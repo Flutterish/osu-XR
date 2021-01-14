@@ -105,5 +105,11 @@ namespace osu.XR.Components {
 				return finalMatrix;
 			}
 		}
+
+		/// <summary>
+		/// An inverse matrix. This one is not cached.
+		/// </summary>
+		public Matrix4x4 InverseMatrix
+			=> Matrix4x4.CreateTranslation( -offset ) * Matrix4x4.CreateScale( new Vector3( 1 / scale.X, 1 / scale.Y, 1 / scale.Z ) ) * Matrix4x4.CreateRotation( rotation.Inverted() ) * Matrix4x4.CreateTranslation( -position );
 	}
 }

@@ -1,10 +1,13 @@
-﻿using osu.Game.Overlays.BeatmapSet;
+﻿using Microsoft.CodeAnalysis.Operations;
+using osu.Game.Overlays.BeatmapSet;
+using osu.XR.Projection;
 using osu.XR.Rendering;
 using osuTK;
+using System;
 using System.Collections.Generic;
 
 namespace osu.XR.Components {
-	public abstract class XrObject {
+	public class XrObject : IDisposable {
 		private List<XrObject> children = new();
 		private XrObject parent;
 
@@ -20,10 +23,15 @@ namespace osu.XR.Components {
 				Transform.SetParent( parent?.Transform, transformKey );
 			}
 		}
+		public void Add ( XrObject child ) {
+			child.Parent = this;
+		}
 
 		public XrObject () {
 			Transform = new( transformKey );
 		}
+
+		public virtual void BeforeDraw () { }
 
 		private readonly object transformKey = new { };
 		public readonly Transform Transform;
@@ -50,15 +58,33 @@ namespace osu.XR.Components {
 
 		private XrObjectDrawNode drawNode;
 		public XrObjectDrawNode DrawNode => drawNode ??= CreateDrawNode();
-		protected abstract XrObjectDrawNode CreateDrawNode ();
-		public abstract class XrObjectDrawNode {
+		protected virtual XrObjectDrawNode CreateDrawNode () => null;
+
+		public virtual void Dispose () {
+			drawNode?.Dispose();
+		}
+		public abstract class XrObjectDrawNode : IDisposable {
 			protected XrObject Source;
 			protected Transform Transform => Source.Transform;
 			public XrObjectDrawNode ( XrObject source ) {
 				Source = source;
 			}
 
-			public abstract void Draw ();
+			public abstract void Draw ( DrawSettings settings );
+
+			public virtual void Dispose () { }
+
+			public class DrawSettings {
+				public readonly Matrix4 WorldToCamera;
+				public readonly Matrix4 CameraToClip;
+				public readonly Camera Camera;
+
+				public DrawSettings ( Matrix4 worldToCamera, Matrix4 cameraToClip, Camera camera ) {
+					WorldToCamera = worldToCamera;
+					CameraToClip = cameraToClip;
+					Camera = camera;
+				}
+			}
 		}
 
 		public abstract class XrObjectDrawNode<T> : XrObjectDrawNode where T : XrObject {

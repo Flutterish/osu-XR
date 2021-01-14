@@ -1,5 +1,6 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Shaders;
 using osu.Framework.Input;
 using osu.Framework.Input.States;
 using osu.Framework.IO.Stores;
@@ -16,8 +17,9 @@ using System.Linq;
 namespace osu.XR {
 	internal class OsuGameXr : OsuGame {
         [Cached]
-        public readonly Camera Camera = new() { Position = new Vector3( 0, 0, 3.356f ) };
-        private XrPanel content;
+        public readonly Camera Camera = new() { Position = new Vector3( 0, 0, 0 ) };
+        private BufferedCapture content;
+        XrScene scene;
         internal InputManager InputManager;
         private InputManager inputManager => InputManager ??= GetContainingInputManager();
         public OsuGameXr ( string[] args ) : base( args ) { }
@@ -25,15 +27,17 @@ namespace osu.XR {
         protected override void LoadComplete () {
             base.LoadComplete();
             Resources.AddStore( new DllResourceStore( typeof( OsuGameXr ).Assembly ) );
-            content = new XrPanel { RelativeSizeAxes = Axes.Both };
+            content = new BufferedCapture { RelativeSizeAxes = Axes.Both };
             foreach ( var i in InternalChildren.ToArray() ) {
                 RemoveInternal( i );
                 content.Add( i );
             }
-            base.AddInternal( new XrSkybox { RelativeSizeAxes = Axes.Both } );
-            base.AddInternal( new XrFloorGrid { RelativeSizeAxes = Axes.Both } );
             base.AddInternal( content );
-            base.AddInternal( new GlXrDrawable { RelativeSizeAxes = Axes.Both, Mesh = Mesh.UnitCube } );
+
+            base.AddInternal( scene = new XrScene { Camera = Camera, RelativeSizeAxes = Axes.Both } );
+            scene.Root.Add( new SkyBox() );
+            scene.Root.Add( new FloorGrid() );
+            scene.Root.Add( new Panel( content ) );
         }
 
         private ButtonStates<Key> lastKeys;
@@ -50,7 +54,7 @@ namespace osu.XR {
             var mouse = inputManager.CurrentState.Mouse.Position;
 
             if ( diff.Pressed.Contains( Key.Q ) ) rotationLocked = !rotationLocked;
-            if ( !rotationLocked ) Camera.Rotation = Quaternion.FromEulerAngles( 0, ( mouse.X - DrawSize.X / 2 ) / 200, 0 ) * Quaternion.FromEulerAngles( Math.Clamp( ( -mouse.Y + DrawSize.Y / 2 ) / 200, -MathF.PI * 2 / 5, MathF.PI * 2 / 5 ), 0, 0 );
+            if ( !rotationLocked ) Camera.Rotation = Quaternion.FromEulerAngles( 0, ( mouse.X - DrawSize.X / 2 ) / 200, 0 ) * Quaternion.FromEulerAngles( Math.Clamp( ( mouse.Y - DrawSize.Y / 2 ) / 200, -MathF.PI * 2 / 5, MathF.PI * 2 / 5 ), 0, 0 );
 
             Vector2 direction = Vector2.Zero;
             if ( keys.IsPressed( Key.I ) ) direction += ( Camera.Rotation * new Vector4( 0, 0, 1, 1 ) ).Xz.Normalized();

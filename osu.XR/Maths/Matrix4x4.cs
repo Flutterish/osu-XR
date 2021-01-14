@@ -159,22 +159,8 @@ namespace osu.XR.Maths {
 		}
 
 		public static Matrix4x4 CreateRotation ( Quaternion q ) {
-			var xx = q.X * q.X;
-			var yy = q.Y * q.Y;
-			var zz = q.Z * q.Z;
-			var ww = q.W * q.W;
-			var xy = q.X * q.Y;
-			var zw = q.Z * q.W;
-			var xz = q.X * q.Z;
-			var yw = q.Y * q.W;
-			var yz = q.Y * q.Z;
-			var xw = q.X * q.W;
-			return new Matrix4x4(
-				1.0f - 2.0f * ( yy + zz ), 2.0f * ( xy - zw )       , 2.0f * ( xz * yw )       , 0.0f,
-				2.0f * ( xy + zw )       , 1.0f - 2.0f * ( xx + zz ), 2.0f * ( yz - xw )       , 0.0f,
-				2.0f * ( xz - yw )       , 2.0f * ( yz + xw )       , 1.0f - 2.0f * ( xx + yy ), 0.0f,
-				0.0f                     , 0.0f                     , 0.0f                     , 1.0f
-			);
+			var x4 = Matrix4.CreateFromQuaternion( q );
+			return (Matrix4x4)x4; // I don't actually know how to do this lol
 		}
 
 		public static Matrix4x4 operator * ( Matrix4x4 l, Matrix4x4 r ) {
@@ -200,11 +186,11 @@ namespace osu.XR.Maths {
 			);
 		}
 
-		public static Matrix4x4 CreatePerspectiveProjection ( float xSlope, float ySlope, float farPlane ) {
+		public static Matrix4x4 CreatePerspectiveProjection ( float xSlope, float ySlope, float nearPlane, float farPlane ) {
 			return new Matrix4x4(
 				1 / xSlope, 0, 0, 0,
 				0, 1 / ySlope, 0, 0,
-				0, 0, 1 / farPlane, 0,
+				0, 0, 0, 0.01f,
 				0, 0, 1, 0
 			);
 			//return new Vector4(
@@ -225,6 +211,15 @@ namespace osu.XR.Maths {
 				m.M01, m.M11, m.M21, m.M31,	
 				m.M02, m.M12, m.M22, m.M32,	
 				m.M03, m.M13, m.M23, m.M33
+			);
+		}
+
+		public static explicit operator Matrix4x4 ( Matrix4 m ) {
+			return new Matrix4x4(
+				m.M11, m.M21, m.M31, m.M41,
+				m.M12, m.M22, m.M32, m.M42,
+				m.M13, m.M23, m.M33, m.M43,
+				m.M14, m.M24, m.M34, m.M44
 			);
 		}
 	}

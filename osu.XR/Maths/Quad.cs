@@ -1,6 +1,6 @@
 ﻿using osuTK;
 
-namespace osu.XR.Projection {
+namespace osu.XR.Maths {
 	public struct Quad
     {
         public Vector3 TL;
