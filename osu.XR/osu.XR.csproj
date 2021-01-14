@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <ApplicationManifest>D:\Main\Solutions\Git\osu!lazer\osu\app.manifest</ApplicationManifest>
+	  <LangVersion>preview</LangVersion>
+	  <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+	  <EmbeddedResource Include="Shaders\sh_3DFrag.fs" />
+	  <EmbeddedResource Include="Shaders\sh_3DVertex.vs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\osu\osu.Game.Tournament\osu.Game.Tournament.csproj" />
+    <ProjectReference Include="..\..\osu\osu.Game\osu.Game.csproj" />
+  </ItemGroup>
+
+</Project>
