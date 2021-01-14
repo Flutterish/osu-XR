@@ -1,14 +1,21 @@
 ﻿using osu.XR.Maths;
 using osuTK;
+using System;
 using System.Collections.Generic;
 
 namespace osu.XR.Components {
 	public class Transform {
+		private readonly object key;
+		/// <param name="key">An optional key to lock modifying relationships by non-authorized sources.</param>
+		public Transform ( object key = null ) {
+			this.key = key;
+		}
 		private Transform parent;
 		private List<Transform> children = new();
 		public Transform Parent {
 			get => parent;
 			set {
+				if ( key is not null ) throw new InvalidOperationException( "This transform's relationships are locked." );
 				if ( parent == value ) return;
 				parent?.children.Remove( this );
 
@@ -19,6 +26,18 @@ namespace osu.XR.Components {
 			}
 		}
 		public IReadOnlyList<Transform> Children => children.AsReadOnly();
+		public void SetParent ( Transform value, object key = null ) {
+			if ( key == this.key ) {
+				if ( parent == value ) return;
+				parent?.children.Remove( this );
+
+				parent = value;
+				parent?.children.Add( this );
+
+				invalidateFinal();
+			}
+			else throw new InvalidOperationException( "Invalid key." );
+		}
 
 		private bool isLocalMatrixInvalidated = true;
 		private bool isFinalMatrixInvalidated = true;

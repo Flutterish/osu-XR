@@ -1,8 +1,32 @@
-﻿using osuTK;
+﻿using osu.Game.Overlays.BeatmapSet;
+using osu.XR.Rendering;
+using osuTK;
+using System.Collections.Generic;
 
 namespace osu.XR.Components {
 	public abstract class XrObject {
-		public Transform Transform { get; } = new Transform();
+		private List<XrObject> children = new();
+		private XrObject parent;
+
+		public IReadOnlyList<XrObject> Children => children.AsReadOnly();
+		public XrObject Parent {
+			get => parent;
+			set {
+				if ( parent == value ) return;
+
+				parent?.children.Remove( this );
+				parent = value;
+				parent?.children.Add( this );
+				Transform.SetParent( parent?.Transform, transformKey );
+			}
+		}
+
+		public XrObject () {
+			Transform = new( transformKey );
+		}
+
+		private readonly object transformKey = new { };
+		public readonly Transform Transform;
 		public Vector3 Position { get => Transform.Position; set => Transform.Position = value; }
 		public float X { get => Transform.X; set => Transform.X = value; }
 		public float Y { get => Transform.Y; set => Transform.Y = value; }
@@ -23,5 +47,23 @@ namespace osu.XR.Components {
 		public float EulerRotX { get => Transform.EulerRotX; set => Transform.EulerRotX = value; }
 		public float EulerRotY { get => Transform.EulerRotY; set => Transform.EulerRotY = value; }
 		public float EulerRotZ { get => Transform.EulerRotZ; set => Transform.EulerRotZ = value; }
+
+		private XrObjectDrawNode drawNode;
+		public XrObjectDrawNode DrawNode => drawNode ??= CreateDrawNode();
+		protected abstract XrObjectDrawNode CreateDrawNode ();
+		public abstract class XrObjectDrawNode {
+			protected XrObject Source;
+			protected Transform Transform => Source.Transform;
+			public XrObjectDrawNode ( XrObject source ) {
+				Source = source;
+			}
+
+			public abstract void Draw ();
+		}
+
+		public abstract class XrObjectDrawNode<T> : XrObjectDrawNode where T : XrObject {
+			new protected T Source => base.Source as T;
+			public XrObjectDrawNode ( T source ) : base( source ) { }
+		}
 	}
 }

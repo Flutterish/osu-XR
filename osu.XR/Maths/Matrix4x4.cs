@@ -200,6 +200,21 @@ namespace osu.XR.Maths {
 			);
 		}
 
+		public static Matrix4x4 CreatePerspectiveProjection ( float xSlope, float ySlope, float farPlane ) {
+			return new Matrix4x4(
+				1 / xSlope, 0, 0, 0,
+				0, 1 / ySlope, 0, 0,
+				0, 0, 1 / farPlane, 0,
+				0, 0, 1, 0
+			);
+			//return new Vector4(
+			//	x / xSlope,     //M00 * X + M10 * Y + M20 * Z + M30 * W,
+			//	y / ySlope,     //M01 * X + M11 * Y + M21 * Z + M31 * W,
+			//	z / farPlane,   //M02 * X + M12 * Y + M22 * Z + M32 * W,
+			//	z               //M03 * X + M13 * Y + M23 * Z + M33 * W
+			//);
+		}
+
 		public override string ToString () {
 			return $"({M00}; {M10}; {M20}; {M30})\r\n({M01}; {M11}; {M21}; {M31})\r\n({M02}; {M12}; {M22}; {M32})\r\n({M03}; {M13}; {M23}; {M33})";
 		}

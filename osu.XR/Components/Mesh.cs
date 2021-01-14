@@ -1,4 +1,5 @@
-﻿using osuTK;
+﻿using osu.Framework.Bindables;
+using osuTK;
 using osuTK.Graphics.OpenGL4;
 using System;
 using System.Collections.Generic;
@@ -8,15 +9,18 @@ using System.Runtime.InteropServices;
 
 namespace osu.XR.Components {
 	public class Mesh {
-		public List<Vector3> Vertices { get; } = new();
-		public List<IndexedFace> Tris { get; } = new();
+		public BindableList<Vector3> Vertices { get; } = new();
+		public BindableList<IndexedFace> Tris { get; } = new();
 
 		public readonly ReadonlyIndexer<int, Face> Faces;
+		public ulong UpdateVersion { get; private set; } = 1;
 		public Mesh () {
 			Faces = new( index => {
 				var indices = Tris[ index ];
 				return new Face( Vertices[ (int)indices.A ], Vertices[ (int)indices.B ], Vertices[ (int)indices.C ] );
 			} );
+			Vertices.CollectionChanged += (_,_) => UpdateVersion++;
+			Tris.CollectionChanged += (_,_) => UpdateVersion++;
 		}
 
 		public static Mesh FromOBJFile ( string path )

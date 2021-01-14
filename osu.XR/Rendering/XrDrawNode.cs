@@ -73,10 +73,10 @@ namespace osu.XR.Rendering {
             if ( Camera.Project( quad.TL, out var tl ) && Camera.Project( quad.TR, out var tr )
                 && Camera.Project( quad.BL, out var bl ) && Camera.Project( quad.BR, out var br ) ) {
                 projection = new Framework.Graphics.Primitives.Quad(
-                    toScreen( size * 0.5f + correctedSize * tl ),
-                    toScreen( size * 0.5f + correctedSize * tr ),
-                    toScreen( size * 0.5f + correctedSize * bl ),
-                    toScreen( size * 0.5f + correctedSize * br )
+                    toScreen( size * 0.5f + correctedSize / 2 * tl ),
+                    toScreen( size * 0.5f + correctedSize / 2 * tr ),
+                    toScreen( size * 0.5f + correctedSize / 2 * bl ),
+                    toScreen( size * 0.5f + correctedSize / 2 * br )
                 );
                 return true;
             }

@@ -5,6 +5,7 @@ using osu.Framework.Input.States;
 using osu.Framework.IO.Stores;
 using osu.Game;
 using osu.XR.Components;
+using osu.XR.Maths;
 using osu.XR.Projection;
 using osu.XR.Rendering;
 using osuTK;
