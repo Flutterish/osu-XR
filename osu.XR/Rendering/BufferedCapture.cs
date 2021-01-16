@@ -17,6 +17,9 @@ using System.Collections.Generic;
 using Quad = osu.XR.Maths.Quad;
 
 namespace osu.XR.Rendering {
+    /// <summary>
+    /// A composite drawable which renders other drawables into a back buffer but does not draw them on screen.
+    /// </summary>
     public class BufferedCapture : Container {
         public BufferedCapture () {
             sharedData = new BufferedDrawNodeSharedData( null, false );
@@ -25,13 +28,11 @@ namespace osu.XR.Rendering {
         public ColourInfo EffectColour = Color4.White;
         public DrawColourInfo? FrameBufferDrawColour => base.DrawColourInfo;
         public Vector2 FrameBufferScale { get; set; } = Vector2.One;
-        public Color4 BackgroundColour { get; set; } = new Color4( 0, 0, 0, 0 );
+        public Color4 BackgroundColour { get; set; } = new Color4( 0, 0, 0, 0 ); // TODO this should be user adjustable
         public IShader TextureShader { get; private set; }
-        public Camera Camera { get; private set; }
         [BackgroundDependencyLoader]
-        private void load ( ShaderManager shaders, Camera camera ) {
+        private void load ( ShaderManager shaders ) {
             TextureShader = shaders.Load( VertexShaderDescriptor.TEXTURE_2, FragmentShaderDescriptor.TEXTURE );
-            Camera = camera;
         }
         public TextureGL Capture;
 
@@ -117,7 +118,7 @@ namespace osu.XR.Rendering {
 
                 TextureShader.Unbind();
             }
-            public float ScreenAspectRation => Source.ChildSize.X / Source.ChildSize.Y;
+			public float ScreenAspectRation => Source.ChildSize.X / Source.ChildSize.Y;
             protected void DrawContents () {
                 Source.Capture = SharedData.CurrentEffectBuffer.Texture;
             }

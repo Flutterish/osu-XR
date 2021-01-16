@@ -19,39 +19,37 @@ using System.Reflection;
 using Pointer = osu.XR.Components.Pointer;
 
 namespace osu.XR {
+    /// <summary>
+    /// The full osu!lazer experience in VR.
+    /// </summary>
 	internal class OsuGameXr : OsuGame {
-        [Cached]
-        public readonly Camera Camera = new() { Position = new Vector3( 0, 0, 0 ) };
-
-        private BufferedCapture content;
-        XrScene scene;
-        private XrInputManager EmulatedInput;
         internal InputManager InputManager;
         private InputManager inputManager => InputManager ??= GetContainingInputManager();
-        public OsuGameXr ( string[] args ) { }
+
+        public readonly Camera Camera = new() { Position = new Vector3( 0, 0, 0 ) };
+        private BufferedCapture content;
+        XrScene scene;
         public Panel OsuPanel;
         public Pointer Pointer;
-
-        public OsuGameXr () {
-
-		}
+        private XrInputManager EmulatedInput;
+        public OsuGameXr ( string[] args ) : base( args ) { } // TODO i want the game captured here so they dont have a chance to cache any top level drawables
 
         protected override void LoadComplete () {
             base.LoadComplete();
             Resources.AddStore( new DllResourceStore( typeof( OsuGameXr ).Assembly ) );
             float yScale = 3f;
             // size has to be less than the actual screen because clipping shenigans
+            // TODO figure out how to render in any resolution without downgrading quality. might also just modify o!f to not clip.
             content = new BufferedCapture { RelativeSizeAxes = Axes.Both, Size = new Vector2( 1, 1/yScale ), FrameBufferScale = new Vector2( yScale ) };
             OsuPanel = new Panel( content );
             Pointer = new Components.Pointer( OsuPanel );
+
             var contentWrapper = EmulatedInput = new XrInputManager( Pointer ) { RelativeSizeAxes = Axes.Both };
             var internalChildren = InternalChildren.ToArray();
-            var children = Children.ToArray();
-
+            //var children = Children.ToArray();
             ClearInternal( false );
             contentWrapper.AddRange( internalChildren );
             content.Add( contentWrapper );
-
             AddInternal( content );
 
             AddInternal( scene = new XrScene { Camera = Camera, RelativeSizeAxes = Axes.Both } );

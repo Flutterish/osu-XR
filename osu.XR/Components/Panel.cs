@@ -4,9 +4,13 @@ using osuTK;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using static osu.XR.Components.XrObject.XrObjectDrawNode;
 
 namespace osu.XR.Components {
-	public class Panel : XrMesh {
+    /// <summary>
+    /// A curved 3D panel that displays an image from a <see cref="BufferedCapture"/>.
+    /// </summary>
+	public class Panel : MeshedXrObject {
 		public BufferedCapture Source;
 
 		public Panel ( BufferedCapture source ) {
@@ -15,11 +19,12 @@ namespace osu.XR.Components {
 		}
 
 		public void SetCurvature ( float arc = MathF.PI * 0.2f, float radius = 4 ) {
+            initilized = true;
             Mesh = new();
 
             var points = 100;
             var arclength = arc * radius;
-            var height = arclength / ( (float)Texture.Width / Texture.Height );
+            var height = arclength / ( (float)Texture.Width / Texture.Height ); // TODO make the texture size a bindable so this can be dynamically updated
             for ( var i = 0; i < points; i++ ) {
                 var start = arc / points * i - arc / 2;
                 var end = arc / points * ( i + 1 ) - arc / 2;
@@ -35,10 +40,9 @@ namespace osu.XR.Components {
         }
 
         private bool initilized;
-		public override void BeforeDraw () {
+		public override void BeforeDraw ( DrawSettings settings ) {
             Texture = Source.Capture;
             if ( !initilized ) {
-                initilized = true;
                 SetCurvature( arc: MathF.PI * 1.3f, radius: 3 );
 			}
 		}

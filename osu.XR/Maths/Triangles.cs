@@ -1,4 +1,4 @@
-﻿using osu.XR.Components;
+﻿using osu.XR.Graphics;
 using osu.XR.Physics;
 using osuTK;
 using System;
@@ -7,11 +7,15 @@ using System.Text;
 
 namespace osu.XR.Maths {
 	public static class Triangles {
+		/// <summary>
+		/// Calculates the barycentric coordinates of a point that lies on a face.
+		/// If the point does not lie on the face, the behaviour is undefined.
+		/// </summary>
 		public static Vector3 Barycentric ( Face face, Vector3 point ) {
 			var normal = Vector3.Cross( face.A - face.B, face.C - face.B );
 
 			// choosing the least distorting plane
-			if ( true ) {
+			if ( true ) { // TODO choose the best axis
 				return Barycentric( face.A.Xy, face.B.Xy, face.C.Xy, point.Xy );
 			}
 			else if ( false ) {
@@ -22,6 +26,9 @@ namespace osu.XR.Maths {
 			}
 		}
 
+		/// <summary>
+		/// Calculates the barycentric coordinates of a point on a simplex.
+		/// </summary>
 		public static Vector3 Barycentric ( Vector2 A, Vector2 B, Vector2 C, Vector2 point ) {
 			var det = ( B.Y - C.Y ) * ( A.X - C.X ) + ( C.X - B.X ) * ( A.Y - C.Y );
 			var r1 = ( ( B.Y - C.Y ) * ( point.X - C.X ) + ( C.X - B.X ) * ( point.Y - C.Y )) / det;

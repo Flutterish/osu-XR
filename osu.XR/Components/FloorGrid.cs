@@ -8,7 +8,10 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace osu.XR.Components {
-	public class FloorGrid : XrMesh {
+    /// <summary>
+    /// White line grid on the floor with a fade.
+    /// </summary>
+	public class FloorGrid : MeshedXrObject {
 		public FloorGrid () {
             Texture = Textures.Vertical2SidedGradient( Color4.Transparent, Color4.White, 200 ).TextureGL;
 

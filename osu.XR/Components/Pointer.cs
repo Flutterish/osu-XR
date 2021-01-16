@@ -8,9 +8,12 @@ using System.Text;
 using static osu.XR.Physics.Raycast;
 
 namespace osu.XR.Components {
-	public class Pointer : XrMesh {
+	/// <summary>
+	/// A 3D cursor.
+	/// </summary>
+	public class Pointer : MeshedXrObject {
 		public Panel Target;
-		public Pointer ( Panel target ) {
+		public Pointer ( Panel target ) { // TODO physics system that will allow this to point at everything. Will require DI
 			Target = target;
 			Mesh = new();
 			Mesh.Vertices.Add( Vector3.Zero );
@@ -40,7 +43,7 @@ namespace osu.XR.Components {
 			}
 		}
 
-		public delegate void PointerUpdate ( Vector3 position, XrMesh mesh, RaycastHit hit );
+		public delegate void PointerUpdate ( Vector3 position, MeshedXrObject mesh, RaycastHit hit );
 		public event PointerUpdate OnUpdate;
 	}
 }

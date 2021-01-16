@@ -9,7 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace osu.XR.Components {
+namespace osu.XR.Graphics {
 	public class Mesh {
 		public BindableList<Vector3> Vertices { get; } = new();
 		public BindableList<Vector2> TextureCoordinates { get; } = new();
@@ -22,9 +22,9 @@ namespace osu.XR.Components {
 				var indices = Tris[ index ];
 				return new Face( Vertices[ (int)indices.A ], Vertices[ (int)indices.B ], Vertices[ (int)indices.C ] );
 			} );
-			Vertices.CollectionChanged += (_,_) => UpdateVersion++;
-			Tris.CollectionChanged += (_,_) => UpdateVersion++;
-			TextureCoordinates.CollectionChanged += (_,_) => UpdateVersion++;
+			Vertices.CollectionChanged += ( _, _ ) => UpdateVersion++;
+			Tris.CollectionChanged += ( _, _ ) => UpdateVersion++;
+			TextureCoordinates.CollectionChanged += ( _, _ ) => UpdateVersion++;
 		}
 
 		public static Mesh FromOBJFile ( string path )
@@ -103,7 +103,7 @@ namespace osu.XR.Components {
 			TextureCoordinates.Add( BR );
 		}
 
-		public static Mesh UnitCube => Mesh.FromOBJ(
+		public static Mesh UnitCube => FromOBJ(
 			@"
 			v  0.5  0.5  0.5
 			v  0.5  0.5 -0.5
@@ -155,9 +155,9 @@ namespace osu.XR.Components {
 
 		public static Face operator * ( Matrix4x4 matrix, Face face ) {
 			return new Face(
-				( matrix * new Vector4( face.A, 1 )	).Xyz,
-				( matrix * new Vector4( face.B, 1 )	).Xyz,
-				( matrix * new Vector4( face.C, 1 )	).Xyz
+				( matrix * new Vector4( face.A, 1 ) ).Xyz,
+				( matrix * new Vector4( face.B, 1 ) ).Xyz,
+				( matrix * new Vector4( face.C, 1 ) ).Xyz
 			);
 		}
 	}

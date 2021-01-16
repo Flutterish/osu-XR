@@ -60,7 +60,8 @@ namespace osu.XR.Projection {
                 CameraClipMatrix,
                 this
             );
-
+            
+            // TODO depth buffers. This might become easier if i have full control over the frame buffer, which i will have to anyway because XR requires 2 eyes to be rendered
             //GLWrapper.PushDepthInfo( new DepthInfo( true, true, osuTK.Graphics.ES30.DepthFunction.Less ) );
             //GL.Enable( EnableCap.DepthTest );
             //GL.DepthMask( true );

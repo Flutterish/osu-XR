@@ -6,7 +6,10 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace osu.XR.Components {
-	public class Plane : XrMesh {
+	/// <summary>
+	/// A simple quad for testing purposes.
+	/// </summary>
+	public class Plane : MeshedXrObject {
 		public Plane () {
 			Mesh = new();
 			var z = 0;

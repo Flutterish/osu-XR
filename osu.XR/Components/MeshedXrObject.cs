@@ -10,22 +10,27 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace osu.XR.Components {
-	public class XrMesh : XrObject {
+	/// <summary>
+	/// An <see cref="XrObject"/> which renders a <see cref="Graphics.Mesh"/>.
+	/// </summary>
+	public class MeshedXrObject : XrObject {
 		public Mesh Mesh = new();
 		public bool UseGammaCorrection = false;
 		public TextureGL Texture = osu.Framework.Graphics.Textures.Texture.WhitePixel.TextureGL;
+		public MeshedXrObject () {
+			Faces = new( i => Transform.Matrix * Mesh.Faces[ i ] );
+		}
 		protected override XrObjectDrawNode CreateDrawNode ()
 			=> new XrMeshDrawNode( this );
 
-		private class XrMeshDrawNode : XrMeshDrawNode<XrMesh> {
-			public XrMeshDrawNode ( XrMesh source ) : base( source ) { }
-			protected override Mesh GetMesh ()
-				=> Source.Mesh;
-		}
+		public readonly ReadonlyIndexer<int,Face> Faces;
 	}
-	public abstract class XrMeshDrawNode<T> : XrObject.XrObjectDrawNode<T> where T : XrMesh {
+	public class XrMeshDrawNode : XrMeshDrawNode<MeshedXrObject> {
+		public XrMeshDrawNode ( MeshedXrObject source ) : base( source ) { }
+	}
+	public class XrMeshDrawNode<T> : XrObject.XrObjectDrawNode<T> where T : MeshedXrObject {
 		public XrMeshDrawNode ( T source ) : base( source ) { }
-		protected abstract Mesh GetMesh ();
+		protected virtual Mesh GetMesh () => Source.Mesh;
 
 		private bool notInitialized = true;
 		private Mesh mesh;

@@ -14,6 +14,9 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace osu.XR.Components {
+	/// <summary>
+	/// A scene containing Xr objects.
+	/// </summary>
 	public class XrScene : Drawable {
 		public readonly XrObject Root = new XrObject();
 		public Camera Camera;
@@ -44,7 +47,6 @@ namespace osu.XR.Components {
 			public override void Draw ( Action<TexturedVertex2D> vertexAction ) {
 				base.Draw( vertexAction );
 				Source.Camera?.Render( Source.Root, size.X, size.Y );
-
 			}
 		}
 	}

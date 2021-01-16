@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using osu.Game.Rulesets.Scoring;
 using osu.XR.Components;
+using osu.XR.Graphics;
 using osu.XR.Maths;
 using osuTK;
 using System;
@@ -10,6 +11,9 @@ using System.Text;
 
 namespace osu.XR.Physics {
 	public static class Raycast {
+		/// <summary>
+		/// Intersect a 3D line and a place.
+		/// </summary>
 		public static bool TryHit ( Vector3 origin, Vector3 direction, Vector3 pointOnPlane, Vector3 planeNormal, out RaycastHit hit, bool includeBehind = false ) {
 			// plane := all points where ( point - pointOnPlane ) dot planeNormal = 0
 			// line := all points where ( point - pointOnLine ) - d * direction = 0
@@ -52,6 +56,9 @@ namespace osu.XR.Physics {
 			}
 		}
 
+		/// <summary>
+		/// Intersect 2 3D lines.
+		/// </summary>
 		public static bool TryHitLine ( Vector3 pointOnLineA, Vector3 directionA, Vector3 pointOnLineB, Vector3 directionB, out Vector3 hit ) {
 			bool Approx ( float a, float b, float tolerance = 0.001f )
 				=> MathF.Abs( a - b ) <= tolerance;
@@ -99,7 +106,9 @@ namespace osu.XR.Physics {
 			return false;
 		}
 
-
+		/// <summary>
+		/// Intersect 2 2D lines.
+		/// </summary>
 		public static bool TryHitLine ( Vector2 pointOnLineA, Vector2 directionA, Vector2 pointOnLineB, Vector2 directionB, out Vector2 hit ) { // TODO vector math this
 			// y = m1 x + b1
 			// y = m2 x + b2
@@ -154,6 +163,9 @@ namespace osu.XR.Physics {
 			}
 		}
 
+		/// <summary>
+		/// Intersect a 3D line and a triangle.
+		/// </summary>
 		public static bool TryHit ( Vector3 origin, Vector3 direction, Face face, out RaycastHit hit, bool includeBehind = false ) {
 			if ( TryHit( origin, direction, face.A, Vector3.Cross( face.B - face.A, face.C - face.A ), out hit, includeBehind ) ) {
 				var directionFromC = ( face.C - hit.Point ).Normalized();
@@ -172,6 +184,9 @@ namespace osu.XR.Physics {
 			return false;
 		}
 
+		/// <summary>
+		/// Intersect a 3D line and a Mesh.
+		/// </summary>
 		public static bool TryHit ( Vector3 origin, Vector3 direction, Mesh mesh, Transform transform, out RaycastHit hit, bool includeBehind = false ) {
 			for ( int i = 0; i < mesh.Tris.Count; i++ ) {
 				var face = mesh.Faces[ i ];
@@ -194,16 +209,37 @@ namespace osu.XR.Physics {
 			return false;
 		}
 
-		public static bool TryHit ( Vector3 origin, Vector3 direction, XrMesh target, out RaycastHit hit, bool includeBehind = false ) {
+		/// <summary>
+		/// Intersect a 3D line and a Mesh.
+		/// </summary>
+		public static bool TryHit ( Vector3 origin, Vector3 direction, MeshedXrObject target, out RaycastHit hit, bool includeBehind = false ) {
 			return TryHit( origin, direction, target.Mesh, target.Transform, out hit, includeBehind );
 		}
 
 		public struct RaycastHit {
+			/// <summary>
+			/// The point that was hit;
+			/// </summary>
 			public readonly Vector3 Point;
+			/// <summary>
+			/// From where the raycast originated.
+			/// </summary>
 			public readonly Vector3 Origin;
+			/// <summary>
+			/// The normal of the hit surface;
+			/// </summary>
 			public readonly Vector3 Normal;
+			/// <summary>
+			/// The direction of the raycast.
+			/// </summary>
 			public readonly Vector3 Direction;
+			/// <summary>
+			/// Distance from the origin to the hit point. Might be negative if the hit happened in opposite direction.
+			/// </summary>
 			public readonly double Distance;
+			/// <summary>
+			/// The triangle of the mesh that was hit, if any.
+			/// </summary>
 			public readonly int TrisIndex;
 
 			public RaycastHit ( Vector3 point, Vector3 origin, Vector3 normal, Vector3 direction, double distance, int trisIndex = -1 ) {

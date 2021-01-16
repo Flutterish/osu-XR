@@ -1,5 +1,7 @@
 ﻿using Microsoft.CodeAnalysis.Operations;
+using osu.Framework.Graphics;
 using osu.Game.Overlays.BeatmapSet;
+using osu.XR.Maths;
 using osu.XR.Projection;
 using osu.XR.Rendering;
 using osuTK;
@@ -8,8 +10,11 @@ using System.Collections.Generic;
 using static osu.XR.Components.XrObject.XrObjectDrawNode;
 
 namespace osu.XR.Components {
+	/// <summary>
+	/// An <see cref="XrObject"/> is the 3D counterpart of a <see cref="Drawable"/>.
+	/// </summary>
 	public class XrObject : IDisposable {
-		private List<XrObject> children = new();
+		private List<XrObject> children = new(); // TODO i want these to have all the features Drawables have but without extending because that will create a mess and eat memory. ( upcoming o!f feature: Component )
 		private XrObject parent;
 
 		public IReadOnlyList<XrObject> Children => children.AsReadOnly();
@@ -24,6 +29,9 @@ namespace osu.XR.Components {
 				Transform.SetParent( parent?.Transform, transformKey );
 			}
 		}
+		/// <summary>
+		/// The topmost <see cref="XrObject"/> in the hierarchy. This operation performs upwards tree traveral and might be expensive.
+		/// </summary>
 		public XrObject Root => ( parent?.Root ?? parent ) ?? this;
 		public T FindObject<T> () where T : XrObject {
 			T find ( XrObject node ) {
@@ -42,11 +50,10 @@ namespace osu.XR.Components {
 		}
 
 		public XrObject () {
-			Transform = new( transformKey );
+			Transform = new Transform( transformKey );
 		}
 
-		public virtual void BeforeDraw () { }
-		public virtual void BeforeDraw ( DrawSettings settings ) => BeforeDraw();
+		public virtual void BeforeDraw ( DrawSettings settings ) { }
 
 		private readonly object transformKey = new { };
 		public readonly Transform Transform;

@@ -1,9 +1,11 @@
-﻿using osu.XR.Maths;
-using osuTK;
+﻿using osuTK;
 using System;
 using System.Collections.Generic;
 
-namespace osu.XR.Components {
+namespace osu.XR.Maths {
+	/// <summary>
+	/// Position, rotation and scale of an object with child-parent hiererchy.
+	/// </summary>
 	public class Transform {
 		private readonly object key;
 		/// <param name="key">An optional key to lock modifying relationships by non-authorized sources.</param>
@@ -98,6 +100,9 @@ namespace osu.XR.Components {
 			}
 		}
 
+		/// <summary>
+		/// The matrix this <see cref="Transform"/> produces. It is cached.
+		/// </summary>
 		public Matrix4x4 Matrix {
 			get {
 				validateLocal();
