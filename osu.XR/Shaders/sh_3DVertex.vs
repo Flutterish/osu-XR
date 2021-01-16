@@ -8,9 +8,12 @@ uniform mat4 cameraToClip;
 uniform mat4 localToWorld;
 
 out vec2 uv;
+out float z;
 
 void main()
 {
     uv = UV;
-    gl_Position = cameraToClip * worldToCamera * localToWorld * vec4( vertex, 1.0f );
+    vec4 temp = cameraToClip * worldToCamera * localToWorld * vec4( vertex, 1.0f );
+    z = temp.z / temp.w;
+    gl_Position = temp;
 }

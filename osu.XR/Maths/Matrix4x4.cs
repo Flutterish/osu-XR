@@ -190,7 +190,7 @@ namespace osu.XR.Maths {
 			return new Matrix4x4(
 				1 / xSlope, 0, 0, 0,
 				0, 1 / ySlope, 0, 0,
-				0, 0, 0, 0.01f,
+				0, 0, 0, 1,
 				0, 0, 1, 0
 			);
 			//return new Vector4(

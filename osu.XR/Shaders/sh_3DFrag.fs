@@ -14,6 +14,7 @@ lowp vec4 toSRGB(lowp vec4 colour)
 }
 
 in vec2 uv;
+in float z;
 
 uniform sampler2D tx;
 //uniform vec4 tint;
@@ -21,4 +22,5 @@ uniform sampler2D tx;
 void main() 
 {
 	gl_FragColor = useGammaCorrection ? toSRGB( texture( tx, uv ) ) : texture( tx, uv );// * tint;
+    //gl_FragColor = vec4(vec3(z), 1.0);
 }

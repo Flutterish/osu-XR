@@ -52,6 +52,7 @@ namespace osu.XR.Components {
 				TextureCoordinates.Add( Vector2.Zero );
 			}
 		}
+
 		public int UploadToGPU ( int positionLocation, int uvLocation, int attributeBuffer, int elementBuffer, BufferUsageHint hint = BufferUsageHint.StaticDraw ) {
 			FillTextureCoordinates();
 			var vertices = new float[ Vertices.Count * 5 ];
@@ -150,6 +151,14 @@ namespace osu.XR.Components {
 			A = a;
 			B = b;
 			C = c;
+		}
+
+		public static Face operator * ( Matrix4x4 matrix, Face face ) {
+			return new Face(
+				( matrix * new Vector4( face.A, 1 )	).Xyz,
+				( matrix * new Vector4( face.B, 1 )	).Xyz,
+				( matrix * new Vector4( face.C, 1 )	).Xyz
+			);
 		}
 	}
 }

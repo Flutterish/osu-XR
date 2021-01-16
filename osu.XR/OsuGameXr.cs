@@ -1,10 +1,12 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shaders;
 using osu.Framework.Input;
 using osu.Framework.Input.States;
 using osu.Framework.IO.Stores;
 using osu.Game;
+using osu.Game.Graphics.Containers;
 using osu.XR.Components;
 using osu.XR.Maths;
 using osu.XR.Projection;
@@ -13,35 +15,54 @@ using osuTK;
 using osuTK.Input;
 using System;
 using System.Linq;
+using System.Reflection;
+using Pointer = osu.XR.Components.Pointer;
 
 namespace osu.XR {
 	internal class OsuGameXr : OsuGame {
         [Cached]
         public readonly Camera Camera = new() { Position = new Vector3( 0, 0, 0 ) };
+
         private BufferedCapture content;
         XrScene scene;
+        private XrInputManager EmulatedInput;
         internal InputManager InputManager;
         private InputManager inputManager => InputManager ??= GetContainingInputManager();
-        public OsuGameXr ( string[] args ) : base( args ) { }
+        public OsuGameXr ( string[] args ) { }
+        public Panel OsuPanel;
+        public Pointer Pointer;
+
+        public OsuGameXr () {
+
+		}
 
         protected override void LoadComplete () {
             base.LoadComplete();
             Resources.AddStore( new DllResourceStore( typeof( OsuGameXr ).Assembly ) );
-            content = new BufferedCapture { RelativeSizeAxes = Axes.Both };
-            foreach ( var i in InternalChildren.ToArray() ) {
-                RemoveInternal( i );
-                content.Add( i );
-            }
-            base.AddInternal( content );
+            float yScale = 3f;
+            // size has to be less than the actual screen because clipping shenigans
+            content = new BufferedCapture { RelativeSizeAxes = Axes.Both, Size = new Vector2( 1, 1/yScale ), FrameBufferScale = new Vector2( yScale ) };
+            OsuPanel = new Panel( content );
+            Pointer = new Components.Pointer( OsuPanel );
+            var contentWrapper = EmulatedInput = new XrInputManager( Pointer ) { RelativeSizeAxes = Axes.Both };
+            var internalChildren = InternalChildren.ToArray();
+            var children = Children.ToArray();
 
-            base.AddInternal( scene = new XrScene { Camera = Camera, RelativeSizeAxes = Axes.Both } );
+            ClearInternal( false );
+            contentWrapper.AddRange( internalChildren );
+            content.Add( contentWrapper );
+
+            AddInternal( content );
+
+            AddInternal( scene = new XrScene { Camera = Camera, RelativeSizeAxes = Axes.Both } );
             scene.Root.Add( new SkyBox() );
             scene.Root.Add( new FloorGrid() );
-            scene.Root.Add( new Panel( content ) );
+            scene.Root.Add( OsuPanel );
+            scene.Root.Add( Pointer );
         }
 
         private ButtonStates<Key> lastKeys;
-        private bool rotationLocked;
+        private bool isKeyboardDisabled;
         protected override void Update () {
             base.Update();
 
@@ -53,24 +74,22 @@ namespace osu.XR {
             var diff = keys.EnumerateDifference( lastKeys );
             var mouse = inputManager.CurrentState.Mouse.Position;
 
-            if ( diff.Pressed.Contains( Key.Q ) ) rotationLocked = !rotationLocked;
-            if ( !rotationLocked ) Camera.Rotation = Quaternion.FromEulerAngles( 0, ( mouse.X - DrawSize.X / 2 ) / 200, 0 ) * Quaternion.FromEulerAngles( Math.Clamp( ( mouse.Y - DrawSize.Y / 2 ) / 200, -MathF.PI * 2 / 5, MathF.PI * 2 / 5 ), 0, 0 );
+            if ( diff.Pressed.Contains( Key.Q ) ) {
+                isKeyboardDisabled = !isKeyboardDisabled;
+                EmulatedInput.IsKeyboardActiveBindable.Value = isKeyboardDisabled;
+            }
 
-            Vector2 direction = Vector2.Zero;
-            if ( keys.IsPressed( Key.I ) ) direction += ( Camera.Rotation * new Vector4( 0, 0, 1, 1 ) ).Xz.Normalized();
-            if ( keys.IsPressed( Key.K ) ) direction += ( Camera.Rotation * new Vector4( 0, 0, -1, 1 ) ).Xz.Normalized();
-            if ( keys.IsPressed( Key.J ) ) direction += ( Camera.Rotation * new Vector4( -1, 0, 0, 1 ) ).Xz.Normalized();
-            if ( keys.IsPressed( Key.L ) ) direction += ( Camera.Rotation * new Vector4( 1, 0, 0, 1 ) ).Xz.Normalized();
+            if ( !isKeyboardDisabled ) {
+                Vector2 direction = Vector2.Zero;
+                if ( keys.IsPressed( Key.W ) ) direction += ( Camera.Rotation * new Vector4( 0, 0, 1, 1 ) ).Xz.Normalized();
+                if ( keys.IsPressed( Key.S ) ) direction += ( Camera.Rotation * new Vector4( 0, 0, -1, 1 ) ).Xz.Normalized();
+                if ( keys.IsPressed( Key.A ) ) direction += ( Camera.Rotation * new Vector4( -1, 0, 0, 1 ) ).Xz.Normalized();
+                if ( keys.IsPressed( Key.D ) ) direction += ( Camera.Rotation * new Vector4( 1, 0, 0, 1 ) ).Xz.Normalized();
 
-            Camera.Position += new Vector3( direction.X, 0, direction.Y ) * (float)( Time.Elapsed / 1000 );
+                Camera.Position += new Vector3( direction.X, 0, direction.Y ) * (float)( Time.Elapsed / 1000 );
+            }
+            Camera.Rotation = Quaternion.FromEulerAngles( 0, ( mouse.X - DrawSize.X / 2 ) / 200, 0 ) * Quaternion.FromEulerAngles( Math.Clamp( ( mouse.Y - DrawSize.Y / 2 ) / 200, -MathF.PI * 2 / 5, MathF.PI * 2 / 5 ), 0, 0 );
             lastKeys = keys.Clone();
-        }
-
-        protected override void AddInternal ( Drawable drawable ) {
-            if ( content is null || drawable == content )
-                base.AddInternal( drawable );
-            else
-                content.Add( drawable );
         }
     }
 }

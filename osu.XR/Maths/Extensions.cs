@@ -21,5 +21,10 @@ namespace osu.XR.Maths {
 
 		public static Vector4 Reversed ( this Vector4 v )
 			=> new Vector4( v.W, v.Z, v.Y, v.X );
+
+		public static float SignedDistance ( Vector3 from, Vector3 to, Vector3 towards ) {
+			var direction = to - from;
+			return ( direction ).Length * ( ( Vector3.Dot( direction, towards - from ) > 0 ) ? 1 : -1 );
+		}
 	}
 }

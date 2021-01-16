@@ -5,6 +5,7 @@ using osu.XR.Rendering;
 using osuTK;
 using System;
 using System.Collections.Generic;
+using static osu.XR.Components.XrObject.XrObjectDrawNode;
 
 namespace osu.XR.Components {
 	public class XrObject : IDisposable {
@@ -23,6 +24,19 @@ namespace osu.XR.Components {
 				Transform.SetParent( parent?.Transform, transformKey );
 			}
 		}
+		public XrObject Root => ( parent?.Root ?? parent ) ?? this;
+		public T FindObject<T> () where T : XrObject {
+			T find ( XrObject node ) {
+				if ( node is T tnode ) return tnode;
+				foreach ( var i in node.children ) {
+					var res = find( i );
+					if ( res is not null ) return res;
+				}
+				return null;
+			}
+
+			return find( Root );
+		}
 		public void Add ( XrObject child ) {
 			child.Parent = this;
 		}
@@ -32,10 +46,13 @@ namespace osu.XR.Components {
 		}
 
 		public virtual void BeforeDraw () { }
+		public virtual void BeforeDraw ( DrawSettings settings ) => BeforeDraw();
 
 		private readonly object transformKey = new { };
 		public readonly Transform Transform;
 		public Vector3 Position { get => Transform.Position; set => Transform.Position = value; }
+		public Vector3 Forward => ( Rotation * new Vector4( 0, 0, 1, 1 ) ).Xyz;
+		public Vector3 Backwards => ( Rotation * new Vector4( 0, 0, -1, 1 ) ).Xyz;
 		public float X { get => Transform.X; set => Transform.X = value; }
 		public float Y { get => Transform.Y; set => Transform.Y = value; }
 		public float Z { get => Transform.Z; set => Transform.Z = value; }
@@ -74,7 +91,7 @@ namespace osu.XR.Components {
 
 			public virtual void Dispose () { }
 
-			public class DrawSettings {
+			public class DrawSettings { // TODO most of these should be in a global uniform block
 				public readonly Matrix4 WorldToCamera;
 				public readonly Matrix4 CameraToClip;
 				public readonly Camera Camera;

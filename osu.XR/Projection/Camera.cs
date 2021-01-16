@@ -1,7 +1,10 @@
-﻿using osu.Framework.Graphics.Shaders;
+﻿using osu.Framework.Graphics.OpenGL;
+using osu.Framework.Graphics.OpenGL.Buffers;
+using osu.Framework.Graphics.Shaders;
 using osu.XR.Components;
 using osu.XR.Maths;
 using osuTK;
+using osuTK.Graphics.OpenGL4;
 using System;
 
 namespace osu.XR.Projection {
@@ -57,9 +60,18 @@ namespace osu.XR.Projection {
                 CameraClipMatrix,
                 this
             );
+
+            //GLWrapper.PushDepthInfo( new DepthInfo( true, true, osuTK.Graphics.ES30.DepthFunction.Less ) );
+            //GL.Enable( EnableCap.DepthTest );
+            //GL.DepthMask( true );
+            //GL.DepthFunc( DepthFunction.Less );
+            //GL.DepthRange( 0.0, 1.0 );
+            //GL.ClearColor( 0, 0, 0, 0 );
+            //GL.ClearDepth( 1 );
+            //GL.Clear( ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit );
             // TODO render to any frame buffer ( this will require to correct global scale to fit the aspect ratio )
             void Draw ( XrObject xrObject ) {
-                xrObject.BeforeDraw();
+                xrObject.BeforeDraw( settings );
                 xrObject.DrawNode?.Draw( settings );
                 foreach ( var i in xrObject.Children ) {
                     Draw( i );
@@ -67,6 +79,7 @@ namespace osu.XR.Projection {
 			}
 
             Draw( xrObject );
+            //GLWrapper.PopDepthInfo();
         }
     }
 }

@@ -14,7 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\osu\osu.Game.Tournament\osu.Game.Tournament.csproj" />
     <ProjectReference Include="..\..\osu\osu.Game\osu.Game.csproj" />
   </ItemGroup>
 

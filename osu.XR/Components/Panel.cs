@@ -39,7 +39,7 @@ namespace osu.XR.Components {
             Texture = Source.Capture;
             if ( !initilized ) {
                 initilized = true;
-                SetCurvature();
+                SetCurvature( arc: MathF.PI * 1.3f, radius: 3 );
 			}
 		}
 	}
