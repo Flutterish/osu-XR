@@ -3,8 +3,6 @@ using osuTK.Graphics;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace osu.XR.Graphics {
 	public static class Textures {

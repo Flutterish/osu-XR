@@ -3,7 +3,6 @@ using osu.XR.Graphics;
 using osuTK;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using static osu.XR.Physics.Raycast;
 
 namespace osu.XR.Physics {

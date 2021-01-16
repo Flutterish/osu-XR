@@ -1,14 +1,11 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Graphics;
-using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics.Shaders;
 using osu.Framework.Input;
 using osu.Framework.Input.States;
 using osu.Framework.IO.Stores;
 using osu.Game;
-using osu.Game.Graphics.Containers;
+using osu.Game.Graphics.Cursor;
 using osu.XR.Components;
-using osu.XR.Maths;
 using osu.XR.Physics;
 using osu.XR.Projection;
 using osu.XR.Rendering;
@@ -16,18 +13,17 @@ using osuTK;
 using osuTK.Input;
 using System;
 using System.Linq;
-using System.Reflection;
 using Pointer = osu.XR.Components.Pointer;
 
 namespace osu.XR {
-    /// <summary>
-    /// The full osu!lazer experience in VR.
-    /// </summary>
+	/// <summary>
+	/// The full osu! experience in VR.
+	/// </summary>
 	internal class OsuGameXr : OsuGame {
         [Cached]
         public readonly PhysicsSystem PhysicsSystem = new();
-        internal InputManager InputManager;
-        private InputManager inputManager => InputManager ??= GetContainingInputManager();
+        internal InputManager _inputManager;
+        private InputManager inputManager => _inputManager ??= GetContainingInputManager();
         [Cached]
         public readonly Camera Camera = new() { Position = new Vector3( 0, 0, 0 ) };
         private BufferedCapture content;
@@ -35,24 +31,25 @@ namespace osu.XR {
         public Panel OsuPanel;
         [Cached]
         public readonly Pointer Pointer = new Pointer();
-        private XrInputManager EmulatedInput;
-        public OsuGameXr ( string[] args ) : base( args ) { } // TODO i want the game captured here so they dont have a chance to cache any top level drawables
+        private XrInputManager EmulatedInput = new XrInputManager { RelativeSizeAxes = Axes.Both };
+
+        private bool addInternalToContent = true;
+        public OsuGameXr ( string[] args ) : base( args ) { }
 
         protected override void LoadComplete () {
             base.LoadComplete();
             Resources.AddStore( new DllResourceStore( typeof( OsuGameXr ).Assembly ) );
-            float yScale = 2f;
+            addInternalToContent = false;
+
             // size has to be less than the actual screen because clipping shenigans
             // TODO figure out how to render in any resolution without downgrading quality. might also just modify o!f to not clip.
+            float yScale = 2f;
             content = new BufferedCapture { RelativeSizeAxes = Axes.Both, Size = new Vector2( 1, 1/yScale ), FrameBufferScale = new Vector2( yScale ) };
-            OsuPanel = new Panel( content );
+            OsuPanel = new Panel() { Source = content };
 
-            var contentWrapper = EmulatedInput = new XrInputManager( Pointer, OsuPanel ) { RelativeSizeAxes = Axes.Both };
-            var internalChildren = InternalChildren.ToArray();
-            //var children = Children.ToArray();
-            ClearInternal( false );
-            contentWrapper.AddRange( internalChildren );
-            content.Add( contentWrapper );
+            EmulatedInput.Pointer = Pointer;
+            EmulatedInput.InputPanel = OsuPanel;
+            content.Add( EmulatedInput );
             AddInternal( content );
 
             AddInternal( scene = new XrScene { Camera = Camera, RelativeSizeAxes = Axes.Both } );
@@ -64,10 +61,18 @@ namespace osu.XR {
             PhysicsSystem.Root = scene.Root;
         }
 
-        private ButtonStates<Key> lastKeys;
+		protected override void AddInternal ( Drawable drawable ) {
+            if ( addInternalToContent )
+                EmulatedInput.Add( drawable );
+            else
+			    base.AddInternal( drawable );
+		}
+
+		private ButtonStates<Key> lastKeys;
         private bool isKeyboardDisabled;
         protected override void Update () {
             base.Update();
+            ( MenuCursorContainer.Cursor as MenuCursor ).Hide(); // HACK hide cursor because it jitters
 
             if ( lastKeys is null ) {
                 lastKeys = inputManager.CurrentState.Keyboard.Keys.Clone();

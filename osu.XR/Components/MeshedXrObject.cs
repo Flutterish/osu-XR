@@ -1,19 +1,14 @@
-﻿using osu.Framework.Allocation;
-using osu.Framework.Graphics.OpenGL.Textures;
-using osu.Framework.Graphics.Shaders;
-using osu.Framework.Graphics.Textures;
+﻿using osu.Framework.Graphics.OpenGL.Textures;
 using osu.XR.Graphics;
 using osuTK;
 using osuTK.Graphics.OpenGL4;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace osu.XR.Components {
 	/// <summary>
 	/// An <see cref="XrObject"/> which renders a <see cref="Graphics.Mesh"/>.
 	/// </summary>
-	public class MeshedXrObject : XrObject {
+	public class MeshedXrObject : XrObject { // TODO might want more than 1 texture. just rename texture to mainTexture and have a list of them all
 		public Mesh Mesh { get; set; } = new();
 		public bool UseGammaCorrection = false;
 		public TextureGL Texture = osu.Framework.Graphics.Textures.Texture.WhitePixel.TextureGL;

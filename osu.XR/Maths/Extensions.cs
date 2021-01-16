@@ -23,5 +23,8 @@ namespace osu.XR.Maths {
 			var direction = to - from;
 			return ( direction ).Length * ( ( Vector3.Dot( direction, towards - from ) > 0 ) ? 1 : -1 );
 		}
+
+		public static Vector2 ScaledBy ( this Vector2 a, Vector2 scale )
+			=> new Vector2( a.X * scale.X, a.Y * scale.Y );
 	}
 }

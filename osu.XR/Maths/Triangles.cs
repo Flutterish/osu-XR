@@ -1,24 +1,24 @@
 ﻿using osu.XR.Graphics;
-using osu.XR.Physics;
 using osuTK;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace osu.XR.Maths {
 	public static class Triangles {
 		/// <summary>
 		/// Calculates the barycentric coordinates of a point that lies on a face.
-		/// If the point does not lie on the face, the behaviour is undefined.
+		/// If the point does not lie on the face, it will return the barycentric coordinates with respect to the last distorted cardinal plane.
 		/// </summary>
 		public static Vector3 Barycentric ( Face face, Vector3 point ) {
 			var normal = Vector3.Cross( face.A - face.B, face.C - face.B );
+			var dotX = MathF.Abs( Vector3.Dot( normal, Vector3.UnitX ) );
+			var dotY = MathF.Abs( Vector3.Dot( normal, Vector3.UnitY ) );
+			var dotZ = MathF.Abs( Vector3.Dot( normal, Vector3.UnitZ ) );
 
 			// choosing the least distorting plane
-			if ( true ) { // TODO choose the best axis
+			if ( dotZ > dotX && dotZ > dotY ) {
 				return Barycentric( face.A.Xy, face.B.Xy, face.C.Xy, point.Xy );
 			}
-			else if ( false ) {
+			else if ( dotY > dotX && dotY > dotZ ) {
 				return Barycentric( face.A.Xz, face.B.Xz, face.C.Xz, point.Xz );
 			}
 			else {

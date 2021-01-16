@@ -1,13 +1,11 @@
 ﻿using osu.Framework.Bindables;
 using osu.XR.Maths;
-using osu.XR.Projection;
 using osuTK;
 using osuTK.Graphics.OpenGL4;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace osu.XR.Graphics {
 	public class Mesh {
@@ -83,6 +81,7 @@ namespace osu.XR.Graphics {
 		}
 
 		public void AddAABBQuad ( Quad quad ) {
+			FillTextureCoordinates();
 			int offset = Vertices.Count;
 
 			Vertices.Add( quad.TL );
@@ -101,6 +100,21 @@ namespace osu.XR.Graphics {
 			TextureCoordinates.Add( TR );
 			TextureCoordinates.Add( BL );
 			TextureCoordinates.Add( BR );
+		}
+
+		public void AddCircle ( Vector3 origin, Vector3 normal, Vector3 direction, int segments ) {
+			FillTextureCoordinates();
+			uint offset = (uint)Vertices.Count;
+
+			normal.Normalize();
+			Vertices.Add( origin );
+			Vertices.Add( origin + direction );
+			for ( int i = 1; i < segments; i++ ) {
+				var angle = ( (float)i / segments ) * MathF.PI * 2;
+				Vertices.Add( ( Quaternion.FromAxisAngle( normal, angle ) * new Vector4( direction, 1 ) ).Xyz );
+				Tris.Add( new IndexedFace( offset, offset + (uint)i, offset + (uint)i + 1 ) );
+			}
+			Tris.Add( new IndexedFace( offset, (uint)(segments + offset), offset + 1 ) );
 		}
 
 		public static Mesh UnitCube => FromOBJ(

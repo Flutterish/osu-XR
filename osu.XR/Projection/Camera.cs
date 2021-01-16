@@ -1,18 +1,21 @@
 ﻿using osu.Framework.Allocation;
-using osu.Framework.Graphics.OpenGL;
-using osu.Framework.Graphics.OpenGL.Buffers;
-using osu.Framework.Graphics.Shaders;
+using osu.Framework.Bindables;
 using osu.XR.Components;
 using osu.XR.Maths;
 using osuTK;
-using osuTK.Graphics.OpenGL4;
 using System;
 using System.Collections.Generic;
 
 namespace osu.XR.Projection {
-    public class Camera : XrObject {
+	public class Camera : XrObject {
         public Camera () {
             Fov = new Vector2( MathF.PI * 2 - 4 * MathF.Atan( 16f / 9 ), MathF.PI );
+            FovBindable.BindValueChanged( v => {
+                XSlope = 1 / MathF.Tan( ( MathF.PI - v.NewValue.X / 2 ) / 2 );
+                YSlope = 1 / MathF.Tan( ( MathF.PI - v.NewValue.Y / 2 ) / 2 );
+                AspectRatio = XSlope / YSlope;
+                CameraClipMatrix = Matrix4x4.CreatePerspectiveProjection( XSlope, YSlope, 0.01f, 100000 );
+            }, true );
         }
 
         List<XrObject> depthTestedRenderTargets = new();
@@ -42,16 +45,12 @@ namespace osu.XR.Projection {
 		/// Field of view in radians.
 		/// </summary>
 		public Vector2 Fov {
-            get => fov;
+            get => FovBindable.Value;
             set {
-                fov = value;
-                XSlope = 1 / MathF.Tan( ( MathF.PI - Fov.X / 2 ) / 2 );
-                YSlope = 1 / MathF.Tan( ( MathF.PI - Fov.Y / 2 ) / 2 );
-                AspectRatio = XSlope / YSlope;
-                CameraClipMatrix = Matrix4x4.CreatePerspectiveProjection( XSlope, YSlope, 0.01f, 100000 );
+                FovBindable.Value = value;
             }
         }
-        private Vector2 fov;
+        public readonly Bindable<Vector2> FovBindable = new();
         public float AspectRatio { get; private set; }
         public float XSlope { get; private set; }
         public float YSlope { get; private set; }
@@ -67,8 +66,7 @@ namespace osu.XR.Projection {
             p /= p.W;
             proj = p.Xy;
 
-            if ( p.Z is <= 0 or >= 1 ) return false;
-            return true;
+            return p.Z > 0;
         }
 
         public void Render ( XrObject xrObject, float width, float height ) {
@@ -91,6 +89,7 @@ namespace osu.XR.Projection {
                 i.DrawNode?.Draw( settings );
             }
             // TODO depth buffers. This might become easier if i have full control over the frame buffer, which i will have to anyway because XR requires 2 eyes to be rendered
+            // TODO render to 2 frame buffers for each eye. then we can link to a VR device.
             //GLWrapper.PushDepthInfo( new DepthInfo( true, true, osuTK.Graphics.ES30.DepthFunction.Less ) );
             //GL.Enable( EnableCap.DepthTest );
             //GL.DepthMask( true );

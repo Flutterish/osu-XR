@@ -1,20 +1,12 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics.OpenGL.Buffers;
 using osu.Framework.Graphics.OpenGL.Vertices;
-using osu.Framework.Graphics.Primitives;
 using osu.Framework.Graphics.Shaders;
-using osu.Framework.Graphics.Shapes;
 using osu.XR.Graphics;
 using osu.XR.Projection;
-using osu.XR.Rendering;
 using osuTK;
-using osuTK.Graphics.ES30;
-using osuTK.Graphics.OpenGL4;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace osu.XR.Components {
 	/// <summary>

@@ -1,10 +1,7 @@
-﻿using Microsoft.CodeAnalysis.Operations;
-using osu.Framework.Graphics;
+﻿using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Game.Overlays.BeatmapSet;
 using osu.XR.Maths;
 using osu.XR.Projection;
-using osu.XR.Rendering;
 using osuTK;
 using System;
 using System.Collections.Generic;
@@ -15,7 +12,7 @@ namespace osu.XR.Components {
 	/// An <see cref="XrObject"/> is the 3D counterpart of a <see cref="Drawable"/>.
 	/// </summary>
 	public class XrObject : Container { // has to be a "Drawable" because it gives us cool stuff.
-		private List<XrObject> children = new();
+		private List<XrObject> children = new(); // TODO bindables/transforms on this
 		private XrObject parent;
 
 		new public IReadOnlyList<XrObject> Children => children.AsReadOnly();
@@ -23,7 +20,7 @@ namespace osu.XR.Components {
 			get => parent;
 			set {
 				if ( parent == value ) return;
-
+				
 				if ( parent is Container con ) {
 					parent.children.Remove( this );
 					con.Remove( this );

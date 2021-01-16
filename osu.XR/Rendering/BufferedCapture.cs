@@ -9,20 +9,18 @@ using osu.Framework.Graphics.OpenGL.Vertices;
 using osu.Framework.Graphics.Primitives;
 using osu.Framework.Graphics.Shaders;
 using osu.Framework.Layout;
-using osu.XR.Projection;
 using osuTK;
 using osuTK.Graphics;
 using System;
 using System.Collections.Generic;
-using Quad = osu.XR.Maths.Quad;
 
 namespace osu.XR.Rendering {
-    /// <summary>
-    /// A composite drawable which renders other drawables into a back buffer but does not draw them on screen.
-    /// </summary>
-    public class BufferedCapture : Container {
+	/// <summary>
+	/// A composite drawable which renders other drawables into a back buffer but does not draw them on screen.
+	/// </summary>
+	public class BufferedCapture : Container {
         public BufferedCapture () {
-            sharedData = new BufferedDrawNodeSharedData( null, false );
+            sharedData = new BufferedDrawNodeSharedData( null, false ); // TODO customize this class ( might fix the cursor jitter bc double buffers or whatever coulbe be in there )
         }
 
         public ColourInfo EffectColour = Color4.White;
@@ -34,7 +32,7 @@ namespace osu.XR.Rendering {
         private void load ( ShaderManager shaders ) {
             TextureShader = shaders.Load( VertexShaderDescriptor.TEXTURE_2, FragmentShaderDescriptor.TEXTURE );
         }
-        public TextureGL Capture;
+        public TextureGL Capture; // TODO make readonly ( reads from shared data )
 
         private long updateVersion;
         protected override void Update () {

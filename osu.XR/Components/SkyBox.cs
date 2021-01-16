@@ -2,9 +2,6 @@
 using osu.XR.Projection;
 using osuTK;
 using osuTK.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace osu.XR.Components {
 	/// <summary>
@@ -31,7 +28,11 @@ namespace osu.XR.Components {
 				new Vector2( 0, 0 ),
 				new Vector2( 0, 0 ),
 				new Vector2( 0, 1 ),
-				new Vector2( 0, 1 )
+				new Vector2( 0, 1 ),
+				new Vector2( 0, 1 ),
+				new Vector2( 1, 1 ),
+				new Vector2( 1, 0 ),
+				new Vector2( 0, 0 )
 			} );
 			Mesh.Tris.AddRange( new IndexedFace[] {
 				new( 4, 7, 5 ),
@@ -43,15 +44,7 @@ namespace osu.XR.Components {
 				new( 5, 3, 7 ),
 				new( 5, 3, 1 ),
 				new( 6, 3, 7 ),
-				new( 6, 3, 2 )
-			} );
-			Mesh.TextureCoordinates.AddRange( new[] {
-				new Vector2( 0, 1 ),
-				new Vector2( 1, 1 ),
-				new Vector2( 1, 0 ),
-				new Vector2( 0, 0 )
-			} );
-			Mesh.Tris.AddRange( new IndexedFace[] {
+				new( 6, 3, 2 ),
 				new( 0, 2, 1 ),
 				new( 0, 2, 3 )
 			} );

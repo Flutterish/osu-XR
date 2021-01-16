@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace osu.XR {
 	public class ReadonlyIndexer<Tin,Tout> {

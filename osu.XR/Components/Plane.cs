@@ -1,9 +1,5 @@
 ﻿using osu.XR.Graphics;
-using osuTK;
 using osuTK.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace osu.XR.Components {
 	/// <summary>

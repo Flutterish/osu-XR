@@ -1,20 +1,14 @@
-﻿using Humanizer;
-using osu.Framework.Bindables;
+﻿using osu.Framework.Bindables;
 using osu.Framework.Input;
 using osu.Framework.Input.Handlers;
 using osu.Framework.Input.Handlers.Keyboard;
 using osu.Framework.Input.Handlers.Mouse;
 using osu.Framework.Input.StateChanges;
-using osu.Framework.Input.StateChanges.Events;
-using osu.Framework.Input.States;
 using osu.Framework.Platform;
 using osu.XR.Components;
 using osu.XR.Maths;
 using osuTK;
 using osuTK.Input;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using static osu.XR.Physics.Raycast;
 using TKKey = osuTK.Input.Key;
 
@@ -23,8 +17,20 @@ namespace osu.XR {
 	/// XR input is passed to 2D drawables though this manger.
 	/// </summary>
 	public class XrInputManager : CustomInputManager {
-		private Pointer pointer;
-		private Panel inputPanel;
+		Pointer pointer;
+		public Pointer Pointer {
+			get => pointer;
+			set {
+				if ( pointer is not null ) {
+					pointer.NewHit -= onPointerUpdate;
+				}
+				pointer = value;
+				if ( pointer is not null ) {
+					pointer.NewHit += onPointerUpdate;
+				}
+			}
+		}
+		public Panel InputPanel;
 		XrMouseHandler mouseHandler;
 		XrKeyboardHandler keyboardHandler;
 		/// <summary>
@@ -32,12 +38,6 @@ namespace osu.XR {
 		/// </summary>
 		public Bindable<bool> IsKeyboardActiveBindable => keyboardHandler.IsActiveBindable;
 		/// <param name="pointer">The pointer to guide the cursor with.</param>
-		public XrInputManager ( Pointer pointer, Panel inputPanel ) {
-			this.pointer = pointer;
-			this.inputPanel = inputPanel;
-
-			pointer.OnUpdate += pointerUpdate;
-		}
 
 		protected override void LoadComplete () {
 			base.LoadComplete();
@@ -45,20 +45,12 @@ namespace osu.XR {
 			AddHandler( keyboardHandler = new XrKeyboardHandler() );
 		}
 
-		Vector2 mousePos;
-		private void pointerUpdate ( RaycastHit hit ) {
+		private void onPointerUpdate ( RaycastHit hit ) {
 			var mesh = hit.Collider;
-			if ( mesh != inputPanel ) return;
+			if ( mesh != InputPanel ) return;
 
-			var face = inputPanel.Faces[ hit.TrisIndex ];
-			var barycentric = Triangles.Barycentric( face, hit.Point );
-			var tris = mesh.Mesh.Tris[ hit.TrisIndex ];
-			var textureCoord = 
-				  mesh.Mesh.TextureCoordinates[ (int)tris.A ] * barycentric.X
-				+ mesh.Mesh.TextureCoordinates[ (int)tris.B ] * barycentric.Y
-				+ mesh.Mesh.TextureCoordinates[ (int)tris.C ] * barycentric.Z;
-			mousePos = new Vector2( DrawWidth * textureCoord.X, DrawHeight * ( 1 - textureCoord.Y ) );
-			mouseHandler.handleMouseMove( mousePos );
+			// BUG this makes the cursor jitter for a frame each time
+			mouseHandler.handleMouseMove( InputPanel.TexturePositionAt( hit.TrisIndex, hit.Point ).ScaledBy( new Vector2( DrawWidth / InputPanel.Texture.Width, DrawHeight / InputPanel.Texture.Height ) ) );
 		}
 
 		/// <summary>
@@ -127,7 +119,7 @@ namespace osu.XR {
 			}
 
 			private void enqueueInput ( IInput input ) {
-				if ( IsActiveBindable.Value ) 
+				if ( IsActiveBindable.Value ) // ISSUE for whatever reason, even though this is disabled, textfields still get inputs while focused
 					PendingInputs.Enqueue( input );
 			}
 

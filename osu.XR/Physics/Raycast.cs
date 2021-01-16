@@ -1,13 +1,8 @@
-﻿using FFmpeg.AutoGen;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using osu.Game.Rulesets.Scoring;
-using osu.XR.Components;
+﻿using osu.XR.Components;
 using osu.XR.Graphics;
 using osu.XR.Maths;
 using osuTK;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace osu.XR.Physics {
 	public static class Raycast {
@@ -236,7 +231,7 @@ namespace osu.XR.Physics {
 			return ok;
 		}
 
-		public struct RaycastHit {
+		public readonly struct RaycastHit {
 			/// <summary>
 			/// The point that was hit;
 			/// </summary>
