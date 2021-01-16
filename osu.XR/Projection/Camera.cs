@@ -1,4 +1,5 @@
-﻿using osu.Framework.Graphics.OpenGL;
+﻿using osu.Framework.Allocation;
+using osu.Framework.Graphics.OpenGL;
 using osu.Framework.Graphics.OpenGL.Buffers;
 using osu.Framework.Graphics.Shaders;
 using osu.XR.Components;
@@ -6,6 +7,7 @@ using osu.XR.Maths;
 using osuTK;
 using osuTK.Graphics.OpenGL4;
 using System;
+using System.Collections.Generic;
 
 namespace osu.XR.Projection {
     public class Camera : XrObject {
@@ -13,10 +15,33 @@ namespace osu.XR.Projection {
             Fov = new Vector2( MathF.PI * 2 - 4 * MathF.Atan( 16f / 9 ), MathF.PI );
         }
 
-        /// <summary>
-        /// Field of view in radians.
-        /// </summary>
-        public Vector2 Fov {
+        List<XrObject> depthTestedRenderTargets = new();
+        List<XrObject> renderTargets = new();
+        private bool shoudBeDepthTested ( XrObject target ) {
+            return target is not IBehindEverything;
+		}
+        private void addRenderTarget ( XrObject parent, XrObject child ) {
+            if ( shoudBeDepthTested( child ) )
+                depthTestedRenderTargets.Add( child );
+            else
+                renderTargets.Add( child );
+        }
+        private void removeRenderTarget ( XrObject parent, XrObject child ) {
+            if ( shoudBeDepthTested( child ) )
+                depthTestedRenderTargets.Remove( child );
+            else
+                renderTargets.Remove( child );
+        }
+
+        [BackgroundDependencyLoader]
+        private void load () {
+            Root.BindHierarchyChange( addRenderTarget, removeRenderTarget, true );
+        }
+
+		/// <summary>
+		/// Field of view in radians.
+		/// </summary>
+		public Vector2 Fov {
             get => fov;
             set {
                 fov = value;
@@ -60,7 +85,11 @@ namespace osu.XR.Projection {
                 CameraClipMatrix,
                 this
             );
-            
+
+            foreach ( var i in renderTargets ) {
+                i.BeforeDraw( settings );
+                i.DrawNode?.Draw( settings );
+            }
             // TODO depth buffers. This might become easier if i have full control over the frame buffer, which i will have to anyway because XR requires 2 eyes to be rendered
             //GLWrapper.PushDepthInfo( new DepthInfo( true, true, osuTK.Graphics.ES30.DepthFunction.Less ) );
             //GL.Enable( EnableCap.DepthTest );
@@ -71,16 +100,18 @@ namespace osu.XR.Projection {
             //GL.ClearDepth( 1 );
             //GL.Clear( ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit );
             // TODO render to any frame buffer ( this will require to correct global scale to fit the aspect ratio )
-            void Draw ( XrObject xrObject ) {
-                xrObject.BeforeDraw( settings );
-                xrObject.DrawNode?.Draw( settings );
-                foreach ( var i in xrObject.Children ) {
-                    Draw( i );
-				}
+            foreach ( var i in depthTestedRenderTargets ) {
+                i.BeforeDraw( settings );
+                i.DrawNode?.Draw( settings );
 			}
-
-            Draw( xrObject );
             //GLWrapper.PopDepthInfo();
         }
-    }
+
+		protected override void Dispose ( bool isDisposing ) {
+			base.Dispose( isDisposing );
+            var root = Root;
+            root.ChildAddedToHierarchy -= addRenderTarget;
+            root.ChildRemovedFromHierarchy -= removeRenderTarget;
+        }
+	}
 }

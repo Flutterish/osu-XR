@@ -1,4 +1,5 @@
 ﻿using osu.Framework.Graphics.Containers;
+using osu.XR.Physics;
 using osu.XR.Rendering;
 using osuTK;
 using System;
@@ -10,7 +11,7 @@ namespace osu.XR.Components {
     /// <summary>
     /// A curved 3D panel that displays an image from a <see cref="BufferedCapture"/>.
     /// </summary>
-	public class Panel : MeshedXrObject {
+	public class Panel : MeshedXrObject, IHasCollider {
 		public BufferedCapture Source;
 
 		public Panel ( BufferedCapture source ) {
@@ -43,7 +44,7 @@ namespace osu.XR.Components {
 		public override void BeforeDraw ( DrawSettings settings ) {
             Texture = Source.Capture;
             if ( !initilized ) {
-                SetCurvature( arc: MathF.PI * 1.3f, radius: 3 );
+                SetCurvature( arc: MathF.PI * 0.9f, radius: 3 );
 			}
 		}
 	}

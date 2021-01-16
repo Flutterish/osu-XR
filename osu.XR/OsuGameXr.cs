@@ -9,6 +9,7 @@ using osu.Game;
 using osu.Game.Graphics.Containers;
 using osu.XR.Components;
 using osu.XR.Maths;
+using osu.XR.Physics;
 using osu.XR.Projection;
 using osu.XR.Rendering;
 using osuTK;
@@ -23,28 +24,30 @@ namespace osu.XR {
     /// The full osu!lazer experience in VR.
     /// </summary>
 	internal class OsuGameXr : OsuGame {
+        [Cached]
+        public readonly PhysicsSystem PhysicsSystem = new();
         internal InputManager InputManager;
         private InputManager inputManager => InputManager ??= GetContainingInputManager();
-
+        [Cached]
         public readonly Camera Camera = new() { Position = new Vector3( 0, 0, 0 ) };
         private BufferedCapture content;
         XrScene scene;
         public Panel OsuPanel;
-        public Pointer Pointer;
+        [Cached]
+        public readonly Pointer Pointer = new Pointer();
         private XrInputManager EmulatedInput;
         public OsuGameXr ( string[] args ) : base( args ) { } // TODO i want the game captured here so they dont have a chance to cache any top level drawables
 
         protected override void LoadComplete () {
             base.LoadComplete();
             Resources.AddStore( new DllResourceStore( typeof( OsuGameXr ).Assembly ) );
-            float yScale = 3f;
+            float yScale = 2f;
             // size has to be less than the actual screen because clipping shenigans
             // TODO figure out how to render in any resolution without downgrading quality. might also just modify o!f to not clip.
             content = new BufferedCapture { RelativeSizeAxes = Axes.Both, Size = new Vector2( 1, 1/yScale ), FrameBufferScale = new Vector2( yScale ) };
             OsuPanel = new Panel( content );
-            Pointer = new Components.Pointer( OsuPanel );
 
-            var contentWrapper = EmulatedInput = new XrInputManager( Pointer ) { RelativeSizeAxes = Axes.Both };
+            var contentWrapper = EmulatedInput = new XrInputManager( Pointer, OsuPanel ) { RelativeSizeAxes = Axes.Both };
             var internalChildren = InternalChildren.ToArray();
             //var children = Children.ToArray();
             ClearInternal( false );
@@ -55,8 +58,10 @@ namespace osu.XR {
             AddInternal( scene = new XrScene { Camera = Camera, RelativeSizeAxes = Axes.Both } );
             scene.Root.Add( new SkyBox() );
             scene.Root.Add( new FloorGrid() );
+            scene.Root.Add( Camera );
             scene.Root.Add( OsuPanel );
             scene.Root.Add( Pointer );
+            PhysicsSystem.Root = scene.Root;
         }
 
         private ButtonStates<Key> lastKeys;

@@ -188,13 +188,15 @@ namespace osu.XR.Physics {
 		/// Intersect a 3D line and a Mesh.
 		/// </summary>
 		public static bool TryHit ( Vector3 origin, Vector3 direction, Mesh mesh, Transform transform, out RaycastHit hit, bool includeBehind = false ) {
+			RaycastHit? closest = null;
+
 			for ( int i = 0; i < mesh.Tris.Count; i++ ) {
 				var face = mesh.Faces[ i ];
 				face.A = ( transform.Matrix * new Vector4( face.A, 1 ) ).Xyz;
 				face.B = ( transform.Matrix * new Vector4( face.B, 1 ) ).Xyz;
 				face.C = ( transform.Matrix * new Vector4( face.C, 1 ) ).Xyz;
-				if ( TryHit( origin, direction, face, out hit, includeBehind ) ) {
-					hit = new RaycastHit(
+				if ( TryHit( origin, direction, face, out hit, includeBehind ) && ( closest is null || Math.Abs( closest.Value.Distance ) > Math.Abs( hit.Distance ) ) ) {
+					closest = new RaycastHit(
 						hit.Point,
 						hit.Origin,
 						hit.Normal,
@@ -202,18 +204,36 @@ namespace osu.XR.Physics {
 						hit.Distance,
 						i
 					);
-					return true;
 				}
 			}
-			hit = default;
-			return false;
+
+			if ( closest is null ) {
+				hit = default;
+				return false;
+			}
+			else {
+				hit = closest.Value;
+				return true;
+			}
 		}
 
 		/// <summary>
 		/// Intersect a 3D line and a Mesh.
 		/// </summary>
 		public static bool TryHit ( Vector3 origin, Vector3 direction, MeshedXrObject target, out RaycastHit hit, bool includeBehind = false ) {
-			return TryHit( origin, direction, target.Mesh, target.Transform, out hit, includeBehind );
+			var ok = TryHit( origin, direction, target.Mesh, target.Transform, out hit, includeBehind );
+			if ( ok ) {
+				hit = new RaycastHit(
+					hit.Point,
+					hit.Origin,
+					hit.Normal,
+					hit.Direction,
+					hit.Distance,
+					hit.TrisIndex,
+					target as IHasCollider
+				);
+			}
+			return ok;
 		}
 
 		public struct RaycastHit {
@@ -241,14 +261,19 @@ namespace osu.XR.Physics {
 			/// The triangle of the mesh that was hit, if any.
 			/// </summary>
 			public readonly int TrisIndex;
+			/// <summary>
+			/// The hit collider, if any.
+			/// </summary>
+			public readonly IHasCollider Collider;
 
-			public RaycastHit ( Vector3 point, Vector3 origin, Vector3 normal, Vector3 direction, double distance, int trisIndex = -1 ) {
+			public RaycastHit ( Vector3 point, Vector3 origin, Vector3 normal, Vector3 direction, double distance, int trisIndex = -1, IHasCollider collider = null ) {
 				Point = point;
 				Origin = origin;
 				Normal = normal;
 				Direction = direction;
 				Distance = distance;
 				TrisIndex = trisIndex;
+				Collider = collider;
 			}
 		}
 	}

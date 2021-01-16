@@ -24,14 +24,80 @@ namespace osu.XR.Components {
 			set {
 				if ( parent == value ) return;
 
-				( base.Parent as Container )?.Remove( this );
-				parent?.children.Remove( this );
+				if ( parent is Container con ) {
+					parent.children.Remove( this );
+					con.Remove( this );
+
+					parent.onChildRemoved( this );
+				}
 				parent = value;
-				( base.Parent as Container )?.Add( this );
-				parent?.children.Add( this );
+				if ( parent is Container con2 ) {
+					parent.children.Add( this );
+					con2.Add( this );
+
+					parent.onChildAdded( this );
+				}
 				Transform.SetParent( parent?.Transform, transformKey );
 			}
 		}
+		// These events are used for efficient hiererchy change scans used in for example the physics system.
+		public delegate void ChildChangedHandler ( XrObject parent, XrObject child );
+		/// <summary>
+		/// Occurs whenever a child is added to this <see cref="XrObject"/>
+		/// </summary>
+		public event ChildChangedHandler ChildAdded;
+		/// <summary>
+		/// Occurs whenever a child is removed from this <see cref="XrObject"/>
+		/// </summary>
+		public event ChildChangedHandler ChildRemoved;
+		/// <summary>
+		/// Occurs whenever an <see cref="XrObject"/> is added under this <see cref="XrObject"/>
+		/// </summary>
+		public event ChildChangedHandler ChildAddedToHierarchy;
+		/// <summary>
+		/// Occurs whenever an <see cref="XrObject"/> is removed from under this <see cref="XrObject"/>
+		/// </summary>
+		public event ChildChangedHandler ChildRemovedFromHierarchy;
+
+		private void onChildAdded ( XrObject child ) {
+			ChildAdded?.Invoke( this, child );
+			onChildAddedToHierarchy( this, child );
+		}
+		private void onChildAddedToHierarchy ( XrObject parent, XrObject child ) {
+			ChildAddedToHierarchy?.Invoke( parent, child );
+			this.parent?.onChildAddedToHierarchy( parent, child );
+		}
+		private void onChildRemoved ( XrObject child ) {
+			ChildRemoved?.Invoke( this, child );
+			onChildRemovedFromHierarchy( this, child );
+		}
+		private void onChildRemovedFromHierarchy ( XrObject parent, XrObject child ) {
+			ChildRemovedFromHierarchy?.Invoke( parent, child );
+			this.parent?.onChildRemovedFromHierarchy( parent, child );
+		}
+		public void BindHierarchyChange ( ChildChangedHandler added, ChildChangedHandler removed, bool runOnAllChildrenImmediately = false ) {
+			if ( removed is not null ) ChildRemovedFromHierarchy += removed;
+			if ( added is not null ) {
+				ChildAddedToHierarchy += added;
+				if ( runOnAllChildrenImmediately ) {
+					foreach ( var i in GetAllChildrenInHiererchy() ) {
+						added( i.parent, i );
+					}
+				}
+			}
+		}
+
+		public IEnumerable<XrObject> GetAllChildrenInHiererchy () {
+			List<XrObject> all = new() { this };
+			for ( int i = 0; i < all.Count; i++ ) {
+				var current = all[ i ];
+				for ( int k = 0; k < current.children.Count; k++ ) {
+					yield return current.children[ k ];
+					all.Add( current.children[ k ] );
+				}
+			}
+		}
+
 		/// <summary>
 		/// The topmost <see cref="XrObject"/> in the hierarchy. This operation performs upwards tree traveral and might be expensive.
 		/// </summary>
@@ -61,10 +127,8 @@ namespace osu.XR.Components {
 		private readonly object transformKey = new { };
 		public readonly Transform Transform;
 		new public Vector3 Position { get => Transform.Position; set => Transform.Position = value; }
-		public Vector3 Forward => ( Rotation * new Vector4( 0, 0, 1, 1 ) ).Xyz;
-		public Vector3 Backwards => ( Rotation * new Vector4( 0, 0, -1, 1 ) ).Xyz;
-		public float X { get => Transform.X; set => Transform.X = value; }
-		public float Y { get => Transform.Y; set => Transform.Y = value; }
+		new public float X { get => Transform.X; set => Transform.X = value; }
+		new public float Y { get => Transform.Y; set => Transform.Y = value; }
 		public float Z { get => Transform.Z; set => Transform.Z = value; }
 
 		new public Vector3 Scale { get => Transform.Scale; set => Transform.Scale = value; }
@@ -82,6 +146,13 @@ namespace osu.XR.Components {
 		public float EulerRotX { get => Transform.EulerRotX; set => Transform.EulerRotX = value; }
 		public float EulerRotY { get => Transform.EulerRotY; set => Transform.EulerRotY = value; }
 		public float EulerRotZ { get => Transform.EulerRotZ; set => Transform.EulerRotZ = value; }
+
+		public Vector3 Forward => Transform.Forward;
+		public Vector3 Backward => Transform.Backward;
+		public Vector3 Left => Transform.Left;
+		public Vector3 Right => Transform.Right;
+		public Vector3 Up => Transform.Up;
+		public Vector3 Down => Transform.Down;
 
 		private XrObjectDrawNode drawNode;
 		public XrObjectDrawNode DrawNode => drawNode ??= CreateDrawNode();

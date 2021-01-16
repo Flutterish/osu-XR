@@ -1,4 +1,5 @@
-﻿using osu.XR.Graphics;
+﻿using osu.Framework.Allocation;
+using osu.XR.Graphics;
 using osu.XR.Physics;
 using osu.XR.Projection;
 using osuTK;
@@ -12,9 +13,10 @@ namespace osu.XR.Components {
 	/// A 3D cursor.
 	/// </summary>
 	public class Pointer : MeshedXrObject {
-		public Panel Target;
-		public Pointer ( Panel target ) { // TODO physics system that will allow this to point at everything. Will require DI
-			Target = target;
+		[Resolved]
+		private PhysicsSystem PhysicsSystem { get; set; }
+
+		public Pointer () {
 			Mesh = new();
 			Mesh.Vertices.Add( Vector3.Zero );
 			float radius = 0.05f;
@@ -31,11 +33,11 @@ namespace osu.XR.Components {
 
 		public override void BeforeDraw ( XrObjectDrawNode.DrawSettings settings ) {
 			base.BeforeDraw( settings );
-			if ( Raycast.TryHit( settings.Camera.Position, settings.Camera.Forward, Target, out var hit ) && hit.Distance < 10 ) {
+			if ( PhysicsSystem.TryHit( settings.Camera.Position, settings.Camera.Forward, out var hit ) && hit.Distance < 10 ) {
 				Position = hit.Point;
 				Rotation = Matrix4.LookAt( Vector3.Zero, hit.Normal, Vector3.UnitY ).ExtractRotation().Inverted();
 
-				OnUpdate?.Invoke( hit.Point, Target, hit );
+				OnUpdate?.Invoke( hit );
 			}
 			else {
 				Position = settings.Camera.Position + settings.Camera.Forward * 10;
@@ -43,7 +45,7 @@ namespace osu.XR.Components {
 			}
 		}
 
-		public delegate void PointerUpdate ( Vector3 position, MeshedXrObject mesh, RaycastHit hit );
-		public event PointerUpdate OnUpdate;
+		public delegate void PointerUpdate ( RaycastHit hit );
+		new public event PointerUpdate OnUpdate;
 	}
 }

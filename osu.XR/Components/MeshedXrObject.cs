@@ -14,7 +14,7 @@ namespace osu.XR.Components {
 	/// An <see cref="XrObject"/> which renders a <see cref="Graphics.Mesh"/>.
 	/// </summary>
 	public class MeshedXrObject : XrObject {
-		public Mesh Mesh = new();
+		public Mesh Mesh { get; set; } = new();
 		public bool UseGammaCorrection = false;
 		public TextureGL Texture = osu.Framework.Graphics.Textures.Texture.WhitePixel.TextureGL;
 		public MeshedXrObject () {

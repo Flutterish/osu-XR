@@ -1,4 +1,5 @@
 ﻿using osu.XR.Graphics;
+using osu.XR.Projection;
 using osuTK;
 using osuTK.Graphics;
 using System;
@@ -9,8 +10,8 @@ namespace osu.XR.Components {
 	/// <summary>
 	/// A hot pink skybox that fits the osu theme.
 	/// </summary>
-	public class SkyBox : MeshedXrObject {
-		public SkyBox () { // TODO this should be always rendered first without a depth test.
+	public class SkyBox : MeshedXrObject, IBehindEverything {
+		public SkyBox () {
 			Texture = Textures.VerticalGradient( Color4.Black, Color4.HotPink, 100 ).TextureGL;
 			Mesh.Vertices.AddRange( new[] {
 				new Vector3(  1,  1,  1 ) * 6,

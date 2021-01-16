@@ -24,6 +24,7 @@ namespace osu.XR {
 	/// </summary>
 	public class XrInputManager : CustomInputManager {
 		private Pointer pointer;
+		private Panel inputPanel;
 		XrMouseHandler mouseHandler;
 		XrKeyboardHandler keyboardHandler;
 		/// <summary>
@@ -31,8 +32,10 @@ namespace osu.XR {
 		/// </summary>
 		public Bindable<bool> IsKeyboardActiveBindable => keyboardHandler.IsActiveBindable;
 		/// <param name="pointer">The pointer to guide the cursor with.</param>
-		public XrInputManager ( Pointer pointer ) {
+		public XrInputManager ( Pointer pointer, Panel inputPanel ) {
 			this.pointer = pointer;
+			this.inputPanel = inputPanel;
+
 			pointer.OnUpdate += pointerUpdate;
 		}
 
@@ -43,9 +46,12 @@ namespace osu.XR {
 		}
 
 		Vector2 mousePos;
-		private void pointerUpdate ( osuTK.Vector3 position, MeshedXrObject mesh, RaycastHit hit ) {
-			var face = mesh.Faces[ hit.TrisIndex ];
-			var barycentric = Triangles.Barycentric( face, position );
+		private void pointerUpdate ( RaycastHit hit ) {
+			var mesh = hit.Collider;
+			if ( mesh != inputPanel ) return;
+
+			var face = inputPanel.Faces[ hit.TrisIndex ];
+			var barycentric = Triangles.Barycentric( face, hit.Point );
 			var tris = mesh.Mesh.Tris[ hit.TrisIndex ];
 			var textureCoord = 
 				  mesh.Mesh.TextureCoordinates[ (int)tris.A ] * barycentric.X
