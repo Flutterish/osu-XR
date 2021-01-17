@@ -20,7 +20,7 @@ namespace osu.XR {
             var cwd = Environment.CurrentDirectory;
             bool useOsuTK = args.Contains( "--tk" );
 
-            using ( DesktopGameHost host = Host.GetSuitableHost( @"osu", true, useOsuTK: useOsuTK ) ) {
+            using ( var host = new ExtendedRealityWindowsGameHost( @"osu!XR", true, null, false ) ) {
                 host.ExceptionThrown += handleException;
 
                 if ( !host.IsPrimaryInstance ) {

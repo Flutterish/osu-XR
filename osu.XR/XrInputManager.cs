@@ -16,7 +16,7 @@ namespace osu.XR {
 	/// <summary>
 	/// XR input is passed to 2D drawables though this manger.
 	/// </summary>
-	public class XrInputManager : CustomInputManager { // TODO we will need a pass-though host ( or a full custom one ) to modify and emulate some events
+	public class XrInputManager : CustomInputManager {
 		Pointer pointer;
 		public Pointer Pointer {
 			get => pointer;

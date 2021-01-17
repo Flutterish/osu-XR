@@ -19,7 +19,7 @@ namespace osu.XR {
 	/// <summary>
 	/// The full osu! experience in VR.
 	/// </summary>
-	internal class OsuGameXr : OsuGame {
+	internal class OsuGameXr : OsuGame, IXrGame {
         [Cached]
         public readonly PhysicsSystem PhysicsSystem = new();
         internal InputManager _inputManager;
@@ -27,7 +27,7 @@ namespace osu.XR {
         [Cached]
         public readonly Camera Camera = new() { Position = new Vector3( 0, 0, 0 ) };
         private BufferedCapture content;
-        XrScene scene;
+        XrScene scene = new XrScene { RelativeSizeAxes = Axes.Both };
         public Panel OsuPanel;
         [Cached]
         public readonly Pointer Pointer = new Pointer();
@@ -53,7 +53,8 @@ namespace osu.XR {
             content.Add( EmulatedInput );
             AddInternal( content );
 
-            AddInternal( scene = new XrScene { Camera = Camera, RelativeSizeAxes = Axes.Both } );
+            AddInternal( scene );
+            scene.Camera = Camera;
             scene.Root.Add( new SkyBox() );
             scene.Root.Add( new FloorGrid() );
             scene.Root.Add( Camera );
@@ -100,5 +101,9 @@ namespace osu.XR {
             Camera.Rotation = Quaternion.FromEulerAngles( 0, ( mouse.X - DrawSize.X / 2 ) / 200, 0 ) * Quaternion.FromEulerAngles( Math.Clamp( ( mouse.Y - DrawSize.Y / 2 ) / 200, -MathF.PI * 2 / 5, MathF.PI * 2 / 5 ), 0, 0 );
             lastKeys = keys.Clone();
         }
-    }
+
+		public XrScene CreateScene () {
+            return scene;
+		}
+	}
 }

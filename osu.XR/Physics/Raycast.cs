@@ -104,7 +104,7 @@ namespace osu.XR.Physics {
 		/// <summary>
 		/// Intersect 2 2D lines.
 		/// </summary>
-		public static bool TryHitLine ( Vector2 pointOnLineA, Vector2 directionA, Vector2 pointOnLineB, Vector2 directionB, out Vector2 hit ) { // TODO vector math this
+		public static bool TryHitLine ( Vector2 pointOnLineA, Vector2 directionA, Vector2 pointOnLineB, Vector2 directionB, out Vector2 hit ) {
 			// y = m1 x + b1
 			// y = m2 x + b2
 			// m1 x + b1 = m2 x + b2
