@@ -179,10 +179,60 @@ namespace osu.XR.Physics {
 			return false;
 		}
 
+		public static bool Intersects ( Vector3 origin, Vector3 direction, AABox box, bool includeBehind = false ) {
+			if ( direction.X == 0 ) {
+				if ( origin.X < box.Min.X || origin.X > box.Max.X ) return false;
+			}
+			else {
+				var tA = ( box.Min.X - origin.X ) / direction.X;
+				var tB = ( box.Max.X - origin.X ) / direction.X;
+
+				var aPoint = origin + direction * tA;
+				var bPoint = origin + direction * tB;
+
+				if ( ( aPoint.Y < box.Min.Y && bPoint.Y < box.Min.Y ) || ( aPoint.Y > box.Max.Y && bPoint.Y > box.Max.Y ) ) return false;
+				if ( ( aPoint.Z < box.Min.Z && bPoint.Z < box.Min.Z ) || ( aPoint.Z > box.Max.Z && bPoint.Z > box.Max.Z ) ) return false;
+			}
+			if ( direction.Y == 0 ) {
+				if ( origin.Y < box.Min.Y || origin.Y > box.Max.Y ) return false;
+			}
+			else {
+				var tA = ( box.Min.Y - origin.Y ) / direction.Y;
+				var tB = ( box.Max.Y - origin.Y ) / direction.Y;
+
+				var aPoint = origin + direction * tA;
+				var bPoint = origin + direction * tB;
+
+				if ( ( aPoint.X < box.Min.X && bPoint.X < box.Min.X ) || ( aPoint.X > box.Max.X && bPoint.X > box.Max.X ) ) return false;
+				if ( ( aPoint.Z < box.Min.Z && bPoint.Z < box.Min.Z ) || ( aPoint.Z > box.Max.Z && bPoint.Z > box.Max.Z ) ) return false;
+			}
+			if ( direction.Z == 0 ) {
+				if ( origin.Z < box.Min.Z || origin.Z > box.Max.Z ) return false;
+			}
+			else {
+				var tA = ( box.Min.Z - origin.Z ) / direction.Z;
+				var tB = ( box.Max.Z - origin.Z ) / direction.Z;
+
+				var aPoint = origin + direction * tA;
+				var bPoint = origin + direction * tB;
+
+				if ( ( aPoint.Y < box.Min.Y && bPoint.Y < box.Min.Y ) || ( aPoint.Y > box.Max.Y && bPoint.Y > box.Max.Y ) ) return false;
+				if ( ( aPoint.X < box.Min.X && bPoint.X < box.Min.X ) || ( aPoint.X > box.Max.X && bPoint.X > box.Max.X ) ) return false;
+			}
+
+			return true;
+		}
+
 		/// <summary>
 		/// Intersect a 3D line and a Mesh.
 		/// </summary>
 		public static bool TryHit ( Vector3 origin, Vector3 direction, Mesh mesh, Transform transform, out RaycastHit hit, bool includeBehind = false ) {
+			if ( mesh.Tris.Count > 24 ) {
+				if ( !Intersects( origin, direction, transform.Matrix * mesh.BoundingBox, includeBehind ) ) {
+					hit = default;
+					return false;
+				}
+			}
 			RaycastHit? closest = null;
 
 			for ( int i = 0; i < mesh.Tris.Count; i++ ) {

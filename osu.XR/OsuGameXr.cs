@@ -31,6 +31,7 @@ namespace osu.XR {
         public Panel OsuPanel;
         [Cached]
         public readonly Pointer Pointer = new Pointer();
+        [Cached(type: typeof(InputManager))]
         private XrInputManager EmulatedInput = new XrInputManager { RelativeSizeAxes = Axes.Both };
 
         private bool addInternalToContent = true;

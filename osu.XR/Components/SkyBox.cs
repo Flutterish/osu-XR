@@ -9,7 +9,7 @@ namespace osu.XR.Components {
 	/// </summary>
 	public class SkyBox : MeshedXrObject, IBehindEverything {
 		public SkyBox () {
-			Texture = Textures.VerticalGradient( Color4.Black, Color4.HotPink, 100 ).TextureGL;
+			MainTexture = Textures.VerticalGradient( Color4.Black, Color4.HotPink, 100 ).TextureGL;
 			Mesh.Vertices.AddRange( new[] {
 				new Vector3(  1,  1,  1 ) * 6,
 				new Vector3(  1,  1, -1 ) * 6,

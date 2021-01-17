@@ -16,7 +16,7 @@ namespace osu.XR {
 	/// <summary>
 	/// XR input is passed to 2D drawables though this manger.
 	/// </summary>
-	public class XrInputManager : CustomInputManager {
+	public class XrInputManager : CustomInputManager { // TODO we will need a pass-though host ( or a full custom one ) to modify and emulate some events
 		Pointer pointer;
 		public Pointer Pointer {
 			get => pointer;
@@ -50,7 +50,7 @@ namespace osu.XR {
 			if ( mesh != InputPanel ) return;
 
 			// BUG this makes the cursor jitter for a frame each time
-			mouseHandler.handleMouseMove( InputPanel.TexturePositionAt( hit.TrisIndex, hit.Point ).ScaledBy( new Vector2( DrawWidth / InputPanel.Texture.Width, DrawHeight / InputPanel.Texture.Height ) ) );
+			mouseHandler.handleMouseMove( InputPanel.TexturePositionAt( hit.TrisIndex, hit.Point ).ScaledBy( new Vector2( DrawWidth / InputPanel.MainTexture.Width, DrawHeight / InputPanel.MainTexture.Height ) ) );
 		}
 
 		/// <summary>
@@ -96,7 +96,7 @@ namespace osu.XR {
 		/// </summary>
 		private class XrKeyboardHandler : InputHandler {
 			public Bindable<bool> IsActiveBindable = new( false );
-			public override bool IsActive => IsActiveBindable.Value;
+			public override bool IsActive => true;
 			public override int Priority => 0;
 
 			public override bool Initialize ( GameHost host ) {

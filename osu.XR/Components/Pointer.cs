@@ -21,7 +21,7 @@ namespace osu.XR.Components {
 			Mesh.AddCircle( Vector3.Zero, Vector3.UnitZ, Vector3.UnitX * 0.04f, 30 );
 			Mesh.AddCircle( Vector3.Zero, Vector3.UnitZ, Vector3.UnitX * 0.014f, 30 );
 
-			Texture = Textures.Pixel( new osuTK.Graphics.Color4( 255, 255, 255, 100 ) ).TextureGL;
+			MainTexture = Textures.Pixel( new osuTK.Graphics.Color4( 255, 255, 255, 100 ) ).TextureGL;
 		}
 
 		public override void BeforeDraw ( XrObjectDrawNode.DrawSettings settings ) {

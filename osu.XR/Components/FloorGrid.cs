@@ -9,7 +9,7 @@ namespace osu.XR.Components {
 	/// </summary>
 	public class FloorGrid : MeshedXrObject {
 		public FloorGrid () {
-            Texture = Textures.Vertical2SidedGradient( Color4.Transparent, Color4.White, 200 ).TextureGL;
+            MainTexture = Textures.Vertical2SidedGradient( Color4.Transparent, Color4.White, 200 ).TextureGL;
 
             const int x_segments = 7;
             const float x_length = 16.7f;

@@ -15,7 +15,7 @@ namespace osu.XR.Components {
 					new osuTK.Vector3( -2, -2, z ), new osuTK.Vector3( 2, -2, z ) 
 				)	
 			);
-			Texture = Textures.Pixel( Color4.Red ).TextureGL;
+			MainTexture = Textures.Pixel( Color4.Red ).TextureGL;
 		}
 	}
 }

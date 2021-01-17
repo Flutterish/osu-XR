@@ -25,6 +25,32 @@ namespace osu.XR.Graphics {
 			TextureCoordinates.CollectionChanged += ( _, _ ) => UpdateVersion++;
 		}
 
+		private AABox boundgingBox;
+		private ulong boundingBoxUpdateVersion;
+		/// <summary>
+		/// A box bounding this mesh. This is cached.
+		/// </summary>
+		public AABox BoundingBox {
+			get {
+				if ( boundingBoxUpdateVersion == UpdateVersion ) return boundgingBox;
+				boundingBoxUpdateVersion = UpdateVersion;
+				boundgingBox = new AABox {
+					Min = new Vector3(
+						Vertices.Min( v => v.X ),
+						Vertices.Min( v => v.Y ),
+						Vertices.Min( v => v.Z )
+					)
+				};
+				boundgingBox.Size = new Vector3(
+					Vertices.Max( v => v.X ),
+					Vertices.Max( v => v.Y ),
+					Vertices.Max( v => v.Z )
+				) - boundgingBox.Min;
+
+				return boundgingBox;
+			}
+		}
+
 		public static Mesh FromOBJFile ( string path )
 			=> FromOBJ( File.ReadAllLines( path ) );
 		public static Mesh FromOBJ ( string lines )
