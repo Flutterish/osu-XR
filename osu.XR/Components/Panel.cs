@@ -1,4 +1,5 @@
-﻿using osu.Framework.Bindables;
+﻿using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.XR.Maths;
@@ -31,19 +32,8 @@ namespace osu.XR.Components {
             ArcBindable.ValueChanged += _ => isCurveInvalidated = true;
             RadiusBindable.ValueChanged += _ => isCurveInvalidated = true;
 
-            // size has to be less than the actual screen because clipping shenigans
-            // TODO figure out how to render in any resolution without downgrading quality. might also just modify o!f to not clip.
             ContentScale.ValueChanged += v => {
-                if ( v.NewValue.X / v.NewValue.Y > 1 ) {
-                    var xScale = v.NewValue.X / v.NewValue.Y;
-                    SourceCapture.Size = new Vector2( 1, 1 / xScale );
-                    SourceCapture.FrameBufferScale = new Vector2( xScale );
-                }
-                else {
-                    var yScale = v.NewValue.Y / v.NewValue.X;
-                    SourceCapture.Size = new Vector2( 1 / yScale, 1 );
-                    SourceCapture.FrameBufferScale = new Vector2( yScale );
-                }
+                SourceCapture.Size = v.NewValue;
                 isCurveInvalidated = true;
             };
 
@@ -51,6 +41,11 @@ namespace osu.XR.Components {
             SourceCapture.Add( EmulatedInput );
             Add( SourceCapture );
         }
+
+        [BackgroundDependencyLoader( permitNulls: true )]
+        private void load ( Pointer pointer ) {
+            EmulatedInput.Pointer ??= pointer;
+		}
 
 		private void recalculateMesh () {
             isCurveInvalidated = false;

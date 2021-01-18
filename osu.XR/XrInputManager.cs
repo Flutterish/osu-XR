@@ -119,7 +119,7 @@ namespace osu.XR {
 			}
 
 			private void enqueueInput ( IInput input ) {
-				if ( IsActiveBindable.Value ) // ISSUE for whatever reason, even though this is disabled, textfields still get inputs while focused
+				if ( IsActiveBindable.Value ) // ISSUE for whatever reason, even though this is disabled, textfields still get inputs while focused. Probably the game hosts proper text input. however, a better solution is to take away focus.
 					PendingInputs.Enqueue( input );
 			}
 

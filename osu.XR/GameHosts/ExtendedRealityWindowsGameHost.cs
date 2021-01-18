@@ -26,14 +26,6 @@ using System.Threading.Tasks;
 
 namespace osu.XR.GameHosts {
 	public class ExtendedRealityWindowsGameHost : ExtendedRealityDesktopGameHost { // this is a copy of DesktopGameHost and WindowsGameHost
-		public override void OpenFileExternally ( string filename ) {
-			throw new NotImplementedException( "File dialog panel is not yet implemented" );
-		}
-
-		public override void OpenUrlExternally ( string url ) {
-			throw new NotImplementedException( "Web browser panel is not yet implemented" );
-		}
-
 		private TcpIpcProvider ipcProvider;
 		private readonly bool bindIPCPort;
 		private Thread ipcThread;
@@ -78,10 +70,6 @@ namespace osu.XR.GameHosts {
 		} );
 
 		public override ITextInputSource GetTextInput () => Window == null ? null : new GameWindowTextInput( Window );
-
-		public void Run ( XrGame game ) {
-			base.Run( game );
-		}
 
 		protected override IEnumerable<InputHandler> CreateAvailableInputHandlers () {
 			var defaultEnabled = new InputHandler[] {

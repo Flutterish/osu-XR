@@ -28,7 +28,7 @@ namespace osu.XR {
         [Cached]
         public readonly Camera Camera = new() { Position = new Vector3( 0, 0, 0 ) };
         XrScene scene = new XrScene { RelativeSizeAxes = Axes.Both };
-        public Panel OsuPanel;
+        public readonly Panel OsuPanel = new Panel();
         [Cached]
         public readonly Pointer Pointer = new Pointer();
         [Cached(typeof(Framework.Game))]
@@ -41,9 +41,7 @@ namespace osu.XR {
             Resources.AddStore( new DllResourceStore( typeof( OsuGameXr ).Assembly ) );
             OsuGame.SetHost( Host );
 
-            OsuPanel = new Panel();
             OsuPanel.Source.Add( OsuGame );
-
             OsuPanel.EmulatedInput.Pointer = Pointer;
             OsuPanel.ContentScale.Value = new Vector2( 2, 1 );
 
@@ -83,8 +81,10 @@ namespace osu.XR {
                 if ( keys.IsPressed( Key.S ) ) direction += ( Camera.Rotation * new Vector4( 0, 0, -1, 1 ) ).Xz.Normalized();
                 if ( keys.IsPressed( Key.A ) ) direction += ( Camera.Rotation * new Vector4( -1, 0, 0, 1 ) ).Xz.Normalized();
                 if ( keys.IsPressed( Key.D ) ) direction += ( Camera.Rotation * new Vector4( 1, 0, 0, 1 ) ).Xz.Normalized();
-
-                Camera.Position += new Vector3( direction.X, 0, direction.Y ) * (float)( Time.Elapsed / 1000 );
+                if ( direction != Vector2.Zero ) {
+                    direction.Normalize();
+                    Camera.Position += new Vector3( direction.X, 0, direction.Y ) * (float)( Time.Elapsed / 1000 );
+                }
             }
             Camera.Rotation = Quaternion.FromEulerAngles( 0, ( mouse.X - DrawSize.X / 2 ) / 200, 0 ) * Quaternion.FromEulerAngles( Math.Clamp( ( mouse.Y - DrawSize.Y / 2 ) / 200, -MathF.PI * 2 / 5, MathF.PI * 2 / 5 ), 0, 0 );
             lastKeys = keys.Clone();

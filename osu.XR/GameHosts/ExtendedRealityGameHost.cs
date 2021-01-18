@@ -20,8 +20,20 @@ using WindowState = osu.Framework.Platform.WindowState;
 namespace osu.XR.GameHosts {
 	public abstract class ExtendedRealityGameHost : GameHost {
         // TBD
-        protected ExtendedRealityGameHost ( string gameName = "", ToolkitOptions toolkitOptions = null ) : base( gameName, toolkitOptions ) {
+        protected ExtendedRealityGameHost ( string gameName = "", ToolkitOptions toolkitOptions = null ) : base( gameName, toolkitOptions ) { }
 
-        }
+		public override void OpenFileExternally ( string filename ) {
+			throw new NotImplementedException( "File dialog panel is not yet implemented" );
+		}
+
+		public override void OpenUrlExternally ( string url ) {
+			throw new NotImplementedException( "Web browser panel is not yet implemented" );
+		}
+
+		XrGame runningGame;
+		public void Run ( XrGame game ) {
+			runningGame = game;
+			base.Run( game );
+		}
 	}
 }

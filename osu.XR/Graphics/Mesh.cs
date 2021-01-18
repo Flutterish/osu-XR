@@ -135,7 +135,7 @@ namespace osu.XR.Graphics {
 			Vertices.Add( origin + direction );
 			for ( int i = 1; i < segments; i++ ) {
 				var angle = ( (float)i / segments ) * MathF.PI * 2;
-				Vertices.Add( ( Quaternion.FromAxisAngle( normal, angle ) * new Vector4( direction, 1 ) ).Xyz );
+				Vertices.Add( origin + ( Quaternion.FromAxisAngle( normal, angle ) * new Vector4( direction, 1 ) ).Xyz );
 				Tris.Add( new IndexedFace( offset, offset + (uint)i, offset + (uint)i + 1 ) );
 			}
 			Tris.Add( new IndexedFace( offset, (uint)(segments + offset), offset + 1 ) );

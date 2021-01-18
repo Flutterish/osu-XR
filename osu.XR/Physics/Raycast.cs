@@ -162,7 +162,13 @@ namespace osu.XR.Physics {
 		/// Intersect a 3D line and a triangle.
 		/// </summary>
 		public static bool TryHit ( Vector3 origin, Vector3 direction, Face face, out RaycastHit hit, bool includeBehind = false ) {
-			if ( TryHit( origin, direction, face.A, Vector3.Cross( face.B - face.A, face.C - face.A ), out hit, includeBehind ) ) {
+			var normal = Vector3.Cross( face.B - face.A, face.C - face.A );
+			// we want the normal to be pointing towards the hit origin
+			if ( Vector3.Dot( normal, direction ) > 0 ) {
+				normal *= -1;
+			}
+
+			if ( TryHit( origin, direction, face.A, normal, out hit, includeBehind ) ) {
 				var directionFromC = ( face.C - hit.Point ).Normalized();
 				if ( TryHitLine( hit.Point, directionFromC, face.A, face.B - face.A, out var pointOnAB ) ) {
 					var distanceFromAToB = Extensions.SignedDistance( face.A, pointOnAB, face.B );
