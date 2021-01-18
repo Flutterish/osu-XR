@@ -14,7 +14,7 @@ namespace osu.XR.Projection {
                 XSlope = 1 / MathF.Tan( ( MathF.PI - v.NewValue.X / 2 ) / 2 );
                 YSlope = 1 / MathF.Tan( ( MathF.PI - v.NewValue.Y / 2 ) / 2 );
                 AspectRatio = XSlope / YSlope;
-                CameraClipMatrix = Matrix4x4.CreatePerspectiveProjection( XSlope, YSlope, 0.01f, 100000 );
+                CameraClipMatrix = Matrix4x4.CreatePerspectiveProjection( XSlope, YSlope, 0.01f, 1000 );
             }, true );
         }
 
@@ -88,22 +88,12 @@ namespace osu.XR.Projection {
                 i.BeforeDraw( settings );
                 i.DrawNode?.Draw( settings );
             }
-            // TODO depth buffers. This might become easier if i have full control over the frame buffer, which i will have to anyway because XR requires 2 eyes to be rendered
             // TODO render to 2 frame buffers for each eye. then we can link to a VR device.
-            //GLWrapper.PushDepthInfo( new DepthInfo( true, true, osuTK.Graphics.ES30.DepthFunction.Less ) );
-            //GL.Enable( EnableCap.DepthTest );
-            //GL.DepthMask( true );
-            //GL.DepthFunc( DepthFunction.Less );
-            //GL.DepthRange( 0.0, 1.0 );
-            //GL.ClearColor( 0, 0, 0, 0 );
-            //GL.ClearDepth( 1 );
-            //GL.Clear( ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit );
             // TODO render to any frame buffer ( this will require to correct global scale to fit the aspect ratio )
             foreach ( var i in depthTestedRenderTargets ) {
                 i.BeforeDraw( settings );
                 i.DrawNode?.Draw( settings );
 			}
-            //GLWrapper.PopDepthInfo();
         }
 
 		protected override void Dispose ( bool isDisposing ) {

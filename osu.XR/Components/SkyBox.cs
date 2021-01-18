@@ -11,14 +11,14 @@ namespace osu.XR.Components {
 		public SkyBox () {
 			MainTexture = Textures.VerticalGradient( Color4.Black, Color4.HotPink, 100 ).TextureGL;
 			Mesh.Vertices.AddRange( new[] {
-				new Vector3(  1,  1,  1 ) * 6,
-				new Vector3(  1,  1, -1 ) * 6,
-				new Vector3(  1, -1,  1 ) * 6,
-				new Vector3(  1, -1, -1 ) * 6,
-				new Vector3( -1,  1,  1 ) * 6,
-				new Vector3( -1,  1, -1 ) * 6,
-				new Vector3( -1, -1,  1 ) * 6,
-				new Vector3( -1, -1, -1 ) * 6,
+				new Vector3(  1,  1,  1 ) * 300,
+				new Vector3(  1,  1, -1 ) * 300,
+				new Vector3(  1, -1,  1 ) * 300,
+				new Vector3(  1, -1, -1 ) * 300,
+				new Vector3( -1,  1,  1 ) * 300,
+				new Vector3( -1,  1, -1 ) * 300,
+				new Vector3( -1, -1,  1 ) * 300,
+				new Vector3( -1, -1, -1 ) * 300,
 			} );
 			Mesh.TextureCoordinates.AddRange( new[] {
 				new Vector2( 0, 0 ),

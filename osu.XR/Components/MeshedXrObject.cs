@@ -1,4 +1,5 @@
-﻿using osu.Framework.Graphics.OpenGL.Textures;
+﻿using osu.Framework.Graphics.OpenGL;
+using osu.Framework.Graphics.OpenGL.Textures;
 using osu.XR.Graphics;
 using osu.XR.Maths;
 using osuTK;

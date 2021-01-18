@@ -27,14 +27,16 @@ namespace osu.XR {
         private InputManager inputManager => _inputManager ??= GetContainingInputManager();
         [Cached]
         public readonly Camera Camera = new() { Position = new Vector3( 0, 0, 0 ) };
-        XrScene scene = new XrScene { RelativeSizeAxes = Axes.Both };
         public readonly Panel OsuPanel = new Panel();
         [Cached]
         public readonly Pointer Pointer = new Pointer();
         [Cached(typeof(Framework.Game))]
         OsuGame OsuGame;
 
-        public OsuGameXr ( string[] args ) { OsuGame = new OsuGame( args ) { RelativeSizeAxes = Axes.Both }; }
+        public OsuGameXr ( string[] args ) { 
+            OsuGame = new OsuGame( args ) { RelativeSizeAxes = Axes.Both };
+            Scene = new XrScene { RelativeSizeAxes = Axes.Both };
+        }
 
         protected override void LoadComplete () {
             base.LoadComplete();
@@ -45,14 +47,14 @@ namespace osu.XR {
             OsuPanel.EmulatedInput.Pointer = Pointer;
             OsuPanel.ContentScale.Value = new Vector2( 2, 1 );
 
-            AddInternal( scene );
-            scene.Camera = Camera;
-            scene.Root.Add( new SkyBox() );
-            scene.Root.Add( new FloorGrid() );
-            scene.Root.Add( Camera );
-            scene.Root.Add( OsuPanel );
-            scene.Root.Add( Pointer );
-            PhysicsSystem.Root = scene.Root;
+            AddInternal( Scene );
+            Scene.Camera = Camera;
+            Scene.Root.Add( new SkyBox() );
+            Scene.Root.Add( new FloorGrid() );
+            Scene.Root.Add( Camera );
+            Scene.Root.Add( OsuPanel );
+            Scene.Root.Add( Pointer );
+            PhysicsSystem.Root = Scene.Root;
         }
 
 		private ButtonStates<Key> lastKeys;
@@ -89,9 +91,5 @@ namespace osu.XR {
             Camera.Rotation = Quaternion.FromEulerAngles( 0, ( mouse.X - DrawSize.X / 2 ) / 200, 0 ) * Quaternion.FromEulerAngles( Math.Clamp( ( mouse.Y - DrawSize.Y / 2 ) / 200, -MathF.PI * 2 / 5, MathF.PI * 2 / 5 ), 0, 0 );
             lastKeys = keys.Clone();
         }
-
-		public override XrScene CreateScene () {
-            return scene;
-		}
 	}
 }

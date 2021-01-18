@@ -1,4 +1,5 @@
 ﻿using osu.Framework.Bindables;
+using osu.Framework.Graphics.OpenGL;
 using osu.XR.Maths;
 using osuTK;
 using osuTK.Graphics.OpenGL4;
@@ -94,13 +95,13 @@ namespace osu.XR.Graphics {
 				indices[ i * 3 + 2 ] = Tris[ i ].C;
 			}
 
-			GL.BindBuffer( BufferTarget.ArrayBuffer, attributeBuffer );
+			GLWrapper.BindBuffer( osuTK.Graphics.ES30.BufferTarget.ArrayBuffer, attributeBuffer );
 			GL.BufferData( BufferTarget.ArrayBuffer, vertices.Length * sizeof( float ), vertices, hint );
 			GL.VertexAttribPointer( positionLocation, 3, VertexAttribPointerType.Float, false, 5 * sizeof( float ), 0 );
 			GL.EnableVertexAttribArray( positionLocation );
 			GL.VertexAttribPointer( uvLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof( float ), 3 * sizeof( float ) );
 			GL.EnableVertexAttribArray( uvLocation );
-			GL.BindBuffer( BufferTarget.ElementArrayBuffer, elementBuffer );
+			GLWrapper.BindBuffer( osuTK.Graphics.ES30.BufferTarget.ElementArrayBuffer, elementBuffer );
 			GL.BufferData( BufferTarget.ElementArrayBuffer, indices.Length * sizeof( uint ), indices, hint );
 
 			return indices.Length;

@@ -187,10 +187,13 @@ namespace osu.XR.Maths {
 		}
 
 		public static Matrix4x4 CreatePerspectiveProjection ( float xSlope, float ySlope, float nearPlane, float farPlane ) {
+			var fon = farPlane / nearPlane;
+			var a = (fon+1) / (fon-1);
+			var b = farPlane * ( 1 - a );
 			return new Matrix4x4(
 				1 / xSlope, 0, 0, 0,
 				0, 1 / ySlope, 0, 0,
-				0, 0, 0, 1,
+				0, 0, a, b,
 				0, 0, 1, 0
 			);
 			//return new Vector4(

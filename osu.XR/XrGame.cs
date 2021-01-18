@@ -5,6 +5,6 @@ using System.Text;
 
 namespace osu.XR {
 	public abstract class XrGame : Framework.Game {
-		public abstract XrScene CreateScene ();
+		public XrScene Scene { get; protected set; }
 	}
 }

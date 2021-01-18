@@ -19,11 +19,10 @@ using WindowState = osu.Framework.Platform.WindowState;
 
 namespace osu.XR.GameHosts {
 	public abstract class ExtendedRealityGameHost : GameHost {
-        // TBD
         protected ExtendedRealityGameHost ( string gameName = "", ToolkitOptions toolkitOptions = null ) : base( gameName, toolkitOptions ) { }
 
 		public override void OpenFileExternally ( string filename ) {
-			throw new NotImplementedException( "File dialog panel is not yet implemented" );
+			throw new NotImplementedException( "File dialog panel is not yet implemented" ); // TODO file dialog and browser panels
 		}
 
 		public override void OpenUrlExternally ( string url ) {
