@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace osu.XR {
-	public interface IXrGame {
-		XrScene CreateScene ();
+	public abstract class XrGame : Framework.Game {
+		public abstract XrScene CreateScene ();
 	}
 }

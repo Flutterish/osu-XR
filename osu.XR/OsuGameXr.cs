@@ -13,45 +13,39 @@ using osuTK;
 using osuTK.Input;
 using System;
 using System.Linq;
+using System.Reflection;
 using Pointer = osu.XR.Components.Pointer;
 
 namespace osu.XR {
 	/// <summary>
 	/// The full osu! experience in VR.
 	/// </summary>
-	internal class OsuGameXr : OsuGame, IXrGame {
+	internal class OsuGameXr : XrGame {
         [Cached]
         public readonly PhysicsSystem PhysicsSystem = new();
         internal InputManager _inputManager;
         private InputManager inputManager => _inputManager ??= GetContainingInputManager();
         [Cached]
         public readonly Camera Camera = new() { Position = new Vector3( 0, 0, 0 ) };
-        private BufferedCapture content;
         XrScene scene = new XrScene { RelativeSizeAxes = Axes.Both };
         public Panel OsuPanel;
         [Cached]
         public readonly Pointer Pointer = new Pointer();
-        [Cached(type: typeof(InputManager))]
-        private XrInputManager EmulatedInput = new XrInputManager { RelativeSizeAxes = Axes.Both };
+        [Cached(typeof(Framework.Game))]
+        OsuGame OsuGame;
 
-        private bool addInternalToContent = true;
-        public OsuGameXr ( string[] args ) : base( args ) { }
+        public OsuGameXr ( string[] args ) { OsuGame = new OsuGame( args ) { RelativeSizeAxes = Axes.Both }; }
 
         protected override void LoadComplete () {
             base.LoadComplete();
             Resources.AddStore( new DllResourceStore( typeof( OsuGameXr ).Assembly ) );
-            addInternalToContent = false;
+            OsuGame.SetHost( Host );
 
-            // size has to be less than the actual screen because clipping shenigans
-            // TODO figure out how to render in any resolution without downgrading quality. might also just modify o!f to not clip.
-            float yScale = 2f;
-            content = new BufferedCapture { RelativeSizeAxes = Axes.Both, Size = new Vector2( 1, 1/yScale ), FrameBufferScale = new Vector2( yScale ) };
-            OsuPanel = new Panel() { Source = content };
+            OsuPanel = new Panel();
+            OsuPanel.Source.Add( OsuGame );
 
-            EmulatedInput.Pointer = Pointer;
-            EmulatedInput.InputPanel = OsuPanel;
-            content.Add( EmulatedInput );
-            AddInternal( content );
+            OsuPanel.EmulatedInput.Pointer = Pointer;
+            OsuPanel.ContentScale.Value = new Vector2( 2, 1 );
 
             AddInternal( scene );
             scene.Camera = Camera;
@@ -63,18 +57,12 @@ namespace osu.XR {
             PhysicsSystem.Root = scene.Root;
         }
 
-		protected override void AddInternal ( Drawable drawable ) {
-            if ( addInternalToContent )
-                EmulatedInput.Add( drawable );
-            else
-			    base.AddInternal( drawable );
-		}
-
 		private ButtonStates<Key> lastKeys;
         private bool isKeyboardDisabled;
         protected override void Update () {
             base.Update();
-            ( MenuCursorContainer.Cursor as MenuCursor ).Hide(); // HACK hide cursor because it jitters
+            // HACK hide cursor because it jitters
+            ( ( ( typeof( OsuGame ).GetField( "MenuCursorContainer", BindingFlags.NonPublic | BindingFlags.Instance ).GetValue( OsuGame ) ) as MenuCursorContainer ).Cursor as MenuCursor ).Hide();
 
             if ( lastKeys is null ) {
                 lastKeys = inputManager.CurrentState.Keyboard.Keys.Clone();
@@ -86,7 +74,7 @@ namespace osu.XR {
 
             if ( diff.Pressed.Contains( Key.Q ) ) {
                 isKeyboardDisabled = !isKeyboardDisabled;
-                EmulatedInput.IsKeyboardActiveBindable.Value = isKeyboardDisabled;
+                OsuPanel.EmulatedInput.IsKeyboardActiveBindable.Value = isKeyboardDisabled;
             }
 
             if ( !isKeyboardDisabled ) {
@@ -102,7 +90,7 @@ namespace osu.XR {
             lastKeys = keys.Clone();
         }
 
-		public XrScene CreateScene () {
+		public override XrScene CreateScene () {
             return scene;
 		}
 	}

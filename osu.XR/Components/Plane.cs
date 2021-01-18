@@ -9,7 +9,7 @@ namespace osu.XR.Components {
 		public Plane () {
 			Mesh = new();
 			var z = 0;
-			Mesh.AddAABBQuad(
+			Mesh.AddQuad(
 				new Maths.Quad( 
 					new osuTK.Vector3( -2, 2, z ), new osuTK.Vector3( 2, 2, z ), 
 					new osuTK.Vector3( -2, -2, z ), new osuTK.Vector3( 2, -2, z ) 

@@ -6,6 +6,7 @@ using osu.Framework.Development;
 using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Game.IPC;
+using osu.XR.GameHosts;
 using System;
 using System.IO;
 using System.Linq;
@@ -20,7 +21,7 @@ namespace osu.XR {
             var cwd = Environment.CurrentDirectory;
             bool useOsuTK = args.Contains( "--tk" );
 
-            using ( var host = new ExtendedRealityWindowsGameHost( @"osu!XR", true, null, false ) ) {
+            using ( var host = new ExtendedRealityWindowsGameHost( @"osu", true, null, false ) ) {
                 host.ExceptionThrown += handleException;
 
                 if ( !host.IsPrimaryInstance ) {

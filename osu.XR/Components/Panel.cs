@@ -1,4 +1,6 @@
 ﻿using osu.Framework.Bindables;
+using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
 using osu.XR.Maths;
 using osu.XR.Physics;
 using osu.XR.Rendering;
@@ -11,10 +13,15 @@ namespace osu.XR.Components {
 	/// A curved 3D panel that displays an image from a <see cref="BufferedCapture"/>.
 	/// </summary>
 	public class Panel : MeshedXrObject, IHasCollider {
-        public BufferedCapture Source { get => SourceBindable.Value; set => SourceBindable.Value = value; }
+        public readonly XrInputManager EmulatedInput = new XrInputManager { RelativeSizeAxes = Axes.Both };
+        public Container Source => EmulatedInput;
+        /// <summary>
+        /// Non-stretching scaling applied to the content
+        /// </summary>
+        public Bindable<Vector2> ContentScale = new( Vector2.One );
+        public BufferedCapture SourceCapture { get; } = new BufferedCapture { RelativeSizeAxes = Axes.Both };
         public double Arc { get => ArcBindable.Value; set => ArcBindable.Value = value; }
         public double Radius { get => RadiusBindable.Value; set => RadiusBindable.Value = value; }
-        public readonly Bindable<BufferedCapture> SourceBindable = new();
         public readonly BindableDouble ArcBindable = new( MathF.PI * 0.8f ) { MinValue = MathF.PI / 18, MaxValue = MathF.PI * 2 };
         public readonly BindableDouble RadiusBindable = new( 3 ) { MinValue = 0.1f, MaxValue = 100 };
 
@@ -23,6 +30,26 @@ namespace osu.XR.Components {
             UseGammaCorrection = true;
             ArcBindable.ValueChanged += _ => isCurveInvalidated = true;
             RadiusBindable.ValueChanged += _ => isCurveInvalidated = true;
+
+            // size has to be less than the actual screen because clipping shenigans
+            // TODO figure out how to render in any resolution without downgrading quality. might also just modify o!f to not clip.
+            ContentScale.ValueChanged += v => {
+                if ( v.NewValue.X / v.NewValue.Y > 1 ) {
+                    var xScale = v.NewValue.X / v.NewValue.Y;
+                    SourceCapture.Size = new Vector2( 1, 1 / xScale );
+                    SourceCapture.FrameBufferScale = new Vector2( xScale );
+                }
+                else {
+                    var yScale = v.NewValue.Y / v.NewValue.X;
+                    SourceCapture.Size = new Vector2( 1 / yScale, 1 );
+                    SourceCapture.FrameBufferScale = new Vector2( yScale );
+                }
+                isCurveInvalidated = true;
+            };
+
+            EmulatedInput.InputPanel = this;
+            SourceCapture.Add( EmulatedInput );
+            Add( SourceCapture );
         }
 
 		private void recalculateMesh () {
@@ -42,7 +69,7 @@ namespace osu.XR.Components {
                 var posA = new Vector2( MathF.Sin( end ), MathF.Cos( end ) ) * radius;
                 var posB = new Vector2( MathF.Sin( start ), MathF.Cos( start ) ) * radius;
 
-                Mesh.AddAABBQuad( new Maths.Quad(
+                Mesh.AddQuad( new Maths.Quad(
                     new Vector3( posB.X, height / 2, posB.Y ), new Vector3( posA.X, height / 2, posA.Y ),
                     new Vector3( posB.X, -height / 2, posB.Y ), new Vector3( posA.X, -height / 2, posA.Y )
                 ), new Vector2( (float)i / points, 1 ), new Vector2( (float)(i+1) / points, 1 ), new Vector2( (float)i / points, 0 ), new Vector2( (float)(i+1) / points, 0 ) );
@@ -65,8 +92,9 @@ namespace osu.XR.Components {
 
         private Vector2 lastTextureSize;
 		public override void BeforeDraw ( DrawSettings settings ) {
-            if ( SourceBindable.Value is null ) return;
-            MainTexture = SourceBindable.Value.Capture;
+            if ( SourceCapture is null ) return;
+            if ( SourceCapture.Capture is null ) return;
+            MainTexture = SourceCapture.Capture;
             if ( MainTexture.Size != lastTextureSize ) {
                 isCurveInvalidated = true;
                 lastTextureSize = MainTexture.Size;

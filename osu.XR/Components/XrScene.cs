@@ -17,7 +17,7 @@ namespace osu.XR.Components {
 			Add( new XrSceneDrawer( this ) );
 			Add( Root );
 		}
-		public readonly XrObject Root = new XrObject();
+		public readonly XrObject Root = new XrObject() { RelativeSizeAxes = Axes.Both };
 		public Camera Camera;
 
 		public static implicit operator XrObject ( XrScene scene )

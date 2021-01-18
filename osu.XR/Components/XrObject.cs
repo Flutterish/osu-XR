@@ -11,7 +11,12 @@ namespace osu.XR.Components {
 	/// <summary>
 	/// An <see cref="XrObject"/> is the 3D counterpart of a <see cref="Drawable"/>.
 	/// </summary>
-	public class XrObject : Container { // has to be a "Drawable" because it gives us cool stuff.
+	public class XrObject : Container { // has to be a "Drawable" because it gives us cool stuff
+		public XrObject () {
+			Transform = new Transform( transformKey );
+			RelativeSizeAxes = Axes.Both;
+		}
+		
 		private List<XrObject> children = new(); // TODO bindables/transforms on this
 		private XrObject parent;
 
@@ -113,10 +118,6 @@ namespace osu.XR.Components {
 		}
 		public void Add ( XrObject child ) {
 			child.Parent = this;
-		}
-
-		public XrObject () {
-			Transform = new Transform( transformKey );
 		}
 
 		public virtual void BeforeDraw ( DrawSettings settings ) { }

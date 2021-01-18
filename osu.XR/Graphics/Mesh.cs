@@ -106,7 +106,10 @@ namespace osu.XR.Graphics {
 			return indices.Length;
 		}
 
-		public void AddAABBQuad ( Quad quad ) {
+		public void AddQuad ( Quad quad )
+			=> AddQuad( quad, new Vector2( 0, 1 ), new Vector2( 1, 1 ), new Vector2( 0, 0 ), new Vector2( 1, 0 ) );
+
+		public void AddQuad ( Quad quad, Vector2 TL, Vector2 TR, Vector2 BL, Vector2 BR ) {
 			FillTextureCoordinates();
 			int offset = Vertices.Count;
 
@@ -117,11 +120,6 @@ namespace osu.XR.Graphics {
 
 			Tris.Add( new( (uint)offset, (uint)offset + 3, (uint)offset + 1 ) );
 			Tris.Add( new( (uint)offset, (uint)offset + 3, (uint)offset + 2 ) );
-		}
-
-		public void AddAABBQuad ( Quad quad, Vector2 TL, Vector2 TR, Vector2 BL, Vector2 BR ) {
-			FillTextureCoordinates();
-			AddAABBQuad( quad );
 			TextureCoordinates.Add( TL );
 			TextureCoordinates.Add( TR );
 			TextureCoordinates.Add( BL );

@@ -8,6 +8,12 @@
 	  <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+  </PropertyGroup>
+
   <ItemGroup>
 	  <EmbeddedResource Include="Shaders\sh_3DFrag.fs" />
 	  <EmbeddedResource Include="Shaders\sh_3DVertex.vs" />
