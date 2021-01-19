@@ -1,8 +1,12 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.OpenGL;
 using osu.XR.Components;
+using osu.XR.Graphics;
 using osu.XR.Maths;
 using osuTK;
+using osuTK.Graphics.OpenGL4;
 using System;
 using System.Collections.Generic;
 
@@ -69,9 +73,10 @@ namespace osu.XR.Projection {
             return p.Z > 0;
         }
 
-        public void Render ( XrObject xrObject, float width, float height ) {
+        // TODO render to 2 frame buffers for each eye. then we can link to a VR device.
+        public void Render ( XrObject xrObject, DepthFrameBuffer depthBuffer ) {
             Vector2 scale;
-            if ( width / height > AspectRatio ) {
+            if ( depthBuffer.Size.X / depthBuffer.Size.Y > AspectRatio ) {
                 scale = new( AspectRatio * AspectRatio, 1 ); // TODO why square?
             }
             else {
@@ -84,19 +89,27 @@ namespace osu.XR.Projection {
                 this
             );
 
+            depthBuffer.Bind();
+            GLWrapper.PushDepthInfo( new DepthInfo( false, false, osuTK.Graphics.ES30.DepthFunction.Less ) );
+            GL.Clear( ClearBufferMask.ColorBufferBit );
             foreach ( var i in renderTargets ) {
                 i.BeforeDraw( settings );
                 i.DrawNode?.Draw( settings );
             }
-            // TODO render to 2 frame buffers for each eye. then we can link to a VR device.
-            // TODO render to any frame buffer ( this will require to correct global scale to fit the aspect ratio )
+
+            GLWrapper.PushDepthInfo( new DepthInfo( true, true, osuTK.Graphics.ES30.DepthFunction.Less ) );
+            GL.Clear( ClearBufferMask.DepthBufferBit );
             foreach ( var i in depthTestedRenderTargets ) {
                 i.BeforeDraw( settings );
                 i.DrawNode?.Draw( settings );
-			}
+            }
+
+            GLWrapper.PopDepthInfo();
+            GLWrapper.PopDepthInfo();
+            depthBuffer.Unbind();
         }
 
-		protected override void Dispose ( bool isDisposing ) {
+        protected override void Dispose ( bool isDisposing ) {
 			base.Dispose( isDisposing );
             var root = Root;
             root.ChildAddedToHierarchy -= addRenderTarget;

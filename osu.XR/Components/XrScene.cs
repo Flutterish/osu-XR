@@ -31,7 +31,7 @@ namespace osu.XR.Components {
 			=> scene.Root;
 
 		private IShader TextureShader;
-		private FrameBuffer depthBuffer = new FrameBuffer( new osuTK.Graphics.ES30.RenderbufferInternalFormat[] { osuTK.Graphics.ES30.RenderbufferInternalFormat.DepthComponent32f } );
+		private DepthFrameBuffer depthBuffer = new();
 		[BackgroundDependencyLoader]
 		private void load ( ShaderManager shaders ) {
 			XrShader.Shader3D ??= shaders.Load( XrShader.VERTEX_3D, XrShader.FRAGMENT_3D ) as Shader;
@@ -76,17 +76,7 @@ namespace osu.XR.Components {
 
 				if ( Source.depthBuffer.Size != size ) Source.depthBuffer.Size = size;
 
-				Source.depthBuffer.Bind();
-				GLWrapper.PushDepthInfo( new DepthInfo( true, true, osuTK.Graphics.ES30.DepthFunction.Less ) );
-				GL.Enable( EnableCap.DepthTest );
-				GL.DepthMask( true );
-				GL.DepthFunc( DepthFunction.Less );
-				GL.DepthRange( 0.0, 1.0 );
-				GL.ClearDepth( 1 );
-				GL.Clear( ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit );
-				Source.Camera?.Render( Source.Root, size.X, size.Y );
-				GLWrapper.PopDepthInfo();
-				Source.depthBuffer.Unbind();
+				Source.Camera?.Render( Source.Root, Source.depthBuffer );
 
 				base.Draw( vertexAction );
 				if ( Source.depthBuffer.Texture.Bind() ) {
