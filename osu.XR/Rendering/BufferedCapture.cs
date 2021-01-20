@@ -29,7 +29,8 @@ namespace osu.XR.Rendering {
             Invalidate( Invalidation.DrawNode );
         }
 
-		protected override RectangleF ComputeChildMaskingBounds ( RectangleF maskingBounds ) {
+        // TODO limit FBO size to GLWrapper.MaxRenderBufferSize
+        protected override RectangleF ComputeChildMaskingBounds ( RectangleF maskingBounds ) {
             var screenSpaceDrawRectangle = ScreenSpaceDrawQuad.AABBFloat;
             var frameBufferSize = new Vector2( MathF.Ceiling( screenSpaceDrawRectangle.Width * FrameBufferScale.X ), MathF.Ceiling( screenSpaceDrawRectangle.Height * FrameBufferScale.Y ) );
             return new RectangleF( Vector2.Zero, frameBufferSize );

@@ -225,5 +225,13 @@ namespace osu.XR.Maths {
 				m.M14, m.M24, m.M34, m.M44
 			);
 		}
+
+		public Matrix4x4 Transposed 
+			=> new Matrix4x4(
+				M00, M01, M02, M03,
+				M10, M11, M12, M13,
+				M20, M21, M22, M23,
+				M30, M31, M32, M33
+			);
 	}
 }

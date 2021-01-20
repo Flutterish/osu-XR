@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <ApplicationManifest>D:\Main\Solutions\Git\osu!lazer\osu\app.manifest</ApplicationManifest>
 	  <LangVersion>preview</LangVersion>
 	  <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
@@ -17,6 +17,10 @@
   <ItemGroup>
 	  <EmbeddedResource Include="Shaders\sh_3DFrag.fs" />
 	  <EmbeddedResource Include="Shaders\sh_3DVertex.vs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Unofficial.OpenVR" Version="1.1.0" />
   </ItemGroup>
 
   <ItemGroup>

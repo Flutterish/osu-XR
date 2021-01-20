@@ -1,14 +1,17 @@
 ﻿using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Input;
 using osu.Framework.Input.States;
 using osu.Framework.IO.Stores;
+using osu.Framework.Logging;
 using osu.Game;
 using osu.Game.Graphics.Cursor;
 using osu.XR.Components;
 using osu.XR.Physics;
 using osu.XR.Projection;
 using osu.XR.Rendering;
+using osu.XR.VR;
 using osuTK;
 using osuTK.Input;
 using System;
@@ -56,6 +59,11 @@ namespace osu.XR {
             Scene.Root.Add( Pointer );
             PhysicsSystem.Root = Scene.Root;
         }
+
+        //[BackgroundDependencyLoader]
+        //private void load ( Bindable<VrState> state ) {
+        //    
+		//}
 
 		private ButtonStates<Key> lastKeys;
         private bool isKeyboardDisabled;

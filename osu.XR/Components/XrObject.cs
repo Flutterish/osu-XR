@@ -171,16 +171,10 @@ namespace osu.XR.Components {
 
 			public virtual void Dispose () { }
 
-			public class DrawSettings { // TODO most of these should be in a global uniform block
-				public readonly Matrix4 WorldToCamera;
-				public readonly Matrix4 CameraToClip;
-				public readonly Camera Camera;
-
-				public DrawSettings ( Matrix4 worldToCamera, Matrix4 cameraToClip, Camera camera ) {
-					WorldToCamera = worldToCamera;
-					CameraToClip = cameraToClip;
-					Camera = camera;
-				}
+			public record DrawSettings { // TODO most of these should be in a global uniform block
+				public Matrix4 WorldToCamera { get; init; }
+				public Matrix4 CameraToClip { get; init; }
+				public Camera Camera { get; init; }
 			}
 		}
 
@@ -189,4 +183,8 @@ namespace osu.XR.Components {
 			public XrObjectDrawNode ( T source ) : base( source ) { }
 		}
 	}
+}
+
+namespace System.Runtime.CompilerServices {
+	public class IsExternalInit { }
 }

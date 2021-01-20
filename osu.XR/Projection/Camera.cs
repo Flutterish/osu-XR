@@ -2,6 +2,7 @@
 using osu.Framework.Bindables;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.OpenGL;
+using osu.Framework.Graphics.Primitives;
 using osu.XR.Components;
 using osu.XR.Graphics;
 using osu.XR.Maths;
@@ -73,7 +74,6 @@ namespace osu.XR.Projection {
             return p.Z > 0;
         }
 
-        // TODO render to 2 frame buffers for each eye. then we can link to a VR device.
         public void Render ( XrObject xrObject, DepthFrameBuffer depthBuffer ) {
             Vector2 scale;
             if ( depthBuffer.Size.X / depthBuffer.Size.Y > AspectRatio ) {
@@ -83,12 +83,21 @@ namespace osu.XR.Projection {
                 scale = new( 1, 1 / AspectRatio / AspectRatio );
             }
 
-            var settings = new XrObjectDrawNode.DrawSettings(
-                Matrix4x4.CreateScale( scale.X, scale.Y ) * WorldCameraMatrix,
-                CameraClipMatrix,
-                this
-            );
+            var settings = new XrObjectDrawNode.DrawSettings {
+                Camera = this,
+                CameraToClip = CameraClipMatrix,
+                WorldToCamera = Matrix4x4.CreateScale( scale.X, scale.Y ) * WorldCameraMatrix
+            };
 
+            Render( xrObject, depthBuffer, settings );
+        }
+
+        public void Render ( XrObject xrObject, DepthFrameBuffer depthBuffer, XrObjectDrawNode.DrawSettings settings ) {
+            settings = settings with { Camera = this };
+
+            GLWrapper.PushViewport( new RectangleI( 0, 0, (int)depthBuffer.Size.X, (int)depthBuffer.Size.Y ) );
+            GLWrapper.PushScissor( new RectangleI( 0, 0, (int)depthBuffer.Size.X, (int)depthBuffer.Size.Y ) );
+            GLWrapper.PushScissorOffset( Vector2I.Zero );
             depthBuffer.Bind();
             GLWrapper.PushDepthInfo( new DepthInfo( false, false, osuTK.Graphics.ES30.DepthFunction.Less ) );
             GL.Clear( ClearBufferMask.ColorBufferBit );
@@ -107,6 +116,9 @@ namespace osu.XR.Projection {
             GLWrapper.PopDepthInfo();
             GLWrapper.PopDepthInfo();
             depthBuffer.Unbind();
+            GLWrapper.PopScissorOffset();
+            GLWrapper.PopScissor();
+            GLWrapper.PopViewport();
         }
 
         protected override void Dispose ( bool isDisposing ) {
