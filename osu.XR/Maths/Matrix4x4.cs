@@ -1,6 +1,7 @@
 ﻿using osuTK;
 using System;
 using System.Runtime.InteropServices;
+using Valve.VR;
 
 namespace osu.XR.Maths {
 	/// <summary>
@@ -12,6 +13,43 @@ namespace osu.XR.Maths {
 		public Vector4 Row1 => new Vector4( M01, M11, M21, M31 );
 		public Vector4 Row2 => new Vector4( M02, M12, M22, M32 );
 		public Vector4 Row3 => new Vector4( M03, M13, M23, M33 );
+
+		public Vector4 Column0 {
+			get => new Vector4( M00, M01, M02, M03 );
+			set {
+				M00 = value.X;
+				M01 = value.Y;
+				M02 = value.Z;
+				M03 = value.W;
+			}
+		}
+		public Vector4 Column1 {
+			get => new Vector4( M10, M11, M12, M13 );
+			set {
+				M10 = value.X;
+				M11 = value.Y;
+				M12 = value.Z;
+				M13 = value.W;
+			}
+		}
+		public Vector4 Column2 {
+			get => new Vector4( M20, M21, M22, M23 );
+			set {
+				M20 = value.X;
+				M21 = value.Y;
+				M22 = value.Z;
+				M23 = value.W;
+			}
+		}
+		public Vector4 Column3 {
+			get => new Vector4( M30, M31, M32, M33 );
+			set {
+				M30 = value.X;
+				M31 = value.Y;
+				M32 = value.Z;
+				M33 = value.W;
+			}
+		}
 
 		public float M00;
 		public float M10;
@@ -196,12 +234,6 @@ namespace osu.XR.Maths {
 				0, 0, a, b,
 				0, 0, 1, 0
 			);
-			//return new Vector4(
-			//	x / xSlope,     //M00 * X + M10 * Y + M20 * Z + M30 * W,
-			//	y / ySlope,     //M01 * X + M11 * Y + M21 * Z + M31 * W,
-			//	z / farPlane,   //M02 * X + M12 * Y + M22 * Z + M32 * W,
-			//	z               //M03 * X + M13 * Y + M23 * Z + M33 * W
-			//);
 		}
 
 		public override string ToString () {
@@ -233,5 +265,23 @@ namespace osu.XR.Maths {
 				M20, M21, M22, M23,
 				M30, M31, M32, M33
 			);
+
+		public static implicit operator Matrix4x4 ( HmdMatrix44_t matrix ) {
+			return new Matrix4x4(
+				matrix.m0, matrix.m1, matrix.m2, matrix.m3,
+				matrix.m4, matrix.m5, matrix.m6, matrix.m7,
+				matrix.m8, matrix.m9, matrix.m10, matrix.m11,
+				matrix.m12, matrix.m13, matrix.m14, matrix.m15
+			);
+		}
+
+		public static implicit operator Matrix4x4 ( HmdMatrix34_t matrix ) {
+			return new Matrix4x4(
+				matrix.m0, matrix.m1, matrix.m2, matrix.m3,
+				matrix.m4, matrix.m5, matrix.m6, matrix.m7,
+				matrix.m8, matrix.m9, -matrix.m10, matrix.m11,
+				0, 0, 0, 1
+			);
+		}
 	}
 }

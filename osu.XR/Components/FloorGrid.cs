@@ -27,8 +27,8 @@ namespace osu.XR.Components {
                 float zFrom = x_length * -0.5f;
                 float zTo = x_length * 0.5f;
                 Mesh.AddQuad( new Quad(
-                    new Vector3( xFrom, -2, zFrom ), new Vector3( xFrom, -2, zTo ),
-                    new Vector3( xTo, -2, zFrom ), new Vector3( xTo, -2, zTo )
+                    new Vector3( xFrom, 0, zFrom ), new Vector3( xFrom, 0, zTo ),
+                    new Vector3( xTo, 0, zFrom ), new Vector3( xTo, 0, zTo )
                 ), new Vector2( 1, 0 ), new Vector2( 1, 1 ), new Vector2( 0, 0 ), new Vector2( 0, 1 ) );
             }
 
@@ -38,8 +38,8 @@ namespace osu.XR.Components {
                 float zFrom = z * z_spread - z_width / 2;
                 float zTo = z * z_spread + z_width / 2;
                 Mesh.AddQuad( new Quad(
-                    new Vector3( xFrom, -2, zFrom ), new Vector3( xFrom, -2, zTo ),
-                    new Vector3( xTo, -2, zFrom ), new Vector3( xTo, -2, zTo )
+                    new Vector3( xFrom, 0, zFrom ), new Vector3( xFrom, 0, zTo ),
+                    new Vector3( xTo, 0, zFrom ), new Vector3( xTo, 0, zTo )
                 ), new Vector2( 0, 1 ), new Vector2( 1, 1 ), new Vector2( 0, 0 ), new Vector2( 1, 0 ) );
             }
         }

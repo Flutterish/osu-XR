@@ -1,6 +1,7 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.XR.Graphics;
+using osu.XR.Maths;
 using osu.XR.Physics;
 using osuTK;
 using static osu.XR.Physics.Raycast;
@@ -10,6 +11,7 @@ namespace osu.XR.Components {
 	/// A 3D cursor.
 	/// </summary>
 	public class Pointer : MeshedXrObject {
+		public Transform Source;
 		[Resolved]
 		private PhysicsSystem PhysicsSystem { get; set; }
 
@@ -26,15 +28,17 @@ namespace osu.XR.Components {
 
 		public override void BeforeDraw ( XrObjectDrawNode.DrawSettings settings ) {
 			base.BeforeDraw( settings );
-			if ( PhysicsSystem.TryHit( settings.Camera.Position, settings.Camera.Forward, out var hit ) && hit.Distance < HitDistance ) {
+			if ( Source is null ) return;
+
+			if ( PhysicsSystem.TryHit( Source.Position, Source.Forward, out var hit ) && hit.Distance < HitDistance ) {
 				Position = hit.Point;
 				Rotation = Matrix4.LookAt( Vector3.Zero, hit.Normal, Vector3.UnitY ).ExtractRotation().Inverted();
 
 				NewHit?.Invoke( hit );
 			}
 			else {
-				Position = settings.Camera.Position + settings.Camera.Forward * (float)HitDistance;
-				Rotation = settings.Camera.Rotation;
+				Position = Source.Position + Source.Forward * (float)HitDistance;
+				Rotation = Source.Rotation;
 			}
 		}
 

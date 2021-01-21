@@ -8,6 +8,7 @@ using osu.Framework.Logging;
 using osu.Game;
 using osu.Game.Graphics.Cursor;
 using osu.XR.Components;
+using osu.XR.Maths;
 using osu.XR.Physics;
 using osu.XR.Projection;
 using osu.XR.Rendering;
@@ -15,6 +16,7 @@ using osu.XR.VR;
 using osuTK;
 using osuTK.Input;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Pointer = osu.XR.Components.Pointer;
@@ -30,7 +32,7 @@ namespace osu.XR {
         private InputManager inputManager => _inputManager ??= GetContainingInputManager();
         [Cached]
         public readonly Camera Camera = new() { Position = new Vector3( 0, 0, 0 ) };
-        public readonly Panel OsuPanel = new Panel();
+        public readonly Panel OsuPanel = new Panel { Y = 1.8f };
         [Cached]
         public readonly Pointer Pointer = new Pointer();
         [Cached(typeof(Framework.Game))]
@@ -60,44 +62,18 @@ namespace osu.XR {
             PhysicsSystem.Root = Scene.Root;
         }
 
-        //[BackgroundDependencyLoader]
-        //private void load ( Bindable<VrState> state ) {
-        //    
-		//}
-
-		private ButtonStates<Key> lastKeys;
-        private bool isKeyboardDisabled;
+        Dictionary<Controller, XrController> controllers = new();
         protected override void Update () {
             base.Update();
             // HACK hide cursor because it jitters
             ( ( ( typeof( OsuGame ).GetField( "MenuCursorContainer", BindingFlags.NonPublic | BindingFlags.Instance ).GetValue( OsuGame ) ) as MenuCursorContainer ).Cursor as MenuCursor ).Hide();
 
-            if ( lastKeys is null ) {
-                lastKeys = inputManager.CurrentState.Keyboard.Keys.Clone();
-                return;
-            }
-            var keys = inputManager.CurrentState.Keyboard.Keys;
-            var diff = keys.EnumerateDifference( lastKeys );
-            var mouse = inputManager.CurrentState.Mouse.Position;
+            foreach ( var i in VrManager.Current.Controllers.Values.Except( controllers.Keys ).ToArray() ) {
+                controllers.Add( i, new XrController( i ) );
+                Scene.Root.Add( controllers[ i ] );
 
-            if ( diff.Pressed.Contains( Key.Q ) ) {
-                isKeyboardDisabled = !isKeyboardDisabled;
-                OsuPanel.EmulatedInput.IsKeyboardActiveBindable.Value = isKeyboardDisabled;
+                Pointer.Source ??= controllers[ i ].Transform;
             }
-
-            if ( !isKeyboardDisabled ) {
-                Vector2 direction = Vector2.Zero;
-                if ( keys.IsPressed( Key.W ) ) direction += ( Camera.Rotation * new Vector4( 0, 0, 1, 1 ) ).Xz.Normalized();
-                if ( keys.IsPressed( Key.S ) ) direction += ( Camera.Rotation * new Vector4( 0, 0, -1, 1 ) ).Xz.Normalized();
-                if ( keys.IsPressed( Key.A ) ) direction += ( Camera.Rotation * new Vector4( -1, 0, 0, 1 ) ).Xz.Normalized();
-                if ( keys.IsPressed( Key.D ) ) direction += ( Camera.Rotation * new Vector4( 1, 0, 0, 1 ) ).Xz.Normalized();
-                if ( direction != Vector2.Zero ) {
-                    direction.Normalize();
-                    Camera.Position += new Vector3( direction.X, 0, direction.Y ) * (float)( Time.Elapsed / 1000 );
-                }
-            }
-            Camera.Rotation = Quaternion.FromEulerAngles( 0, ( mouse.X - DrawSize.X / 2 ) / 200, 0 ) * Quaternion.FromEulerAngles( Math.Clamp( ( mouse.Y - DrawSize.Y / 2 ) / 200, -MathF.PI * 2 / 5, MathF.PI * 2 / 5 ), 0, 0 );
-            lastKeys = keys.Clone();
         }
 	}
 }

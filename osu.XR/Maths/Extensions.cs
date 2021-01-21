@@ -1,5 +1,6 @@
 ﻿using osuTK;
 using System;
+using Valve.VR;
 
 namespace osu.XR.Maths {
 	public static class Extensions {
@@ -26,5 +27,27 @@ namespace osu.XR.Maths {
 
 		public static Vector2 ScaledBy ( this Vector2 a, Vector2 scale )
 			=> new Vector2( a.X * scale.X, a.Y * scale.Y );
+
+		public static Vector3 ExtractPosition ( this HmdMatrix34_t mat ) {
+			return new Vector3( mat.m3, mat.m7, -mat.m11 );
+		}
+
+		public static Quaternion ExtractRotation ( this HmdMatrix34_t mat ) {
+			static float CopySign ( float a, float b ) {
+				if ( MathF.Sign( a ) != MathF.Sign( b ) )
+					return -a;
+				else return a;
+			}
+
+			Quaternion q = default;
+			q.W = MathF.Sqrt( MathF.Max( 0, 1 + mat.m0 + mat.m5 + mat.m10 ) ) / 2;
+			q.X = MathF.Sqrt( MathF.Max( 0, 1 + mat.m0 - mat.m5 - mat.m10 ) ) / 2;
+			q.Y = MathF.Sqrt( MathF.Max( 0, 1 - mat.m0 + mat.m5 - mat.m10 ) ) / 2;
+			q.Z = MathF.Sqrt( MathF.Max( 0, 1 - mat.m0 - mat.m5 + mat.m10 ) ) / 2;
+			q.X = CopySign( q.X, mat.m9 - mat.m6 );
+			q.Y = CopySign( q.Y, mat.m2 - mat.m8 );
+			q.Z = CopySign( q.Z, mat.m1 - mat.m4 );
+			return q.Normalized().Inverted();
+		}
 	}
 }
