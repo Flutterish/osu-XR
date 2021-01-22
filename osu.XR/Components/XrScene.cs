@@ -20,8 +20,16 @@ namespace osu.XR.Components {
 	public class XrScene : Container {
 		public XrScene () {
 			Add( new XrSceneDrawer( this ) );
-			Add( Root );
+			base.Add( Root );
 		}
+
+		public override void Add ( Drawable drawable ) {
+			if ( drawable is XrObject xro)
+				Root.Add( xro );
+			else
+				base.Add( drawable );
+		}
+
 		public bool RenderToScreen { get => RenderToScreenBindable.Value; set => RenderToScreenBindable.Value = value; }
 		public readonly BindableBool RenderToScreenBindable = new( true );
 		public readonly XrObject Root = new XrObject();

@@ -4,20 +4,27 @@ using osu.Framework.Configuration;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Logging;
+using osu.Framework.Testing.Drawables;
 using osu.Framework.Timing;
+using osu.Game.Screens.OnlinePlay.Components;
 using osu.XR.Graphics;
 using osu.XR.Maths;
+using osu.XR.VR.ActionManifest;
 using osuTK;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Valve.VR;
 
 namespace osu.XR.VR {
 	public static class VrManager {
+		static event System.Action onUpdateThread;
+
 		// NOTE platform specific binaries for openVR are there: https://github.com/ValveSoftware/openvr/tree/master/bin
 		public static VrState VrState { get => VrStateBindable.Value; set => VrStateBindable.Value = value; }
 		public static readonly Bindable<VrState> VrStateBindable = new( VrState.NotInitialized );
@@ -27,7 +34,7 @@ namespace osu.XR.VR {
 		private static double lastInitializationAttempt;
 		private static double initializationAttemptInterval = 5000;
 		public static readonly VrInput Current = new();
-		internal static void Update ( IClock clock ) {
+		internal static void UpdateDraw ( IClock clock ) {
 			if ( VrState.HasFlag( VrState.NotInitialized ) && clock.CurrentTime >= lastInitializationAttempt + initializationAttemptInterval ) {
 				lastInitializationAttempt = clock.CurrentTime;
 				EVRInitError error = EVRInitError.None;
@@ -53,6 +60,8 @@ namespace osu.XR.VR {
 			uint w = 0, h = 0;
 			CVRSystem.GetRecommendedRenderTargetSize( ref w, ref h );
 			RenderSize = new Vector2( w, h );
+
+			if ( ActionManifest is not null ) SetManifest();
 		}
 
 		const string DEFAULT_CONTROLLER_MODEL = "{indexcontroller}valve_controller_knu_1_0_left";
@@ -65,30 +74,33 @@ namespace osu.XR.VR {
 				Logger.Error( null, $"Pose error: {error}" );
 				return;
 			}
-			TrackedDevicePose_t? headset = default;
+
 			for ( int i = 0; i < trackedRenderDevices.Length + trackedGameDevices.Length; i++ ) {
 				int index = i < trackedRenderDevices.Length ? i : ( i - trackedRenderDevices.Length );
 				var device = i < trackedRenderDevices.Length ? trackedRenderDevices[ index ] : trackedGameDevices[ index ];
 				if ( device.bPoseIsValid && device.bDeviceIsConnected ) {
 					switch ( OpenVR.System.GetTrackedDeviceClass( (uint)i ) ) {
 						case ETrackedDeviceClass.HMD:
-							headset = device;
+							Current.Headset.Position = device.mDeviceToAbsoluteTracking.ExtractPosition();
+							Current.Headset.Rotation = device.mDeviceToAbsoluteTracking.ExtractRotation();
 							break;
 
 						case ETrackedDeviceClass.Controller:
 							if ( !Current.Controllers.ContainsKey( i ) ) {
-								StringBuilder sb = new(256);
+								var sb = new StringBuilder( 256 );
 								var propError = ETrackedPropertyError.TrackedProp_Success;
 								CVRSystem.GetStringTrackedDeviceProperty( (uint)index, ETrackedDeviceProperty.Prop_RenderModelName_String, sb, 256, ref propError );
 								Mesh mesh = new();
+								Controller controller;
 								if ( propError != ETrackedPropertyError.TrackedProp_Success ) {
-									Current.Controllers.Add( i, new() { ID = i, ModelName = DEFAULT_CONTROLLER_MODEL, Mesh = mesh } );
+									controller = new() { ID = i, ModelName = DEFAULT_CONTROLLER_MODEL, Mesh = mesh };
 									Logger.Error( null, $"Couldn't find a model for controller with id {index}. Using Valve Index Controller (Left)" );
 								}
 								else {
-									Current.Controllers.Add( i, new() { ID = i, ModelName = sb.ToString(), Mesh = mesh } );
+									controller = new() { ID = i, ModelName = sb.ToString(), Mesh = mesh };
 								}
-								_ = LoadModelAsync( Current.Controllers[ i ].ModelName, mesh );
+								Current.Controllers.Add( i, controller );
+								_ = LoadModelAsync( controller.ModelName, mesh );
 							}
 							Current.Controllers[ i ].Position = device.mDeviceToAbsoluteTracking.ExtractPosition();
 							Current.Controllers[ i ].Rotation = device.mDeviceToAbsoluteTracking.ExtractRotation();
@@ -96,14 +108,52 @@ namespace osu.XR.VR {
 					}
 				}
 			}
+		}
 
-			if ( headset is not null ) {
-				Current.Headset.Position = headset.Value.mDeviceToAbsoluteTracking.ExtractPosition();
-				Current.Headset.Rotation = headset.Value.mDeviceToAbsoluteTracking.ExtractRotation();
+		public static void Update () {
+			onUpdateThread?.Invoke();
+			onUpdateThread = null;
+
+			if ( !VrState.HasFlag( VrState.OK ) ) return;
+			if ( ActionManifest is null || !AreComponentsLoaded ) return;
+
+			var vrEvents = new List<VREvent_t>();
+			var vrEvent = new VREvent_t();
+			try {
+				while ( OpenVR.System.PollNextEvent( ref vrEvent, (uint)Marshal.SizeOf<VREvent_t>() ) ) {
+					vrEvents.Add( vrEvent );
+				}
+			}
+			catch ( Exception e ) {
+				Logger.Error( e, "Could not get events" );
+			}
+
+			// Printing events
+			foreach ( var e in vrEvents ) {
+				var pid = e.data.process.pid;
+				if ( (EVREventType)vrEvent.eventType != EVREventType.VREvent_None ) {
+					var name = Enum.GetName( typeof( EVREventType ), e.eventType );
+					var message = $"[{pid}] {name}";
+					if ( pid == 0 ) Logger.Log( message );
+					else if ( name == null ) Logger.Log( message );
+					else if ( name.ToLower().Contains( "fail" ) ) 
+						Logger.Error( null, message );
+					else if ( name.ToLower().Contains( "error" ) ) 
+						Logger.Error( null, message );
+					else if ( name.ToLower().Contains( "success" ) ) 
+						Logger.Log( message );
+					else Logger.Log( message );
+				}
+			}
+
+			OpenVR.Input.UpdateActionState( actionSets, (uint)System.Runtime.InteropServices.Marshal.SizeOf<VRActiveActionSet_t>() );
+			foreach ( var i in components ) {
+				i.Value.Update();
 			}
 		}
 
 		static async Task LoadModelAsync ( string modelName, Mesh target ) {
+			target.IsReady = false;
 			IntPtr ptr = IntPtr.Zero;
 			while ( true ) {
 				var error = OpenVR.RenderModels.LoadRenderModel_Async( modelName, ref ptr );
@@ -143,10 +193,12 @@ namespace osu.XR.VR {
 					}
 					// TODO load textures
 					// https://github.com/ValveSoftware/steamvr_unity_plugin/blob/9cc1a76226648d8deb7f3900ab277dfaaa80d60c/Assets/SteamVR/Scripts/SteamVR_RenderModel.cs#L377
+					target.IsReady = true;
 					return;
 				}
 				else {
 					Logger.Error( null, $"Model `{modelName}` could not be loaded." );
+					target.IsReady = true;
 					return;
 				}
 			}
@@ -157,6 +209,61 @@ namespace osu.XR.VR {
 				OpenVR.Shutdown();
 				CVRSystem = null;
 			}
+		}
+
+		public static Manifest ActionManifest { get; private set; }
+		public static void SetManifest ( Manifest manifest ) {
+			ActionManifest = manifest;
+			if ( VrState.HasFlag( VrState.OK ) ) SetManifest();
+		}
+
+		public const string ACTION_MANIFEST_NAME = "openVR_action_manifest.json";
+		public const string VR_MANIFEST_NAME = "openVR_vrmanifest.vrmanifest";
+		public static bool AreComponentsLoaded { get; private set; }
+		static Dictionary<object, ControllerComponent> components = new();
+		static VRActiveActionSet_t[] actionSets;
+		static void SetManifest () {
+			var raw = RawManifest.Parse( ActionManifest );
+			var actionManifestPath = Path.Combine( Directory.GetCurrentDirectory(), ACTION_MANIFEST_NAME );
+			File.WriteAllText( actionManifestPath, System.Text.Json.JsonSerializer.Serialize( raw.actionManifest, new JsonSerializerOptions { WriteIndented = true, IncludeFields = true } ) );
+			var vrManifestPath = Path.Combine( Directory.GetCurrentDirectory(), VR_MANIFEST_NAME );
+			File.WriteAllText( vrManifestPath, System.Text.Json.JsonSerializer.Serialize( raw.vrManifest, new JsonSerializerOptions { WriteIndented = true, IncludeFields = true } ) );
+			var error = OpenVR.Applications.AddApplicationManifest( vrManifestPath, true );
+			if ( error != EVRApplicationError.None ) {
+				Logger.Error( null, $"Couldn't set application vr manifest: {error}" ); // TODO our own VR error panel
+			}
+			var error2 = OpenVR.Input.SetActionManifestPath( actionManifestPath );
+			if ( error2 != EVRInputError.None ) {
+				Logger.Error( null, $"Couldn't set application action manifest: {error2}" );
+			}
+
+			foreach ( var group in ActionManifest.EnumerateGroups() ) {
+				foreach ( var action in group.EnumerateActions() ) {
+					ulong handle = 0;
+					OpenVR.Input.GetActionHandle( action.FullPath, ref handle );
+					var comp = action.CreateComponent( handle );
+					components.Add( comp.Name, comp );
+				}
+			}
+
+			actionSets = ActionManifest.EnumerateGroups().Select( x => {
+				ulong handle = 0;
+				var error = OpenVR.Input.GetActionSetHandle( x.FullPath, ref handle );
+				if ( error != EVRInputError.None ) {
+					Logger.Error( null, error.ToString() );
+				}
+
+				return new VRActiveActionSet_t { ulActionSet = handle };
+			} ).ToArray();
+
+			AreComponentsLoaded = true;
+		}
+
+		public static T GetControllerComponent<T> ( object name ) where T : ControllerComponent {
+			if ( components.TryGetValue( name, out var comp ) ) {
+				return comp as T;
+			}
+			else return null;
 		}
 	}
 

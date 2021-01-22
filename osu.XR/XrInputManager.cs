@@ -9,6 +9,7 @@ using osu.XR.Components;
 using osu.XR.Maths;
 using osuTK;
 using osuTK.Input;
+using System.Security.Cryptography.Pkcs;
 using static osu.XR.Physics.Raycast;
 using TKKey = osuTK.Input.Key;
 
@@ -53,6 +54,19 @@ namespace osu.XR {
 			mouseHandler.handleMouseMove( InputPanel.TexturePositionAt( hit.TrisIndex, hit.Point ).ScaledBy( new Vector2( DrawWidth / InputPanel.MainTexture.Width, DrawHeight / InputPanel.MainTexture.Height ) ) );
 		}
 
+		private bool isPressed = false;
+		public bool IsPressed {
+			get => isPressed;
+			set {
+				if ( isPressed == value ) return;
+				isPressed = value;
+				if ( isPressed )
+					mouseHandler.handleMouseDown( MouseButton.Left );
+				else
+					mouseHandler.handleMouseUp( MouseButton.Left );
+			}
+		}
+
 		/// <summary>
 		/// A copy of <see cref="MouseHandler"/> overriden to use <see cref="Pointer"/> input.
 		/// </summary>
@@ -67,13 +81,9 @@ namespace osu.XR {
 				Enabled.BindValueChanged( e =>
 				{
 					if ( e.NewValue ) {
-						window.MouseDown += handleMouseDown;
-						window.MouseUp += handleMouseUp;
 						window.MouseWheel += handleMouseWheel;
 					}
 					else {
-						window.MouseDown -= handleMouseDown;
-						window.MouseUp -= handleMouseUp;
 						window.MouseWheel -= handleMouseWheel;
 					}
 				}, true );
@@ -86,8 +96,8 @@ namespace osu.XR {
 			}
 
 			internal void handleMouseMove ( Vector2 position ) => enqueueInput( new MousePositionAbsoluteInput { Position = position } );
-			private void handleMouseDown ( MouseButton button ) => enqueueInput( new MouseButtonInput( button, true ) );
-			private void handleMouseUp ( MouseButton button ) => enqueueInput( new MouseButtonInput( button, false ) );
+			internal void handleMouseDown ( MouseButton button ) => enqueueInput( new MouseButtonInput( button, true ) );
+			internal void handleMouseUp ( MouseButton button ) => enqueueInput( new MouseButtonInput( button, false ) );
 			private void handleMouseWheel ( Vector2 delta, bool precise ) => enqueueInput( new MouseScrollRelativeInput { Delta = delta, IsPrecise = precise } );
 		}
 

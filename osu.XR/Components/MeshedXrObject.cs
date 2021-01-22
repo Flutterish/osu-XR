@@ -58,7 +58,7 @@ namespace osu.XR.Components {
 				notInitialized = false;
 			}
 
-			if ( lastUpdateVersion != mesh.UpdateVersion ) {
+			if ( lastUpdateVersion != mesh.UpdateVersion && mesh.IsReady ) {
 				UpdateMesh();
 				lastUpdateVersion = mesh.UpdateVersion;
 			}

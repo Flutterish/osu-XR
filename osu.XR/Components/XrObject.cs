@@ -182,6 +182,9 @@ namespace osu.XR.Components {
 			new protected T Source => base.Source as T;
 			public XrObjectDrawNode ( T source ) : base( source ) { }
 		}
+
+		public static implicit operator Transform ( XrObject xro )
+			=> xro.Transform;
 	}
 }
 

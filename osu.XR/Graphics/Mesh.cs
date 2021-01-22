@@ -1,4 +1,5 @@
-﻿using osu.Framework.Bindables;
+﻿using NUnit.Framework.Constraints;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics.OpenGL;
 using osu.XR.Maths;
 using osuTK;
@@ -16,6 +17,10 @@ namespace osu.XR.Graphics {
 
 		public readonly ReadonlyIndexer<int, Face> Faces;
 		public ulong UpdateVersion { get; private set; } = 1;
+		/// <summary>
+		/// Whether this mesh is fully loaded and can be edited/used
+		/// </summary>
+		public bool IsReady = true;
 		public Mesh () {
 			Faces = new( index => {
 				var indices = Tris[ index ];
@@ -79,6 +84,10 @@ namespace osu.XR.Graphics {
 		}
 
 		public int UploadToGPU ( int positionLocation, int uvLocation, int attributeBuffer, int elementBuffer, BufferUsageHint hint = BufferUsageHint.StaticDraw ) {
+			if ( !IsReady ) {
+				throw new InvalidOperationException( "This mesh is not avaialbe" );
+			}
+
 			FillTextureCoordinates();
 			var vertices = new float[ Vertices.Count * 5 ];
 			for ( int i = 0; i < Vertices.Count; i++ ) {

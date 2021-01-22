@@ -30,15 +30,15 @@ namespace osu.XR.Projection {
 		}
         private void addRenderTarget ( XrObject parent, XrObject child ) {
             if ( shoudBeDepthTested( child ) )
-                depthTestedRenderTargets.Add( child );
+                lock ( depthTestedRenderTargets ) { depthTestedRenderTargets.Add( child ); }
             else
-                renderTargets.Add( child );
+                lock ( renderTargets ) { renderTargets.Add( child ); }
         }
         private void removeRenderTarget ( XrObject parent, XrObject child ) {
             if ( shoudBeDepthTested( child ) )
-                depthTestedRenderTargets.Remove( child );
+                lock ( depthTestedRenderTargets ) { depthTestedRenderTargets.Remove( child ); }
             else
-                renderTargets.Remove( child );
+                lock ( renderTargets ) { renderTargets.Remove( child ); }
         }
 
         [BackgroundDependencyLoader]
@@ -101,16 +101,20 @@ namespace osu.XR.Projection {
             depthBuffer.Bind();
             GLWrapper.PushDepthInfo( new DepthInfo( false, false, osuTK.Graphics.ES30.DepthFunction.Less ) );
             GL.Clear( ClearBufferMask.ColorBufferBit );
-            foreach ( var i in renderTargets ) {
-                i.BeforeDraw( settings );
-                i.DrawNode?.Draw( settings );
+            lock ( renderTargets ) {
+                foreach ( var i in renderTargets ) {
+                    i.BeforeDraw( settings );
+                    i.DrawNode?.Draw( settings );
+                }
             }
 
             GLWrapper.PushDepthInfo( new DepthInfo( true, true, osuTK.Graphics.ES30.DepthFunction.Less ) );
             GL.Clear( ClearBufferMask.DepthBufferBit );
-            foreach ( var i in depthTestedRenderTargets ) {
-                i.BeforeDraw( settings );
-                i.DrawNode?.Draw( settings );
+            lock ( depthTestedRenderTargets ) {
+                foreach ( var i in depthTestedRenderTargets ) {
+                    i.BeforeDraw( settings );
+                    i.DrawNode?.Draw( settings );
+                }
             }
 
             GLWrapper.PopDepthInfo();

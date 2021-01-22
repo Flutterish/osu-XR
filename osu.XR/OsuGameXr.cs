@@ -13,6 +13,7 @@ using osu.XR.Physics;
 using osu.XR.Projection;
 using osu.XR.Rendering;
 using osu.XR.VR;
+using osu.XR.VR.ActionManifest;
 using osuTK;
 using osuTK.Input;
 using System;
@@ -41,6 +42,39 @@ namespace osu.XR {
         public OsuGameXr ( string[] args ) { 
             OsuGame = new OsuGame( args ) { RelativeSizeAxes = Axes.Both };
             Scene = new XrScene { RelativeSizeAxes = Axes.Both };
+
+            VrManager.SetManifest( new Manifest<XrActionGroup, XrAction> {
+                LaunchType = LaunchType.Binary,
+                IsDashBoardOverlay = false,
+                Name = "perigee.osuXR",
+                Localizations = new() {
+                    new( "en_us" ) {
+                        Name = "osu!XR",
+                        Description = "The full osu! experience in VR"
+                    }
+                },
+                Groups = new() {
+                    new() {
+                        Type = ActionGroupType.LeftRight,
+                        Name = XrActionGroup.Main,
+                        Actions = new() {
+							new() {
+                                Name = XrAction.Press,
+                                Type = ActionType.Boolean,
+                                Requirement = Requirement.Mandatory,
+                                Localizations = new() { ["en_us"] = "Press" }
+							}
+						},
+                        Localizations = new() { ["en_us"] = "Main" },
+					}
+				},
+                DefaultBindings = new() {
+					new() {
+                        ControllerType = "knuckles",
+                        Path = "system_generated_osu_xr_exe_binding_knuckles.json"
+                    }
+                }
+            } );
         }
 
         protected override void LoadComplete () {
@@ -62,17 +96,27 @@ namespace osu.XR {
             PhysicsSystem.Root = Scene.Root;
         }
 
-        Dictionary<Controller, XrController> controllers = new();
+		Dictionary<Controller, XrController> controllers = new();
+        bool areActionsBound;
         protected override void Update () {
             base.Update();
             // HACK hide cursor because it jitters
             ( ( ( typeof( OsuGame ).GetField( "MenuCursorContainer", BindingFlags.NonPublic | BindingFlags.Instance ).GetValue( OsuGame ) ) as MenuCursorContainer ).Cursor as MenuCursor ).Hide();
 
             foreach ( var i in VrManager.Current.Controllers.Values.Except( controllers.Keys ).ToArray() ) {
-                controllers.Add( i, new XrController( i ) );
-                Scene.Root.Add( controllers[ i ] );
+                var controller = new XrController( i );
+                controllers.Add( i, controller );
+                Scene.Add( controller );
 
-                Pointer.Source ??= controllers[ i ].Transform;
+                Pointer.Source ??= controller;
+            }
+
+            if ( !areActionsBound && VrManager.AreComponentsLoaded ) {
+                areActionsBound = true;
+                var click = VrManager.GetControllerComponent<ControllerButton>( XrAction.Press );
+                click.ValueBindable.BindValueChanged( v => {
+                    OsuPanel.EmulatedInput.IsPressed = v.NewValue;
+                }, true );
             }
         }
 	}

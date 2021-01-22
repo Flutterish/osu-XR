@@ -23,8 +23,8 @@ namespace osu.XR.Components {
         public BufferedCapture SourceCapture { get; } = new BufferedCapture { RelativeSizeAxes = Axes.Both };
         public double Arc { get => ArcBindable.Value; set => ArcBindable.Value = value; }
         public double Radius { get => RadiusBindable.Value; set => RadiusBindable.Value = value; }
-        public readonly BindableDouble ArcBindable = new( MathF.PI * 1.6f ) { MinValue = MathF.PI / 18, MaxValue = MathF.PI * 2 };
-        public readonly BindableDouble RadiusBindable = new( 1.4f ) { MinValue = 0.1f, MaxValue = 100 };
+        public readonly BindableDouble ArcBindable = new( MathF.PI * 1.2f ) { MinValue = MathF.PI / 18, MaxValue = MathF.PI * 2 };
+        public readonly BindableDouble RadiusBindable = new( 1.6f ) { MinValue = 0.1f, MaxValue = 100 };
 
         private bool isCurveInvalidated = true;
         public Panel () {

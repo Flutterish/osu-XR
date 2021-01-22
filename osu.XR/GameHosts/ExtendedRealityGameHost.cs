@@ -48,7 +48,7 @@ namespace osu.XR.GameHosts {
 		static EVRCompositorError[] errors = new EVRCompositorError[ 2 ];
 		protected override void DrawFrame () {
 			base.DrawFrame();
-			vr.Update( SceneGraphClock );
+			vr.UpdateDraw( SceneGraphClock );
 			if ( !vr.VrState.HasFlag( VrState.OK ) ) return;
 
 			if ( leftEye.Size != vr.RenderSize ) {
@@ -109,6 +109,11 @@ namespace osu.XR.GameHosts {
 				Logger.Error( null, $"Frame submit errors: Left eye ({errors[0]}), Right eye ({errors[1]})" );
 				return;
 			}
+		}
+
+		protected override void UpdateFrame () {
+			VrManager.Update();
+			base.UpdateFrame();
 		}
 	}
 }
