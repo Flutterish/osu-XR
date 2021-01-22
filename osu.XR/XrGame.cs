@@ -2,7 +2,6 @@
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Platform;
 using osu.XR.Components;
-using osu.XR.VR;
 using System;
 using System.Collections.Generic;
 using System.Text;

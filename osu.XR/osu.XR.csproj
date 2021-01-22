@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\OpenVR.NET\OpenVR.NET\OpenVR.NET\OpenVR.NET.csproj" />
     <ProjectReference Include="..\..\osu\osu.Game.Rulesets.Catch\osu.Game.Rulesets.Catch.csproj" />
     <ProjectReference Include="..\..\osu\osu.Game.Rulesets.Mania\osu.Game.Rulesets.Mania.csproj" />
     <ProjectReference Include="..\..\osu\osu.Game.Rulesets.Osu\osu.Game.Rulesets.Osu.csproj" />

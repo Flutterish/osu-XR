@@ -1,5 +1,6 @@
 ﻿using Humanizer;
 using NuGet.Protocol.Core.Types;
+using OpenVR.NET;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Configuration;
@@ -11,18 +12,17 @@ using osu.Framework.Platform.Windows;
 using osu.Game;
 using osu.XR.Graphics;
 using osu.XR.Maths;
-using osu.XR.VR;
 using osuTK;
 using osuTK.Graphics.ES30;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Reflection;
 using System.Text;
 using System.Threading;
 using Valve.VR;
 using WindowState = osu.Framework.Platform.WindowState;
-using vr = osu.XR.VR.VrManager;
 
 namespace osu.XR.GameHosts {
 	public abstract class ExtendedRealityGameHost : GameHost {
@@ -41,23 +41,27 @@ namespace osu.XR.GameHosts {
 		DepthFrameBuffer rightEye = new();
 		public void Run ( XrGame game ) {
 			runningGame = game;
+			Events.OnError += m => {
+				Logger.Error( null, m );
+			};
 			base.Run( game );
-			vr.Exit();
+			VR.Exit();
 		}
 
 		static EVRCompositorError[] errors = new EVRCompositorError[ 2 ];
 		protected override void DrawFrame () {
 			base.DrawFrame();
-			vr.UpdateDraw( SceneGraphClock );
-			if ( !vr.VrState.HasFlag( VrState.OK ) ) return;
+			VR.UpdateDraw( SceneGraphClock.CurrentTime );
+			if ( !VR.VrState.HasFlag( VrState.OK ) ) return;
 
-			if ( leftEye.Size != vr.RenderSize ) {
-				leftEye.Size = vr.RenderSize;
-				rightEye.Size = vr.RenderSize;
+			var size = new Vector2( VR.RenderSize.X, VR.RenderSize.Y );
+			if ( leftEye.Size != size ) {
+				leftEye.Size = size;
+				rightEye.Size = size;
 			}
 
-			var lMatrix = vr.CVRSystem.GetProjectionMatrix( EVREye.Eye_Left, 0.01f, 1000 );
-			var rMatrix = vr.CVRSystem.GetProjectionMatrix( EVREye.Eye_Right, 0.01f, 1000 );
+			var lMatrix = VR.CVRSystem.GetProjectionMatrix( EVREye.Eye_Left, 0.01f, 1000 );
+			var rMatrix = VR.CVRSystem.GetProjectionMatrix( EVREye.Eye_Right, 0.01f, 1000 );
 
 			var leftEyeMatrix =
 				new Matrix4x4( 
@@ -74,11 +78,11 @@ namespace osu.XR.GameHosts {
 					rMatrix.m12, rMatrix.m13, -rMatrix.m14, rMatrix.m15 
 				);
 
-			runningGame.Scene.Camera.Position = vr.Current.Headset.Position;
-			runningGame.Scene.Camera.Rotation = vr.Current.Headset.Rotation;
+			runningGame.Scene.Camera.Position = new Vector3( VR.Current.Headset.Position.X, VR.Current.Headset.Position.Y, VR.Current.Headset.Position.Z );
+			runningGame.Scene.Camera.Rotation = new Quaternion( VR.Current.Headset.Rotation.X, VR.Current.Headset.Rotation.Y, VR.Current.Headset.Rotation.Z, VR.Current.Headset.Rotation.W );
 
-			var el = vr.CVRSystem.GetEyeToHeadTransform( EVREye.Eye_Left );
-			var er = vr.CVRSystem.GetEyeToHeadTransform( EVREye.Eye_Right );
+			var el = VR.CVRSystem.GetEyeToHeadTransform( EVREye.Eye_Left );
+			var er = VR.CVRSystem.GetEyeToHeadTransform( EVREye.Eye_Right );
 
 			Matrix4x4 headToLeftEye = new Matrix4x4(
 				el.m0, el.m1, el.m2, el.m3,
@@ -99,20 +103,12 @@ namespace osu.XR.GameHosts {
 
 			Texture_t left = new Texture_t { eColorSpace = EColorSpace.Linear, eType = ETextureType.OpenGL, handle = (IntPtr)leftEye.Texture.TextureId };
 			Texture_t right = new Texture_t { eColorSpace = EColorSpace.Linear, eType = ETextureType.OpenGL, handle = (IntPtr)rightEye.Texture.TextureId };
-			VRTextureBounds_t bounds = new VRTextureBounds_t { uMin = 0, uMax = 1, vMin = 0, vMax = 1 };
-			leftEye.Texture.Bind();
-			errors[ 0 ] = OpenVR.Compositor.Submit( EVREye.Eye_Right, ref left, ref bounds, EVRSubmitFlags.Submit_Default );
-			rightEye.Texture.Bind();
-			errors[ 1 ] = OpenVR.Compositor.Submit( EVREye.Eye_Left, ref right, ref bounds, EVRSubmitFlags.Submit_Default );
-
-			if ( errors[ 0 ] is not EVRCompositorError.None || errors[ 1 ] is not EVRCompositorError.None ) {
-				Logger.Error( null, $"Frame submit errors: Left eye ({errors[0]}), Right eye ({errors[1]})" );
-				return;
-			}
+			VR.SubmitFrame( EVREye.Eye_Right, left );
+			VR.SubmitFrame( EVREye.Eye_Left, right );
 		}
 
 		protected override void UpdateFrame () {
-			VrManager.Update();
+			VR.Update();
 			base.UpdateFrame();
 		}
 	}

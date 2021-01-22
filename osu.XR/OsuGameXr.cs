@@ -1,4 +1,6 @@
-﻿using osu.Framework.Allocation;
+﻿using OpenVR.NET;
+using OpenVR.NET.Manifests;
+using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Input;
@@ -12,8 +14,6 @@ using osu.XR.Maths;
 using osu.XR.Physics;
 using osu.XR.Projection;
 using osu.XR.Rendering;
-using osu.XR.VR;
-using osu.XR.VR.ActionManifest;
 using osuTK;
 using osuTK.Input;
 using System;
@@ -43,7 +43,7 @@ namespace osu.XR {
             OsuGame = new OsuGame( args ) { RelativeSizeAxes = Axes.Both };
             Scene = new XrScene { RelativeSizeAxes = Axes.Both };
 
-            VrManager.SetManifest( new Manifest<XrActionGroup, XrAction> {
+            VR.SetManifest( new Manifest<XrActionGroup, XrAction> {
                 LaunchType = LaunchType.Binary,
                 IsDashBoardOverlay = false,
                 Name = "perigee.osuXR",
@@ -103,7 +103,7 @@ namespace osu.XR {
             // HACK hide cursor because it jitters
             ( ( ( typeof( OsuGame ).GetField( "MenuCursorContainer", BindingFlags.NonPublic | BindingFlags.Instance ).GetValue( OsuGame ) ) as MenuCursorContainer ).Cursor as MenuCursor ).Hide();
 
-            foreach ( var i in VrManager.Current.Controllers.Values.Except( controllers.Keys ).ToArray() ) {
+            foreach ( var i in VR.Current.Controllers.Values.Except( controllers.Keys ).ToArray() ) {
                 var controller = new XrController( i );
                 controllers.Add( i, controller );
                 Scene.Add( controller );
@@ -111,11 +111,11 @@ namespace osu.XR {
                 Pointer.Source ??= controller;
             }
 
-            if ( !areActionsBound && VrManager.AreComponentsLoaded ) {
+            if ( !areActionsBound && VR.AreComponentsLoaded ) {
                 areActionsBound = true;
-                var click = VrManager.GetControllerComponent<ControllerButton>( XrAction.Press );
-                click.ValueBindable.BindValueChanged( v => {
-                    OsuPanel.EmulatedInput.IsPressed = v.NewValue;
+                var click = VR.GetControllerComponent<ControllerButton>( XrAction.Press );
+                click.BindValueChanged( v => {
+                    OsuPanel.EmulatedInput.IsPressed = v;
                 }, true );
             }
         }
