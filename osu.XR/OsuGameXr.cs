@@ -39,7 +39,7 @@ namespace osu.XR {
         [Cached(typeof(Framework.Game))]
         OsuGame OsuGame;
 
-        public OsuGameXr ( string[] args ) { 
+        public OsuGameXr ( string[] args ) { // BUG sometimes at startup osu throws an error. investigate.
             OsuGame = new OsuGame( args ) { RelativeSizeAxes = Axes.Both };
             Scene = new XrScene { RelativeSizeAxes = Axes.Both };
 

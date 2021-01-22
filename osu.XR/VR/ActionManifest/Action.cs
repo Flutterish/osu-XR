@@ -41,6 +41,9 @@ namespace osu.XR.VR.ActionManifest {
 		public abstract string GetReadableName ();
 		public ActionType Type { get; set; }
 		public Requirement Requirement { get; set; }
+		/// <summary>
+		/// Locale names. The key should follow http://www.lingoes.net/en/translator/langcode.htm (but lowercase snake case).
+		/// </summary>
 		public Dictionary<string, string> Localizations = new();
 
 		/// <summary>

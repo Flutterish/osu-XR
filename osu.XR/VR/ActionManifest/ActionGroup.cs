@@ -30,6 +30,9 @@ namespace osu.XR.VR.ActionManifest {
 		/// </summary>
 		public string FullPath;
 		public abstract IEnumerable<Action> EnumerateActions ();
+		/// <summary>
+		/// Locale names. The key should follow http://www.lingoes.net/en/translator/langcode.htm (but lowercase snake case).
+		/// </summary>
 		public Dictionary<string, string> Localizations = new();
 	}
 }
