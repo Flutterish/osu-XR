@@ -54,16 +54,36 @@ namespace osu.XR {
 			mouseHandler.handleMouseMove( InputPanel.TexturePositionAt( hit.TrisIndex, hit.Point ).ScaledBy( new Vector2( DrawWidth / InputPanel.MainTexture.Width, DrawHeight / InputPanel.MainTexture.Height ) ) );
 		}
 
-		private bool isPressed = false;
-		public bool IsPressed {
-			get => isPressed;
+		private bool isLeftPressed = false;
+		public bool IsLeftPressed {
+			get => isLeftPressed;
 			set {
-				if ( isPressed == value ) return;
-				isPressed = value;
-				if ( isPressed )
+				if ( isLeftPressed == value ) return;
+				isLeftPressed = value;
+				if ( isLeftPressed )
 					mouseHandler.handleMouseDown( MouseButton.Left );
 				else
 					mouseHandler.handleMouseUp( MouseButton.Left );
+			}
+		}
+		private bool isRightPressed = false;
+		public bool IsRightPressed {
+			get => isRightPressed;
+			set {
+				if ( isRightPressed == value ) return;
+				isRightPressed = value;
+				if ( isRightPressed )
+					mouseHandler.handleMouseDown( MouseButton.Right );
+				else
+					mouseHandler.handleMouseUp( MouseButton.Right );
+			}
+		}
+		private Vector2 scroll;
+		public Vector2 Scroll {
+			get => scroll;
+			set {
+				mouseHandler.handleMouseWheel( value - scroll, false );
+				scroll = value;
 			}
 		}
 
@@ -74,22 +94,7 @@ namespace osu.XR {
 			public override bool IsActive => true;
 			public override int Priority => 0;
 
-			public override bool Initialize ( GameHost host ) {
-				if ( !( host.Window is SDL2DesktopWindow window ) )
-					return false;
-
-				Enabled.BindValueChanged( e =>
-				{
-					if ( e.NewValue ) {
-						window.MouseWheel += handleMouseWheel;
-					}
-					else {
-						window.MouseWheel -= handleMouseWheel;
-					}
-				}, true );
-
-				return true;
-			}
+			public override bool Initialize ( GameHost host ) => true;
 
 			private void enqueueInput ( IInput input ) {
 				PendingInputs.Enqueue( input );
@@ -98,7 +103,7 @@ namespace osu.XR {
 			internal void handleMouseMove ( Vector2 position ) => enqueueInput( new MousePositionAbsoluteInput { Position = position } );
 			internal void handleMouseDown ( MouseButton button ) => enqueueInput( new MouseButtonInput( button, true ) );
 			internal void handleMouseUp ( MouseButton button ) => enqueueInput( new MouseButtonInput( button, false ) );
-			private void handleMouseWheel ( Vector2 delta, bool precise ) => enqueueInput( new MouseScrollRelativeInput { Delta = delta, IsPrecise = precise } );
+			internal void handleMouseWheel ( Vector2 delta, bool precise ) => enqueueInput( new MouseScrollRelativeInput { Delta = delta, IsPrecise = precise } );
 		}
 
 		/// <summary>

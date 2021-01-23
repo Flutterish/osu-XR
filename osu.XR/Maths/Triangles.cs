@@ -1,4 +1,5 @@
 ﻿using osu.XR.Graphics;
+using osu.XR.Physics;
 using osuTK;
 using System;
 
@@ -34,6 +35,20 @@ namespace osu.XR.Maths {
 			var r1 = ( ( B.Y - C.Y ) * ( point.X - C.X ) + ( C.X - B.X ) * ( point.Y - C.Y )) / det;
 			var r2 = ( ( C.Y - A.Y ) * ( point.X - C.X ) + ( A.X - C.X ) * ( point.Y - C.Y )) / det;
 			return new Vector3( r1, r2, 1 - r1 - r2 );
+		}
+
+		public static bool IsPointInside ( Vector3 p, Face face ) {
+			var directionFromC = ( face.C -p ).Normalized();
+			if ( Raycast.TryHitLine( p, directionFromC, face.A, face.B - face.A, out var pointOnAB ) ) {
+				var distanceFromAToB = Extensions.SignedDistance( face.A, pointOnAB, face.B );
+				if ( distanceFromAToB >= -0.01f && distanceFromAToB <= ( face.B - face.A ).Length + 0.01f ) {
+					var distanceToC = Extensions.SignedDistance( face.C, p, pointOnAB );
+					if ( distanceToC >= -0.01f && distanceToC <= ( face.C - pointOnAB ).Length + 0.01f ) {
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 	}
 }

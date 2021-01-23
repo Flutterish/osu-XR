@@ -44,7 +44,7 @@ namespace osu.XR.Physics {
 
 			for ( int i = 0; i < colliders.Count; i++ ) {
 				var collider = colliders[ i ];
-				if ( Raycast.TryHit( origin, direction, collider.Mesh, ( collider as XrObject ).Transform, out hit, includeBehind ) ) {
+				if ( collider.IsColliderEnabled && Raycast.TryHit( origin, direction, collider.Mesh, ( collider as XrObject ).Transform, out hit, includeBehind ) ) {
 					if ( closest is null || Math.Abs( closest.Value.Distance ) > Math.Abs( hit.Distance ) ) {
 						closest = hit;
 						closestCollider = collider;
@@ -71,6 +71,41 @@ namespace osu.XR.Physics {
 			}
 		}
 
+		/// <summary>
+		/// Intersect a shpere and a the closest collider.
+		/// </summary>
+		public bool TryHit ( Vector3 origin, double radius, out SphereHit hit ) {
+			SphereHit? closest = null;
+			IHasCollider closestCollider = null;
+
+			for ( int i = 0; i < colliders.Count; i++ ) {
+				var collider = colliders[ i ];
+				if ( collider.IsColliderEnabled && Sphere.TryHit( origin, radius, collider.Mesh, ( collider as XrObject ).Transform, out hit ) ) {
+					if ( closest is null || Math.Abs( closest.Value.Distance ) > Math.Abs( hit.Distance ) ) {
+						closest = hit;
+						closestCollider = collider;
+					}
+				}
+			}
+
+			if ( closest is null ) {
+				hit = default;
+				return false;
+			}
+			else {
+				hit = closest.Value;
+				hit = new SphereHit(
+					hit.Distance,
+					hit.Origin,
+					hit.Radius,
+					hit.Point,
+					hit.TrisIndex,
+					closestCollider
+				);
+				return true;
+			}
+		}
+
 		public void Dispose () {
 			Root = null;
 		}
@@ -78,5 +113,6 @@ namespace osu.XR.Physics {
 
 	public interface IHasCollider {
 		Mesh Mesh { get; }
+		bool IsColliderEnabled { get; }
 	}
 }

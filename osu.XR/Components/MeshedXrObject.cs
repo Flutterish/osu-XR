@@ -11,6 +11,7 @@ namespace osu.XR.Components {
 	/// An <see cref="XrObject"/> which renders a <see cref="Graphics.Mesh"/>.
 	/// </summary>
 	public class MeshedXrObject : XrObject {
+		public bool IsVisible = true;
 		public Mesh Mesh { get; set; } = new();
 		public bool UseGammaCorrection = false;
 		public TextureGL MainTexture {
@@ -44,6 +45,8 @@ namespace osu.XR.Components {
 		private ulong lastUpdateVersion;
 
 		public override void Draw ( DrawSettings settings ) {
+			if ( !Source.IsVisible ) return;
+
 			var newMesh = GetMesh();
 			if ( mesh != newMesh ) {
 				mesh = newMesh;

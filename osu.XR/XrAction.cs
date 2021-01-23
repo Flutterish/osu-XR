@@ -6,10 +6,21 @@ using System.Threading.Tasks;
 
 namespace osu.XR {
 	public enum XrActionGroup {
-		Main
+		Pointer,
+		Configuration,
+		Haptics
 	}
 
 	public enum XrAction {
-		Press
+		// Pointer
+		MouseLeft,
+		MouseRight,
+		Scroll,
+
+		// Configuration
+		ToggleMenu,
+
+		// Haptics
+		Feedback
 	}
 }

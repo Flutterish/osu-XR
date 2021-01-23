@@ -1,5 +1,6 @@
 ﻿using OpenVR.NET;
 using osu.XR.Graphics;
+using osuTK;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,16 +10,31 @@ using System.Threading.Tasks;
 namespace osu.XR.Components {
 	public class XrController : MeshedXrObject {
 		public readonly Controller Controller;
+		Mesh ControllerMesh;
+		Mesh SphereMesh;
+
 		public XrController ( Controller controller ) {
 			Controller = controller;
-			Mesh = new Mesh();
+			ControllerMesh = new Mesh();
 			_ = controller.LoadModelAsync(
-				begin: () => Mesh.IsReady = false,
-				finish: () => Mesh.IsReady = true,
-				addVertice: v => Mesh.Vertices.Add( new osuTK.Vector3( v.X, v.Y, v.Z ) ),
-				addTextureCoordinate: uv => Mesh.TextureCoordinates.Add( new osuTK.Vector2( uv.X, uv.Y ) ),
-				addTriangle: (a,b,c) => Mesh.Tris.Add( new IndexedFace( (uint)a, (uint)b, (uint)c ) )
+				begin: () => ControllerMesh.IsReady = false,
+				finish: () => ControllerMesh.IsReady = true,
+				addVertice: v => ControllerMesh.Vertices.Add( new osuTK.Vector3( v.X, v.Y, v.Z ) ),
+				addTextureCoordinate: uv => ControllerMesh.TextureCoordinates.Add( new osuTK.Vector2( uv.X, uv.Y ) ),
+				addTriangle: (a,b,c) => ControllerMesh.Tris.Add( new IndexedFace( (uint)a, (uint)b, (uint)c ) )
 			);
+			Mesh = ControllerMesh;
+
+			SphereMesh = Mesh.FromOBJFile( "./Resources/shpere.obj" );
+		}
+
+		public void UseControllerMesh () {
+			Mesh = ControllerMesh;
+			Scale = Vector3.One;
+		}
+		public void UseSphereMesh () {
+			Mesh = SphereMesh;
+			Scale = new Vector3( 0.03f );
 		}
 
 		protected override void Update () {

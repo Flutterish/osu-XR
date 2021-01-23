@@ -4,6 +4,7 @@ using osu.XR.Graphics;
 using osu.XR.Maths;
 using osu.XR.Physics;
 using osuTK;
+using System;
 using static osu.XR.Physics.Raycast;
 
 namespace osu.XR.Components {
@@ -26,6 +27,15 @@ namespace osu.XR.Components {
 			MainTexture = Textures.Pixel( new osuTK.Graphics.Color4( 255, 255, 255, 100 ) ).TextureGL;
 		}
 
+		/// <summary>
+		/// The <see cref="IHasCollider"/> this pointer points at. Might be null.
+		/// </summary>
+		public IHasCollider CurrentHit { get; private set; }
+		/// <summary>
+		/// The last non-null <see cref="CurrentHit"/>.
+		/// </summary>
+		public IHasCollider CurrentFocus { get; private set; }
+
 		public override void BeforeDraw ( XrObjectDrawNode.DrawSettings settings ) {
 			base.BeforeDraw( settings );
 			if ( Source is null ) return;
@@ -34,13 +44,23 @@ namespace osu.XR.Components {
 				Position = hit.Point;
 				Rotation = Matrix4.LookAt( Vector3.Zero, hit.Normal, Vector3.UnitY ).ExtractRotation().Inverted();
 
+				if ( CurrentFocus != hit.Collider ) {
+					var prev = CurrentFocus;
+					CurrentHit = CurrentFocus = hit.Collider;
+					FocusChanged?.Invoke( new( prev, CurrentFocus ) );
+				}
 				NewHit?.Invoke( hit );
 			}
 			else {
 				Position = Source.Position + Source.Forward * (float)HitDistance;
 				Rotation = Source.Rotation;
+				CurrentHit = null;
 			}
+
+			Scale = new Vector3( ( Position - Source.Position ).Length );
 		}
+
+		public event Action<ValueChangedEvent<IHasCollider>> FocusChanged;
 
 		public delegate void PointerUpdate ( RaycastHit hit );
 		public event PointerUpdate NewHit;

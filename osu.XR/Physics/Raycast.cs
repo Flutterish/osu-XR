@@ -287,6 +287,24 @@ namespace osu.XR.Physics {
 			return ok;
 		}
 
+		/// <summary>
+		/// The closest point to a line [from;to]
+		/// </summary>
+		public static Vector3 ClosestPoint ( Vector3 from, Vector3 to, Vector3 other ) {
+			var dir = to - from;
+			Raycast.TryHit( from, dir, other, dir, out var hit, true );
+
+			// P = from + (to-from) * T -> T = (P - from)/(to-from);
+			float t;
+			if ( dir.X != 0 ) t = ( hit.Point.X - from.X ) / ( dir.X );
+			else if ( dir.Y != 0 ) t = ( hit.Point.Y - from.Y ) / ( dir.Y );
+			else t = ( hit.Point.Z - from.Z ) / ( dir.Z );
+
+			if ( t < 0 ) return from;
+			else if ( t > 1 ) return to;
+			else return hit.Point;
+		}
+
 		public readonly struct RaycastHit {
 			/// <summary>
 			/// The point that was hit;

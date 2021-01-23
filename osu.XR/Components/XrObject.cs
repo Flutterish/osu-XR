@@ -184,7 +184,7 @@ namespace osu.XR.Components {
 		}
 
 		public static implicit operator Transform ( XrObject xro )
-			=> xro.Transform;
+			=> xro?.Transform;
 	}
 }
 

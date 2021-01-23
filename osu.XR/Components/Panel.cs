@@ -11,9 +11,10 @@ using static osu.XR.Components.XrObject.XrObjectDrawNode;
 
 namespace osu.XR.Components {
 	/// <summary>
-	/// A curved 3D panel that displays an image from a <see cref="BufferedCapture"/>.
+	/// A 3D panel that displays an image from a <see cref="BufferedCapture"/>.
 	/// </summary>
-	public class Panel : MeshedXrObject, IHasCollider {
+	public abstract class Panel : MeshedXrObject, IHasCollider {
+        public PanelInputMode RequestedInputMode { get; protected set; } = PanelInputMode.Regular;
         public readonly XrInputManager EmulatedInput = new XrInputManager { RelativeSizeAxes = Axes.Both };
         public Container Source => EmulatedInput;
         /// <summary>
@@ -21,20 +22,55 @@ namespace osu.XR.Components {
         /// </summary>
         public Bindable<Vector2> ContentScale = new( Vector2.One );
         public BufferedCapture SourceCapture { get; } = new BufferedCapture { RelativeSizeAxes = Axes.Both };
-        public double Arc { get => ArcBindable.Value; set => ArcBindable.Value = value; }
-        public double Radius { get => RadiusBindable.Value; set => RadiusBindable.Value = value; }
-        public readonly BindableDouble ArcBindable = new( MathF.PI * 1.2f ) { MinValue = MathF.PI / 18, MaxValue = MathF.PI * 2 };
-        public readonly BindableDouble RadiusBindable = new( 1.6f ) { MinValue = 0.1f, MaxValue = 100 };
 
-        private bool isCurveInvalidated = true;
+        protected bool IsMeshInvalidated = true;
+
+        private bool hasFocus;
+        new public bool HasFocus {
+            get => HasFocus;
+            set {
+                if ( hasFocus == value ) return;
+                hasFocus = value;
+                if ( !hasFocus ) {
+                    EmulatedInput.IsLeftPressed = false;
+                    EmulatedInput.IsRightPressed = false;
+				}
+			}
+		}
+
+        public Panel AutosizeX () {
+            EmulatedInput.RelativeSizeAxes = Axes.Y;
+            SourceCapture.RelativeSizeAxes = Axes.Y;
+
+            EmulatedInput.AutoSizeAxes = Axes.X;
+            SourceCapture.AutoSizeAxes = Axes.X;
+
+            return this;
+        }
+        public Panel AutosizeY () {
+            EmulatedInput.RelativeSizeAxes = Axes.X;
+            SourceCapture.RelativeSizeAxes = Axes.X;
+
+            EmulatedInput.AutoSizeAxes = Axes.Y;
+            SourceCapture.AutoSizeAxes = Axes.Y;
+
+            return this;
+        }
+        public Panel AutosizeBoth () {
+            EmulatedInput.RelativeSizeAxes = Axes.None;
+            SourceCapture.RelativeSizeAxes = Axes.None;
+
+            EmulatedInput.AutoSizeAxes = Axes.Both;
+            SourceCapture.AutoSizeAxes = Axes.Both;
+
+            return this;
+        }
         public Panel () {
             UseGammaCorrection = true;
-            ArcBindable.ValueChanged += _ => isCurveInvalidated = true;
-            RadiusBindable.ValueChanged += _ => isCurveInvalidated = true;
 
             ContentScale.ValueChanged += v => {
                 SourceCapture.Size = v.NewValue;
-                isCurveInvalidated = true;
+                IsMeshInvalidated = true;
             };
 
             EmulatedInput.InputPanel = this;
@@ -47,29 +83,7 @@ namespace osu.XR.Components {
             EmulatedInput.Pointer ??= pointer;
 		}
 
-		private void recalculateMesh () {
-            isCurveInvalidated = false;
-            Mesh = new();
-
-            var arc = (float)Arc;
-            var radius = (float)Radius;
-
-            var points = 100;
-            var arclength = arc * radius;
-            var height = arclength / ( (float)MainTexture.Width / MainTexture.Height );
-            for ( var i = 0; i < points; i++ ) {
-                var start = arc / points * i - arc / 2;
-                var end = arc / points * ( i + 1 ) - arc / 2;
-
-                var posA = new Vector2( MathF.Sin( end ), MathF.Cos( end ) ) * radius;
-                var posB = new Vector2( MathF.Sin( start ), MathF.Cos( start ) ) * radius;
-
-                Mesh.AddQuad( new Maths.Quad(
-                    new Vector3( posB.X, height / 2, posB.Y ), new Vector3( posA.X, height / 2, posA.Y ),
-                    new Vector3( posB.X, -height / 2, posB.Y ), new Vector3( posA.X, -height / 2, posA.Y )
-                ), new Vector2( (float)i / points, 1 ), new Vector2( (float)(i+1) / points, 1 ), new Vector2( (float)i / points, 0 ), new Vector2( (float)(i+1) / points, 0 ) );
-            }
-        }
+        protected abstract void RecalculateMesh ();
 
         /// <summary>
         /// The texture position from top left.
@@ -91,12 +105,19 @@ namespace osu.XR.Components {
             if ( SourceCapture.Capture is null ) return;
             MainTexture = SourceCapture.Capture;
             if ( MainTexture.Size != lastTextureSize ) {
-                isCurveInvalidated = true;
+                IsMeshInvalidated = true;
                 lastTextureSize = MainTexture.Size;
 			}
-            if ( isCurveInvalidated ) {
-                recalculateMesh();
+            if ( IsMeshInvalidated ) {
+                RecalculateMesh();
 			}
 		}
+
+        public bool IsColliderEnabled => IsVisible;
+	}
+
+    public enum PanelInputMode {
+        Regular,
+        Inverted
 	}
 }
