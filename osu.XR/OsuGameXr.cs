@@ -15,6 +15,7 @@ using osu.Game.Configuration;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Cursor;
 using osu.Game.Overlays;
+using osu.Game.Resources;
 using osu.Game.Rulesets;
 using osu.XR.Components;
 using osu.XR.Drawables;
@@ -45,8 +46,6 @@ namespace osu.XR {
         public readonly Camera Camera = new() { Position = new Vector3( 0, 0, 0 ) };
         public readonly CurvedPanel OsuPanel = new CurvedPanel { Y = 1.8f }; // TODO our own VR error panel
         public readonly XrConfigPanel ConfigPanel = new XrConfigPanel();
-        [Cached]
-        public readonly Pointer Pointer = new Pointer();
         [Cached(typeof(Framework.Game))]
         OsuGame OsuGame;
 
@@ -56,7 +55,7 @@ namespace osu.XR {
                 var main = MainController;
                 return controllers.Values.FirstOrDefault( x => x != main && x.Controller.IsEnabled );
             }
-		}
+        }
 
         DependencyContainer dependency;
 		protected override IReadOnlyDependencyContainer CreateChildDependencies ( IReadOnlyDependencyContainer parent ) {
@@ -67,70 +66,64 @@ namespace osu.XR {
             OsuGame = new OsuGame( args ) { RelativeSizeAxes = Axes.Both };
             Scene = new XrScene { RelativeSizeAxes = Axes.Both };
 
-            VR.ComponentsLoaded += () => {
-                var mouseLeft = VR.GetControllerComponent<ControllerButton>( XrAction.MouseLeft );
-                mouseLeft.BindValueChanged( v => {
-                    if ( Pointer.CurrentFocus is Panel panel ) {
-                        if ( MainController.Controller.IsMainController ) {
-                            if ( panel.RequestedInputMode == PanelInputMode.Regular ) panel.EmulatedInput.IsLeftPressed = v;
-                            else if ( panel.RequestedInputMode == PanelInputMode.Inverted ) panel.EmulatedInput.IsRightPressed = v;
-                        }
-                        else panel.EmulatedInput.IsLeftPressed = v;
-                    }
-                }, true );
-                var mouseRight = VR.GetControllerComponent<ControllerButton>( XrAction.MouseRight );
-                mouseRight.BindValueChanged( v => {
-                    if ( Pointer.CurrentFocus is Panel panel ) {
-                        if ( MainController.Controller.IsMainController ) {
-                            if ( panel.RequestedInputMode == PanelInputMode.Regular ) panel.EmulatedInput.IsRightPressed = v;
-                            else if ( panel.RequestedInputMode == PanelInputMode.Inverted ) panel.EmulatedInput.IsLeftPressed = v;
-                        }
-                        else panel.EmulatedInput.IsLeftPressed = v;
-                    }
-                }, true );
-                var scroll = VR.GetControllerComponent<Controller2DVector>( XrAction.Scroll );
-                scroll.BindValueUpdated( v => {
-                    if ( Pointer.CurrentFocus is Panel panel ) panel.EmulatedInput.Scroll += new Vector2( v.X, v.Y ) * (float)VR.DeltaTime * 80;
-                } );
-                var haptic = VR.GetControllerComponent<ControllerHaptic>( XrAction.Feedback );
-                haptic.TriggerVibration( 0.5 ); // NOTE haptics dont work yet
-            };
-
-            Pointer.FocusChanged += v => {
-                if ( v.OldValue is Panel panel ) panel.HasFocus = false;
-                if ( v.NewValue is Panel panel2 ) panel2.HasFocus = true;
-            };
-
-            ConfigPanel.IsVisibleBindable.ValueChanged += v => {
-                if ( v.NewValue ) {
-                    Pointer.Source = SecondaryController;
-				}
-				else {
-                    Pointer.Source = MainController;
-				}
-            };
-
             VR.BindNewControllerAdded( c => {
+                var controller = new XrController( c );
+                controllers.Add( c, controller );
                 onUpdateThread += () => {
-                    var controller = new XrController( c );
-                    controllers.Add( c, controller );
                     Scene.Add( controller );
 
+                    controller.Pointer.HitChanged += _ => reassignFocus();
+
                     c.BindEnabled( () => {
-                        controller.IsVisible = true;
-                        if ( c.IsMainController )
-                            Pointer.Source = controller;
-                        else
-                            Pointer.Source ??= controller;
+                        onControllerInputModeChanged();
                     }, true );
                     c.BindDisabled( () => {
-                        controller.IsVisible = false;
-                        if ( Pointer.Source == controller.Transform ) {
-                            Pointer.Source = MainController;
-                        }
+                        onControllerInputModeChanged();
                     } );
                 };
             }, true );
+
+            VR.BindComponentsLoaded( () => {
+                var mouseLeft = VR.GetControllerComponent<ControllerButton>( XrAction.MouseLeft );
+                mouseLeft.BindValueChangedDetailed( v => {
+                    if ( v.Source is null || !controllers.ContainsKey( v.Source ) ) return;
+                    var Pointer = controllers[ v.Source ].Pointer;
+                    if ( Pointer.CurrentFocus is Panel panel ) {
+                        if ( VR.EnabledControllerCount > 1 ) {
+                            if ( panel.RequestedInputMode == PanelInputMode.Regular ) panel.EmulatedInput.IsLeftPressed = v.NewValue;
+                            else if ( panel.RequestedInputMode == PanelInputMode.Inverted ) panel.EmulatedInput.IsRightPressed = v.NewValue;
+                        }
+                        else panel.EmulatedInput.IsLeftPressed = v.NewValue;
+                    }
+                }, true );
+
+                var mouseRight = VR.GetControllerComponent<ControllerButton>( XrAction.MouseRight );
+                mouseRight.BindValueChangedDetailed( v => {
+                    if ( v.Source is null || !controllers.ContainsKey( v.Source ) ) return;
+                    var Pointer = controllers[ v.Source ].Pointer;
+                    if ( Pointer.CurrentFocus is Panel panel ) {
+                        if ( VR.EnabledControllerCount > 1 ) {
+                            if ( panel.RequestedInputMode == PanelInputMode.Regular ) panel.EmulatedInput.IsRightPressed = v.NewValue;
+                            else if ( panel.RequestedInputMode == PanelInputMode.Inverted ) panel.EmulatedInput.IsLeftPressed = v.NewValue;
+                        }
+                        else panel.EmulatedInput.IsLeftPressed = v.NewValue;
+                    }
+                }, true );
+
+                var scroll = VR.GetControllerComponent<Controller2DVector>( XrAction.Scroll );
+                scroll.BindValueUpdatedDetailed( v => {
+                    if ( v.Source is null || !controllers.ContainsKey( v.Source ) ) return;
+                    var Pointer = controllers[ v.Source ].Pointer;
+                    if ( Pointer.CurrentFocus is Panel panel ) panel.EmulatedInput.Scroll += new Vector2( v.NewValue.X, v.NewValue.Y ) * (float)VR.DeltaTime * 80;
+                } );
+
+                var haptic = VR.GetControllerComponent<ControllerHaptic>( XrAction.Feedback );
+                haptic.TriggerVibration( 0.5 ); // NOTE haptics dont work yet
+            } );
+
+            ConfigPanel.IsVisibleBindable.ValueChanged += v => {
+                onControllerInputModeChanged();
+            };
 
             VR.SetManifest( new Manifest<XrActionGroup, XrAction> {
                 LaunchType = LaunchType.Binary,
@@ -204,13 +197,64 @@ namespace osu.XR {
             } );
         }
 
+        void onControllerInputModeChanged () {
+
+		}
+
+        void reassignFocus () {
+            foreach ( var panel in panels ) {
+                var controller = 
+                    controllers.Values.FirstOrDefault( x => x.Pointer.CurrentHit == panel && x.Controller.IsMainController ) ?? 
+                    controllers.Values.FirstOrDefault( x => x.Pointer.CurrentHit == panel ) ?? 
+                    controllers.Values.FirstOrDefault( x => x.Pointer.CurrentFocus == panel && x.Controller.IsMainController ) ??
+                    controllers.Values.FirstOrDefault( x => x.Pointer.CurrentFocus == panel );
+                panel.HasFocus = controller is not null;
+                if ( panel.HasFocus ) {
+                    panel.EmulatedInput.Pointer = controller.Pointer;
+				}
+			}
+		}
+
+        List<Panel> panels = new();
+
         protected override void LoadComplete () {
             base.LoadComplete();
+            Scene.Root.BindHierarchyChange( (parent,added) => {
+                if ( added is Panel panel ) {
+                    panels.Add( panel );
+                    reassignFocus();
+                }
+            },
+            (parent,removed) => {
+                if ( removed is Panel panel ) {
+                    panels.Remove( panel );
+                    reassignFocus();
+                }
+            }, true );
+
             Resources.AddStore( new DllResourceStore( typeof( OsuGameXr ).Assembly ) );
+            Resources.AddStore( new DllResourceStore( typeof( OsuGame ).Assembly ) );
+            Resources.AddStore( new DllResourceStore( OsuResources.ResourceAssembly ) );
+            AddFont( Resources, @"Fonts/osuFont" );
+
+            AddFont( Resources, @"Fonts/Torus-Regular" );
+            AddFont( Resources, @"Fonts/Torus-Light" );
+            AddFont( Resources, @"Fonts/Torus-SemiBold" );
+            AddFont( Resources, @"Fonts/Torus-Bold" );
+
+            AddFont( Resources, @"Fonts/Noto-Basic" );
+            AddFont( Resources, @"Fonts/Noto-Hangul" );
+            AddFont( Resources, @"Fonts/Noto-CJK-Basic" );
+            AddFont( Resources, @"Fonts/Noto-CJK-Compatibility" );
+            AddFont( Resources, @"Fonts/Noto-Thai" );
+
+            AddFont( Resources, @"Fonts/Venera-Light" );
+            AddFont( Resources, @"Fonts/Venera-Bold" );
+            AddFont( Resources, @"Fonts/Venera-Black" );
+            // TODO somehow just cache everything osugame caches ( either set our dep container to osu's + ours or somehow retreive all of its cache )
             OsuGame.SetHost( Host );
 
             OsuPanel.Source.Add( OsuGame );
-            OsuPanel.EmulatedInput.Pointer = Pointer;
             OsuPanel.ContentScale.Value = new Vector2( 2, 1 );
 
             OsuGame.OnLoadComplete += v => {
@@ -232,7 +276,6 @@ namespace osu.XR {
             Scene.Root.Add( new FloorGrid() );
             Scene.Root.Add( Camera );
             Scene.Root.Add( OsuPanel );
-            Scene.Root.Add( Pointer );
             PhysicsSystem.Root = Scene.Root;
         }
 

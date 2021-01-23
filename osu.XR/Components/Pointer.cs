@@ -44,16 +44,26 @@ namespace osu.XR.Components {
 				Position = hit.Point;
 				Rotation = Matrix4.LookAt( Vector3.Zero, hit.Normal, Vector3.UnitY ).ExtractRotation().Inverted();
 
-				if ( CurrentFocus != hit.Collider ) {
-					var prev = CurrentFocus;
-					CurrentHit = CurrentFocus = hit.Collider;
-					FocusChanged?.Invoke( new( prev, CurrentFocus ) );
+				if ( CurrentHit != hit.Collider ) {
+					var prev = CurrentHit;
+					CurrentHit = hit.Collider;
+					HitChanged?.Invoke( new(prev,CurrentHit) );
+					if ( CurrentFocus != hit.Collider ) {
+						prev = CurrentFocus;
+						CurrentFocus = hit.Collider;
+						FocusChanged?.Invoke( new( prev, CurrentFocus ) );
+					}
 				}
 				NewHit?.Invoke( hit );
 			}
 			else {
 				Position = Source.Position + Source.Forward * (float)HitDistance;
 				Rotation = Source.Rotation;
+				if ( CurrentHit != null ) {
+					var prev = CurrentHit;
+					CurrentHit = null;
+					HitChanged?.Invoke( new(prev, null) );
+				}
 				CurrentHit = null;
 			}
 
@@ -61,6 +71,7 @@ namespace osu.XR.Components {
 		}
 
 		public event Action<ValueChangedEvent<IHasCollider>> FocusChanged;
+		public event Action<ValueChangedEvent<IHasCollider>> HitChanged;
 
 		public delegate void PointerUpdate ( RaycastHit hit );
 		public event PointerUpdate NewHit;

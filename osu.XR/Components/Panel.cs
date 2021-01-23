@@ -27,7 +27,7 @@ namespace osu.XR.Components {
 
         private bool hasFocus;
         new public bool HasFocus {
-            get => HasFocus;
+            get => hasFocus;
             set {
                 if ( hasFocus == value ) return;
                 hasFocus = value;
@@ -77,11 +77,6 @@ namespace osu.XR.Components {
             SourceCapture.Add( EmulatedInput );
             Add( SourceCapture );
         }
-
-        [BackgroundDependencyLoader( permitNulls: true )]
-        private void load ( Pointer pointer ) {
-            EmulatedInput.Pointer ??= pointer;
-		}
 
         protected abstract void RecalculateMesh ();
 
