@@ -15,11 +15,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="openvr_api.dll" />
     <None Remove="Resources\shpere.obj" />
+    <None Remove="system_generated_osu_xr_exe_binding_knuckles.json" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="openvr_api.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\shpere.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="system_generated_osu_xr_exe_binding_knuckles.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

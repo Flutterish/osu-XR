@@ -45,23 +45,26 @@ namespace osu.XR {
         [Cached]
         public readonly Camera Camera = new() { Position = new Vector3( 0, 0, 0 ) };
         public readonly CurvedPanel OsuPanel = new CurvedPanel { Y = 1.8f }; // TODO our own VR error panel
+        [Cached]
         public readonly XrConfigPanel ConfigPanel = new XrConfigPanel();
         [Cached(typeof(Framework.Game))]
         OsuGame OsuGame;
 
-        public XrController MainController => controllers.Values.FirstOrDefault( x => x.Controller.IsEnabled && x.Controller.IsMainController ) ?? controllers.Values.FirstOrDefault( x => x.Controller.IsEnabled );
+        public XrController MainController => controllers.Values.FirstOrDefault( x => x.Source.IsEnabled && x.Source.IsMainController ) ?? controllers.Values.FirstOrDefault( x => x.Source.IsEnabled );
         public XrController SecondaryController {
             get {
                 var main = MainController;
-                return controllers.Values.FirstOrDefault( x => x != main && x.Controller.IsEnabled );
+                return controllers.Values.FirstOrDefault( x => x != main && x.Source.IsEnabled );
             }
         }
+        public XrController GetControllerFor ( Controller controller ) => controller is null ? null : ( controllers.TryGetValue( controller, out var c ) ? c : null );
 
         DependencyContainer dependency;
 		protected override IReadOnlyDependencyContainer CreateChildDependencies ( IReadOnlyDependencyContainer parent ) {
             return dependency = new DependencyContainer( base.CreateChildDependencies(parent) );
         }
 
+        object updatelock = new { };
 		public OsuGameXr ( string[] args ) { // BUG sometimes at startup osu throws an error. investigate.
             OsuGame = new OsuGame( args ) { RelativeSizeAxes = Axes.Both };
             Scene = new XrScene { RelativeSizeAxes = Axes.Both };
@@ -69,61 +72,24 @@ namespace osu.XR {
             VR.BindNewControllerAdded( c => {
                 var controller = new XrController( c );
                 controllers.Add( c, controller );
-                onUpdateThread += () => {
-                    Scene.Add( controller );
+                lock ( updatelock ) {
+                    onUpdateThread += () => {
+                        Scene.Add( controller );
 
-                    controller.Pointer.HitChanged += _ => reassignFocus();
-
-                    c.BindEnabled( () => {
-                        onControllerInputModeChanged();
-                    }, true );
-                    c.BindDisabled( () => {
-                        onControllerInputModeChanged();
-                    } );
-                };
+                        c.BindEnabled( () => {
+                            onControllerInputModeChanged();
+                        }, true );
+                        c.BindDisabled( () => {
+                            onControllerInputModeChanged();
+                        } );
+                    };
+                }
             }, true );
 
             VR.BindComponentsLoaded( () => {
-                var mouseLeft = VR.GetControllerComponent<ControllerButton>( XrAction.MouseLeft );
-                mouseLeft.BindValueChangedDetailed( v => {
-                    if ( v.Source is null || !controllers.ContainsKey( v.Source ) ) return;
-                    var Pointer = controllers[ v.Source ].Pointer;
-                    if ( Pointer.CurrentFocus is Panel panel ) {
-                        if ( VR.EnabledControllerCount > 1 ) {
-                            if ( panel.RequestedInputMode == PanelInputMode.Regular ) panel.EmulatedInput.IsLeftPressed = v.NewValue;
-                            else if ( panel.RequestedInputMode == PanelInputMode.Inverted ) panel.EmulatedInput.IsRightPressed = v.NewValue;
-                        }
-                        else panel.EmulatedInput.IsLeftPressed = v.NewValue;
-                    }
-                }, true );
-
-                var mouseRight = VR.GetControllerComponent<ControllerButton>( XrAction.MouseRight );
-                mouseRight.BindValueChangedDetailed( v => {
-                    if ( v.Source is null || !controllers.ContainsKey( v.Source ) ) return;
-                    var Pointer = controllers[ v.Source ].Pointer;
-                    if ( Pointer.CurrentFocus is Panel panel ) {
-                        if ( VR.EnabledControllerCount > 1 ) {
-                            if ( panel.RequestedInputMode == PanelInputMode.Regular ) panel.EmulatedInput.IsRightPressed = v.NewValue;
-                            else if ( panel.RequestedInputMode == PanelInputMode.Inverted ) panel.EmulatedInput.IsLeftPressed = v.NewValue;
-                        }
-                        else panel.EmulatedInput.IsLeftPressed = v.NewValue;
-                    }
-                }, true );
-
-                var scroll = VR.GetControllerComponent<Controller2DVector>( XrAction.Scroll );
-                scroll.BindValueUpdatedDetailed( v => {
-                    if ( v.Source is null || !controllers.ContainsKey( v.Source ) ) return;
-                    var Pointer = controllers[ v.Source ].Pointer;
-                    if ( Pointer.CurrentFocus is Panel panel ) panel.EmulatedInput.Scroll += new Vector2( v.NewValue.X, v.NewValue.Y ) * (float)VR.DeltaTime * 80;
-                } );
-
                 var haptic = VR.GetControllerComponent<ControllerHaptic>( XrAction.Feedback );
                 haptic.TriggerVibration( 0.5 ); // NOTE haptics dont work yet
             } );
-
-            ConfigPanel.IsVisibleBindable.ValueChanged += v => {
-                onControllerInputModeChanged();
-            };
 
             VR.SetManifest( new Manifest<XrActionGroup, XrAction> {
                 LaunchType = LaunchType.Binary,
@@ -195,23 +161,29 @@ namespace osu.XR {
                     }
                 }
             } );
+
+            ConfigPanel.InputModeBindable.BindValueChanged( v => {
+                onControllerInputModeChanged();
+            }, true );
+            ConfigPanel.IsVisibleBindable.BindValueChanged( _ => {
+                onControllerInputModeChanged();
+            } );
         }
 
         void onControllerInputModeChanged () {
+            var main = MainController;
+            if ( ConfigPanel.InputModeBindable.Value == InputMode.SinglePointer ) {
+                foreach ( var controller in controllers.Values ) {
+                    controller.IsPointerEnabled = controller == main;
+                }
+			}
+            else if ( ConfigPanel.InputModeBindable.Value == InputMode.DoublePointer ) {
+                foreach ( var controller in controllers.Values ) {
+                    controller.IsPointerEnabled = !ConfigPanel.IsVisible || controller == main;
+                }
+            }
+            else if ( ConfigPanel.InputModeBindable.Value == InputMode.TouchScreen ) {
 
-		}
-
-        void reassignFocus () {
-            foreach ( var panel in panels ) {
-                var controller = 
-                    controllers.Values.FirstOrDefault( x => x.Pointer.CurrentHit == panel && x.Controller.IsMainController ) ?? 
-                    controllers.Values.FirstOrDefault( x => x.Pointer.CurrentHit == panel ) ?? 
-                    controllers.Values.FirstOrDefault( x => x.Pointer.CurrentFocus == panel && x.Controller.IsMainController ) ??
-                    controllers.Values.FirstOrDefault( x => x.Pointer.CurrentFocus == panel );
-                panel.HasFocus = controller is not null;
-                if ( panel.HasFocus ) {
-                    panel.EmulatedInput.Pointer = controller.Pointer;
-				}
 			}
 		}
 
@@ -222,13 +194,11 @@ namespace osu.XR {
             Scene.Root.BindHierarchyChange( (parent,added) => {
                 if ( added is Panel panel ) {
                     panels.Add( panel );
-                    reassignFocus();
                 }
             },
             (parent,removed) => {
                 if ( removed is Panel panel ) {
                     panels.Remove( panel );
-                    reassignFocus();
                 }
             }, true );
 
@@ -252,7 +222,7 @@ namespace osu.XR {
             AddFont( Resources, @"Fonts/Venera-Bold" );
             AddFont( Resources, @"Fonts/Venera-Black" );
             // TODO somehow just cache everything osugame caches ( either set our dep container to osu's + ours or somehow retreive all of its cache )
-            OsuGame.SetHost( Host );
+            OsuGame.SetHost( Host ); // TODO contant size for this
 
             OsuPanel.Source.Add( OsuGame );
             OsuPanel.ContentScale.Value = new Vector2( 2, 1 );
@@ -284,8 +254,10 @@ namespace osu.XR {
         protected override void Update () {
             base.Update();
 
-            onUpdateThread?.Invoke();
-            onUpdateThread = null;
+            lock ( updatelock ) {
+                onUpdateThread?.Invoke();
+                onUpdateThread = null;
+            }
 
             // HACK hide cursor because it jitters
             ( ( ( typeof( OsuGame ).GetField( "MenuCursorContainer", BindingFlags.NonPublic | BindingFlags.Instance ).GetValue( OsuGame ) ) as MenuCursorContainer ).Cursor as MenuCursor ).Hide();

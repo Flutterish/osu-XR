@@ -51,15 +51,15 @@ namespace osu.XR.Drawables {
             if ( main is null ) {
                 Config.Hide();
             }
-            else if ( secondary is null ) {
+            else if ( secondary is null || InputModeBindable.Value == InputMode.SinglePointer ) {
                 this.MoveTo( Game.Camera.Position + Game.Camera.Forward * 0.5f, 100 );
                 this.RotateTo( Game.Camera.Rotation, 100 );
                 RequestedInputMode = PanelInputMode.Regular;
             }
-            else {
-                Position = main.Position + ( main.Controller.Role == Valve.VR.ETrackedControllerRole.LeftHand ? main.Right : main.Left ) * 0.3f;
-                Rotation = main.Rotation * Quaternion.FromAxisAngle( Vector3.UnitX, MathF.PI / 2 );
-                RequestedInputMode = PanelInputMode.Inverted;
+            else { // TODO move to opening hand
+                this.MoveTo( secondary.Position + secondary.Forward * 0.2f + secondary.Up * 0.05f, 100 );
+                this.RotateTo( secondary.Rotation * Quaternion.FromAxisAngle( Vector3.UnitX, MathF.PI * 0.25f ), 100);
+                RequestedInputMode = PanelInputMode.Regular;
             }
         }
 	}
@@ -67,7 +67,7 @@ namespace osu.XR.Drawables {
 	public class ConfigPanel : SettingsPanel {
         public Bindable<InputMode> InputModeBindable => inputSettingSection.InputModeBindable;
 
-        InputSettingSection inputSettingSection;
+        InputSettingSection inputSettingSection = new InputSettingSection();
         public string Title => "VR Settings";
         public string Description => "change the way osu!XR behaves";
 		public ConfigPanel ( bool showSidebar ) : base( showSidebar ) {
@@ -75,7 +75,7 @@ namespace osu.XR.Drawables {
 		}
 
         protected override IEnumerable<SettingsSection> CreateSections () => new SettingsSection[] {
-            inputSettingSection = new InputSettingSection()
+            inputSettingSection
         };
 
         private readonly List<SettingsSubPanel> subPanels = new List<SettingsSubPanel>();
@@ -98,9 +98,9 @@ namespace osu.XR.Drawables {
         public InputSettingSection () {
             Children = new Drawable[] {
                 new SettingsEnumDropdown<InputMode> { LabelText = "Input mode", Current = InputModeBindable },
-                new SettingsCheckboxWithTooltip { LabelText = "Emulate touch with single pointer", Current = EmulateTouchWithPointersBindable, TooltipText = "In single pointer mode, send position only when holding a button" },
-                new SettingsCheckboxWithTooltip { LabelText = "Tap only on press", Current = TouchOnPressBindable, TooltipText = "In touchscreen mode, hold a button to touch the screen" },
-                new SettingsSliderWithTooltip<int, PxSliderBar> { LabelText = "Deadzone", Current = DeadzoneBindable, TooltipText = "Pointer deadzone after touching the screen or pressing a button" }
+                new SettingsCheckboxWithTooltip { LabelText = "Emulate touch with single pointer (TBD)", Current = EmulateTouchWithPointersBindable, TooltipText = "In single pointer mode, send position only when holding a button" },
+                new SettingsCheckboxWithTooltip { LabelText = "Tap only on press (TBD)", Current = TouchOnPressBindable, TooltipText = "In touchscreen mode, hold a button to touch the screen" },
+                new SettingsSliderWithTooltip<int, PxSliderBar> { LabelText = "Deadzone (TBD)", Current = DeadzoneBindable, TooltipText = "Pointer deadzone after touching the screen or pressing a button" }
             };
         }
     }
@@ -124,7 +124,7 @@ namespace osu.XR.Drawables {
         SinglePointer,
         [Description( "Two Pointers" )]
         DoublePointer,
-        [Description( "Touchscreen" )]
+        [Description( "Touchscreen (TBD)" )]
         TouchScreen
 	}
 }

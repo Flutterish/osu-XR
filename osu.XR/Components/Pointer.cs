@@ -36,9 +36,24 @@ namespace osu.XR.Components {
 		/// </summary>
 		public IHasCollider CurrentFocus { get; private set; }
 
-		public override void BeforeDraw ( XrObjectDrawNode.DrawSettings settings ) {
-			base.BeforeDraw( settings );
-			if ( Source is null ) return;
+		private bool wasActive = false;
+		protected override void Update () {
+			base.Update();
+			if ( Source is null || !IsVisible ) {
+				if ( wasActive ) {
+					wasActive = false;
+					var oldFocus = CurrentFocus;
+					var oldHit = CurrentHit;
+					CurrentHit = null;
+					CurrentFocus = null;
+					FocusChanged?.Invoke( new( oldFocus, null ) );
+					HitChanged?.Invoke( new(oldHit, null) );
+					NewHit?.Invoke( default );
+				}
+				return;
+			}
+
+			wasActive = true;
 
 			if ( PhysicsSystem.TryHit( Source.Position, Source.Forward, out var hit ) && hit.Distance < HitDistance ) {
 				Position = hit.Point;
@@ -47,12 +62,12 @@ namespace osu.XR.Components {
 				if ( CurrentHit != hit.Collider ) {
 					var prev = CurrentHit;
 					CurrentHit = hit.Collider;
-					HitChanged?.Invoke( new(prev,CurrentHit) );
 					if ( CurrentFocus != hit.Collider ) {
 						prev = CurrentFocus;
 						CurrentFocus = hit.Collider;
 						FocusChanged?.Invoke( new( prev, CurrentFocus ) );
 					}
+					HitChanged?.Invoke( new(prev,CurrentHit) );
 				}
 				NewHit?.Invoke( hit );
 			}

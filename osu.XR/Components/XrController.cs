@@ -1,4 +1,5 @@
 ﻿using OpenVR.NET;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.XR.Graphics;
 using osuTK;
@@ -11,18 +12,23 @@ using System.Threading.Tasks;
 
 namespace osu.XR.Components {
 	public class XrController : MeshedXrObject {
-		public readonly Controller Controller;
+		public readonly Controller Source;
 		Mesh ControllerMesh;
 		Mesh SphereMesh;
 
 		public readonly Pointer Pointer = new();
+		public readonly BindableBool IsPointerEnabledBindable = new();
+		public bool IsPointerEnabled {
+			get => IsPointerEnabledBindable.Value;
+			set => IsPointerEnabledBindable.Value = value;
+		}
 
 		public XrController ( Controller controller ) {
 			MainTexture = Textures.Pixel( controller.IsMainController ? Color4.Orange : Color4.LightBlue ).TextureGL;
 			Pointer.MainTexture = Textures.Pixel( (controller.IsMainController ? Colour4.Orange : Colour4.LightBlue ).MultiplyAlpha( 100f / 255f ) ).TextureGL;
 			Pointer.Source = this;
 
-			Controller = controller;
+			Source = controller;
 			ControllerMesh = new Mesh();
 			_ = controller.LoadModelAsync(
 				begin: () => ControllerMesh.IsReady = false,
@@ -42,12 +48,21 @@ namespace osu.XR.Components {
 				}
 				Pointer.IsVisible = false;
 				reversibleActions.Clear();
-			} );
+			}, true );
 
 			controller.BindEnabled( () => {
 				IsVisible = true;
-				Pointer.IsVisible = true;
-			} );
+				Pointer.IsVisible = IsPointerEnabled;
+			}, true );
+
+			IsPointerEnabledBindable.BindValueChanged( v => {
+				Pointer.IsVisible = v.NewValue;
+			}, true );
+
+			Pointer.FocusChanged += v => {
+				if ( v.OldValue is IReactsToControllerPointer old ) old.OnPointerFocusLost( this );
+				if ( v.NewValue is IReactsToControllerPointer @new ) @new.OnPointerFocusGained( this );
+			};
 		}
 
 		protected override void LoadComplete () {
@@ -66,8 +81,8 @@ namespace osu.XR.Components {
 
 		protected override void Update () {
 			base.Update();
-			Position = new osuTK.Vector3( Controller.Position.X, Controller.Position.Y, Controller.Position.Z );
-			Rotation = new osuTK.Quaternion( Controller.Rotation.X, Controller.Rotation.Y, Controller.Rotation.Z, Controller.Rotation.W );
+			Position = new osuTK.Vector3( Source.Position.X, Source.Position.Y, Source.Position.Z );
+			Rotation = new osuTK.Quaternion( Source.Rotation.X, Source.Rotation.Y, Source.Rotation.Z, Source.Rotation.W );
 		}
 
 		Dictionary<object,(System.Action @do, System.Action undo)> reversibleActions = new();
@@ -80,5 +95,10 @@ namespace osu.XR.Components {
 			reversibleActions.Remove( name );
 			undo();
 		}
+	}
+
+	public interface IReactsToControllerPointer {
+		void OnPointerFocusGained ( XrController controller );
+		void OnPointerFocusLost ( XrController controller );
 	}
 }
