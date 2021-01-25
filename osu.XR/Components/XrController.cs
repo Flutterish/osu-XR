@@ -22,6 +22,11 @@ namespace osu.XR.Components {
 			get => IsPointerEnabledBindable.Value;
 			set => IsPointerEnabledBindable.Value = value;
 		}
+		public readonly BindableBool IsHoldingBindable = new();
+		public bool IsHoldingAnything {
+			get => IsHoldingBindable.Value;
+			set => IsHoldingBindable.Value = value;
+		}
 
 		public XrController ( Controller controller ) {
 			MainTexture = Textures.Pixel( controller.IsMainController ? Color4.Orange : Color4.LightBlue ).TextureGL;
@@ -55,14 +60,17 @@ namespace osu.XR.Components {
 				Pointer.IsVisible = IsPointerEnabled;
 			}, true );
 
-			IsPointerEnabledBindable.BindValueChanged( v => {
-				Pointer.IsVisible = v.NewValue;
-			}, true );
+			IsPointerEnabledBindable.BindValueChanged( _ => updatePointer(), true );
+			IsHoldingBindable.BindValueChanged( _ => updatePointer(), true );
 
 			Pointer.FocusChanged += v => {
 				if ( v.OldValue is IReactsToControllerPointer old ) old.OnPointerFocusLost( this );
 				if ( v.NewValue is IReactsToControllerPointer @new ) @new.OnPointerFocusGained( this );
 			};
+		}
+
+		void updatePointer () {
+			Pointer.IsVisible = IsPointerEnabled && !IsHoldingAnything;
 		}
 
 		protected override void LoadComplete () {

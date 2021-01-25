@@ -10,6 +10,7 @@ using osu.XR.Drawables;
 using osu.XR.Maths;
 using osu.XR.Physics;
 using osu.XR.Rendering;
+using osu.XR.Settings;
 using osuTK;
 using System;
 using System.Collections.Generic;
@@ -30,8 +31,6 @@ namespace osu.XR.Components {
         public Bindable<Vector2> ContentScale = new( Vector2.One );
         public BufferedCapture SourceCapture { get; } = new BufferedCapture { RelativeSizeAxes = Axes.Both };
         protected bool IsMeshInvalidated = true;
-        [Resolved]
-        private XrConfigPanel config { get; set; }
 
         private bool hasFocus;
         new public bool HasFocus {
@@ -76,7 +75,7 @@ namespace osu.XR.Components {
         }
 
         public bool AcceptsInputFrom ( Controller controller )
-            => focusedControllerSources.Contains( controller ) || ( config.InputModeBindable.Value == InputMode.SinglePointer && focusedControllerSources.Contains( VR.MainController ) );
+            => focusedControllerSources.Contains( controller ) || ( inputModeBindable.Value == InputMode.SinglePointer && focusedControllerSources.Contains( VR.MainController ) );
 
         public Panel () {
             UseGammaCorrection = true;
@@ -90,8 +89,15 @@ namespace osu.XR.Components {
             Add( SourceCapture );
         }
 
-		protected override void LoadComplete () {
+        [BackgroundDependencyLoader]
+        private void load ( XrConfigManager config ) {
+            config.BindWith( XrConfigSetting.InputMode, inputModeBindable );
+        }
+        Bindable<InputMode> inputModeBindable = new();
+
+        protected override void LoadComplete () {
 			base.LoadComplete();
+
             VR.BindComponentsLoaded( () => {
                 var scroll = VR.GetControllerComponent<Controller2DVector>( XrAction.Scroll );
                 scroll.BindValueUpdatedDetailed( v => {
@@ -179,12 +185,16 @@ namespace osu.XR.Components {
                 IsMeshInvalidated = true;
                 lastTextureSize = MainTexture.Size;
 			}
-            if ( IsMeshInvalidated ) {
-                RecalculateMesh();
-			}
 		}
 
-        public bool IsColliderEnabled => IsVisible;
+		protected override void Update () {
+			base.Update();
+            if ( IsMeshInvalidated ) {
+                RecalculateMesh();
+            }
+        }
+
+		public virtual bool IsColliderEnabled => IsVisible;
 
         List<XrController> focusedControllers = new();
         IEnumerable<Controller> focusedControllerSources => focusedControllers.Select( x => x.Source );
@@ -215,8 +225,6 @@ namespace osu.XR.Components {
 
         Dictionary<Controller, TouchSource> touchSources = new();
         private void onPointerUpdate ( XrController controller, Raycast.RaycastHit hit ) {
-            if ( hit.TrisIndex >= Mesh.Tris.Count ) return; // BUG timetimes the mesh is empty but is still hit
-
             var position = TexturePositionAt( hit.TrisIndex, hit.Point );
             if ( useTouch ) {
                 if ( !touchSources.ContainsKey( controller.Source ) ) {

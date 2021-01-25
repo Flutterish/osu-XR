@@ -3,6 +3,7 @@ using OpenVR.NET.Manifests;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Input;
 using osu.Framework.Input.States;
@@ -23,6 +24,7 @@ using osu.XR.Maths;
 using osu.XR.Physics;
 using osu.XR.Projection;
 using osu.XR.Rendering;
+using osu.XR.Settings;
 using osuTK;
 using osuTK.Input;
 using System;
@@ -46,7 +48,7 @@ namespace osu.XR {
         public readonly Camera Camera = new() { Position = new Vector3( 0, 0, 0 ) };
         public readonly CurvedPanel OsuPanel = new CurvedPanel { Y = 1.8f }; // TODO our own VR error panel
         [Cached]
-        public readonly XrConfigPanel ConfigPanel = new XrConfigPanel();
+        public readonly XrConfigManager Config = new();
         [Cached(typeof(Framework.Game))]
         OsuGame OsuGame;
 
@@ -162,45 +164,32 @@ namespace osu.XR {
                 }
             } );
 
-            ConfigPanel.InputModeBindable.BindValueChanged( v => {
+            Config.BindWith( XrConfigSetting.InputMode, inputModeBindable );
+            inputModeBindable.BindValueChanged( v => {
                 onControllerInputModeChanged();
             }, true );
-            ConfigPanel.IsVisibleBindable.BindValueChanged( _ => {
-                onControllerInputModeChanged();
-            } );
         }
+        Bindable<InputMode> inputModeBindable = new();
 
         void onControllerInputModeChanged () {
             var main = MainController;
-            if ( ConfigPanel.InputModeBindable.Value == InputMode.SinglePointer ) {
+            if ( inputModeBindable.Value == InputMode.SinglePointer ) {
                 foreach ( var controller in controllers.Values ) {
                     controller.IsPointerEnabled = controller == main;
                 }
 			}
-            else if ( ConfigPanel.InputModeBindable.Value == InputMode.DoublePointer ) {
+            else if ( inputModeBindable.Value == InputMode.DoublePointer ) {
                 foreach ( var controller in controllers.Values ) {
-                    controller.IsPointerEnabled = !ConfigPanel.IsVisible || controller == main;
+                    controller.IsPointerEnabled = true;
                 }
             }
-            else if ( ConfigPanel.InputModeBindable.Value == InputMode.TouchScreen ) {
+            else if ( inputModeBindable.Value == InputMode.TouchScreen ) {
 
 			}
 		}
 
-        List<Panel> panels = new();
-
         protected override void LoadComplete () {
             base.LoadComplete();
-            Scene.Root.BindHierarchyChange( (parent,added) => {
-                if ( added is Panel panel ) {
-                    panels.Add( panel );
-                }
-            },
-            (parent,removed) => {
-                if ( removed is Panel panel ) {
-                    panels.Remove( panel );
-                }
-            }, true );
 
             Resources.AddStore( new DllResourceStore( typeof( OsuGameXr ).Assembly ) );
             Resources.AddStore( new DllResourceStore( typeof( OsuGame ).Assembly ) );
@@ -222,7 +211,7 @@ namespace osu.XR {
             AddFont( Resources, @"Fonts/Venera-Bold" );
             AddFont( Resources, @"Fonts/Venera-Black" );
             // TODO somehow just cache everything osugame caches ( either set our dep container to osu's + ours or somehow retreive all of its cache )
-            OsuGame.SetHost( Host ); // TODO contant size for this
+            OsuGame.SetHost( Host ); // TODO constant size for this
 
             OsuPanel.Source.Add( OsuGame );
             OsuPanel.ContentScale.Value = new Vector2( 2, 1 );
@@ -235,8 +224,8 @@ namespace osu.XR {
                 dependency.CacheAs( OsuGame.Dependencies.Get<IBindable<WorkingBeatmap>>() );
                 dependency.CacheAs<OsuGameBase>( OsuGame );
 
-                onUpdateThread += () => {
-                    Scene.Add( ConfigPanel );
+                onUpdateThread += () => { // TODO is this needed?
+                    Scene.Add( new XrConfigPanel() );
                 };
             };
 

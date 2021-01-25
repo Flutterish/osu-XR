@@ -3,12 +3,14 @@ using OpenVR.NET.Manifests;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Cursor;
 using osu.Framework.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays;
 using osu.Game.Overlays.Settings;
 using osu.XR.Components;
+using osu.XR.Settings;
 using osuTK;
 using System;
 using System.Collections.Generic;
@@ -20,7 +22,6 @@ using System.Threading.Tasks;
 namespace osu.XR.Drawables {
     public class XrConfigPanel : FlatPanel {
         public readonly ConfigPanel Config = new( true ) { AutoSizeAxes = Axes.X, RelativeSizeAxes = Axes.None, Height = 500 };
-        public Bindable<InputMode> InputModeBindable => Config.InputModeBindable;
         public readonly Bindable<bool> IsVisibleBindable = new();
 
         [Resolved]
@@ -34,38 +35,108 @@ namespace osu.XR.Drawables {
 
             VR.BindComponentsLoaded( () => {
                 var toggleMenu = VR.GetControllerComponent<ControllerButton>( XrAction.ToggleMenu );
-                toggleMenu.BindValueChanged( v => {
-                    if ( v ) {
-                        Config.ToggleVisibility();
+                toggleMenu.BindValueChangedDetailed( v => {
+                    if ( v.NewValue ) {
+                        if ( Config.State.Value == Visibility.Visible ) {
+                            if ( HoldingController is null || HoldingController.Source == v.Source ) {
+                                Config.Hide();
+                                holdingController = null;
+                            }
+                            else {
+                                holdingController = openingController = v.Source;
+                            }
+                        }
+                        else {
+                            holdingController = openingController = v.Source;
+                            this.Position = targetPosition;
+                            this.Rotation = targetRotation;
+                            Config.Show();
+						}
                     }
                 } );
             } );
         }
+        Bindable<InputMode> inputModeBindable = new();
 
-		protected override void Update () {
+        [BackgroundDependencyLoader]
+        private void load ( XrConfigManager config ) {
+            config.BindWith( XrConfigSetting.InputMode, inputModeBindable );
+
+            inputModeBindable.BindValueChanged( v => {
+                if ( inputModeBindable.Value == InputMode.SinglePointer ) {
+                    holdingController = null;
+                }
+                else if ( inputModeBindable.Value == InputMode.DoublePointer ) {
+                    holdingController = openingController;
+                }
+                else if ( inputModeBindable.Value == InputMode.TouchScreen ) {
+
+                }
+            }, true );
+        }
+
+        private Controller openingController; // TODO try to simplify this
+        private Controller _holdingController;
+        private Controller holdingController {
+            get => _holdingController;
+            set {
+                var prev = Game.GetControllerFor( _holdingController );
+                if ( prev is not null ) prev.IsHoldingAnything = false;
+
+                _holdingController = value;
+                var next = HoldingController;
+                if ( next is not null ) next.IsHoldingAnything = true;
+			}
+		}
+        public XrController HoldingController {
+            get {
+                if ( inputModeBindable.Value == InputMode.SinglePointer || VR.EnabledControllerCount <= 1 ) return null;
+                if ( holdingController?.IsEnabled == true ) return Game.GetControllerFor( holdingController );
+                else return null;
+			}
+		}
+		public override bool IsColliderEnabled => Config.State.Value == Visibility.Visible;
+
+        Vector3 targetPosition {
+            get {
+                if ( HoldingController is null ) {
+                    return Game.Camera.Position + Game.Camera.Forward * 0.5f;
+                }
+                else {
+                    return HoldingController.Position + HoldingController.Forward * 0.2f + HoldingController.Up * 0.05f;
+                }
+            }
+        }
+
+        Quaternion targetRotation {
+            get {
+                if ( HoldingController is null ) {
+                    return Game.Camera.Rotation;
+                }
+                else {
+                    return HoldingController.Rotation * Quaternion.FromAxisAngle( Vector3.UnitX, MathF.PI * 0.25f );
+                }
+            }
+        }
+
+        protected override void Update () {
 			base.Update();
             IsVisible = Config.IsPresent;
             IsVisibleBindable.Value = IsVisible;
-            var main = Game.MainController;
-            var secondary = Game.SecondaryController;
-            if ( main is null ) {
-                Config.Hide();
-            }
-            else if ( secondary is null || InputModeBindable.Value == InputMode.SinglePointer ) {
-                this.MoveTo( Game.Camera.Position + Game.Camera.Forward * 0.5f, 100 );
-                this.RotateTo( Game.Camera.Rotation, 100 );
-                RequestedInputMode = PanelInputMode.Regular;
-            }
-            else { // TODO move to opening hand
-                this.MoveTo( secondary.Position + secondary.Forward * 0.2f + secondary.Up * 0.05f, 100 );
-                this.RotateTo( secondary.Rotation * Quaternion.FromAxisAngle( Vector3.UnitX, MathF.PI * 0.25f ), 100);
-                RequestedInputMode = PanelInputMode.Regular;
+            
+            if ( Config.State.Value == Visibility.Visible ) {
+                if ( VR.EnabledControllerCount == 0 ) {
+                    Config.Hide();
+                    holdingController = null;
+                }
+                this.MoveTo( targetPosition, 100 );
+                this.RotateTo( targetRotation, 100 );
+                RequestedInputMode = HoldingController == Game.MainController ? PanelInputMode.Inverted : PanelInputMode.Regular;
             }
         }
 	}
 
 	public class ConfigPanel : SettingsPanel {
-        public Bindable<InputMode> InputModeBindable => inputSettingSection.InputModeBindable;
 
         InputSettingSection inputSettingSection = new InputSettingSection();
         public string Title => "VR Settings";
@@ -85,22 +156,20 @@ namespace osu.XR.Drawables {
     }
 
     public class InputSettingSection : SettingsSection {
-        public readonly Bindable<InputMode> InputModeBindable = new Bindable<InputMode>( InputMode.SinglePointer );
-        public readonly BindableBool EmulateTouchWithPointersBindable = new();
-        public readonly BindableBool TouchOnPressBindable = new();
-        public readonly BindableInt DeadzoneBindable = new( 20 ) { MinValue = 0, MaxValue = 100 };
         public override string Header => "Input";
 
         public override Drawable CreateIcon () => new SpriteIcon {
             Icon = FontAwesome.Solid.Keyboard
         };
 
-        public InputSettingSection () {
+
+        [BackgroundDependencyLoader]
+        private void load ( XrConfigManager config ) {
             Children = new Drawable[] {
-                new SettingsEnumDropdown<InputMode> { LabelText = "Input mode", Current = InputModeBindable },
-                new SettingsCheckboxWithTooltip { LabelText = "Emulate touch with single pointer (TBD)", Current = EmulateTouchWithPointersBindable, TooltipText = "In single pointer mode, send position only when holding a button" },
-                new SettingsCheckboxWithTooltip { LabelText = "Tap only on press (TBD)", Current = TouchOnPressBindable, TooltipText = "In touchscreen mode, hold a button to touch the screen" },
-                new SettingsSliderWithTooltip<int, PxSliderBar> { LabelText = "Deadzone (TBD)", Current = DeadzoneBindable, TooltipText = "Pointer deadzone after touching the screen or pressing a button" }
+                new SettingsEnumDropdown<InputMode> { LabelText = "Input mode", Current = config.GetBindable<InputMode>( XrConfigSetting.InputMode ) },
+                new SettingsCheckboxWithTooltip { LabelText = "Emulate touch with single pointer (TBD)", Current = config.GetBindable<bool>( XrConfigSetting.EmulateTouchWithSinglePointer ), TooltipText = "In single pointer mode, send position only when holding a button" },
+                new SettingsCheckboxWithTooltip { LabelText = "Tap only on press (TBD)", Current = config.GetBindable<bool>( XrConfigSetting.TapOnPress ), TooltipText = "In touchscreen mode, hold a button to touch the screen" },
+                new SettingsSliderWithTooltip<int, PxSliderBar> { LabelText = "Deadzone (TBD)", Current = config.GetBindable<int>( XrConfigSetting.Deadzone ), TooltipText = "Pointer deadzone after touching the screen or pressing a button" }
             };
         }
     }
