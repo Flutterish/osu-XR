@@ -14,7 +14,7 @@ namespace osu.XR.Settings {
 		protected override void InitialiseDefaults () {
 			base.InitialiseDefaults();
 			Set( XrConfigSetting.InputMode, InputMode.SinglePointer );
-			Set( XrConfigSetting.EmulateTouchWithSinglePointer, false );
+			Set( XrConfigSetting.SinglePointerTouch, false );
 			Set( XrConfigSetting.TapOnPress, false );
 			Set( XrConfigSetting.Deadzone, 20, 0, 100 );
 		}
@@ -30,7 +30,7 @@ namespace osu.XR.Settings {
 
 	public enum XrConfigSetting {
 		InputMode,
-		EmulateTouchWithSinglePointer,
+		SinglePointerTouch,
 		TapOnPress,
 		Deadzone
 	}

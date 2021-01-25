@@ -75,7 +75,7 @@ namespace osu.XR.Components {
         }
 
         public bool AcceptsInputFrom ( Controller controller )
-            => focusedControllerSources.Contains( controller ) || ( inputModeBindable.Value == InputMode.SinglePointer && focusedControllerSources.Contains( VR.MainController ) );
+            => focusedControllerSources.Contains( controller ) || ( !useTouch && inputModeBindable.Value == InputMode.SinglePointer && focusedControllerSources.Contains( VR.MainController ) );
 
         public Panel () {
             UseGammaCorrection = true;
@@ -92,8 +92,10 @@ namespace osu.XR.Components {
         [BackgroundDependencyLoader]
         private void load ( XrConfigManager config ) {
             config.BindWith( XrConfigSetting.InputMode, inputModeBindable );
+            config.BindWith( XrConfigSetting.SinglePointerTouch, singlePointerTouchBindable );
         }
         Bindable<InputMode> inputModeBindable = new();
+        Bindable<bool> singlePointerTouchBindable = new();
 
         protected override void LoadComplete () {
 			base.LoadComplete();
@@ -242,7 +244,7 @@ namespace osu.XR.Components {
             }
         }
 
-        bool useTouch => focusedControllers.Count > 1;
+        bool useTouch => focusedControllers.Count > 1 || singlePointerTouchBindable.Value;
 
         private class TouchSource {
             public Controller Source;
