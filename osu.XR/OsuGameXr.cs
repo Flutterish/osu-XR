@@ -20,6 +20,7 @@ using osu.Game.Resources;
 using osu.Game.Rulesets;
 using osu.XR.Components;
 using osu.XR.Drawables;
+using osu.XR.Graphics;
 using osu.XR.Maths;
 using osu.XR.Physics;
 using osu.XR.Projection;
@@ -51,6 +52,8 @@ namespace osu.XR {
         public readonly XrConfigManager Config = new();
         [Cached(typeof(Framework.Game))]
         OsuGame OsuGame;
+        [Cached]
+        public readonly BeatProvider BeatProvider = new();
 
         public XrController MainController => controllers.Values.FirstOrDefault( x => x.Source.IsEnabled && x.Source.IsMainController ) ?? controllers.Values.FirstOrDefault( x => x.Source.IsEnabled );
         public XrController SecondaryController {
@@ -69,7 +72,7 @@ namespace osu.XR {
         object updatelock = new { };
 		public OsuGameXr ( string[] args ) { // BUG sometimes at startup osu throws an error. investigate.
             OsuGame = new OsuGame( args ) { RelativeSizeAxes = Axes.Both };
-            Scene = new XrScene { RelativeSizeAxes = Axes.Both };
+            Scene = new XrScene { RelativeSizeAxes = Axes.Both, Camera = Camera };
 
             VR.BindNewControllerAdded( c => {
                 var controller = new XrController( c );
@@ -226,19 +229,20 @@ namespace osu.XR {
 
                 onUpdateThread += () => { // TODO is this needed?
                     Scene.Add( new XrConfigPanel() );
+                    AddInternal( BeatProvider );
                 };
             };
 
             AddInternal( Scene );
-            Scene.Camera = Camera;
             Scene.Root.Add( new SkyBox() );
             Scene.Root.Add( new FloorGrid() );
             Scene.Root.Add( Camera );
             Scene.Root.Add( OsuPanel );
+            Scene.Root.Add( new BeatingScenery() );
             PhysicsSystem.Root = Scene.Root;
         }
 
-		Dictionary<Controller, XrController> controllers = new();
+        Dictionary<Controller, XrController> controllers = new();
         private event System.Action onUpdateThread;
         protected override void Update () {
             base.Update();

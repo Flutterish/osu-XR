@@ -49,5 +49,14 @@ namespace osu.XR.Maths {
 			q.Z = CopySign( q.Z, mat.m1 - mat.m4 );
 			return q.Normalized().Inverted();
 		}
+
+		public static double NextDouble ( this Random random, double range )
+			=> random.NextDouble() * range;
+
+		public static double NextDouble ( this Random random, double from, double to )
+			=> from + random.NextDouble() * (to-from);
+
+		public static bool Chance ( this Random random, double chance )
+			=> random.NextDouble() < chance;
 	}
 }

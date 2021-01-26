@@ -110,7 +110,7 @@ namespace osu.XR.Projection {
 
             GLWrapper.PushDepthInfo( new DepthInfo( true, true, osuTK.Graphics.ES30.DepthFunction.Less ) );
             GL.Clear( ClearBufferMask.DepthBufferBit );
-            lock ( depthTestedRenderTargets ) {
+            lock ( depthTestedRenderTargets ) { // TODO sort transparent drawables ( transparent last, first the most distant ones )
                 foreach ( var i in depthTestedRenderTargets ) {
                     i.BeforeDraw( settings );
                     i.DrawNode?.Draw( settings );

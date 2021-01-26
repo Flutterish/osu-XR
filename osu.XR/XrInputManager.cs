@@ -1,4 +1,5 @@
-﻿using osu.Framework.Bindables;
+﻿using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Input;
 using osu.Framework.Input.Handlers;
 using osu.Framework.Input.Handlers.Keyboard;
@@ -7,6 +8,7 @@ using osu.Framework.Input.StateChanges;
 using osu.Framework.Platform;
 using osu.XR.Components;
 using osu.XR.Maths;
+using osu.XR.Settings;
 using osuTK;
 using osuTK.Input;
 using System;
@@ -149,8 +151,13 @@ namespace osu.XR {
 			public override bool IsActive => true;
 			public override int Priority => 0;
 
-			public readonly BindableDouble DeadzoneBindable = new( 70 );
+			public readonly BindableInt DeadzoneBindable = new( 70 );
 			double holdDuration = 500;
+
+			[BackgroundDependencyLoader]
+			private void load ( XrConfigManager config ) {
+				config.BindWith( XrConfigSetting.Deadzone, DeadzoneBindable );
+			}
 
 			private void enqueueInput ( IInput input ) {
 				PendingInputs.Enqueue( input );

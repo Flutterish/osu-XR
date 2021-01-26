@@ -10,11 +10,18 @@ using System.Threading.Tasks;
 
 namespace osu.XR.Components {
 	public static class TransformExtensions {
-        public static TransformSequence<T> MoveTo<T> ( this T drawable, Vector3 position, double duration, Easing easing = Easing.None )
+        public static TransformSequence<T> MoveTo<T> ( this T drawable, Vector3 position, double duration = 0, Easing easing = Easing.None )
             where T : XrObject
             => drawable.TransformTo( drawable.PopulateTransform( new PositionTransform( position ), default, duration, new DefaultEasingFunction( easing ) ) );
 
-        public static TransformSequence<T> RotateTo<T> ( this T drawable, Quaternion rotation, double duration, Easing easing = Easing.None )
+        public static TransformSequence<T> ScaleTo<T> ( this T drawable, Vector3 scale, double duration = 0, Easing easing = Easing.None )
+            where T : XrObject
+            => drawable.TransformTo( drawable.PopulateTransform( new ScaleTransform( scale ), default, duration, new DefaultEasingFunction( easing ) ) );
+        public static TransformSequence<T> ScaleTo<T> ( this TransformSequence<T> seq, Vector3 scale, double duration = 0, Easing easing = Easing.None )
+            where T : XrObject
+            => seq.Append( o => o.ScaleTo(scale,duration,easing) );
+
+        public static TransformSequence<T> RotateTo<T> ( this T drawable, Quaternion rotation, double duration = 0, Easing easing = Easing.None )
             where T : XrObject
             => drawable.TransformTo( drawable.PopulateTransform( new RotationTransform( rotation ), default, duration, new DefaultEasingFunction( easing ) ) );
 
@@ -42,6 +49,30 @@ namespace osu.XR.Components {
             }
         }
 
+        private class ScaleTransform : Transform<Vector3, XrObject> {
+            private readonly Vector3 target;
+
+            public override string TargetMember => nameof( XrObject.Scale );
+
+            public ScaleTransform ( Vector3 target ) {
+                this.target = target;
+            }
+
+            private Vector3 scaleAt ( double time ) {
+                if ( time < StartTime ) return StartValue;
+                if ( time >= EndTime ) return EndValue;
+
+                return StartValue + Interpolation.ValueAt( time, 0f, 1f, StartTime, EndTime, Easing ) * ( EndValue - StartValue );
+            }
+
+            protected override void Apply ( XrObject d, double time ) => d.Scale = scaleAt( time );
+
+            protected override void ReadIntoStartValue ( XrObject d ) {
+                StartValue = d.Scale;
+                EndValue = target;
+            }
+        }
+
         private class RotationTransform : Transform<Quaternion, XrObject> {
             private readonly Quaternion target;
 
@@ -51,14 +82,14 @@ namespace osu.XR.Components {
                 this.target = target;
             }
 
-            private Quaternion positionAt ( double time ) {
+            private Quaternion rotationAt ( double time ) {
                 if ( time < StartTime ) return StartValue;
                 if ( time >= EndTime ) return EndValue;
 
                 return Quaternion.Slerp( StartValue, EndValue, Interpolation.ValueAt( time, 0f, 1f, StartTime, EndTime, Easing ) );
             }
 
-            protected override void Apply ( XrObject d, double time ) => d.Rotation = positionAt( time );
+            protected override void Apply ( XrObject d, double time ) => d.Rotation = rotationAt( time );
 
             protected override void ReadIntoStartValue ( XrObject d ) {
                 StartValue = d.Rotation;

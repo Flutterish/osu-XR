@@ -5,6 +5,7 @@ using osu.XR.Projection;
 using osuTK;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using static osu.XR.Components.XrObject.XrObjectDrawNode;
 
 namespace osu.XR.Components {
@@ -20,8 +21,20 @@ namespace osu.XR.Components {
 		
 		private List<XrObject> children = new();
 		private XrObject parent;
-
-		new public IReadOnlyList<XrObject> Children => children.AsReadOnly();
+		new public XrObject Child {
+			get => children.Single();
+			set {
+				foreach ( var i in children.ToArray() ) i.Parent = null;
+				value.Parent = this;
+			}
+		}
+		new public IReadOnlyList<XrObject> Children {
+			get => children.AsReadOnly();
+			set {
+				foreach ( var i in children.ToArray() ) i.Parent = null;
+				foreach ( var i in value ) i.Parent = this;
+			}
+		}
 		new public XrObject Parent {
 			get => parent;
 			set {
@@ -32,6 +45,7 @@ namespace osu.XR.Components {
 					con.Remove( this );
 
 					parent.onChildRemoved( this );
+					foreach ( var i in GetAllChildrenInHiererchy() ) parent.onChildRemovedFromHierarchy( i.parent, i );
 				}
 				parent = value;
 				if ( parent is Container con2 ) {
@@ -39,6 +53,7 @@ namespace osu.XR.Components {
 					con2.Add( this );
 
 					parent.onChildAdded( this );
+					foreach ( var i in GetAllChildrenInHiererchy() ) parent.onChildAddedToHierarchy( i.parent, i );
 				}
 				Transform.SetParent( parent?.Transform, transformKey );
 			}

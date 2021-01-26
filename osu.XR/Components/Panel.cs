@@ -93,9 +93,15 @@ namespace osu.XR.Components {
         private void load ( XrConfigManager config ) {
             config.BindWith( XrConfigSetting.InputMode, inputModeBindable );
             config.BindWith( XrConfigSetting.SinglePointerTouch, singlePointerTouchBindable );
+            config.BindWith( XrConfigSetting.Deadzone, deadzoneBindable );
         }
+        BindableInt deadzoneBindable = new( 20 );
         Bindable<InputMode> inputModeBindable = new();
         Bindable<bool> singlePointerTouchBindable = new();
+
+        bool inDeadzone = false;
+        Vector2 deadzoneCenter;
+        Vector2 pointerPosition;
 
         protected override void LoadComplete () {
 			base.LoadComplete();
@@ -112,54 +118,45 @@ namespace osu.XR.Components {
                 mouseLeft.BindValueChangedDetailed( v => {
                     if ( !AcceptsInputFrom( v.Source ) ) return;
 
-                    if ( useTouch ) {
-                        if ( !touchSources.TryGetValue( v.Source, out var touch ) ) {
-                            touchSources.Add( v.Source, touch = new TouchSource { Source = v.Source } );
-                        }
-                        if ( v.NewValue ) {
-                            touch.ActionCount++;
-                            if ( touch.ActionCount == 1 ) EmulatedInput.TouchDown( touch, touch.Position );
-                        }
-                        else {
-                            if ( touch.ActionCount == 1 ) EmulatedInput.TouchUp( touch, touch.Position );
-                            touch.ActionCount = Math.Max( 0, touch.ActionCount - 1 );
-                        }
-                    }
-                    else {
-                        if ( VR.EnabledControllerCount > 1 ) {
-                            if ( RequestedInputMode == PanelInputMode.Regular ) EmulatedInput.IsLeftPressed = v.NewValue;
-                            else if ( RequestedInputMode == PanelInputMode.Inverted ) EmulatedInput.IsRightPressed = v.NewValue;
-                        }
-                        else EmulatedInput.IsLeftPressed = v.NewValue;
-                    }
+                    handleButton( v.Source, isLeft: true, isDown: v.NewValue );
                 } );
 
                 var mouseRight = VR.GetControllerComponent<ControllerButton>( XrAction.MouseRight );
                 mouseRight.BindValueChangedDetailed( v => {
                     if ( !AcceptsInputFrom( v.Source ) ) return;
 
-                    if ( useTouch ) {
-                        if ( !touchSources.TryGetValue( v.Source, out var touch ) ) {
-                            touchSources.Add( v.Source, touch = new TouchSource { Source = v.Source } );
-                        }
-                        if ( v.NewValue ) {
-                            touch.ActionCount++;
-                            if ( touch.ActionCount == 1 ) EmulatedInput.TouchDown( touch, touch.Position );
-                        }
-                        else {
-                            if ( touch.ActionCount == 1 ) EmulatedInput.TouchUp( touch, touch.Position );
-                            touch.ActionCount = Math.Max( 0, touch.ActionCount - 1 );
-                        }
-                    }
-                    else {
-                        if ( VR.EnabledControllerCount > 1 ) {
-                            if ( RequestedInputMode == PanelInputMode.Regular ) EmulatedInput.IsRightPressed = v.NewValue;
-                            else if ( RequestedInputMode == PanelInputMode.Inverted ) EmulatedInput.IsLeftPressed = v.NewValue;
-                        }
-                        else EmulatedInput.IsLeftPressed = v.NewValue;
-                    }
+                    handleButton( v.Source, isLeft: false, isDown: v.NewValue );
                 } );
             } );
+        }
+
+        void handleButton ( Controller source, bool isLeft, bool isDown ) {
+            if ( useTouch ) {
+                if ( !touchSources.TryGetValue( source, out var touch ) ) {
+                    touchSources.Add( source, touch = new TouchSource { Source = source } );
+                }
+                if ( isDown ) {
+                    touch.ActionCount++;
+                    if ( touch.ActionCount == 1 ) EmulatedInput.TouchDown( touch, touch.Position );
+                }
+                else {
+                    if ( touch.ActionCount == 1 ) EmulatedInput.TouchUp( touch, touch.Position );
+                    touch.ActionCount = Math.Max( 0, touch.ActionCount - 1 );
+                }
+            }
+            else {
+                if ( VR.EnabledControllerCount > 1 ) {
+                    if ( RequestedInputMode == PanelInputMode.Regular == isLeft ) EmulatedInput.IsLeftPressed = isDown;
+                    else if ( RequestedInputMode == PanelInputMode.Inverted == isLeft ) EmulatedInput.IsRightPressed = isDown;
+                }
+                else EmulatedInput.IsLeftPressed = isDown;
+
+                if ( isDown ) {
+                    inDeadzone = true;
+                    deadzoneCenter = pointerPosition;
+                }
+                else inDeadzone = false;
+            }
         }
 
 		protected abstract void RecalculateMesh ();
@@ -240,7 +237,9 @@ namespace osu.XR.Components {
                 }
 			}
             else {
-                EmulatedInput.mouseHandler.handleMouseMove( position );
+                pointerPosition = position;
+                if ( ( pointerPosition - deadzoneCenter ).Length > deadzoneBindable.Value ) inDeadzone = false;
+                if ( !inDeadzone ) EmulatedInput.mouseHandler.handleMouseMove( position );
             }
         }
 

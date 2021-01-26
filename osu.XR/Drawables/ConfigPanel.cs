@@ -40,14 +40,14 @@ namespace osu.XR.Drawables {
                         if ( Config.State.Value == Visibility.Visible ) {
                             if ( HoldingController is null || HoldingController.Source == v.Source ) {
                                 Config.Hide();
-                                holdingController = null;
+                                openingController = null;
                             }
                             else {
-                                holdingController = openingController = v.Source;
+                                openingController = v.Source;
                             }
                         }
                         else {
-                            holdingController = openingController = v.Source;
+                            openingController = v.Source;
                             this.Position = targetPosition;
                             this.Rotation = targetRotation;
                             Config.Show();
@@ -61,37 +61,14 @@ namespace osu.XR.Drawables {
         [BackgroundDependencyLoader]
         private void load ( XrConfigManager config ) {
             config.BindWith( XrConfigSetting.InputMode, inputModeBindable );
-
-            inputModeBindable.BindValueChanged( v => {
-                if ( inputModeBindable.Value == InputMode.SinglePointer ) {
-                    holdingController = null;
-                }
-                else if ( inputModeBindable.Value == InputMode.DoublePointer ) {
-                    holdingController = openingController;
-                }
-                else if ( inputModeBindable.Value == InputMode.TouchScreen ) {
-
-                }
-            }, true );
         }
 
-        private Controller openingController; // TODO try to simplify this
-        private Controller _holdingController;
-        private Controller holdingController {
-            get => _holdingController;
-            set {
-                var prev = Game.GetControllerFor( _holdingController );
-                if ( prev is not null ) prev.IsHoldingAnything = false;
-
-                _holdingController = value;
-                var next = HoldingController;
-                if ( next is not null ) next.IsHoldingAnything = true;
-			}
-		}
+        private Controller openingController;
+        private XrController previousHoldingController;
         public XrController HoldingController {
             get {
                 if ( inputModeBindable.Value == InputMode.SinglePointer || VR.EnabledControllerCount <= 1 ) return null;
-                if ( holdingController?.IsEnabled == true ) return Game.GetControllerFor( holdingController );
+                if ( openingController?.IsEnabled == true ) return Game.GetControllerFor( openingController );
                 else return null;
 			}
 		}
@@ -124,10 +101,15 @@ namespace osu.XR.Drawables {
             IsVisible = Config.IsPresent;
             IsVisibleBindable.Value = IsVisible;
             
+            if ( HoldingController != previousHoldingController ) {
+                if ( previousHoldingController is not null ) previousHoldingController.IsHoldingAnything = false;
+                previousHoldingController = HoldingController;
+                if ( previousHoldingController is not null ) previousHoldingController.IsHoldingAnything = true;
+            }
             if ( Config.State.Value == Visibility.Visible ) {
                 if ( VR.EnabledControllerCount == 0 ) {
                     Config.Hide();
-                    holdingController = null;
+                    openingController = null;
                 }
                 this.MoveTo( targetPosition, 100 );
                 this.RotateTo( targetRotation, 100 );
@@ -137,7 +119,6 @@ namespace osu.XR.Drawables {
 	}
 
 	public class ConfigPanel : SettingsPanel {
-
         InputSettingSection inputSettingSection = new InputSettingSection();
         public string Title => "VR Settings";
         public string Description => "change the way osu!XR behaves";
@@ -162,14 +143,13 @@ namespace osu.XR.Drawables {
             Icon = FontAwesome.Solid.Keyboard
         };
 
-
         [BackgroundDependencyLoader]
         private void load ( XrConfigManager config ) {
             Children = new Drawable[] {
                 new SettingsEnumDropdown<InputMode> { LabelText = "Input mode", Current = config.GetBindable<InputMode>( XrConfigSetting.InputMode ) },
                 new SettingsCheckboxWithTooltip { LabelText = "Emulate touch with single pointer", Current = config.GetBindable<bool>( XrConfigSetting.SinglePointerTouch ), TooltipText = "In single pointer mode, send position only when holding a button" },
                 new SettingsCheckboxWithTooltip { LabelText = "Tap only on press (TBD)", Current = config.GetBindable<bool>( XrConfigSetting.TapOnPress ), TooltipText = "In touchscreen mode, hold a button to touch the screen" },
-                new SettingsSliderWithTooltip<int, PxSliderBar> { LabelText = "Deadzone (TBD)", Current = config.GetBindable<int>( XrConfigSetting.Deadzone ), TooltipText = "Pointer deadzone after touching the screen or pressing a button" }
+                new SettingsSliderWithTooltip<int, PxSliderBar> { LabelText = "Deadzone", Current = config.GetBindable<int>( XrConfigSetting.Deadzone ), TooltipText = "Pointer deadzone after touching the screen or pressing a button" }
             };
         }
     }
