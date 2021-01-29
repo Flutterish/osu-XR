@@ -19,10 +19,17 @@ namespace osu.XR.Components {
 			Mesh = Graphics.Mesh.FromOBJFile( "./Resources/shpere.obj" );
 		}
 
-		protected override void UpdatePointer () {
-			Position = Source.Position;
+		protected override void UpdatePointer () { // TODO back and forward motion should trigger a tap even while blocked
+			var targetPos = Source.Position; // BUG this can very rarely go though the collider
+			if ( PhysicsSystem.TryHit( Position, (targetPos - Position).Normalized(), out var rayHit ) && rayHit.Distance - Radius / 2 < ( Position - targetPos ).Length ) {
+				Position = rayHit.Point + rayHit.Normal * (float)Radius / 2;
+			}
+			else {
+				Position = targetPos;
+			}
+
 			Scale = new Vector3( (float)Radius );
-			if ( PhysicsSystem.TryHit( Source.Position, Radius, out var hit ) ) {
+			if ( PhysicsSystem.TryHit( Position, Radius, out var hit ) ) {
 				RaycastHit = new Raycast.RaycastHit(
 					point: hit.Point,
 					origin: hit.Origin,
@@ -46,7 +53,7 @@ namespace osu.XR.Components {
 
 /*
 TODO handheld/movable screen (grip binding)
-TODO adjustable screen params [size, arc, scale]
+TODO adjustable screen params [size, scale]
 TODO cursor warping (at least figure out which vertices to warp)
 TODO VR error panel ( button to show it in settings )
 */

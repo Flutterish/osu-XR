@@ -171,8 +171,11 @@ namespace osu.XR {
             inputModeBindable.BindValueChanged( v => {
                 onControllerInputModeChanged();
             }, true );
+            Config.BindWith( XrConfigSetting.ScreenHeight, screenHeightBindable );
+            screenHeightBindable.BindValueChanged( v => OsuPanel.Y = v.NewValue, true );
         }
         Bindable<InputMode> inputModeBindable = new();
+        Bindable<float> screenHeightBindable = new( 1.8f );
 
         void onControllerInputModeChanged () {
             var main = MainController;

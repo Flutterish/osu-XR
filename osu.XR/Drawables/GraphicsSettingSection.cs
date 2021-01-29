@@ -18,6 +18,7 @@ namespace osu.XR.Drawables {
             Children = new Drawable[] {
                 new SettingsSlider<float,RadToDegreeSliderBar> { Current = config.GetBindable<float>( XrConfigSetting.ScreenArc ), LabelText = "Screen arc" },
                 new SettingsSlider<float,MetersSliderBar> { Current = config.GetBindable<float>( XrConfigSetting.ScreenRadius ), LabelText = "Screen radius" },
+                new SettingsSlider<float,MetersSliderBar> { Current = config.GetBindable<float>( XrConfigSetting.ScreenHeight ), LabelText = "Screen height" },
                 // TODO setting for screen resolution
             };
         }

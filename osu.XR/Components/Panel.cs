@@ -188,6 +188,8 @@ namespace osu.XR.Components {
         }
 
         private void onPointerMove ( XrController controller, Raycast.RaycastHit hit ) {
+            if ( hit.Collider != this ) return;
+
             var position = TexturePositionAt( hit.TrisIndex, hit.Point );
             if ( controller.EmulatesTouch ) {
                 EmulatedInput.TouchMove( controller, position );
@@ -200,6 +202,8 @@ namespace osu.XR.Components {
         }
 
         private void onTouchDown ( XrController controller, Raycast.RaycastHit hit ) {
+            if ( hit.Collider != this ) return;
+
             var position = TexturePositionAt( hit.TrisIndex, hit.Point );
             EmulatedInput.TouchDown( controller, position );
         }

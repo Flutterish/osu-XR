@@ -307,7 +307,7 @@ namespace osu.XR.Physics {
 
 		public readonly struct RaycastHit {
 			/// <summary>
-			/// The point that was hit;
+			/// The point that was hit.
 			/// </summary>
 			public readonly Vector3 Point;
 			/// <summary>
@@ -315,7 +315,7 @@ namespace osu.XR.Physics {
 			/// </summary>
 			public readonly Vector3 Origin;
 			/// <summary>
-			/// The normal of the hit surface;
+			/// The normal of the hit surface.
 			/// </summary>
 			public readonly Vector3 Normal;
 			/// <summary>
