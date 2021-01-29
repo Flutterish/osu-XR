@@ -1,94 +1,84 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Bindables;
-using osu.XR.Graphics;
-using osu.XR.Maths;
 using osu.XR.Physics;
-using osuTK;
+using osuTK.Graphics.ES20;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using static osu.XR.Physics.Raycast;
 
 namespace osu.XR.Components {
-	/// <summary>
-	/// A 3D cursor.
-	/// </summary>
-	public class Pointer : MeshedXrObject {
-		public Transform Source;
+	public abstract class Pointer : MeshedXrObject {
 		[Resolved]
-		private PhysicsSystem PhysicsSystem { get; set; }
+		protected PhysicsSystem PhysicsSystem { get; private set; }
 
-		public double HitDistance { get => HitDistanceBindable.Value; set => HitDistanceBindable.Value = value; }
-		public readonly BindableDouble HitDistanceBindable = new( 5 );
-
-		public Pointer () { // TODO make colors reflect pressed buttons, possibly warp towards the held location ( easier to do with a circular texture )
-			Mesh = new();
-			Mesh.AddCircle( new Vector3( 0, 0, -0.01f ), Vector3.UnitZ, Vector3.UnitX * 0.04f, 30 );
-			Mesh.AddCircle( new Vector3( 0, 0, -0.02f ), Vector3.UnitZ, Vector3.UnitX * 0.014f, 30 );
-
-			MainTexture = Textures.Pixel( new osuTK.Graphics.Color4( 255, 255, 255, 100 ) ).TextureGL;
-		}
-
+		protected RaycastHit RaycastHit;
+		private IHasCollider currentHit;
 		/// <summary>
 		/// The <see cref="IHasCollider"/> this pointer points at. Might be null.
 		/// </summary>
-		public IHasCollider CurrentHit { get; private set; }
+		public IHasCollider CurrentHit {
+			get => currentHit;
+			protected set {
+				if ( value != currentHit ) {
+					var prev = currentHit;
+					currentHit = value;
+					if ( currentHit != null ) CurrentFocus = value;
+					HitChanged?.Invoke( new( prev, currentHit ) );
+				}
+				if ( value != null ) NewHit?.Invoke( RaycastHit );
+				else NoHit?.Invoke();
+			}
+		}
+
+		private IHasCollider currentFocus;
 		/// <summary>
 		/// The last non-null <see cref="CurrentHit"/>.
 		/// </summary>
-		public IHasCollider CurrentFocus { get; private set; }
+		public IHasCollider CurrentFocus {
+			get => currentFocus;
+			private set {
+				if ( value == currentFocus ) return;
+				var prev = currentFocus;
+				currentFocus = value;
+
+				FocusChanged?.Invoke( new(prev, currentFocus) );
+			}
+		}
 
 		private bool wasActive = false;
-		protected override void Update () {
+		public abstract bool IsActive { get; }
+		protected sealed override void Update () {
 			base.Update();
-			if ( Source is null || !IsVisible ) {
+			if ( !IsActive ) {
 				if ( wasActive ) {
+					RaycastHit = default;
 					wasActive = false;
-					var oldFocus = CurrentFocus;
-					var oldHit = CurrentHit;
-					CurrentHit = null;
-					CurrentFocus = null;
+
+					var oldFocus = currentFocus;
+					var oldHit = currentHit;
+					currentHit = null;
+					currentFocus = null;
 					FocusChanged?.Invoke( new( oldFocus, null ) );
-					HitChanged?.Invoke( new(oldHit, null) );
+					HitChanged?.Invoke( new( oldHit, null ) );
 					NewHit?.Invoke( default );
 				}
 				return;
 			}
 
 			wasActive = true;
-
-			if ( PhysicsSystem.TryHit( Source.Position, Source.Forward, out var hit ) && hit.Distance < HitDistance ) {
-				Position = hit.Point;
-				Rotation = Matrix4.LookAt( Vector3.Zero, hit.Normal, Vector3.UnitY ).ExtractRotation().Inverted();
-
-				if ( CurrentHit != hit.Collider ) {
-					var prev = CurrentHit;
-					CurrentHit = hit.Collider;
-					if ( CurrentFocus != hit.Collider ) {
-						prev = CurrentFocus;
-						CurrentFocus = hit.Collider;
-						FocusChanged?.Invoke( new( prev, CurrentFocus ) );
-					}
-					HitChanged?.Invoke( new(prev,CurrentHit) );
-				}
-				NewHit?.Invoke( hit );
-			}
-			else {
-				Position = Source.Position + Source.Forward * (float)HitDistance;
-				Rotation = Source.Rotation;
-				if ( CurrentHit != null ) {
-					var prev = CurrentHit;
-					CurrentHit = null;
-					HitChanged?.Invoke( new(prev, null) );
-				}
-				CurrentHit = null;
-			}
-
-			Scale = new Vector3( ( Position - Source.Position ).Length );
+			UpdatePointer();
 		}
+
+		protected abstract void UpdatePointer ();
 
 		public event Action<ValueChangedEvent<IHasCollider>> FocusChanged;
 		public event Action<ValueChangedEvent<IHasCollider>> HitChanged;
 
 		public delegate void PointerUpdate ( RaycastHit hit );
 		public event PointerUpdate NewHit;
+		public event Action NoHit;
 	}
 }

@@ -83,15 +83,15 @@ namespace osu.XR {
 		public void TouchMove ( object source, Vector2 position ) {
 			touchHandler.move( source, position, Time.Current );
 		}
-		public void TouchUp ( object source, Vector2 position ) {
-			touchHandler.touchUp( source, position, Time.Current );
+		public void TouchUp ( object source ) {
+			touchHandler.touchUp( source, Time.Current );
 		}
 		public void ReleaseAllTouch () {
 			touchHandler.releaseAll( Time.Current );
 		}
 
 		/// <summary>
-		/// A copy of <see cref="MouseHandler"/> overriden to use <see cref="Pointer"/> input.
+		/// A copy of <see cref="MouseHandler"/> overriden to use <see cref="RaycastPointer"/> input.
 		/// </summary>
 		internal class XrMouseHandler : InputHandler {
 			public override bool IsActive => true;
@@ -151,7 +151,7 @@ namespace osu.XR {
 			public override bool IsActive => true;
 			public override int Priority => 0;
 
-			public readonly BindableInt DeadzoneBindable = new( 70 );
+			public readonly BindableInt DeadzoneBindable = new( 20 );
 			double holdDuration = 500;
 
 			[BackgroundDependencyLoader]
@@ -183,11 +183,10 @@ namespace osu.XR {
 					enqueueInput( new TouchInput( touch.Touch, true ) ); // drag
 			}
 
-			internal void touchUp ( object source, Vector2 position, double time ) {
+			internal void touchUp ( object source, double time ) {
 				if ( !sources.ContainsKey( source ) ) return;
 
 				var touch = sources[ source ];
-				touch.Position = position;
 				sources.Remove( source );
 				if ( !touch.RightClick )
 					enqueueInput( new TouchInput( touch.Touch, false ) ); // tap if in deadzone
@@ -205,7 +204,7 @@ namespace osu.XR {
 			}
 			internal void releaseAll ( double time ) {
 				foreach ( var i in sources.ToArray() ) {
-					touchUp( i.Key, i.Value.Position, time );
+					touchUp( i.Key, time );
 				}
 			}
 

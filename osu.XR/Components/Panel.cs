@@ -15,13 +15,15 @@ using osuTK;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization.Json;
 using static osu.XR.Components.XrObject.XrObjectDrawNode;
+using static osu.XR.Physics.Raycast;
 
 namespace osu.XR.Components {
 	/// <summary>
 	/// A 3D panel that displays an image from a <see cref="BufferedCapture"/>.
 	/// </summary>
-	public abstract class Panel : MeshedXrObject, IHasCollider, IReactsToControllerPointer {
+	public abstract class Panel : MeshedXrObject, IHasCollider, IReactsToController {
         public PanelInputMode RequestedInputMode { get; protected set; } = PanelInputMode.Regular;
         public readonly XrInputManager EmulatedInput = new XrInputManager { RelativeSizeAxes = Axes.Both };
         public Container Source => EmulatedInput;
@@ -42,7 +44,7 @@ namespace osu.XR.Components {
                     EmulatedInput.IsLeftPressed = false;
                     EmulatedInput.IsRightPressed = false;
                     EmulatedInput.ReleaseAllTouch();
-				}
+                }
 			}
 		}
 
@@ -74,9 +76,6 @@ namespace osu.XR.Components {
             return this;
         }
 
-        public bool AcceptsInputFrom ( Controller controller )
-            => focusedControllerSources.Contains( controller ) || ( !useTouch && inputModeBindable.Value == InputMode.SinglePointer && focusedControllerSources.Contains( VR.MainController ) );
-
         public Panel () {
             UseGammaCorrection = true;
 
@@ -91,72 +90,26 @@ namespace osu.XR.Components {
 
         [BackgroundDependencyLoader]
         private void load ( XrConfigManager config ) {
-            config.BindWith( XrConfigSetting.InputMode, inputModeBindable );
-            config.BindWith( XrConfigSetting.SinglePointerTouch, singlePointerTouchBindable );
             config.BindWith( XrConfigSetting.Deadzone, deadzoneBindable );
         }
         BindableInt deadzoneBindable = new( 20 );
-        Bindable<InputMode> inputModeBindable = new();
-        Bindable<bool> singlePointerTouchBindable = new();
 
         bool inDeadzone = false;
         Vector2 deadzoneCenter;
         Vector2 pointerPosition;
-
-        protected override void LoadComplete () {
-			base.LoadComplete();
-
-            VR.BindComponentsLoaded( () => {
-                var scroll = VR.GetControllerComponent<Controller2DVector>( XrAction.Scroll );
-                scroll.BindValueUpdatedDetailed( v => {
-                    if ( !AcceptsInputFrom( v.Source ) ) return;
-
-                    EmulatedInput.Scroll += new Vector2( v.NewValue.X, v.NewValue.Y ) * (float)VR.DeltaTime * 80;
-                } );
-
-                var mouseLeft = VR.GetControllerComponent<ControllerButton>( XrAction.MouseLeft );
-                mouseLeft.BindValueChangedDetailed( v => {
-                    if ( !AcceptsInputFrom( v.Source ) ) return;
-
-                    handleButton( v.Source, isLeft: true, isDown: v.NewValue );
-                } );
-
-                var mouseRight = VR.GetControllerComponent<ControllerButton>( XrAction.MouseRight );
-                mouseRight.BindValueChangedDetailed( v => {
-                    if ( !AcceptsInputFrom( v.Source ) ) return;
-
-                    handleButton( v.Source, isLeft: false, isDown: v.NewValue );
-                } );
-            } );
-        }
-
-        void handleButton ( Controller source, bool isLeft, bool isDown ) {
-            if ( useTouch ) {
-                if ( !touchSources.TryGetValue( source, out var touch ) ) {
-                    touchSources.Add( source, touch = new TouchSource { Source = source } );
-                }
-                if ( isDown ) {
-                    touch.ActionCount++;
-                    if ( touch.ActionCount == 1 ) EmulatedInput.TouchDown( touch, touch.Position );
-                }
-                else {
-                    if ( touch.ActionCount == 1 ) EmulatedInput.TouchUp( touch, touch.Position );
-                    touch.ActionCount = Math.Max( 0, touch.ActionCount - 1 );
-                }
+        
+        void handleButton ( bool isLeft, bool isDown ) {
+            if ( VR.EnabledControllerCount > 1 ) {
+                if ( RequestedInputMode == PanelInputMode.Regular == isLeft ) EmulatedInput.IsLeftPressed = isDown;
+                else if ( RequestedInputMode == PanelInputMode.Inverted == isLeft ) EmulatedInput.IsRightPressed = isDown;
             }
-            else {
-                if ( VR.EnabledControllerCount > 1 ) {
-                    if ( RequestedInputMode == PanelInputMode.Regular == isLeft ) EmulatedInput.IsLeftPressed = isDown;
-                    else if ( RequestedInputMode == PanelInputMode.Inverted == isLeft ) EmulatedInput.IsRightPressed = isDown;
-                }
-                else EmulatedInput.IsLeftPressed = isDown;
-
-                if ( isDown ) {
-                    inDeadzone = true;
-                    deadzoneCenter = pointerPosition;
-                }
-                else inDeadzone = false;
+            else EmulatedInput.IsLeftPressed = isDown;
+        
+            if ( isDown ) {
+                inDeadzone = true;
+                deadzoneCenter = pointerPosition;
             }
+            else inDeadzone = false;
         }
 
 		protected abstract void RecalculateMesh ();
@@ -197,45 +150,48 @@ namespace osu.XR.Components {
 
         List<XrController> focusedControllers = new();
         IEnumerable<Controller> focusedControllerSources => focusedControllers.Select( x => x.Source );
-        Dictionary<XrController, Pointer.PointerUpdate> pointerEvents = new();
-		public void OnPointerFocusGained ( XrController controller ) {
+        Dictionary<XrController, System.Action> eventUnsubs = new();
+		public void OnControllerFocusGained ( XrController controller ) {
+            System.Action<ValueChangedEvent<Vector2>> onScroll = v => { EmulatedInput.Scroll += v.NewValue - v.OldValue; };
+            System.Action<ValueChangedEvent<bool>> onLeft = v => { handleButton( isLeft: true, isDown: v.NewValue ); };
+            System.Action<ValueChangedEvent<bool>> onRight = v => { handleButton( isLeft: false, isDown: v.NewValue ); };
+            System.Action<RaycastHit> onMove = hit => { onPointerMove( controller, hit ); };
+            System.Action<RaycastHit> onDown = hit => { onTouchDown( controller, hit ); };
+            System.Action onUp = () => { onTouchUp( controller ); };
+            controller.PointerMove += onMove;
+            controller.PointerDown += onDown;
+            controller.PointerUp += onUp;
+            controller.ScrollBindable.ValueChanged += onScroll;
+            controller.LeftButtonBindable.ValueChanged += onLeft;
+            controller.RightButtonBindable.ValueChanged += onRight;
+            eventUnsubs.Add( controller, () => {
+                controller.PointerMove -= onMove;
+                controller.PointerDown -= onDown;
+                controller.PointerUp -= onUp;
+                controller.ScrollBindable.ValueChanged -= onScroll;
+                controller.LeftButtonBindable.ValueChanged -= onLeft;
+                controller.RightButtonBindable.ValueChanged -= onRight;
+            } );
             focusedControllers.Add( controller );
-            Pointer.PointerUpdate @event = ( Raycast.RaycastHit hit ) => {
-                onPointerUpdate( controller, hit );
-            };
-            pointerEvents.Add( controller, @event );
-            controller.Pointer.NewHit += @event;
 
             updateFocus();
-		}
-        public void OnPointerFocusLost ( XrController controller ) {
+        }
+        public void OnControllerFocusLost ( XrController controller ) {
+            eventUnsubs[ controller ].Invoke();
+            eventUnsubs.Remove( controller );
             focusedControllers.Remove( controller );
-            controller.Pointer.NewHit -= pointerEvents[ controller ];
-            pointerEvents.Remove( controller );
+            
             updateFocus();
         }
         void updateFocus () {
             HasFocus = focusedControllers.Any();
-            if ( !useTouch ) {
-                touchSources.Clear();
-                EmulatedInput.ReleaseAllTouch();
-			}
         }
 
-        Dictionary<Controller, TouchSource> touchSources = new();
-        private void onPointerUpdate ( XrController controller, Raycast.RaycastHit hit ) {
+        private void onPointerMove ( XrController controller, Raycast.RaycastHit hit ) {
             var position = TexturePositionAt( hit.TrisIndex, hit.Point );
-            if ( useTouch ) {
-                if ( !touchSources.ContainsKey( controller.Source ) ) {
-                    touchSources.Add( controller.Source, new() { Position = position, Source = controller.Source } );
-                }
-                else {
-                    touchSources[ controller.Source ].Position = position;
-                    if ( touchSources[ controller.Source ].ActionCount > 0 ) {
-                        EmulatedInput.TouchMove( touchSources[ controller.Source ], position );
-                    }
-                }
-			}
+            if ( controller.EmulatesTouch ) {
+                EmulatedInput.TouchMove( controller, position );
+            }
             else {
                 pointerPosition = position;
                 if ( ( pointerPosition - deadzoneCenter ).Length > deadzoneBindable.Value ) inDeadzone = false;
@@ -243,12 +199,13 @@ namespace osu.XR.Components {
             }
         }
 
-        bool useTouch => focusedControllers.Count > 1 || singlePointerTouchBindable.Value;
+        private void onTouchDown ( XrController controller, Raycast.RaycastHit hit ) {
+            var position = TexturePositionAt( hit.TrisIndex, hit.Point );
+            EmulatedInput.TouchDown( controller, position );
+        }
 
-        private class TouchSource {
-            public Controller Source;
-            public Vector2 Position;
-            public int ActionCount;
+        private void onTouchUp ( XrController controller ) {
+            EmulatedInput.TouchUp( controller );
 		}
     }
 

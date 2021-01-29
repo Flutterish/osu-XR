@@ -33,7 +33,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Schema;
-using Pointer = osu.XR.Components.Pointer;
+using Pointer = osu.XR.Components.RaycastPointer;
 
 namespace osu.XR {
 	/// <summary>
@@ -178,17 +178,19 @@ namespace osu.XR {
             var main = MainController;
             if ( inputModeBindable.Value == InputMode.SinglePointer ) {
                 foreach ( var controller in controllers.Values ) {
-                    controller.IsPointerEnabled = controller == main;
+                    controller.Mode = controller == main ? ControllerMode.Pointer : ControllerMode.Disabled;
                 }
 			}
             else if ( inputModeBindable.Value == InputMode.DoublePointer ) {
                 foreach ( var controller in controllers.Values ) {
-                    controller.IsPointerEnabled = true;
+                    controller.Mode = ControllerMode.Pointer;
                 }
             }
             else if ( inputModeBindable.Value == InputMode.TouchScreen ) {
-
-			}
+                foreach ( var controller in controllers.Values ) {
+                    controller.Mode = ControllerMode.Touch;
+                }
+            }
 		}
 
         protected override void LoadComplete () {
@@ -214,10 +216,12 @@ namespace osu.XR {
             AddFont( Resources, @"Fonts/Venera-Bold" );
             AddFont( Resources, @"Fonts/Venera-Black" );
             // TODO somehow just cache everything osugame caches ( either set our dep container to osu's + ours or somehow retreive all of its cache )
-            OsuGame.SetHost( Host ); // TODO constant size for this
+            OsuGame.SetHost( Host );
 
             OsuPanel.Source.Add( OsuGame );
-            OsuPanel.ContentScale.Value = new Vector2( 2, 1 );
+            OsuPanel.AutosizeBoth();
+            OsuGame.RelativeSizeAxes = Axes.None;
+            OsuGame.Size = new Vector2( 1920 * 2, 1080 ); // TODO should also be adjustable
 
             OsuGame.OnLoadComplete += v => {
                 dependency.CacheAs( OsuGame.Dependencies.Get<PreviewTrackManager>() );
@@ -233,13 +237,18 @@ namespace osu.XR {
                 };
             };
 
+            // TODO transparency that either doesnt depend on order or is transparent-shader agnostic
+            // for now we are just sorting objects here
             AddInternal( Scene );
             Scene.Root.Add( new SkyBox() );
             Scene.Root.Add( new FloorGrid() );
+            Scene.Root.Add( new BeatingScenery() );
             Scene.Root.Add( Camera );
             Scene.Root.Add( OsuPanel );
-            Scene.Root.Add( new BeatingScenery() );
             PhysicsSystem.Root = Scene.Root;
+
+            Config.BindWith( XrConfigSetting.ScreenRadius, OsuPanel.RadiusBindable );
+            Config.BindWith( XrConfigSetting.ScreenArc, OsuPanel.ArcBindable );
         }
 
         Dictionary<Controller, XrController> controllers = new();

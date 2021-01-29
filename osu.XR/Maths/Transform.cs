@@ -87,6 +87,8 @@ namespace osu.XR.Maths {
 		public Vector3 Up => ( Rotation * new Vector4( 0, 1, 0, 1 ) ).Xyz;
 		public Vector3 Down => ( Rotation * new Vector4( 0, -1, 0, 1 ) ).Xyz;
 
+		public Vector3 GlobalPosition => ( Matrix * new Vector4( position, 1 ) ).Xyz;
+
 		private Matrix4x4 localMatrix;
 		private Matrix4x4 finalMatrix;
 
