@@ -5,6 +5,7 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input;
 using osu.Framework.Input.States;
 using osu.Framework.IO.Stores;
@@ -16,6 +17,7 @@ using osu.Game.Configuration;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Cursor;
 using osu.Game.Overlays;
+using osu.Game.Overlays.Notifications;
 using osu.Game.Resources;
 using osu.Game.Rulesets;
 using osu.XR.Components;
@@ -56,6 +58,8 @@ namespace osu.XR {
         OsuGame OsuGame;
         [Cached]
         public readonly BeatProvider BeatProvider = new();
+        [Cached]
+        public readonly XrNotificationPanel Notifications = new XrNotificationPanel();
 
         public XrController MainController => controllers.Values.FirstOrDefault( x => x.Source.IsEnabled && x.Source.IsMainController ) ?? controllers.Values.FirstOrDefault( x => x.Source.IsEnabled );
         public XrController SecondaryController {
@@ -73,6 +77,15 @@ namespace osu.XR {
 
         object updatelock = new { };
 		public OsuGameXr ( string[] args ) { // BUG sometimes at startup osu throws an error. investigate.
+            OpenVR.NET.Events.OnMessage += msg => {
+                Notifications.Post( new SimpleNotification() { Text = msg } );
+            };
+            OpenVR.NET.Events.OnError += msg => {
+                Notifications.Post( new SimpleNotification() { Text = msg, Icon = FontAwesome.Solid.Bomb } );
+            };
+            OpenVR.NET.Events.OnException += (msg,e) => {
+                Notifications.Post( new SimpleNotification() { Text = msg, Icon = FontAwesome.Solid.Bomb } );
+            };
             OsuGame = new OsuGame( args ) { RelativeSizeAxes = Axes.None, Size = new Vector2( 1920 * 2, 1080 ) };
             Scene = new XrScene { RelativeSizeAxes = Axes.Both, Camera = Camera };
 
@@ -148,7 +161,7 @@ namespace osu.XR {
                         Localizations = new() { [ "en_us" ] = "Configuration" }
 					},
                     new() {
-                        Type = ActionGroupType.Hidden,
+                        Type = ActionGroupType.LeftRight,
                         Name = XrActionGroup.Haptics,
                         Actions = new() {
                             new() {
@@ -241,6 +254,7 @@ namespace osu.XR {
                 dependency.CacheAs<OsuGameBase>( OsuGame );
 
                 Scene.Add( new XrConfigPanel() );
+                //Scene.Add( Notifications );
                 AddInternal( BeatProvider );
             };
 

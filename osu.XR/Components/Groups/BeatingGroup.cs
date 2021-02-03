@@ -16,7 +16,7 @@ namespace osu.XR.Components.Groups {
 		public BeatingGroup () {
 			BindableBeat.ValueChanged += v => {
 				FinishTransforms();
-				this.ScaleTo( new Vector3( (float)( 1 - v.NewValue.AverageAmplitude * 0.04 ) ), 50 ).Then().ScaleTo( Vector3.One, 100 );
+				this.ScaleTo( new Vector3( (float)( 1 - v.NewValue.AverageAmplitude * 0.06 ) ), 50 ).Then().ScaleTo( Vector3.One, 100 );
 			};
 		}
 

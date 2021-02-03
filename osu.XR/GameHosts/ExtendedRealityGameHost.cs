@@ -41,9 +41,6 @@ namespace osu.XR.GameHosts {
 		DepthFrameBuffer rightEye = new();
 		public void Run ( XrGame game ) {
 			runningGame = game;
-			Events.OnError += m => {
-				Logger.Error( null, m );
-			};
 			base.Run( game );
 			VR.Exit();
 		}
