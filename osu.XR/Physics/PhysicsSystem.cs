@@ -41,6 +41,7 @@ namespace osu.XR.Physics {
 		public bool TryHit ( Vector3 origin, Vector3 direction, out RaycastHit hit, bool includeBehind = false ) {
 			RaycastHit? closest = null;
 			IHasCollider closestCollider = null;
+			direction.Normalize();
 
 			for ( int i = 0; i < colliders.Count; i++ ) {
 				var collider = colliders[ i ];

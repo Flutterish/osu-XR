@@ -19,6 +19,7 @@ using osu.Game.Overlays;
 using osu.Game.Resources;
 using osu.Game.Rulesets;
 using osu.XR.Components;
+using osu.XR.Components.Panels;
 using osu.XR.Drawables;
 using osu.XR.Graphics;
 using osu.XR.Maths;
@@ -28,18 +29,19 @@ using osu.XR.Rendering;
 using osu.XR.Settings;
 using osuTK;
 using osuTK.Input;
+using SixLabors.ImageSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Schema;
-using Pointer = osu.XR.Components.RaycastPointer;
+using Pointer = osu.XR.Components.Pointers.RaycastPointer;
 
 namespace osu.XR {
 	/// <summary>
 	/// The full osu! experience in VR.
 	/// </summary>
-    [Cached]
+	[Cached]
 	public class OsuGameXr : XrGame {
         [Cached]
         public readonly PhysicsSystem PhysicsSystem = new();
@@ -47,7 +49,7 @@ namespace osu.XR {
         private InputManager inputManager => _inputManager ??= GetContainingInputManager();
         [Cached]
         public readonly Camera Camera = new() { Position = new Vector3( 0, 0, 0 ) };
-        public readonly CurvedPanel OsuPanel = new CurvedPanel { Y = 1.8f }; // TODO our own VR error panel
+        public readonly CurvedPanel OsuPanel = new CurvedPanel { Y = 1.8f };
         [Cached]
         public readonly XrConfigManager Config = new();
         [Cached(typeof(Framework.Game))]
@@ -71,7 +73,7 @@ namespace osu.XR {
 
         object updatelock = new { };
 		public OsuGameXr ( string[] args ) { // BUG sometimes at startup osu throws an error. investigate.
-            OsuGame = new OsuGame( args ) { RelativeSizeAxes = Axes.Both };
+            OsuGame = new OsuGame( args ) { RelativeSizeAxes = Axes.None, Size = new Vector2( 1920 * 2, 1080 ) };
             Scene = new XrScene { RelativeSizeAxes = Axes.Both, Camera = Camera };
 
             VR.BindNewControllerAdded( c => {
@@ -173,9 +175,15 @@ namespace osu.XR {
             }, true );
             Config.BindWith( XrConfigSetting.ScreenHeight, screenHeightBindable );
             screenHeightBindable.BindValueChanged( v => OsuPanel.Y = v.NewValue, true );
+
+            screenResX.BindValueChanged( v => OsuGame.Width = v.NewValue, true );
+            screenResY.BindValueChanged( v => OsuGame.Height = v.NewValue, true );
         }
         Bindable<InputMode> inputModeBindable = new();
         Bindable<float> screenHeightBindable = new( 1.8f );
+
+        Bindable<int> screenResX = new( 1920 * 2 );
+        Bindable<int> screenResY = new( 1080 );
 
         void onControllerInputModeChanged () {
             var main = MainController;
@@ -223,8 +231,6 @@ namespace osu.XR {
 
             OsuPanel.Source.Add( OsuGame );
             OsuPanel.AutosizeBoth();
-            OsuGame.RelativeSizeAxes = Axes.None;
-            OsuGame.Size = new Vector2( 1920 * 2, 1080 ); // TODO should also be adjustable
 
             OsuGame.OnLoadComplete += v => {
                 dependency.CacheAs( OsuGame.Dependencies.Get<PreviewTrackManager>() );
@@ -234,10 +240,8 @@ namespace osu.XR {
                 dependency.CacheAs( OsuGame.Dependencies.Get<IBindable<WorkingBeatmap>>() );
                 dependency.CacheAs<OsuGameBase>( OsuGame );
 
-                onUpdateThread += () => { // TODO is this needed?
-                    Scene.Add( new XrConfigPanel() );
-                    AddInternal( BeatProvider );
-                };
+                Scene.Add( new XrConfigPanel() );
+                AddInternal( BeatProvider );
             };
 
             // TODO transparency that either doesnt depend on order or is transparent-shader agnostic
@@ -252,6 +256,9 @@ namespace osu.XR {
 
             Config.BindWith( XrConfigSetting.ScreenRadius, OsuPanel.RadiusBindable );
             Config.BindWith( XrConfigSetting.ScreenArc, OsuPanel.ArcBindable );
+
+            Config.BindWith( XrConfigSetting.ScreenResolutionX, screenResX );
+            Config.BindWith( XrConfigSetting.ScreenResolutionY, screenResY );
         }
 
         Dictionary<Controller, XrController> controllers = new();

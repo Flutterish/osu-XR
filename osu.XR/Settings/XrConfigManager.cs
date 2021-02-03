@@ -21,9 +21,11 @@ namespace osu.XR.Settings {
 			Set( XrConfigSetting.Deadzone, 20, 0, 100 );
 
 			Set( XrConfigSetting.ScreenArc, MathF.PI * 1.2f, MathF.PI / 18, MathF.PI * 2 );
-			Set( XrConfigSetting.ScreenResolution, new Size( 1920 * 2, 1080 ), new Size( 500, 400 ), new Size( 7680, 4320 ) );
 			Set( XrConfigSetting.ScreenRadius, 1.6f, 0.4f, 4 );
 			Set( XrConfigSetting.ScreenHeight, 1.8f, 0f, 3 );
+
+			Set( XrConfigSetting.ScreenResolutionX, 1920 * 2, 500, 7680 );
+			Set( XrConfigSetting.ScreenResolutionY, 1080, 400, 4320 );
 		}
 
 		protected override void PerformLoad () {
@@ -42,9 +44,11 @@ namespace osu.XR.Settings {
 		Deadzone,
 
 		ScreenArc,
-		ScreenResolution,
 		ScreenRadius,
-		ScreenHeight
+		ScreenHeight,
+
+		ScreenResolutionX,
+		ScreenResolutionY,
 	}
 
 	public enum InputMode {
@@ -53,6 +57,6 @@ namespace osu.XR.Settings {
 		[Description( "Two Pointers" )]
 		DoublePointer,
 		[Description( "Touchscreen" )]
-		TouchScreen // TODO touchscreen feels horrible. improve.
+		TouchScreen
 	}
 }

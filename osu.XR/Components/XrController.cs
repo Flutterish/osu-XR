@@ -4,6 +4,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Game.Beatmaps;
+using osu.XR.Components.Pointers;
 using osu.XR.Drawables;
 using osu.XR.Graphics;
 using osu.XR.Physics;

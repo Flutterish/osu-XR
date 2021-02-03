@@ -5,6 +5,7 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.XR.Components;
+using osu.XR.Components.Panels;
 using osu.XR.Settings;
 using osuTK;
 using System;

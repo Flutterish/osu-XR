@@ -5,6 +5,7 @@ using osuTK;
 using System;
 
 namespace osu.XR.Physics {
+	// TODO all of the physics methods should include both a regular and a prenormalized version for preformance
 	public static class Raycast {
 		/// <summary>
 		/// Intersect a 3D line and a place.
@@ -233,7 +234,7 @@ namespace osu.XR.Physics {
 		/// Intersect a 3D line and a Mesh.
 		/// </summary>
 		public static bool TryHit ( Vector3 origin, Vector3 direction, Mesh mesh, Transform transform, out RaycastHit hit, bool includeBehind = false ) {
-			if ( mesh.Tris.Count > 24 ) {
+			if ( mesh.Tris.Count > 6 ) {
 				if ( !Intersects( origin, direction, transform.Matrix * mesh.BoundingBox, includeBehind ) ) {
 					hit = default;
 					return false;

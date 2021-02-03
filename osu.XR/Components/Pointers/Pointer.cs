@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static osu.XR.Physics.Raycast;
 
-namespace osu.XR.Components {
+namespace osu.XR.Components.Pointers {
 	public abstract class Pointer : MeshedXrObject {
 		[Resolved]
 		protected PhysicsSystem PhysicsSystem { get; private set; }
@@ -44,7 +44,7 @@ namespace osu.XR.Components {
 				var prev = currentFocus;
 				currentFocus = value;
 
-				FocusChanged?.Invoke( new(prev, currentFocus) );
+				FocusChanged?.Invoke( new( prev, currentFocus ) );
 			}
 		}
 

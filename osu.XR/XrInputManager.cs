@@ -6,7 +6,7 @@ using osu.Framework.Input.Handlers.Keyboard;
 using osu.Framework.Input.Handlers.Mouse;
 using osu.Framework.Input.StateChanges;
 using osu.Framework.Platform;
-using osu.XR.Components;
+using osu.XR.Components.Pointers;
 using osu.XR.Maths;
 using osu.XR.Settings;
 using osuTK;

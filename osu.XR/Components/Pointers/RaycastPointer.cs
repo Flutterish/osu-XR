@@ -7,7 +7,7 @@ using osuTK;
 using System;
 using static osu.XR.Physics.Raycast;
 
-namespace osu.XR.Components {
+namespace osu.XR.Components.Pointers {
 	/// <summary>
 	/// A 3D cursor.
 	/// </summary>
