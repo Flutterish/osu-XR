@@ -24,7 +24,7 @@ namespace osu.XR.Components.Panels {
 	/// A 3D panel that displays an image from a <see cref="BufferedCapture"/>.
 	/// </summary>
 	public abstract class Panel : MeshedXrObject, IHasCollider, IReactsToController {
-		public PanelInputMode RequestedInputMode { get; protected set; } = PanelInputMode.Regular;
+		public PanelInputMode RequestedInputMode { get; set; } = PanelInputMode.Regular;
 		public readonly XrInputManager EmulatedInput = new XrInputManager { RelativeSizeAxes = Axes.Both };
 		public Container Source => EmulatedInput;
 		/// <summary>
@@ -146,7 +146,17 @@ namespace osu.XR.Components.Panels {
 			}
 		}
 
-		public virtual bool IsColliderEnabled => IsVisible;
+		public virtual bool IsColliderEnabled => Source.Any( x => x.IsPresent );
+		public override void Show () {
+			foreach ( var i in Source ) {
+				i.Show();
+			}
+		}
+		public override void Hide () {
+			foreach ( var i in Source ) {
+				i.Hide();
+			}
+		}
 
 		List<XrController> focusedControllers = new();
 		IEnumerable<Controller> focusedControllerSources => focusedControllers.Select( x => x.Source );

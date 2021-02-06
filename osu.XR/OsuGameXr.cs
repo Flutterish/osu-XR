@@ -21,6 +21,7 @@ using osu.Game.Overlays.Notifications;
 using osu.Game.Resources;
 using osu.Game.Rulesets;
 using osu.XR.Components;
+using osu.XR.Components.Groups;
 using osu.XR.Components.Panels;
 using osu.XR.Drawables;
 using osu.XR.Graphics;
@@ -253,8 +254,7 @@ namespace osu.XR {
                 dependency.CacheAs( OsuGame.Dependencies.Get<IBindable<WorkingBeatmap>>() );
                 dependency.CacheAs<OsuGameBase>( OsuGame );
 
-                Scene.Add( new XrConfigPanel() );
-                //Scene.Add( Notifications );
+                Scene.Add( new HandheldMenu().With( s => s.Panels.AddRange( new FlatPanel[] { new XrConfigPanel(), Notifications } ) ) );
                 AddInternal( BeatProvider );
             };
 

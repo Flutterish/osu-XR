@@ -135,6 +135,9 @@ namespace osu.XR.Components {
 		public void Add ( XrObject child ) {
 			child.Parent = this;
 		}
+		public void Remove ( XrObject child ) {
+			child.Parent = null;
+		}
 
 		public virtual void BeforeDraw ( DrawSettings settings ) { }
 

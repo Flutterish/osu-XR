@@ -21,13 +21,7 @@ namespace osu.XR.Components.Panels {
 			Height = 500;
 			AutosizeX();
 			Source.Add( notifications );
-		}
-
-		protected override void Update () {
-			base.Update();
-
-			this.RotateTo( Game.Camera.Rotation, 100 );
-			this.MoveTo( Game.Camera.Position + Game.Camera.Forward * 0.75f, 100 );
+			this.Hide();
 		}
 
 		public void Post ( Notification notification )
