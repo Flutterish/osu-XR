@@ -7,6 +7,7 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.XR.Drawables;
+using osu.XR.Input;
 using osu.XR.Maths;
 using osu.XR.Physics;
 using osu.XR.Rendering;

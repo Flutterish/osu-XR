@@ -19,7 +19,7 @@ using System.Security.Cryptography.Pkcs;
 using static osu.XR.Physics.Raycast;
 using TKKey = osuTK.Input.Key;
 
-namespace osu.XR {
+namespace osu.XR.Input {
 	/// <summary>
 	/// XR input is passed to 2D drawables though this manger.
 	/// </summary>
@@ -121,8 +121,7 @@ namespace osu.XR {
 				if ( !( host.Window is SDL2DesktopWindow window ) )
 					return false;
 
-				Enabled.BindValueChanged( e =>
-				{
+				Enabled.BindValueChanged( e => {
 					if ( e.NewValue ) {
 						window.KeyDown += handleKeyDown;
 						window.KeyUp += handleKeyUp;
@@ -179,7 +178,7 @@ namespace osu.XR {
 				if ( ( touch.StartPosition - position ).Length > DeadzoneBindable.Value )
 					touch.InDeadzone = false;
 
-				if ( !touch.InDeadzone ) 
+				if ( !touch.InDeadzone )
 					enqueueInput( new TouchInput( touch.Touch, true ) ); // drag
 			}
 

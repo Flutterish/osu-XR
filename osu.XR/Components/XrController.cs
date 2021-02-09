@@ -4,6 +4,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Game.Beatmaps;
+using osu.XR.Components.Panels;
 using osu.XR.Components.Pointers;
 using osu.XR.Drawables;
 using osu.XR.Graphics;
@@ -33,6 +34,8 @@ namespace osu.XR.Components {
 			set => IsHoldingBindable.Value = value;
 		}
 		public readonly BindableBool IsHoldingBindable = new();
+		[Resolved( name: "FocusedPanel" )]
+		private Bindable<Panel> focusedPanel { get; set; }
 
 		public XrController ( Controller controller ) {
 			MainTexture = Textures.Pixel( controller.IsMainController ? Color4.Orange : Color4.LightBlue ).TextureGL;
@@ -149,6 +152,7 @@ namespace osu.XR.Components {
 			if ( myFocus is IReactsToController old ) old.OnControllerFocusLost( this );
 			myFocus = v.NewValue;
 			if ( myFocus is IReactsToController @new ) @new.OnControllerFocusGained( this );
+			if ( myFocus is Panel ) focusedPanel.Value = myFocus as Panel;
 		}
 
 		void updateVisibility () {

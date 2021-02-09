@@ -61,6 +61,8 @@ namespace osu.XR {
         public readonly BeatProvider BeatProvider = new();
         [Cached]
         public readonly XrNotificationPanel Notifications = new XrNotificationPanel();
+        [Cached( name: "FocusedPanel" )]
+        public readonly Bindable<Panel> FocusedPanel = new();
 
         public XrController MainController => controllers.Values.FirstOrDefault( x => x.Source.IsEnabled && x.Source.IsMainController ) ?? controllers.Values.FirstOrDefault( x => x.Source.IsEnabled );
         public XrController SecondaryController {
