@@ -1,6 +1,8 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Sprites;
 using osu.Game.Overlays.Notifications;
+using osu.XR.Components.Groups;
 using osu.XR.Drawables;
 using System;
 using System.Collections.Generic;
@@ -9,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace osu.XR.Components.Panels {
-	public class XrNotificationPanel : FlatPanel {
+	public class XrNotificationPanel : FlatPanel, IHasName, IHasIcon {
 		[Resolved]
 		private OsuGameXr Game { get; set; }
 		NotificationPanel notifications = new NotificationPanel();
@@ -26,5 +28,10 @@ namespace osu.XR.Components.Panels {
 
 		public void Post ( Notification notification )
 			=> notifications.Post( notification );
+
+		public string DisplayName => "Notifications";
+
+		public Drawable CreateIcon ()
+			=> new SpriteIcon { Icon = FontAwesome.Solid.ExclamationCircle };
 	}
 }

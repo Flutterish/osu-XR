@@ -76,7 +76,6 @@ namespace osu.XR {
             return dependency = new DependencyContainer( base.CreateChildDependencies(parent) );
         }
 
-        object updatelock = new { };
 		public OsuGameXr ( string[] args ) { // BUG sometimes at startup osu throws an error. investigate.
             OpenVR.NET.Events.OnMessage += msg => {
                 Notifications.Post( new SimpleNotification() { Text = msg } );
@@ -93,18 +92,16 @@ namespace osu.XR {
             VR.BindNewControllerAdded( c => {
                 var controller = new XrController( c );
                 controllers.Add( c, controller );
-                lock ( updatelock ) {
-                    onUpdateThread += () => {
-                        Scene.Add( controller );
+                this.ScheduleAfterChildren( () => {
+                    Scene.Add( controller );
 
-                        c.BindEnabled( () => {
-                            onControllerInputModeChanged();
-                        }, true );
-                        c.BindDisabled( () => {
-                            onControllerInputModeChanged();
-                        } );
-                    };
-                }
+                    c.BindEnabled( () => {
+                        onControllerInputModeChanged();
+                    }, true );
+                    c.BindDisabled( () => {
+                        onControllerInputModeChanged();
+                    }, true );
+                } );
             }, true );
 
             VR.BindComponentsLoaded( () => {
@@ -241,6 +238,7 @@ namespace osu.XR {
             AddFont( Resources, @"Fonts/Venera-Bold" );
             AddFont( Resources, @"Fonts/Venera-Black" );
             // TODO somehow just cache everything osugame caches ( either set our dep container to osu's + ours or somehow retreive all of its cache )
+            // another option is to add dependent items to osugame and create a proxy
             OsuGame.SetHost( Host );
 
             OsuPanel.Source.Add( OsuGame );
@@ -276,17 +274,11 @@ namespace osu.XR {
         }
 
         Dictionary<Controller, XrController> controllers = new();
-        private event System.Action onUpdateThread;
         protected override void Update () {
             base.Update();
 
-            lock ( updatelock ) {
-                onUpdateThread?.Invoke();
-                onUpdateThread = null;
-            }
-
-            // HACK hide cursor because it jitters
-            ( ( ( typeof( OsuGame ).GetField( "MenuCursorContainer", BindingFlags.NonPublic | BindingFlags.Instance ).GetValue( OsuGame ) ) as MenuCursorContainer ).Cursor as MenuCursor ).Hide();
+            // // HACK hide cursor because it jitters
+            // ( ( ( typeof( OsuGame ).GetField( "MenuCursorContainer", BindingFlags.NonPublic | BindingFlags.Instance ).GetValue( OsuGame ) ) as MenuCursorContainer ).Cursor as MenuCursor ).Hide();
         }
 	}
 }

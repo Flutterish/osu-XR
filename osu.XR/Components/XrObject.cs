@@ -153,10 +153,34 @@ namespace osu.XR.Components {
 		public float ScaleY { get => Transform.ScaleY; set => Transform.ScaleY = value; }
 		public float ScaleZ { get => Transform.ScaleZ; set => Transform.ScaleZ = value; }
 
-		public Vector3 Offset { get => Transform.Offset; set => Transform.Offset = value; }
-		public float OffsetX { get => Transform.OffsetX; set => Transform.OffsetX = value; }
-		public float OffsetY { get => Transform.OffsetY; set => Transform.OffsetY = value; }
-		public float OffsetZ { get => Transform.OffsetZ; set => Transform.OffsetZ = value; }
+		public Vector3 Offset { 
+			get => Transform.Offset; 
+			set {
+				AutoOffsetAxes = Axes3D.None;
+				Transform.Offset = value;
+			} 
+		}
+		public float OffsetX { 
+			get => Transform.OffsetX; 
+			set {
+				AutoOffsetAxes &= ~Axes3D.X;
+				Transform.OffsetX = value;
+			}
+		}
+		public float OffsetY { 
+			get => Transform.OffsetY; 
+			set {
+				AutoOffsetAxes &= ~Axes3D.Y;
+				Transform.OffsetY = value;
+			}
+		}
+		public float OffsetZ { 
+			get => Transform.OffsetZ; 
+			set {
+				AutoOffsetAxes &= ~Axes3D.Z;
+				Transform.OffsetZ = value;
+			}
+		}
 
 		new public Quaternion Rotation { get => Transform.Rotation; set => Transform.Rotation = value; }
 		public Vector3 EulerRotation { get => Transform.EulerRotation; set => Transform.EulerRotation = value; }
@@ -170,6 +194,102 @@ namespace osu.XR.Components {
 		public Vector3 Right => Transform.Right;
 		public Vector3 Up => Transform.Up;
 		public Vector3 Down => Transform.Down;
+
+		protected virtual Vector3 RequiredParentSizeToFit => ChildSize;
+		/// <summary>
+		/// The size nescessary to fit all children
+		/// </summary>
+		new public Vector3 ChildSize { get; private set; } // ISSUE the "no separation between composite and regular xrobjects" makes this iffy bc theres "children size" and "self size"
+		new protected Axes3D AutoSizeAxes = Axes3D.All; // TODO invalidation mechanism for this
+		public Axes3D AutoOffsetAxes = Axes3D.None;
+		new public Axes3D BypassAutoSizeAxes = Axes3D.None;
+		private Vector3 autoOffsetAnchor;
+		public Vector3 AutoOffsetAnchor {
+			get => autoOffsetAnchor;
+			set {
+				AutoOffsetAxes = Axes3D.All;
+				autoOffsetAnchor = value;
+			}
+		}
+		public float AutoOffsetAnchorX {
+			get => autoOffsetAnchor.X;
+			set {
+				AutoOffsetAxes |= Axes3D.X;
+				autoOffsetAnchor.X = value;
+			}
+		}
+		public float AutoOffsetAnchorY {
+			get => autoOffsetAnchor.Y;
+			set {
+				AutoOffsetAxes |= Axes3D.Y;
+				autoOffsetAnchor.Y = value;
+			}
+		}
+		public float AutoOffsetAnchorZ {
+			get => autoOffsetAnchor.Z;
+			set {
+				AutoOffsetAxes |= Axes3D.Z;
+				autoOffsetAnchor.Z = value;
+			}
+		}
+		private Vector3 autoOffsetOrigin;
+		public Vector3 AutoOffsetOrigin {
+			get => autoOffsetOrigin;
+			set {
+				AutoOffsetAxes = Axes3D.All;
+				autoOffsetOrigin = value;
+			}
+		}
+		public float AutoOffsetOriginX {
+			get => autoOffsetOrigin.X;
+			set {
+				AutoOffsetAxes |= Axes3D.X;
+				autoOffsetOrigin.X = value;
+			}
+		}
+		public float AutoOffsetOriginY {
+			get => autoOffsetOrigin.Y;
+			set {
+				AutoOffsetAxes |= Axes3D.Y;
+				autoOffsetOrigin.Y = value;
+			}
+		}
+		public float AutoOffsetOriginZ {
+			get => autoOffsetOrigin.Z;
+			set {
+				AutoOffsetAxes |= Axes3D.Z;
+				autoOffsetOrigin.Z = value;
+			}
+		}
+		protected override void Update () {
+			base.Update();
+			if ( children.Any() ) {
+				ChildSize = new Vector3(
+					AutoSizeAxes.HasFlag( Axes3D.X ) ? children.Max( c => c.BypassAutoSizeAxes.HasFlag( Axes3D.X ) ? 0 : c.RequiredParentSizeToFit.X ) : 0,
+					AutoSizeAxes.HasFlag( Axes3D.Y ) ? children.Max( c => c.BypassAutoSizeAxes.HasFlag( Axes3D.Y ) ? 0 : c.RequiredParentSizeToFit.Y ) : 0,
+					AutoSizeAxes.HasFlag( Axes3D.Z ) ? children.Max( c => c.BypassAutoSizeAxes.HasFlag( Axes3D.Z ) ? 0 : c.RequiredParentSizeToFit.Z ) : 0
+				);
+			}
+			else {
+				ChildSize = RequiredParentSizeToFit;
+			}
+
+			if ( AutoOffsetAxes.HasFlag( Axes3D.X ) ) {
+				var parentSize = parent is null ? 0 : parent.ChildSize.X;
+				var ownSize = ChildSize.X;
+				Transform.OffsetX = autoOffsetAnchor.X * parentSize - autoOffsetOrigin.X * ownSize;
+			}
+			if ( AutoOffsetAxes.HasFlag( Axes3D.Y ) ) {
+				var parentSize = parent is null ? 0 : parent.ChildSize.Y;
+				var ownSize = ChildSize.Y;
+				Transform.OffsetY = autoOffsetAnchor.Y * parentSize - autoOffsetOrigin.Y * ownSize;
+			}
+			if ( AutoOffsetAxes.HasFlag( Axes3D.Z ) ) {
+				var parentSize = parent is null ? 0 : parent.ChildSize.Z;
+				var ownSize = ChildSize.Z;
+				Transform.OffsetZ = autoOffsetAnchor.Z * parentSize - autoOffsetOrigin.Z * ownSize;
+			}
+		}
 
 		private XrObjectDrawNode drawNode;
 		public XrObjectDrawNode DrawNode => drawNode ??= CreateDrawNode();
@@ -204,6 +324,19 @@ namespace osu.XR.Components {
 
 		public static implicit operator Transform ( XrObject xro )
 			=> xro?.Transform;
+	}
+	[Flags]
+	public enum Axes3D {
+		None = 0,
+
+		X = 1,
+		Y = 2,
+		Z = 4,
+
+		XY = X | Y,
+		XZ = X | Z,
+		YZ = Y | Z,
+		All = X | Y | Z
 	}
 }
 

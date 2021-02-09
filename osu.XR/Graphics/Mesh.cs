@@ -38,7 +38,7 @@ namespace osu.XR.Graphics {
 		/// </summary>
 		public AABox BoundingBox {
 			get {
-				if ( boundingBoxUpdateVersion == UpdateVersion ) return boundgingBox;
+				if ( boundingBoxUpdateVersion == UpdateVersion || !IsReady ) return boundgingBox;
 				boundingBoxUpdateVersion = UpdateVersion;
 				if ( Vertices.Any() ) {
 					boundgingBox = new AABox {

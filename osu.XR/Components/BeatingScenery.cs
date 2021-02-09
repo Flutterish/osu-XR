@@ -23,8 +23,8 @@ namespace osu.XR.Components {
 					double y = Math.Sin( theta ) * radius;
 
 					Add( new BeatingGroup { Position = new Vector3( (float)x, 0, (float)y ), Child = new Collider { 
-						Mesh = Mesh.UnitCube, 
-						Offset = new Vector3( 0, 0.5f, 0 ), 
+						Mesh = Mesh.UnitCube,
+						AutoOffsetOriginY = -0.5f,
 						Scale = new Vector3( (float)(random.NextDouble(0.05,0.2) * radius) ),
 						Rotation = Quaternion.FromAxisAngle( Vector3.UnitY, (float)random.NextDouble( Math.PI * 2 ) )
 					} } );

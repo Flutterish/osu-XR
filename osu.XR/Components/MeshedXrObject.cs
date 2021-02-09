@@ -1,4 +1,5 @@
-﻿using osu.Framework.Graphics.OpenGL;
+﻿using Microsoft.EntityFrameworkCore.Internal;
+using osu.Framework.Graphics.OpenGL;
 using osu.Framework.Graphics.OpenGL.Textures;
 using osu.XR.Graphics;
 using osu.XR.Maths;
@@ -28,10 +29,7 @@ namespace osu.XR.Components {
 
 		public readonly ReadonlyIndexer<int,Face> Faces;
 
-		/// <summary>
-		/// A box bounding this mesh.
-		/// </summary>
-		new public AABox BoundingBox => Transform.Matrix * Mesh.BoundingBox;
+		protected override Vector3 RequiredParentSizeToFit => Mesh.BoundingBox.Size;
 	}
 	public class XrMeshDrawNode : XrMeshDrawNode<MeshedXrObject> {
 		public XrMeshDrawNode ( MeshedXrObject source ) : base( source ) { }

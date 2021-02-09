@@ -5,6 +5,7 @@ using osu.Framework.Bindables;
 using osu.XR.Components.Panels;
 using osu.XR.Settings;
 using osuTK;
+using Remotion.Linq.Parsing.ExpressionVisitors.MemberBindings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,38 +47,50 @@ namespace osu.XR.Components.Groups {
 							}
 						}
 						else {
+							Show();
 							openingController = v.Source;
 							Position = TargetPosition;
 							Rotation = TargetRotation;
-							Show();
 						}
 					}
 				} );
 			} );
 		}
+		public bool IsOpen { get; private set; }
 
 		public override void Hide () {
 			base.Hide();
+			IsOpen = false;
 			openingController = null;
 		}
 
+		public override void Show () {
+			base.Show();
+			IsOpen = true;
+		}
+
+		private Vector3 retainedPosition;
 		protected override Vector3 TargetPosition {
 			get {
+				if ( !IsOpen ) return retainedPosition;
 				if ( HoldingController is null ) {
-					return Game.Camera.Position + Game.Camera.Forward * 0.5f;
+					return retainedPosition = Game.Camera.Position + Game.Camera.Forward * 0.5f;
 				}
 				else {
-					return HoldingController.Position + HoldingController.Forward * 0.2f + HoldingController.Up * 0.05f;
+					return retainedPosition = HoldingController.Position + HoldingController.Forward * 0.2f + HoldingController.Up * 0.05f;
 				}
 			}
 		}
+
+		private Quaternion retainedRotation;
 		protected override Quaternion TargetRotation {
 			get {
+				if ( !IsOpen ) return retainedRotation;
 				if ( HoldingController is null ) {
-					return Game.Camera.Rotation;
+					return retainedRotation = Game.Camera.Rotation;
 				}
 				else {
-					return HoldingController.Rotation * Quaternion.FromAxisAngle( Vector3.UnitX, MathF.PI * 0.25f );
+					return retainedRotation = HoldingController.Rotation * Quaternion.FromAxisAngle( Vector3.UnitX, MathF.PI * 0.25f );
 				}
 			}
 		}
