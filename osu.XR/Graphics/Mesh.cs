@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Valve.VR;
 
 namespace osu.XR.Graphics {
 	public class Mesh {
@@ -68,20 +69,45 @@ namespace osu.XR.Graphics {
 		public static Mesh FromOBJ ( string lines )
 			=> FromOBJ( lines.Split( '\n' ) );
 		public static Mesh FromOBJ ( IEnumerable<string> lines ) {
-			Mesh mesh = new();
+			// TODO Merge( IEnumerable<Mesh> ) so we dont repeat here
+			return MultipleFromOBJ( lines ).FirstOrDefault() ?? new();
+		}
+
+		public static IEnumerable<Mesh> MultipleFromOBJFile ( string path )
+			=> MultipleFromOBJ( File.ReadAllLines( path ) );
+
+		public static IEnumerable<Mesh> MultipleFromOBJ ( string lines )
+			=> MultipleFromOBJ( lines.Split( '\n' ) );
+
+		public static IEnumerable<Mesh> MultipleFromOBJ ( IEnumerable<string> lines ) {
+			Mesh current = new();
+			uint indexOffset = 1;
 			foreach ( var i in lines ) {
 				var line = i.Trim();
-				if ( line.StartsWith( "v " ) ) {
+				if ( line.StartsWith( "o " ) ) {
+					if ( !current.IsEmpty ) {
+						yield return current;
+						indexOffset += (uint)current.Vertices.Count;
+						current = new();
+					}
+				}
+				else if ( line.StartsWith( "v " ) ) {
 					var coords = line.Substring( 2 ).Split( " " ).Where( x => x.Length > 0 ).Select( x => float.Parse( x ) ).ToArray();
-					mesh.Vertices.Add( new Vector3( coords[ 0 ], coords[ 1 ], coords[ 2 ] ) );
+					current.Vertices.Add( new Vector3( coords[ 0 ], coords[ 1 ], coords[ 2 ] ) );
 				}
 				else if ( line.StartsWith( "f " ) ) {
 					var info = line.Substring( 2 ).Split( " " ).Where( x => x.Length > 0 ).Select( x => x.Split( "/" ).Select( x => uint.Parse( x ) ).ToArray() ).ToArray();
-					mesh.Tris.Add( new IndexedFace( info[ 0 ][ 0 ] - 1, info[ 1 ][ 0 ] - 1, info[ 2 ][ 0 ] - 1 ) );
+					current.Tris.Add( new IndexedFace( info[ 0 ][ 0 ] - indexOffset, info[ 1 ][ 0 ] - indexOffset, info[ 2 ][ 0 ] - indexOffset ) );
 				}
 			}
-			return mesh;
+
+			if ( !current.IsEmpty ) {
+				yield return current;
+				current = new();
+			}
 		}
+
+		public bool IsEmpty => !Tris.Any();
 
 		private void FillTextureCoordinates () {
 			while ( TextureCoordinates.Count < Vertices.Count ) {

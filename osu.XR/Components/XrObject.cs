@@ -261,6 +261,10 @@ namespace osu.XR.Components {
 				autoOffsetOrigin.Z = value;
 			}
 		}
+		/// <summary>
+		/// The centre of the object in local coordinates.
+		/// </summary>
+		public virtual Vector3 Centre => children.Any() ? children.Average( x => x.Position + x.Centre ) : Vector3.Zero;
 		protected override void Update () {
 			base.Update();
 			if ( children.Any() ) {
@@ -274,21 +278,28 @@ namespace osu.XR.Components {
 				ChildSize = RequiredParentSizeToFit;
 			}
 
+			// TODO autooffset does not center
 			if ( AutoOffsetAxes.HasFlag( Axes3D.X ) ) {
 				var parentSize = parent is null ? 0 : parent.ChildSize.X;
 				var ownSize = ChildSize.X;
-				Transform.OffsetX = autoOffsetAnchor.X * parentSize - autoOffsetOrigin.X * ownSize;
+				Transform.OffsetX = autoOffsetAnchor.X * parentSize - autoOffsetOrigin.X * ownSize - Centre.X;
 			}
 			if ( AutoOffsetAxes.HasFlag( Axes3D.Y ) ) {
 				var parentSize = parent is null ? 0 : parent.ChildSize.Y;
 				var ownSize = ChildSize.Y;
-				Transform.OffsetY = autoOffsetAnchor.Y * parentSize - autoOffsetOrigin.Y * ownSize;
+				Transform.OffsetY = autoOffsetAnchor.Y * parentSize - autoOffsetOrigin.Y * ownSize - Centre.Y;
 			}
 			if ( AutoOffsetAxes.HasFlag( Axes3D.Z ) ) {
 				var parentSize = parent is null ? 0 : parent.ChildSize.Z;
 				var ownSize = ChildSize.Z;
-				Transform.OffsetZ = autoOffsetAnchor.Z * parentSize - autoOffsetOrigin.Z * ownSize;
+				Transform.OffsetZ = autoOffsetAnchor.Z * parentSize - autoOffsetOrigin.Z * ownSize - Centre.Z;
 			}
+		}
+
+		public void Destroy () {
+			Parent = null;
+			foreach ( var i in children ) i.Destroy();
+			Dispose();
 		}
 
 		private XrObjectDrawNode drawNode;

@@ -1,5 +1,7 @@
 ﻿using osuTK;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Valve.VR;
 
 namespace osu.XR.Maths {
@@ -58,5 +60,12 @@ namespace osu.XR.Maths {
 
 		public static bool Chance ( this Random random, double chance )
 			=> random.NextDouble() < chance;
+
+		public static Vector3 Average<T> ( this IEnumerable<T> a, Func<T,Vector3> selector )
+			=> new Vector3(
+				a.Average( x => selector( x ).X ),
+				a.Average( x => selector( x ).Y ),
+				a.Average( x => selector( x ).Z )
+			);
 	}
 }

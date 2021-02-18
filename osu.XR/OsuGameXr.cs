@@ -25,6 +25,7 @@ using osu.XR.Components.Groups;
 using osu.XR.Components.Panels;
 using osu.XR.Drawables;
 using osu.XR.Graphics;
+using osu.XR.Input;
 using osu.XR.Maths;
 using osu.XR.Physics;
 using osu.XR.Projection;
@@ -63,6 +64,8 @@ namespace osu.XR {
         public readonly XrNotificationPanel Notifications = new XrNotificationPanel();
         [Cached( name: "FocusedPanel" )]
         public readonly Bindable<Panel> FocusedPanel = new();
+        [Cached]
+        public readonly XrKeyboard Keyboard = new() { Scale = new Vector3( 0.04f ) };
 
         public XrController MainController => controllers.Values.FirstOrDefault( x => x.Source.IsEnabled && x.Source.IsMainController ) ?? controllers.Values.FirstOrDefault( x => x.Source.IsEnabled );
         public XrController SecondaryController {
@@ -92,9 +95,9 @@ namespace osu.XR {
             Scene = new XrScene { RelativeSizeAxes = Axes.Both, Camera = Camera };
 
             VR.BindNewControllerAdded( c => {
-                var controller = new XrController( c );
-                controllers.Add( c, controller );
                 this.ScheduleAfterChildren( () => {
+                    var controller = new XrController( c );
+                    controllers.Add( c, controller );
                     Scene.Add( controller );
 
                     c.BindEnabled( () => {
@@ -266,6 +269,7 @@ namespace osu.XR {
             Scene.Root.Add( new BeatingScenery() );
             Scene.Root.Add( Camera );
             Scene.Root.Add( OsuPanel );
+            Scene.Root.Add( Keyboard );
             PhysicsSystem.Root = Scene.Root;
 
             Config.BindWith( XrConfigSetting.ScreenRadius, OsuPanel.RadiusBindable );
@@ -273,14 +277,10 @@ namespace osu.XR {
 
             Config.BindWith( XrConfigSetting.ScreenResolutionX, screenResX );
             Config.BindWith( XrConfigSetting.ScreenResolutionY, screenResY );
+
+            Keyboard.LoadModel( @".\Resources\keyboard.obj" );
         }
 
         Dictionary<Controller, XrController> controllers = new();
-        protected override void Update () {
-            base.Update();
-
-            // // HACK hide cursor because it jitters
-            // ( ( ( typeof( OsuGame ).GetField( "MenuCursorContainer", BindingFlags.NonPublic | BindingFlags.Instance ).GetValue( OsuGame ) ) as MenuCursorContainer ).Cursor as MenuCursor ).Hide();
-        }
 	}
 }

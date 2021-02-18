@@ -54,5 +54,4 @@ namespace osu.XR.Components.Pointers {
 /*
 TODO handheld/movable screen (grip binding)
 TODO cursor warping (at least figure out which vertices to warp)
-TODO VR error panel ( button to show it in settings )
 */
