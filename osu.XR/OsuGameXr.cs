@@ -56,7 +56,6 @@ namespace osu.XR {
         public readonly CurvedPanel OsuPanel = new CurvedPanel { Y = 1.8f };
         [Cached]
         public readonly XrConfigManager Config = new();
-        [Cached(typeof(Framework.Game))]
         OsuGame OsuGame;
         [Cached]
         public readonly BeatProvider BeatProvider = new();
@@ -74,6 +73,8 @@ namespace osu.XR {
                 return controllers.Values.FirstOrDefault( x => x != main && x.Source.IsEnabled );
             }
         }
+
+        Dictionary<Controller, XrController> controllers = new();
         public XrController GetControllerFor ( Controller controller ) => controller is null ? null : ( controllers.TryGetValue( controller, out var c ) ? c : null );
 
         DependencyContainer dependency;
@@ -81,7 +82,10 @@ namespace osu.XR {
             return dependency = new DependencyContainer( base.CreateChildDependencies(parent) );
         }
 
-		public OsuGameXr ( string[] args ) { // BUG sometimes at startup osu throws an error. investigate.
+        private string[] args;
+		public OsuGameXr ( string[] args ) {
+            this.args = args.ToArray();
+
             OpenVR.NET.Events.OnMessage += msg => {
                 Notifications.Post( new SimpleNotification() { Text = msg } );
             };
@@ -91,29 +95,12 @@ namespace osu.XR {
             OpenVR.NET.Events.OnException += (msg,e) => {
                 Notifications.Post( new SimpleNotification() { Text = msg, Icon = FontAwesome.Solid.Bomb } );
             };
-            OsuGame = new OsuGame( args ) { RelativeSizeAxes = Axes.None, Size = new Vector2( 1920 * 2, 1080 ) };
             Scene = new XrScene { RelativeSizeAxes = Axes.Both, Camera = Camera };
 
-            VR.BindNewControllerAdded( c => {
-                this.ScheduleAfterChildren( () => {
-                    var controller = new XrController( c );
-                    controllers.Add( c, controller );
-                    Scene.Add( controller );
+            setManifest();
+        }
 
-                    c.BindEnabled( () => {
-                        onControllerInputModeChanged();
-                    }, true );
-                    c.BindDisabled( () => {
-                        onControllerInputModeChanged();
-                    }, true );
-                } );
-            }, true );
-
-            VR.BindComponentsLoaded( () => {
-                var haptic = VR.GetControllerComponent<ControllerHaptic>( XrAction.Feedback );
-                haptic.TriggerVibration( 0.5 ); // NOTE haptics dont work yet
-            } );
-
+        private void setManifest () {
             VR.SetManifest( new Manifest<XrActionGroup, XrAction> {
                 LaunchType = LaunchType.Binary,
                 IsDashBoardOverlay = false,
@@ -149,20 +136,20 @@ namespace osu.XR {
                             }
                         },
                         Localizations = new() { [ "en_us" ] = "Pointer" },
-					},
+                    },
                     new() {
                         Type = ActionGroupType.LeftRight,
                         Name = XrActionGroup.Configuration,
                         Actions = new() {
-							new() {
+                            new() {
                                 Name = XrAction.ToggleMenu,
                                 Type = ActionType.Boolean,
                                 Requirement = Requirement.Suggested,
                                 Localizations = new() { [ "en_us" ] = "Toggle configuration panel" }
                             }
-						},
+                        },
                         Localizations = new() { [ "en_us" ] = "Configuration" }
-					},
+                    },
                     new() {
                         Type = ActionGroupType.LeftRight,
                         Name = XrActionGroup.Haptics,
@@ -176,25 +163,16 @@ namespace osu.XR {
                         },
                         Localizations = new() { [ "en_us" ] = "Haptics" }
                     },
-				},
+                },
                 DefaultBindings = new() {
-					new() {
+                    new() {
                         ControllerType = "knuckles",
                         Path = "system_generated_osu_xr_exe_binding_knuckles.json"
                     }
                 }
             } );
-
-            Config.BindWith( XrConfigSetting.InputMode, inputModeBindable );
-            inputModeBindable.BindValueChanged( v => {
-                onControllerInputModeChanged();
-            }, true );
-            Config.BindWith( XrConfigSetting.ScreenHeight, screenHeightBindable );
-            screenHeightBindable.BindValueChanged( v => OsuPanel.Y = v.NewValue, true );
-
-            screenResX.BindValueChanged( v => OsuGame.Width = v.NewValue, true );
-            screenResY.BindValueChanged( v => OsuGame.Height = v.NewValue, true );
         }
+
         Bindable<InputMode> inputModeBindable = new();
         Bindable<float> screenHeightBindable = new( 1.8f );
 
@@ -221,7 +199,8 @@ namespace osu.XR {
 		}
 
         protected override void LoadComplete () {
-            base.LoadComplete();
+            OsuGame = new OsuGame( args ) { RelativeSizeAxes = Axes.None, Size = new Vector2( 1920 * 2, 1080 ) };
+            OsuGame.SetHost( Host );
 
             Resources.AddStore( new DllResourceStore( typeof( OsuGameXr ).Assembly ) );
             Resources.AddStore( new DllResourceStore( typeof( OsuGame ).Assembly ) );
@@ -244,7 +223,6 @@ namespace osu.XR {
             AddFont( Resources, @"Fonts/Venera-Black" );
             // TODO somehow just cache everything osugame caches ( either set our dep container to osu's + ours or somehow retreive all of its cache )
             // another option is to add dependent items to osugame and create a proxy
-            OsuGame.SetHost( Host );
 
             OsuPanel.Source.Add( OsuGame );
             OsuPanel.AutosizeBoth();
@@ -261,16 +239,28 @@ namespace osu.XR {
                 AddInternal( BeatProvider );
             };
 
+            base.LoadComplete();
             // TODO transparency that either doesnt depend on order or is transparent-shader agnostic
             // for now we are just sorting objects here
             AddInternal( Scene );
-            Scene.Root.Add( new SkyBox() );
-            Scene.Root.Add( new FloorGrid() );
-            Scene.Root.Add( new BeatingScenery() );
-            Scene.Root.Add( Camera );
-            Scene.Root.Add( OsuPanel );
-            Scene.Root.Add( Keyboard );
+            Scene.Add( new SkyBox() );
+            Scene.Add( new FloorGrid() );
+            Scene.Add( new BeatingScenery() );
+            Scene.Add( Camera );
+            Scene.Add( OsuPanel );
+            //Scene.Add( Keyboard );
             PhysicsSystem.Root = Scene.Root;
+
+            Config.BindWith( XrConfigSetting.InputMode, inputModeBindable );
+            inputModeBindable.BindValueChanged( v => {
+                onControllerInputModeChanged();
+            }, true );
+
+            Config.BindWith( XrConfigSetting.ScreenHeight, screenHeightBindable );
+            screenHeightBindable.BindValueChanged( v => OsuPanel.Y = v.NewValue, true );
+
+            screenResX.BindValueChanged( v => OsuGame.Width = v.NewValue, true );
+            screenResY.BindValueChanged( v => OsuGame.Height = v.NewValue, true );
 
             Config.BindWith( XrConfigSetting.ScreenRadius, OsuPanel.RadiusBindable );
             Config.BindWith( XrConfigSetting.ScreenArc, OsuPanel.ArcBindable );
@@ -279,8 +269,26 @@ namespace osu.XR {
             Config.BindWith( XrConfigSetting.ScreenResolutionY, screenResY );
 
             Keyboard.LoadModel( @".\Resources\keyboard.obj" );
-        }
 
-        Dictionary<Controller, XrController> controllers = new();
+            VR.BindNewControllerAdded( c => {
+                this.ScheduleAfterChildren( () => {
+                    var controller = new XrController( c );
+                    controllers.Add( c, controller );
+                    Scene.Add( controller );
+
+                    c.BindEnabled( () => {
+                        onControllerInputModeChanged();
+                    }, true );
+                    c.BindDisabled( () => {
+                        onControllerInputModeChanged();
+                    }, true );
+                } );
+            }, true );
+
+            VR.BindComponentsLoaded( () => {
+                var haptic = VR.GetControllerComponent<ControllerHaptic>( XrAction.Feedback );
+                haptic.TriggerVibration( 0.5 ); // NOTE haptics dont work yet
+            } );
+        }
 	}
 }
