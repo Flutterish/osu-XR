@@ -278,7 +278,6 @@ namespace osu.XR.Components {
 				ChildSize = RequiredParentSizeToFit;
 			}
 
-			// TODO autooffset does not center
 			if ( AutoOffsetAxes.HasFlag( Axes3D.X ) ) {
 				var parentSize = parent is null ? 0 : parent.ChildSize.X;
 				var ownSize = ChildSize.X;

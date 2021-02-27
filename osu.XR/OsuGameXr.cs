@@ -42,6 +42,10 @@ using System.Xml.Schema;
 using Pointer = osu.XR.Components.Pointers.RaycastPointer;
 
 namespace osu.XR {
+    // TODO skybox settings:
+    // Rave!
+    // Storyboard
+
 	/// <summary>
 	/// The full osu! experience in VR.
 	/// </summary>
@@ -96,6 +100,7 @@ namespace osu.XR {
                 Notifications.Post( new SimpleNotification() { Text = msg, Icon = FontAwesome.Solid.Bomb } );
             };
             Scene = new XrScene { RelativeSizeAxes = Axes.Both, Camera = Camera };
+            PhysicsSystem.Root = Scene.Root;
 
             setManifest();
         }
@@ -199,9 +204,19 @@ namespace osu.XR {
 		}
 
         protected override void LoadComplete () {
+            base.LoadComplete();
+
             OsuGame = new OsuGame( args ) { RelativeSizeAxes = Axes.None, Size = new Vector2( 1920 * 2, 1080 ) };
             OsuGame.SetHost( Host );
+            AddInternal( OsuGame );
 
+            OsuGame.OnLoadComplete += _ => {
+                RemoveInternal( OsuGame );
+                osuLoaded();
+            };
+        }
+
+        void osuLoaded () {
             Resources.AddStore( new DllResourceStore( typeof( OsuGameXr ).Assembly ) );
             Resources.AddStore( new DllResourceStore( typeof( OsuGame ).Assembly ) );
             Resources.AddStore( new DllResourceStore( OsuResources.ResourceAssembly ) );
@@ -227,29 +242,25 @@ namespace osu.XR {
             OsuPanel.Source.Add( OsuGame );
             OsuPanel.AutosizeBoth();
 
-            OsuGame.OnLoadComplete += v => {
-                dependency.CacheAs( OsuGame.Dependencies.Get<PreviewTrackManager>() );
-                dependency.CacheAs( OsuGame.Dependencies.Get<OsuColour>() ); 
-                dependency.CacheAs( OsuGame.Dependencies.Get<RulesetStore>() );
-                dependency.CacheAs( OsuGame.Dependencies.Get<SessionStatics>() );
-                dependency.CacheAs( OsuGame.Dependencies.Get<IBindable<WorkingBeatmap>>() );
-                dependency.CacheAs<OsuGameBase>( OsuGame );
+            dependency.CacheAs( OsuGame.Dependencies.Get<PreviewTrackManager>() );
+            dependency.CacheAs( OsuGame.Dependencies.Get<OsuColour>() );
+            dependency.CacheAs( OsuGame.Dependencies.Get<RulesetStore>() );
+            dependency.CacheAs( OsuGame.Dependencies.Get<SessionStatics>() );
+            dependency.CacheAs( OsuGame.Dependencies.Get<IBindable<WorkingBeatmap>>() );
+            dependency.CacheAs<OsuGameBase>( OsuGame );
+            dependency.CacheAs<Framework.Game>( OsuGame );
 
-                Scene.Add( new HandheldMenu().With( s => s.Panels.AddRange( new FlatPanel[] { new XrConfigPanel(), Notifications } ) ) );
-                AddInternal( BeatProvider );
-            };
-
-            base.LoadComplete();
             // TODO transparency that either doesnt depend on order or is transparent-shader agnostic
             // for now we are just sorting objects here
+            AddInternal( BeatProvider );
             AddInternal( Scene );
             Scene.Add( new SkyBox() );
             Scene.Add( new FloorGrid() );
             Scene.Add( new BeatingScenery() );
             Scene.Add( Camera );
             Scene.Add( OsuPanel );
+            Scene.Add( new HandheldMenu().With( s => s.Panels.AddRange( new FlatPanel[] { new XrConfigPanel(), Notifications } ) ) );
             //Scene.Add( Keyboard );
-            PhysicsSystem.Root = Scene.Root;
 
             Config.BindWith( XrConfigSetting.InputMode, inputModeBindable );
             inputModeBindable.BindValueChanged( v => {
