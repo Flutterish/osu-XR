@@ -6,6 +6,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Input;
 using osu.XR.Drawables;
 using osu.XR.Input;
 using osu.XR.Maths;
@@ -25,9 +26,11 @@ namespace osu.XR.Components.Panels {
 	/// A 3D panel that displays an image from a <see cref="BufferedCapture"/>.
 	/// </summary>
 	public abstract class Panel : MeshedXrObject, IHasCollider, IReactsToController {
+		public bool CanHaveGlobalFocus = true;
 		public PanelInputMode RequestedInputMode { get; set; } = PanelInputMode.Regular;
 		public readonly XrInputManager EmulatedInput = new XrInputManager { RelativeSizeAxes = Axes.Both };
-		public Container Source => EmulatedInput;
+		private PlatformActionContainer platformActions = new() { RelativeSizeAxes = Axes.Both };
+		public Container Source => platformActions;
 		/// <summary>
 		/// Non-stretching scaling applied to the content
 		/// </summary>
@@ -46,33 +49,40 @@ namespace osu.XR.Components.Panels {
 					EmulatedInput.IsRightPressed = false;
 					EmulatedInput.ReleaseAllTouch();
 				}
+				EmulatedInput.HasFocus = value;
 			}
 		}
 
 		public Panel AutosizeX () {
 			EmulatedInput.RelativeSizeAxes = Axes.Y;
 			SourceCapture.RelativeSizeAxes = Axes.Y;
+			platformActions.RelativeSizeAxes = Axes.Y;
 
 			EmulatedInput.AutoSizeAxes = Axes.X;
 			SourceCapture.AutoSizeAxes = Axes.X;
+			platformActions.AutoSizeAxes = Axes.X;
 
 			return this;
 		}
 		public Panel AutosizeY () {
 			EmulatedInput.RelativeSizeAxes = Axes.X;
 			SourceCapture.RelativeSizeAxes = Axes.X;
+			platformActions.RelativeSizeAxes = Axes.X;
 
 			EmulatedInput.AutoSizeAxes = Axes.Y;
 			SourceCapture.AutoSizeAxes = Axes.Y;
+			platformActions.AutoSizeAxes = Axes.Y;
 
 			return this;
 		}
 		public Panel AutosizeBoth () {
 			EmulatedInput.RelativeSizeAxes = Axes.None;
 			SourceCapture.RelativeSizeAxes = Axes.None;
+			platformActions.RelativeSizeAxes = Axes.None;
 
 			EmulatedInput.AutoSizeAxes = Axes.Both;
 			SourceCapture.AutoSizeAxes = Axes.Both;
+			platformActions.AutoSizeAxes = Axes.Both;
 
 			return this;
 		}
@@ -86,6 +96,7 @@ namespace osu.XR.Components.Panels {
 			};
 
 			SourceCapture.Add( EmulatedInput );
+			EmulatedInput.Add( platformActions );
 			Add( SourceCapture );
 		}
 

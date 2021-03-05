@@ -78,8 +78,6 @@ namespace osu.XR.GameHosts {
             UseShellExecute = true //see https://github.com/dotnet/corefx/issues/10361
         } );
 
-        public override ITextInputSource GetTextInput () => Window == null ? null : new GameWindowTextInput( Window );
-
         protected override IEnumerable<InputHandler> CreateAvailableInputHandlers () {
             var defaultEnabled = new InputHandler[]
             {

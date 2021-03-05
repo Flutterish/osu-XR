@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework.Constraints;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics.OpenGL;
+using osu.Framework.XR.Maths;
 using osu.XR.Maths;
 using osuTK;
 using osuTK.Graphics.OpenGL4;

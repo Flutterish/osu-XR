@@ -27,6 +27,10 @@ namespace osu.XR.Input {
 		internal XrMouseHandler mouseHandler;
 		internal XrKeyboardHandler keyboardHandler;
 		internal XrTouchHandler touchHandler;
+
+		new public bool HasFocus;
+		protected override bool HandleHoverEvents => HasFocus;
+
 		/// <summary>
 		/// Whether to pass keyboard input to the children.
 		/// </summary>
@@ -90,6 +94,17 @@ namespace osu.XR.Input {
 			touchHandler.releaseAll( Time.Current );
 		}
 
+		public void PressKey ( TKKey key ) {
+			keyboardHandler.HandleKeyDown( key );
+			keyboardHandler.HandleKeyUp( key );
+		}
+		public void HoldKey ( TKKey key ) {
+			keyboardHandler.HandleKeyDown( key );
+		}
+		public void ReleaseKey ( TKKey key ) {
+			keyboardHandler.HandleKeyUp( key );
+		}
+
 		/// <summary>
 		/// A copy of <see cref="MouseHandler"/> overriden to use <see cref="RaycastPointer"/> input.
 		/// </summary>
@@ -140,6 +155,13 @@ namespace osu.XR.Input {
 					PendingInputs.Enqueue( input );
 			}
 
+			private void EnqueueInput ( IInput input ) {
+				PendingInputs.Enqueue( input );
+			}
+
+			public void HandleKeyDown ( TKKey key ) => EnqueueInput( new KeyboardKeyInput( key, true ) );
+
+			public void HandleKeyUp ( TKKey key ) => EnqueueInput( new KeyboardKeyInput( key, false ) );
 			private void handleKeyDown ( TKKey key ) => enqueueInput( new KeyboardKeyInput( key, true ) );
 
 			private void handleKeyUp ( TKKey key ) => enqueueInput( new KeyboardKeyInput( key, false ) );

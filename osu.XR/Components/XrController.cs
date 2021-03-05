@@ -136,11 +136,15 @@ namespace osu.XR.Components {
 			if ( isTouchPointerDown ) {
 				isTouchPointerDown = false;
 				PointerUp?.Invoke();
+
+				onPointerFocusChanged( new ValueChangedEvent<IHasCollider>( myFocus, null ) );
 			}
 		}
 
 		private void onPointerHit ( RaycastHit hit ) {
 			if ( !isTouchPointerDown && EmulatesTouch && canTouch ) {
+				onPointerFocusChanged( new ValueChangedEvent<IHasCollider>( myFocus, hit.Collider ) );
+
 				isTouchPointerDown = true;
 				PointerDown?.Invoke( hit );
 			}
@@ -152,7 +156,7 @@ namespace osu.XR.Components {
 			if ( myFocus is IReactsToController old ) old.OnControllerFocusLost( this );
 			myFocus = v.NewValue;
 			if ( myFocus is IReactsToController @new ) @new.OnControllerFocusGained( this );
-			if ( myFocus is Panel ) focusedPanel.Value = myFocus as Panel;
+			if ( myFocus is Panel panel && panel.CanHaveGlobalFocus ) focusedPanel.Value = panel;
 		}
 
 		void updateVisibility () {

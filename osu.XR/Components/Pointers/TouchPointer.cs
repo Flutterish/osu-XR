@@ -1,6 +1,6 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Bindables;
-using osu.XR.Maths;
+using osu.Framework.XR.Maths;
 using osu.XR.Physics;
 using osuTK;
 using System;
@@ -21,13 +21,15 @@ namespace osu.XR.Components.Pointers {
 
 		protected override void UpdatePointer () { // TODO back and forward motion should trigger a tap even while blocked
 			var targetPos = Source.Position; // ISSUE this can get stuck behind the screen
-			if ( PhysicsSystem.TryHit( Position, ( targetPos - Position ).Normalized(), out var rayHit ) && rayHit.Distance - Radius / 2 < ( Position - targetPos ).Length ) {
+
+			var direction = ( targetPos - Position ).Normalized();
+			if ( PhysicsSystem.TryHit( Position, direction, out var rayHit ) && rayHit.Distance - Radius / 2 < ( Position - targetPos ).Length ) {
 				Position = rayHit.Point + rayHit.Normal * (float)Radius / 2;
 			}
 			else {
 				Position = targetPos;
 			}
-
+			
 			Scale = new Vector3( (float)Radius );
 			if ( PhysicsSystem.TryHit( Position, Radius, out var hit ) ) {
 				RaycastHit = new Raycast.RaycastHit(

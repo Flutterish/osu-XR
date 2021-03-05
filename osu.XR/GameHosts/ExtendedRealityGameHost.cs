@@ -6,12 +6,13 @@ using osu.Framework.Bindables;
 using osu.Framework.Configuration;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.OpenGL;
+using osu.Framework.Input;
 using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Framework.Platform.Windows;
+using osu.Framework.XR.Maths;
 using osu.Game;
 using osu.XR.Graphics;
-using osu.XR.Maths;
 using osuTK;
 using osuTK.Graphics.ES30;
 using System;
@@ -27,6 +28,11 @@ using WindowState = osu.Framework.Platform.WindowState;
 namespace osu.XR.GameHosts {
 	public abstract class ExtendedRealityGameHost : GameHost {
         protected ExtendedRealityGameHost ( string gameName = "", ToolkitOptions toolkitOptions = null ) : base( gameName, toolkitOptions ) { }
+
+
+		public XrTextInput TextInput { get; } = new XrTextInput();
+		public override ITextInputSource GetTextInput ()
+			=> TextInput;
 
 		public override void OpenFileExternally ( string filename ) {
 			throw new NotImplementedException( "File dialog panel is not yet implemented" ); // TODO file dialog and browser panels

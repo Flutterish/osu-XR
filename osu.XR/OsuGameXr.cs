@@ -10,6 +10,7 @@ using osu.Framework.Input;
 using osu.Framework.Input.States;
 using osu.Framework.IO.Stores;
 using osu.Framework.Logging;
+using osu.Framework.Platform;
 using osu.Game;
 using osu.Game.Audio;
 using osu.Game.Beatmaps;
@@ -42,9 +43,15 @@ using System.Xml.Schema;
 using Pointer = osu.XR.Components.Pointers.RaycastPointer;
 
 namespace osu.XR {
+    // TODO separate out osu.Framework.XR
+
     // TODO skybox settings:
     // Rave!
     // Storyboard
+
+    // ISSUE osu limits frasmerate to 60Hz when not focused
+
+    // TODO clap bindings and general user ruleset action bindings
 
 	/// <summary>
 	/// The full osu! experience in VR.
@@ -65,7 +72,7 @@ namespace osu.XR {
         public readonly BeatProvider BeatProvider = new();
         [Cached]
         public readonly XrNotificationPanel Notifications = new XrNotificationPanel();
-        [Cached( name: "FocusedPanel" )]
+        [Cached( name: nameof(FocusedPanel) )]
         public readonly Bindable<Panel> FocusedPanel = new();
         [Cached]
         public readonly XrKeyboard Keyboard = new() { Scale = new Vector3( 0.04f ) };
@@ -105,7 +112,7 @@ namespace osu.XR {
             setManifest();
         }
 
-        private void setManifest () {
+		private void setManifest () {
             VR.SetManifest( new Manifest<XrActionGroup, XrAction> {
                 LaunchType = LaunchType.Binary,
                 IsDashBoardOverlay = false,
@@ -210,37 +217,33 @@ namespace osu.XR {
             OsuGame.SetHost( Host );
             AddInternal( OsuGame );
 
+            // this is done like this because otherwise DI stealing is harder to do
             OsuGame.OnLoadComplete += _ => {
                 RemoveInternal( OsuGame );
                 osuLoaded();
             };
         }
 
-        void osuLoaded () {
+        void stealOsuDI () {
+            // TODO somehow just cache everything osugame caches ( either set our dep container to osu's + ours or somehow retreive all of its cache )
+            // or maybe we can put the scene root as osus child and proxy it but i dont think it is possible
             Resources.AddStore( new DllResourceStore( typeof( OsuGameXr ).Assembly ) );
             Resources.AddStore( new DllResourceStore( typeof( OsuGame ).Assembly ) );
             Resources.AddStore( new DllResourceStore( OsuResources.ResourceAssembly ) );
-            AddFont( Resources, @"Fonts/osuFont" );
 
+            AddFont( Resources, @"Fonts/osuFont" );
             AddFont( Resources, @"Fonts/Torus-Regular" );
             AddFont( Resources, @"Fonts/Torus-Light" );
             AddFont( Resources, @"Fonts/Torus-SemiBold" );
             AddFont( Resources, @"Fonts/Torus-Bold" );
-
             AddFont( Resources, @"Fonts/Noto-Basic" );
             AddFont( Resources, @"Fonts/Noto-Hangul" );
             AddFont( Resources, @"Fonts/Noto-CJK-Basic" );
             AddFont( Resources, @"Fonts/Noto-CJK-Compatibility" );
             AddFont( Resources, @"Fonts/Noto-Thai" );
-
             AddFont( Resources, @"Fonts/Venera-Light" );
             AddFont( Resources, @"Fonts/Venera-Bold" );
             AddFont( Resources, @"Fonts/Venera-Black" );
-            // TODO somehow just cache everything osugame caches ( either set our dep container to osu's + ours or somehow retreive all of its cache )
-            // another option is to add dependent items to osugame and create a proxy
-
-            OsuPanel.Source.Add( OsuGame );
-            OsuPanel.AutosizeBoth();
 
             dependency.CacheAs( OsuGame.Dependencies.Get<PreviewTrackManager>() );
             dependency.CacheAs( OsuGame.Dependencies.Get<OsuColour>() );
@@ -249,6 +252,13 @@ namespace osu.XR {
             dependency.CacheAs( OsuGame.Dependencies.Get<IBindable<WorkingBeatmap>>() );
             dependency.CacheAs<OsuGameBase>( OsuGame );
             dependency.CacheAs<Framework.Game>( OsuGame );
+        }
+
+        void osuLoaded () {
+            stealOsuDI();
+
+            OsuPanel.Source.Add( OsuGame );
+            OsuPanel.AutosizeBoth();
 
             // TODO transparency that either doesnt depend on order or is transparent-shader agnostic
             // for now we are just sorting objects here
@@ -260,7 +270,8 @@ namespace osu.XR {
             Scene.Add( Camera );
             Scene.Add( OsuPanel );
             Scene.Add( new HandheldMenu().With( s => s.Panels.AddRange( new FlatPanel[] { new XrConfigPanel(), Notifications } ) ) );
-            //Scene.Add( Keyboard );
+            Scene.Add( Keyboard );
+            Keyboard.LoadModel( @".\Resources\keyboard.obj" );
 
             Config.BindWith( XrConfigSetting.InputMode, inputModeBindable );
             inputModeBindable.BindValueChanged( v => {
@@ -278,8 +289,6 @@ namespace osu.XR {
 
             Config.BindWith( XrConfigSetting.ScreenResolutionX, screenResX );
             Config.BindWith( XrConfigSetting.ScreenResolutionY, screenResY );
-
-            Keyboard.LoadModel( @".\Resources\keyboard.obj" );
 
             VR.BindNewControllerAdded( c => {
                 this.ScheduleAfterChildren( () => {

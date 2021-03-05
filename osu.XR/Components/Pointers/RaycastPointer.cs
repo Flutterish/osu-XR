@@ -1,7 +1,7 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.XR.Maths;
 using osu.XR.Graphics;
-using osu.XR.Maths;
 using osu.XR.Physics;
 using osuTK;
 using System;

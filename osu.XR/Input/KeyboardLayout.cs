@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using K = osu.XR.Input.KeyboardKey;
+using KKey = osuTK.Input.Key;
 
 namespace osu.XR.Input {
 	public class KeyboardLayout {
@@ -97,6 +98,62 @@ namespace osu.XR.Input {
 				Key = key,
 				IsModifier = true,
 				IsToggle = true
+			};
+		}
+
+		public string GetComboFor ( params Key[] modifiers ) {
+			if ( ModifierCombos is not null ) {
+				if ( modifiers is null ) modifiers = Array.Empty<Key>();
+				var matches = this.ModifierCombos.Where( x => x.modifiers.Count() == modifiers.Length && !x.modifiers.Except( modifiers ).Any() );
+				if ( matches.Any() ) {
+					return matches.First().value;
+				}
+
+				if ( ModifierCombos.Any( x => x.modifiers.Length == 0 ) ) 
+					return ModifierCombos.First( x => x.modifiers.Length == 0 ).value;
+			}
+
+			return "";
+		}
+
+		public string GetDisplayFor ( params Key[] modifiers ) {
+			static string translate (string str) {
+				return str switch {
+					"\t" => "Tab",
+					"\n" => "Enter",
+					" " => "␣", // Space
+					_ => str
+				};
+			}
+
+			if ( ModifierCombos is not null ) {
+				if ( modifiers is null ) modifiers = Array.Empty<Key>();
+				var matches = this.ModifierCombos.Where( x => x.modifiers.Count() == modifiers.Length && !x.modifiers.Except( modifiers ).Any() );
+				if ( matches.Any() ) {
+					return translate( matches.First().value );
+				}
+				else if( ModifierCombos.Any( x => x.modifiers.Length == 0 ) ) {
+					return translate( ModifierCombos.First( x => x.modifiers.Length == 0 ).value );
+				}
+			}
+
+			return Key switch {
+				KKey.Escape => "Esc",
+				KKey.AltLeft or KKey.AltRight => "Alt",
+				KKey.ControlLeft or KKey.ControlRight => "Ctrl",
+				KKey.WinLeft or KKey.WinRight => "Host",
+				KKey.ShiftLeft or KKey.ShiftRight => "Shift",
+				KKey.PrintScreen => "Print\nScrn",
+				KKey.PageDown => "Page\nDown",
+				KKey.PageUp => "Page\nUp",
+				KKey.Insert => "Ins",
+				KKey.ScrollLock => "Scroll\nLock",
+				KKey.Pause => "Pause\nBreak",
+				KKey.Delete => "Del",
+				KKey.BackSpace => "BackSpc",
+				KKey.NumLock => "Num\nLock",
+
+				_ => Key?.ToString() ?? "NULL"
 			};
 		}
 	}

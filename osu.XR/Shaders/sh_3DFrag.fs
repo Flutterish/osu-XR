@@ -21,5 +21,7 @@ uniform sampler2D tx;
 void main() 
 {
     gl_FragColor = useGammaCorrection ? toSRGB( texture( tx, uv ) ) : texture( tx, uv );// * tint;
+    if (gl_FragColor.a == 0)
+        discard;
     //gl_FragColor = vec4(vec3(gl_FragCoord.z), 1.0);
 }

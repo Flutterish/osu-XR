@@ -1,6 +1,6 @@
 ﻿using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.XR.Maths;
+using osu.Framework.XR.Maths;
 using osu.XR.Projection;
 using osuTK;
 using System;
@@ -261,6 +261,7 @@ namespace osu.XR.Components {
 				autoOffsetOrigin.Z = value;
 			}
 		}
+
 		/// <summary>
 		/// The centre of the object in local coordinates.
 		/// </summary>

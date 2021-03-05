@@ -3,6 +3,7 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.OpenGL;
 using osu.Framework.Graphics.Primitives;
+using osu.Framework.XR.Maths;
 using osu.XR.Components;
 using osu.XR.Graphics;
 using osu.XR.Maths;
