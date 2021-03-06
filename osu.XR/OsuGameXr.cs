@@ -11,6 +11,8 @@ using osu.Framework.Input.States;
 using osu.Framework.IO.Stores;
 using osu.Framework.Logging;
 using osu.Framework.Platform;
+using osu.Framework.XR;
+using osu.Framework.XR.Components;
 using osu.Framework.XR.Projection;
 using osu.Game;
 using osu.Game.Audio;

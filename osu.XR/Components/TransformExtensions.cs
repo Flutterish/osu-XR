@@ -1,6 +1,7 @@
 ﻿using osu.Framework.Graphics;
 using osu.Framework.Graphics.Transforms;
 using osu.Framework.Utils;
+using osu.Framework.XR.Components;
 using osuTK;
 using System;
 using System.Collections.Generic;

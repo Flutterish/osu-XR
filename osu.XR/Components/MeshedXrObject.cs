@@ -2,6 +2,7 @@
 using osu.Framework.Graphics.OpenGL;
 using osu.Framework.Graphics.OpenGL.Textures;
 using osu.Framework.XR;
+using osu.Framework.XR.Components;
 using osu.Framework.XR.Graphics;
 using osu.XR.Maths;
 using osuTK;

@@ -1,5 +1,4 @@
-﻿using NuGet.Configuration;
-using osu.Framework.Graphics;
+﻿using osu.Framework.Graphics;
 using osu.Framework.Graphics.Cursor;
 using osu.Framework.Input.Events;
 using osu.Game.Graphics.UserInterface;
@@ -27,16 +26,6 @@ namespace osu.XR.Drawables {
 
         protected override Drawable CreateHeader () => new SettingsHeader( Title, Description );
         protected override Drawable CreateFooter () => new SettingsFooter();
-    }
-
-    public class SettingsCheckboxWithTooltip : SettingsCheckbox, IHasTooltip {
-        public string TooltipText { get; set; }
-    }
-
-    public class SettingsSliderWithTooltip<T,Tslider> : SettingsSlider<T,Tslider>, IHasTooltip 
-        where T : struct, IEquatable<T>, IComparable<T>, IConvertible
-        where Tslider : OsuSliderBar<T>, new() {
-        public string TooltipText { get; set; }
     }
 
     public class PxSliderBar : OsuSliderBar<int> {

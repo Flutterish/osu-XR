@@ -7,12 +7,13 @@ using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
 using osu.Framework.Platform;
+using osu.Framework.XR.Components;
+using osu.Framework.XR.GameHosts;
 using osu.Framework.XR.Graphics;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.XR.Components;
 using osu.XR.Components.Panels;
-using osu.XR.GameHosts;
 using osu.XR.Physics;
 using osuTK;
 using osuTK.Graphics;
@@ -137,7 +138,7 @@ namespace osu.XR.Input {
 			}
 		}
 
-		private class XrKey : MeshedXrObject, IHasCollider {
+		private class XrKey : MeshedXrObject {
 			public readonly Bindable<KeyboardKey> KeyBindalbe = new();
 			FlatPanel panel = new FlatPanel { CanHaveGlobalFocus = false };
 			XrKeyDrawable drawable;
@@ -251,7 +252,7 @@ namespace osu.XR.Input {
 				else if ( displayText == "BackSpc" ) icon.Icon = FontAwesome.Solid.Backspace;
 				else if ( displayText == "Enter" ) {
 					icon.Icon = FontAwesome.Solid.LevelDownAlt;
-					icon.Rotation = -90;
+					icon.Rotation = 90;
 				}
 				else if ( displayText == "␣" ) {
 					text.Text = "[";

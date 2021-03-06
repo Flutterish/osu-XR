@@ -1,6 +1,7 @@
 ﻿using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.XR.Components;
 using osu.Game.Graphics.Containers;
 using osu.Game.Overlays.Settings;
 using osu.XR.Components.Panels;

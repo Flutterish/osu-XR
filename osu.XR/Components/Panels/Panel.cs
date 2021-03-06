@@ -18,7 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization.Json;
-using static osu.XR.Components.XrObject.XrObjectDrawNode;
+using static osu.Framework.XR.Components.XrObject.XrObjectDrawNode;
 using static osu.XR.Physics.Raycast;
 
 namespace osu.XR.Components.Panels {
