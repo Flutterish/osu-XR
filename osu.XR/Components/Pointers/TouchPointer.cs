@@ -1,5 +1,6 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Maths;
 using osu.XR.Physics;
 using osuTK;
@@ -16,7 +17,7 @@ namespace osu.XR.Components.Pointers {
 		public readonly BindableDouble RadiusBindable = new( 0.023 );
 
 		public TouchPointer () {
-			Mesh = Graphics.Mesh.FromOBJFile( "./Resources/shpere.obj" );
+			Mesh = Mesh.FromOBJFile( "./Resources/shpere.obj" );
 		}
 
 		protected override void UpdatePointer () { // TODO back and forward motion should trigger a tap even while blocked

@@ -1,5 +1,6 @@
 ﻿using osu.Framework.Bindables;
 using osu.Framework.Graphics;
+using osu.Framework.XR.Maths;
 using osu.XR.Maths;
 using osuTK;
 using System;

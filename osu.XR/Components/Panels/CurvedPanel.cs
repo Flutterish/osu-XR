@@ -1,4 +1,5 @@
 ﻿using osu.Framework.Bindables;
+using osu.Framework.XR.Maths;
 using osuTK;
 using System;
 using System.Collections.Generic;
@@ -40,7 +41,7 @@ namespace osu.XR.Components.Panels {
 				var posA = new Vector2( MathF.Sin( end ), MathF.Cos( end ) ) * radius;
 				var posB = new Vector2( MathF.Sin( start ), MathF.Cos( start ) ) * radius;
 
-				Mesh.AddQuad( new Maths.Quad(
+				Mesh.AddQuad( new Quad(
 					new Vector3( posB.X, height / 2, posB.Y ), new Vector3( posA.X, height / 2, posA.Y ),
 					new Vector3( posB.X, -height / 2, posB.Y ), new Vector3( posA.X, -height / 2, posA.Y )
 				), new Vector2( (float)i / points, 1 ), new Vector2( (float)( i + 1 ) / points, 1 ), new Vector2( (float)i / points, 0 ), new Vector2( (float)( i + 1 ) / points, 0 ) );

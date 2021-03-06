@@ -28,8 +28,6 @@ namespace osu.XR.GameHosts {
 	public class ExtendedRealityWindowsGameHost : ExtendedRealityDesktopGameHost { // this is a copy of DesktopGameHost and WindowsGameHost
 		private TimePeriod timePeriod;
 
-		public override Clipboard GetClipboard () => new WindowsClipboard();
-
 		public override string UserStoragePath => Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData );
 
 #if NET5_0

@@ -7,12 +7,13 @@ using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
 using osu.Framework.Platform;
+using osu.Framework.XR.Graphics;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.XR.Components;
 using osu.XR.Components.Panels;
 using osu.XR.GameHosts;
-using osu.XR.Graphics;
+using osu.XR.Physics;
 using osuTK;
 using osuTK.Graphics;
 using osuTK.Input;
@@ -29,8 +30,6 @@ namespace osu.XR.Input {
 		private List<XrKey> keys = new();
 		[Resolved]
 		private OsuGameXr Game { get; set; }
-		FlatPanel previewPanel;
-		TextFlowContainer preview;
 		[Resolved( name: nameof(OsuGameXr.FocusedPanel) )]
 		private Bindable<Panel> focusedPanel { get; set; }
 
@@ -38,31 +37,6 @@ namespace osu.XR.Input {
 			LayoutBindable.BindValueChanged( _ => remapKeys(), true );
 			AutoOffsetAxes = Axes3D.All;
 			EulerRotX = -0.1f;
-
-			Add( previewPanel = new FlatPanel {
-				PanelHeight = 1.4,
-				PanelWidth = 16,
-				EulerRotX = 0.5f,
-				CanHaveGlobalFocus = false
-			} );
-
-			previewPanel.AutosizeBoth();
-			previewPanel.PanelAutoScaleAxes = Axes.None;
-			previewPanel.AutoOffsetOriginX = 0;
-
-			previewPanel.Source.Add( new Box {
-				RelativeSizeAxes = Axes.Both,
-				Colour = new Color4( 0, 0, 0, 0.2f )
-			} );
-			previewPanel.Source.Add( preview = new TextFlowContainer( x => x.Font = OsuFont.GetFont( Typeface.Torus, 25 ) ) {
-				Width = 300,
-				Height = 30,
-				Origin = Anchor.Centre,
-				Anchor = Anchor.Centre,
-				TextAnchor = Anchor.Centre
-			} );
-
-			preview.Text = "Hello, World!";
 
 			modifiers.BindCollectionChanged( (a,b) => {
 				if ( b.Action == NotifyCollectionChangedAction.Add ) {
@@ -130,7 +104,6 @@ namespace osu.XR.Input {
 			);
 
 			remapKeys();
-			previewPanel.Position = new Vector3( ( keys.Min( m => m.BoundingBox.Min.X ) + keys.Max( m => m.BoundingBox.Max.X ) ) / 2, 1.3f, keys.Max( m => m.BoundingBox.Max.Z ) + 0.5f );
 		}
 
 		private void remapKeys () {
@@ -164,7 +137,7 @@ namespace osu.XR.Input {
 			}
 		}
 
-		private class XrKey : MeshedXrObject {
+		private class XrKey : MeshedXrObject, IHasCollider {
 			public readonly Bindable<KeyboardKey> KeyBindalbe = new();
 			FlatPanel panel = new FlatPanel { CanHaveGlobalFocus = false };
 			XrKeyDrawable drawable;
@@ -209,6 +182,8 @@ namespace osu.XR.Input {
 			public void ApplyModifiers ( Key[] modifiers ) {
 				drawable.ApplyModifiers( modifiers );
 			}
+
+			public bool IsColliderEnabled => ( (IHasCollider)panel ).IsColliderEnabled;
 		}
 
 		private class XrKeyDrawable : CompositeDrawable {

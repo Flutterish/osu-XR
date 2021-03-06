@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore.Internal;
 using osu.Framework.Graphics.OpenGL;
 using osu.Framework.Graphics.OpenGL.Textures;
-using osu.XR.Graphics;
+using osu.Framework.XR;
+using osu.Framework.XR.Graphics;
 using osu.XR.Maths;
 using osuTK;
 using osuTK.Graphics.OpenGL4;
@@ -9,7 +10,7 @@ using System.Collections.Generic;
 
 namespace osu.XR.Components {
 	/// <summary>
-	/// An <see cref="XrObject"/> which renders a <see cref="Graphics.Mesh"/>.
+	/// An <see cref="XrObject"/> which renders a <see cref="Framework.XR.Graphics.Mesh"/>.
 	/// </summary>
 	public class MeshedXrObject : XrObject {
 		public bool IsVisible = true;

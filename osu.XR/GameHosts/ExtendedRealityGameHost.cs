@@ -10,9 +10,9 @@ using osu.Framework.Input;
 using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Framework.Platform.Windows;
+using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Maths;
 using osu.Game;
-using osu.XR.Graphics;
 using osuTK;
 using osuTK.Graphics.ES30;
 using System;
@@ -33,6 +33,10 @@ namespace osu.XR.GameHosts {
 		public XrTextInput TextInput { get; } = new XrTextInput();
 		public override ITextInputSource GetTextInput ()
 			=> TextInput;
+
+		XrClipboard clipboard = new();
+		public override Clipboard GetClipboard ()
+			=> clipboard;
 
 		public override void OpenFileExternally ( string filename ) {
 			throw new NotImplementedException( "File dialog panel is not yet implemented" ); // TODO file dialog and browser panels

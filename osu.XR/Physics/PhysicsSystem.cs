@@ -1,5 +1,5 @@
-﻿using osu.XR.Components;
-using osu.XR.Graphics;
+﻿using osu.Framework.XR.Graphics;
+using osu.XR.Components;
 using osuTK;
 using System;
 using System.Collections.Generic;

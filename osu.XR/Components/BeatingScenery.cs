@@ -1,6 +1,6 @@
-﻿using osu.Framework.XR.Maths;
+﻿using osu.Framework.XR.Graphics;
+using osu.Framework.XR.Maths;
 using osu.XR.Components.Groups;
-using osu.XR.Graphics;
 using osuTK;
 using System;
 using System.Collections.Generic;

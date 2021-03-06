@@ -11,6 +11,7 @@ using osu.Framework.Input.States;
 using osu.Framework.IO.Stores;
 using osu.Framework.Logging;
 using osu.Framework.Platform;
+using osu.Framework.XR.Projection;
 using osu.Game;
 using osu.Game.Audio;
 using osu.Game.Beatmaps;
@@ -25,11 +26,9 @@ using osu.XR.Components;
 using osu.XR.Components.Groups;
 using osu.XR.Components.Panels;
 using osu.XR.Drawables;
-using osu.XR.Graphics;
 using osu.XR.Input;
 using osu.XR.Maths;
 using osu.XR.Physics;
-using osu.XR.Projection;
 using osu.XR.Rendering;
 using osu.XR.Settings;
 using osuTK;
@@ -43,15 +42,15 @@ using System.Xml.Schema;
 using Pointer = osu.XR.Components.Pointers.RaycastPointer;
 
 namespace osu.XR {
-    // TODO separate out osu.Framework.XR
+	// TODO separate out osu.Framework.XR
 
-    // TODO skybox settings:
-    // Rave!
-    // Storyboard
+	// TODO skybox settings:
+	// Rave!
+	// Storyboard
 
-    // ISSUE osu limits frasmerate to 60Hz when not focused
+	// ISSUE osu limits frasmerate to 60Hz when not focused
 
-    // TODO clap bindings and general user ruleset action bindings
+	// TODO clap bindings and general user ruleset action bindings
 
 	/// <summary>
 	/// The full osu! experience in VR.
