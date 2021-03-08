@@ -69,7 +69,7 @@
     "category": "steamvr_input",
     "controller_type": "knuckles",
     "description": "",
-    "name": "My osu.XR configuration for Index Controller",
+    "name": "Default osu.XR configuration for Index Controller",
     "options": {},
     "simulated_actions": []
 }

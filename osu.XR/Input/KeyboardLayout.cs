@@ -109,6 +109,11 @@ namespace osu.XR.Input {
 					return matches.First().value;
 				}
 
+				matches = this.ModifierCombos.Where( x => x.modifiers.Count() < modifiers.Length && !x.modifiers.Except( modifiers ).Any() );
+				if ( matches.Any() ) {
+					return matches.OrderByDescending( x => x.modifiers.Count() ).First().value;
+				}
+
 				if ( ModifierCombos.Any( x => x.modifiers.Length == 0 ) ) 
 					return ModifierCombos.First( x => x.modifiers.Length == 0 ).value;
 			}

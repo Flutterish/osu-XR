@@ -15,6 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="export_system_generated_osu_xr_exe_vive_controller_My_osu_XR_configuration_for_Vive_Controller.json" />
     <None Remove="openvr_api.dll" />
     <None Remove="Resources\keyboard.obj" />
     <None Remove="Resources\shpere.obj" />
@@ -22,6 +23,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="export_system_generated_osu_xr_exe_vive_controller_My_osu_XR_configuration_for_Vive_Controller.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="openvr_api.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

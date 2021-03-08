@@ -75,7 +75,7 @@ namespace osu.XR.Physics {
 
 		public static bool TryHit ( Vector3 origin, double radius, Mesh mesh, Transform transform, out SphereHit hit ) {
 			SphereHit? closest = null;
-
+			// TODO optimize this with an AABB check
 			for ( int i = 0; i < mesh.Tris.Count; i++ ) {
 				var face = mesh.Faces[ i ];
 				face.A = ( transform.Matrix * new Vector4( face.A, 1 ) ).Xyz;

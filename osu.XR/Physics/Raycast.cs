@@ -273,6 +273,8 @@ namespace osu.XR.Physics {
 		/// Intersect a 3D line and a Mesh.
 		/// </summary>
 		public static bool TryHit ( Vector3 origin, Vector3 direction, MeshedXrObject target, out RaycastHit hit, bool includeBehind = false ) {
+			// TODO if we do more than one check ( we are doing 1 per controller ) we are doing matrix multiplication multiple times. we should cache that until its transform is invalidated.
+			// additionaly, multiple tris share one vertice. not caching that is wasting our computing time.
 			var ok = TryHit( origin, direction, target.Mesh, target.Transform, out hit, includeBehind );
 			if ( ok ) {
 				hit = new RaycastHit(

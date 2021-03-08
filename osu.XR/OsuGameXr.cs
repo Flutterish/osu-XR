@@ -180,7 +180,11 @@ namespace osu.XR {
                 DefaultBindings = new() {
                     new() {
                         ControllerType = "knuckles",
-                        Path = "system_generated_osu_xr_exe_binding_knuckles.json"
+                        Path = "knuckles.json"
+                    },
+                    new() {
+                        ControllerType = "vive_controller",
+                        Path = "vive_controller.json"
                     }
                 }
             } );

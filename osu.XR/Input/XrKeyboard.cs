@@ -26,6 +26,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace osu.XR.Input {
+	// TODO enable touch by proximity
 	public class XrKeyboard : XrObject {
 		public readonly Bindable<KeyboardLayout> LayoutBindable = new( KeyboardLayout.Default );
 		private List<XrKey> keys = new();
@@ -117,22 +118,36 @@ namespace osu.XR.Input {
 		[Resolved]
 		private GameHost Host { get; set; }
 		private void onKeyPressed ( KeyboardKey key ) {
-			if ( focusedPanel.Value is null ) return;
-
-			if ( key.Key is Key k ) {
-				focusedPanel.Value.EmulatedInput.PressKey( k );
+			if ( key.IsToggle ) {
+				if ( modifiers.Contains( key.Key.Value ) ) {
+					modifiers.Remove( key.Key.Value );
+				}
+				else {
+					modifiers.Add( key.Key.Value );
+				}
 			}
+			else {
+				if ( focusedPanel.Value is null ) return;
 
-			( Host as ExtendedRealityGameHost ).TextInput.AppendText( key.GetComboFor( modifiers.ToArray() ) );
+				if ( key.Key is Key k ) {
+					focusedPanel.Value.EmulatedInput.PressKey( k );
+				}
+
+				( Host as ExtendedRealityGameHost ).TextInput.AppendText( key.GetComboFor( modifiers.ToArray() ) );
+			}
 		}
 
 		private BindableList<Key> modifiers = new();
 		private void OnKeyHeld ( KeyboardKey key ) {
-			if (key.Key is Key k ) {
+			if ( key.IsToggle ) return;
+
+			if ( key.Key is Key k ) {
 				modifiers.Add( k );
 			}
 		}
 		private void OnKeyReleased ( KeyboardKey key ) {
+			if ( key.IsToggle ) return;
+
 			if ( key.Key is Key k ) {
 				modifiers.Remove( k );
 			}

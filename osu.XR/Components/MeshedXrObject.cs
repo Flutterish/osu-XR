@@ -78,14 +78,19 @@ namespace osu.XR.Components {
 			var b = settings.CameraToClip;
 			var c = (Matrix4)Source.Transform.Matrix;
 
-			GL.UniformMatrix4( GL.GetUniformLocation( XrShader.Shader3D, XrShader.VERTEX_3D.WorldToCameraMatrix ), true, ref a );
-			GL.UniformMatrix4( GL.GetUniformLocation( XrShader.Shader3D, XrShader.VERTEX_3D.CameraToClipMatrix ), true, ref b );
-			GL.UniformMatrix4( GL.GetUniformLocation( XrShader.Shader3D, XrShader.VERTEX_3D.LocalToWorldMatrix ), true, ref c );
-			GL.Uniform1( GL.GetUniformLocation( XrShader.Shader3D, XrShader.FRAGMENT_3D.UseGammaCorrection ), Source.UseGammaCorrection ? 1 : 0 );
+			GL.UniformMatrix4( worldToCamera ??= GL.GetUniformLocation( XrShader.Shader3D, XrShader.VERTEX_3D.WorldToCameraMatrix ), true, ref a );
+			GL.UniformMatrix4( cameraToClip ??= GL.GetUniformLocation( XrShader.Shader3D, XrShader.VERTEX_3D.CameraToClipMatrix ), true, ref b );
+			GL.UniformMatrix4( localToWorld ??= GL.GetUniformLocation( XrShader.Shader3D, XrShader.VERTEX_3D.LocalToWorldMatrix ), true, ref c );
+			GL.Uniform1( useGamma ??= GL.GetUniformLocation( XrShader.Shader3D, XrShader.FRAGMENT_3D.UseGammaCorrection ), Source.UseGammaCorrection ? 1 : 0 );
 			GL.DrawElements( PrimitiveType.Triangles, indiceCount, DrawElementsType.UnsignedInt, 0 );
 			GL.BindVertexArray( 0 );
 			XrShader.Shader3D.Unbind();
 		}
+
+		private static int? worldToCamera;
+		private static int? cameraToClip;
+		private static int? localToWorld;
+		private static int? useGamma;
 
 		private int VAO;
 		private int buffer;
