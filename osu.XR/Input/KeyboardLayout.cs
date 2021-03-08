@@ -137,7 +137,13 @@ namespace osu.XR.Input {
 				if ( matches.Any() ) {
 					return translate( matches.First().value );
 				}
-				else if( ModifierCombos.Any( x => x.modifiers.Length == 0 ) ) {
+
+				matches = this.ModifierCombos.Where( x => x.modifiers.Count() < modifiers.Length && !x.modifiers.Except( modifiers ).Any() );
+				if ( matches.Any() ) {
+					return translate( matches.OrderByDescending( x => x.modifiers.Count() ).First().value );
+				}
+
+				if ( ModifierCombos.Any( x => x.modifiers.Length == 0 ) ) {
 					return translate( ModifierCombos.First( x => x.modifiers.Length == 0 ).value );
 				}
 			}

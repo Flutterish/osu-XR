@@ -15,15 +15,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="export_system_generated_osu_xr_exe_vive_controller_My_osu_XR_configuration_for_Vive_Controller.json" />
+    <None Remove="knuckles.json" />
     <None Remove="openvr_api.dll" />
     <None Remove="Resources\keyboard.obj" />
     <None Remove="Resources\shpere.obj" />
-    <None Remove="system_generated_osu_xr_exe_binding_knuckles.json" />
+    <None Remove="vive_controller.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="export_system_generated_osu_xr_exe_vive_controller_My_osu_XR_configuration_for_Vive_Controller.json">
+    <Content Include="vive_controller.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="openvr_api.dll">
@@ -35,7 +35,7 @@
     <Content Include="Resources\shpere.obj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="system_generated_osu_xr_exe_binding_knuckles.json">
+    <Content Include="knuckles.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

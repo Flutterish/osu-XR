@@ -42,10 +42,20 @@ namespace osu.XR.Input {
 
 			modifiers.BindCollectionChanged( (a,b) => {
 				if ( b.Action == NotifyCollectionChangedAction.Add ) {
-					foreach ( Key i in b.NewItems ) focusedPanel.Value?.EmulatedInput.HoldKey( i );
+					foreach ( Key i in b.NewItems ) {
+						focusedPanel.Value?.EmulatedInput.HoldKey( i );
+						foreach ( var k in keys.Where( x => x.KeyBindalbe.Value.Key == i ) ) {
+							k.MarkActive();
+						}
+					}
 				}
 				else if ( b.Action is NotifyCollectionChangedAction.Reset or NotifyCollectionChangedAction.Remove ) {
-					foreach ( Key i in b.OldItems.Cast<Key>().Except( b.NewItems?.Cast<Key>() ?? Array.Empty<Key>() ) ) focusedPanel.Value?.EmulatedInput.ReleaseKey( i );
+					foreach ( Key i in b.OldItems.Cast<Key>().Except( b.NewItems?.Cast<Key>() ?? Array.Empty<Key>() ) ) {
+						focusedPanel.Value?.EmulatedInput.ReleaseKey( i );
+						foreach ( var k in keys.Where( x => x.KeyBindalbe.Value.Key == i ) ) {
+							k.Unmark();
+						}
+					}
 				}
 
 				foreach ( var i in keys ) {
@@ -133,7 +143,8 @@ namespace osu.XR.Input {
 					focusedPanel.Value.EmulatedInput.PressKey( k );
 				}
 
-				( Host as ExtendedRealityGameHost ).TextInput.AppendText( key.GetComboFor( modifiers.ToArray() ) );
+				if ( !(modifiers.Contains( Key.ControlLeft ) || modifiers.Contains( Key.ControlRight )) ) // workaround really, we need a better way
+					( Host as ExtendedRealityGameHost ).TextInput.AppendText( key.GetComboFor( modifiers.ToArray() ) );
 			}
 		}
 
@@ -141,14 +152,14 @@ namespace osu.XR.Input {
 		private void OnKeyHeld ( KeyboardKey key ) {
 			if ( key.IsToggle ) return;
 
-			if ( key.Key is Key k ) {
+			if ( key.Key is Key k && key.IsModifier ) {
 				modifiers.Add( k );
 			}
 		}
 		private void OnKeyReleased ( KeyboardKey key ) {
 			if ( key.IsToggle ) return;
 
-			if ( key.Key is Key k ) {
+			if ( key.Key is Key k && key.IsModifier ) {
 				modifiers.Remove( k );
 			}
 		}
@@ -175,6 +186,16 @@ namespace osu.XR.Input {
 				drawable.Clicked += v => Clicked?.Invoke( v );
 				drawable.Held += v => Held?.Invoke( v );
 				drawable.Released += v => Released?.Invoke( v );
+			}
+
+			public void MarkActive () {
+				drawable.MarkActive();
+			}
+			public void MarkInactive () {
+				drawable.MarkInactive();
+			}
+			public void Unmark () {
+				drawable.Unmark();
 			}
 
 			ulong meshver;
@@ -238,6 +259,19 @@ namespace osu.XR.Input {
 				} );
 				AddInternal( text );
 				AddInternal( icon );
+			}
+
+			public void MarkActive () {
+				text.FadeColour( Colour4.HotPink, 100 );
+				icon.FadeColour( Colour4.HotPink, 100 );
+			}
+			public void MarkInactive () {
+				text.FadeColour( Colour4.Gray, 100 );
+				icon.FadeColour( Colour4.Gray, 100 );
+			}
+			public void Unmark () {
+				text.FadeColour( Colour4.White, 100 );
+				icon.FadeColour( Colour4.White, 100 );
 			}
 
 			protected override void LoadComplete () {
