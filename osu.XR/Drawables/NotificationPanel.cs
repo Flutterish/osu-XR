@@ -11,5 +11,10 @@ namespace osu.XR.Drawables {
 		public NotificationPanel () {
 			
 		}
+
+		protected override void LoadComplete () {
+			base.LoadComplete();
+			Hide();
+		}
 	}
 }

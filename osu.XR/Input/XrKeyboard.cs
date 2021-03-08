@@ -79,7 +79,7 @@ namespace osu.XR.Input {
 			base.Update();
 			//this.MoveTo( Game.Camera.Position + Game.Camera.Forward + Game.Camera.Down * 0.3f, 50 );
 			//this.RotateTo( Game.Camera.Rotation * Quaternion.FromAxisAngle( Vector3.UnitX, -50f / 180 * MathF.PI ), 50 );
-			this.Position = new Vector3( 0, 1, 0 );
+			this.Position = new Vector3( 0, 1, -0.3f );
 		}
 
 		public void LoadModel ( string path ) {

@@ -215,7 +215,37 @@ namespace osu.XR {
             }
 		}
 
-        protected override void LoadComplete () {
+        private Dictionary<XrController, ControllerMode> modes = new();
+        private void temporaryInputMode ( System.Action<XrController> action ) {
+            revertTemporaryInputMode();
+            foreach ( var i in controllers ) {
+                modes.Add( i.Value, i.Value.Mode );
+                action( i.Value );
+			}
+		}
+        private void revertTemporaryInputMode () {
+            foreach ( var (c,m) in modes ) {
+                c.Mode = m;
+			}
+            modes.Clear();
+		}
+
+		protected override void Update () {
+			base.Update();
+            var inKeyboardProximity = controllers.Values.Any( i => {
+                return i.Position.X - Keyboard.Position.X > -Keyboard.ChildSize.X * Keyboard.Scale.X * 2 && i.Position.X - Keyboard.Position.X < Keyboard.ChildSize.X * Keyboard.Scale.X * 2
+                    && i.Position.Z - Keyboard.Position.Z > -Keyboard.ChildSize.Z * Keyboard.Scale.Z * 2 && i.Position.Z - Keyboard.Position.Z < Keyboard.ChildSize.Z * Keyboard.Scale.Z * 2
+                    && i.Position.Y + 0.1 > Keyboard.Position.Y;
+            } );
+            if ( modes.Any() ) {
+                if ( !inKeyboardProximity ) revertTemporaryInputMode();
+			}
+            else if ( inKeyboardProximity ) {
+                temporaryInputMode( c => c.Mode = ControllerMode.Touch );
+			}
+		}
+
+		protected override void LoadComplete () {
             base.LoadComplete();
 
             OsuGame = new OsuGame( args ) { RelativeSizeAxes = Axes.None, Size = new Vector2( 1920 * 2, 1080 ) };

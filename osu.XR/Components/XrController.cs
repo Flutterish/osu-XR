@@ -97,7 +97,7 @@ namespace osu.XR.Components {
 			} );
 		}
 		private bool acceptsInputFrom ( Controller controller )
-			=> controller == Source || inputModeBindable.Value == InputMode.SinglePointer;
+			=> controller == Source || ( inputModeBindable.Value == InputMode.SinglePointer && Mode == ControllerMode.Pointer );
 
 		void setPointer () {
 			if ( Mode == ControllerMode.Disabled ) {
@@ -107,6 +107,7 @@ namespace osu.XR.Components {
 				pointer = raycast;
 			}
 			else if ( Mode == ControllerMode.Touch ) {
+				touch.Position = Position;
 				pointer = touch;
 			}
 		}
@@ -122,16 +123,17 @@ namespace osu.XR.Components {
 				current.NewHit += onPointerHit;
 				current.NoHit += onPointerNoHit;
 			}
+			onPointerFocusChanged( new ValueChangedEvent<IHasCollider>(myFocus, current?.CurrentFocus) );
 		}
 
 		public bool EmulatesTouch
-			=> inputModeBindable.Value == InputMode.TouchScreen
+			=> Mode == ControllerMode.Touch
 			|| inputModeBindable.Value == InputMode.DoublePointer
 			|| ( inputModeBindable.Value == InputMode.SinglePointer && singlePointerTouchBindable.Value );
 
 		private bool isTouchPointerDown;
 		private bool forceTouch;
-		private bool canTouch => ( inputModeBindable.Value == InputMode.TouchScreen && !tapTouchBindable.Value ) || forceTouch;
+		private bool canTouch => ( Mode == ControllerMode.Touch && !tapTouchBindable.Value ) || forceTouch;
 		private void onPointerNoHit () {
 			if ( isTouchPointerDown ) {
 				isTouchPointerDown = false;
