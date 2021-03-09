@@ -73,13 +73,21 @@ namespace osu.XR.Input {
 					v.NewValue?.EmulatedInput.HoldKey( i );
 				}
 			}, true );
+
+			( Host as ExtendedRealityGameHost ).TextInput.IsActiveBindable.BindValueChanged( v => {
+				if ( v.NewValue ) {
+					this.Position = new Vector3( 0, 1, -0.3f );
+				}
+				else {
+					this.Position = new Vector3( 0, 0, -10 );
+				}
+			}, true );
 		}
 
 		protected override void Update () {
 			base.Update();
 			//this.MoveTo( Game.Camera.Position + Game.Camera.Forward + Game.Camera.Down * 0.3f, 50 );
 			//this.RotateTo( Game.Camera.Rotation * Quaternion.FromAxisAngle( Vector3.UnitX, -50f / 180 * MathF.PI ), 50 );
-			this.Position = new Vector3( 0, 1, -0.3f );
 		}
 
 		public void LoadModel ( string path ) {

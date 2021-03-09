@@ -12,6 +12,8 @@ namespace osu.XR.Drawables {
 			
 		}
 
+		protected override bool StartHidden => true;
+
 		protected override void LoadComplete () {
 			base.LoadComplete();
 			Hide();

@@ -10,7 +10,7 @@ namespace osu.XR.Physics {
 		/// <summary>
 		/// Intersect a 3D line and a place.
 		/// </summary>
-		public static bool TryHit ( Vector3 origin, Vector3 direction, Vector3 pointOnPlane, Vector3 planeNormal, out RaycastHit hit, bool includeBehind = false ) { // BUG something is wrong with some collisions
+		public static bool TryHit ( Vector3 origin, Vector3 direction, Vector3 pointOnPlane, Vector3 planeNormal, out RaycastHit hit, bool includeBehind = false ) { // BUG something is wrong with some collisions ( flat Y normals )
 			// plane := all points where ( point - pointOnPlane ) dot planeNormal = 0
 			// line := all points where ( point - pointOnLine ) - d * direction = 0
 			// in other words, point = pointOnLine + d * direction

@@ -59,291 +59,289 @@ namespace osu.XR {
 	/// </summary>
 	[Cached]
 	public class OsuGameXr : XrGame {
-        [Cached]
-        public readonly PhysicsSystem PhysicsSystem = new();
-        internal InputManager _inputManager;
-        private InputManager inputManager => _inputManager ??= GetContainingInputManager();
-        [Cached]
-        public readonly Camera Camera = new() { Position = new Vector3( 0, 0, 0 ) };
-        public readonly CurvedPanel OsuPanel = new CurvedPanel { Y = 1.8f };
-        [Cached]
-        public readonly XrConfigManager Config = new();
-        OsuGame OsuGame;
-        [Cached]
-        public readonly BeatProvider BeatProvider = new();
-        [Cached]
-        public readonly XrNotificationPanel Notifications = new XrNotificationPanel();
-        [Cached( name: nameof(FocusedPanel) )]
-        public readonly Bindable<Panel> FocusedPanel = new();
-        [Cached]
-        public readonly XrKeyboard Keyboard = new() { Scale = new Vector3( 0.04f ) };
+		[Cached]
+		public readonly PhysicsSystem PhysicsSystem = new();
+		internal InputManager _inputManager;
+		private InputManager inputManager => _inputManager ??= GetContainingInputManager();
+		[Cached]
+		public readonly Camera Camera = new() { Position = new Vector3( 0, 0, 0 ) };
+		public readonly CurvedPanel OsuPanel = new CurvedPanel { Y = 1.8f };
+		[Cached]
+		public readonly XrConfigManager Config = new();
+		OsuGame OsuGame;
+		[Cached]
+		public readonly BeatProvider BeatProvider = new();
+		[Cached]
+		public readonly XrNotificationPanel Notifications = new XrNotificationPanel();
+		[Cached( name: nameof(FocusedPanel) )]
+		public readonly Bindable<Panel> FocusedPanel = new();
+		[Cached]
+		public readonly XrKeyboard Keyboard = new() { Scale = new Vector3( 0.04f ) };
 
-        public XrController MainController => controllers.Values.FirstOrDefault( x => x.Source.IsEnabled && x.Source.IsMainController ) ?? controllers.Values.FirstOrDefault( x => x.Source.IsEnabled );
-        public XrController SecondaryController {
-            get {
-                var main = MainController;
-                return controllers.Values.FirstOrDefault( x => x != main && x.Source.IsEnabled );
-            }
-        }
+		public XrController MainController => controllers.Values.FirstOrDefault( x => x.Source.IsEnabled && x.Source.IsMainController ) ?? controllers.Values.FirstOrDefault( x => x.Source.IsEnabled );
+		public XrController SecondaryController {
+			get {
+				var main = MainController;
+				return controllers.Values.FirstOrDefault( x => x != main && x.Source.IsEnabled );
+			}
+		}
 
-        Dictionary<Controller, XrController> controllers = new();
-        public XrController GetControllerFor ( Controller controller ) => controller is null ? null : ( controllers.TryGetValue( controller, out var c ) ? c : null );
+		Dictionary<Controller, XrController> controllers = new();
+		public XrController GetControllerFor ( Controller controller ) => controller is null ? null : ( controllers.TryGetValue( controller, out var c ) ? c : null );
 
-        DependencyContainer dependency;
+		DependencyContainer dependency;
 		protected override IReadOnlyDependencyContainer CreateChildDependencies ( IReadOnlyDependencyContainer parent ) {
-            return dependency = new DependencyContainer( base.CreateChildDependencies(parent) );
-        }
+			return dependency = new DependencyContainer( base.CreateChildDependencies(parent) );
+		}
 
-        private string[] args;
+		private string[] args;
 		public OsuGameXr ( string[] args ) {
-            this.args = args.ToArray();
+			this.args = args.ToArray();
 
-            OpenVR.NET.Events.OnMessage += msg => {
-                Notifications.Post( new SimpleNotification() { Text = msg } );
-            };
-            OpenVR.NET.Events.OnError += msg => {
-                Notifications.Post( new SimpleNotification() { Text = msg, Icon = FontAwesome.Solid.Bomb } );
-            };
-            OpenVR.NET.Events.OnException += (msg,e) => {
-                Notifications.Post( new SimpleNotification() { Text = msg, Icon = FontAwesome.Solid.Bomb } );
-            };
-            Scene = new XrScene { RelativeSizeAxes = Axes.Both, Camera = Camera };
-            PhysicsSystem.Root = Scene.Root;
+			OpenVR.NET.Events.OnMessage += msg => {
+				Notifications.Post( new SimpleNotification() { Text = msg } );
+			};
+			OpenVR.NET.Events.OnError += msg => {
+				Notifications.Post( new SimpleNotification() { Text = msg, Icon = FontAwesome.Solid.Bomb } );
+			};
+			OpenVR.NET.Events.OnException += (msg,e) => {
+				Notifications.Post( new SimpleNotification() { Text = msg, Icon = FontAwesome.Solid.Bomb } );
+			};
+			Scene = new XrScene { RelativeSizeAxes = Axes.Both, Camera = Camera };
+			PhysicsSystem.Root = Scene.Root;
 
-            setManifest();
-        }
+			setManifest();
+		}
 
 		private void setManifest () {
-            VR.SetManifest( new Manifest<XrActionGroup, XrAction> {
-                LaunchType = LaunchType.Binary,
-                IsDashBoardOverlay = false,
-                Name = "perigee.osuXR",
-                Localizations = new() {
-                    new( "en_us" ) {
-                        Name = "osu!XR",
-                        Description = "The full osu! experience in VR"
-                    }
-                },
-                Groups = new() {
-                    new() {
-                        Type = ActionGroupType.LeftRight,
-                        Name = XrActionGroup.Pointer,
-                        Actions = new() {
-                            new() {
-                                Name = XrAction.MouseLeft,
-                                Type = ActionType.Boolean,
-                                Requirement = Requirement.Mandatory,
-                                Localizations = new() { [ "en_us" ] = "Left Click" }
-                            },
-                            new() {
-                                Name = XrAction.MouseRight,
-                                Type = ActionType.Boolean,
-                                Requirement = Requirement.Mandatory,
-                                Localizations = new() { [ "en_us" ] = "Right Click" }
-                            },
-                            new() {
-                                Name = XrAction.Scroll,
-                                Type = ActionType.Vector2,
-                                Requirement = Requirement.Suggested,
-                                Localizations = new() { [ "en_us" ] = "Scroll" }
-                            }
-                        },
-                        Localizations = new() { [ "en_us" ] = "Pointer" },
-                    },
-                    new() {
-                        Type = ActionGroupType.LeftRight,
-                        Name = XrActionGroup.Configuration,
-                        Actions = new() {
-                            new() {
-                                Name = XrAction.ToggleMenu,
-                                Type = ActionType.Boolean,
-                                Requirement = Requirement.Suggested,
-                                Localizations = new() { [ "en_us" ] = "Toggle configuration panel" }
-                            }
-                        },
-                        Localizations = new() { [ "en_us" ] = "Configuration" }
-                    },
-                    new() {
-                        Type = ActionGroupType.LeftRight,
-                        Name = XrActionGroup.Haptics,
-                        Actions = new() {
-                            new() {
-                                Name = XrAction.Feedback,
-                                Type = ActionType.Vibration,
-                                Requirement = Requirement.Suggested,
-                                Localizations = new() { [ "en_us" ] = "Feedback" }
-                            }
-                        },
-                        Localizations = new() { [ "en_us" ] = "Haptics" }
-                    },
-                },
-                DefaultBindings = new() {
-                    new() {
-                        ControllerType = "knuckles",
-                        Path = "knuckles.json"
-                    },
-                    new() {
-                        ControllerType = "vive_controller",
-                        Path = "vive_controller.json"
-                    }
-                }
-            } );
-        }
-
-        Bindable<InputMode> inputModeBindable = new();
-        Bindable<float> screenHeightBindable = new( 1.8f );
-
-        Bindable<int> screenResX = new( 1920 * 2 );
-        Bindable<int> screenResY = new( 1080 );
-
-        void onControllerInputModeChanged () {
-            var main = MainController;
-            if ( inputModeBindable.Value == InputMode.SinglePointer ) {
-                foreach ( var controller in controllers.Values ) {
-                    controller.Mode = controller == main ? ControllerMode.Pointer : ControllerMode.Disabled;
-                }
-			}
-            else if ( inputModeBindable.Value == InputMode.DoublePointer ) {
-                foreach ( var controller in controllers.Values ) {
-                    controller.Mode = ControllerMode.Pointer;
-                }
-            }
-            else if ( inputModeBindable.Value == InputMode.TouchScreen ) {
-                foreach ( var controller in controllers.Values ) {
-                    controller.Mode = ControllerMode.Touch;
-                }
-            }
+			VR.SetManifest( new Manifest<XrActionGroup, XrAction> {
+				LaunchType = LaunchType.Binary,
+				IsDashBoardOverlay = false,
+				Name = "perigee.osuXR",
+				Localizations = new() {
+					new( "en_us" ) {
+						Name = "osu!XR",
+						Description = "The full osu! experience in VR"
+					}
+				},
+				Groups = new() {
+					new() {
+						Type = ActionGroupType.LeftRight,
+						Name = XrActionGroup.Pointer,
+						Actions = new() {
+							new() {
+								Name = XrAction.MouseLeft,
+								Type = ActionType.Boolean,
+								Requirement = Requirement.Mandatory,
+								Localizations = new() { [ "en_us" ] = "Left Click" }
+							},
+							new() {
+								Name = XrAction.MouseRight,
+								Type = ActionType.Boolean,
+								Requirement = Requirement.Mandatory,
+								Localizations = new() { [ "en_us" ] = "Right Click" }
+							},
+							new() {
+								Name = XrAction.Scroll,
+								Type = ActionType.Vector2,
+								Requirement = Requirement.Suggested,
+								Localizations = new() { [ "en_us" ] = "Scroll" }
+							}
+						},
+						Localizations = new() { [ "en_us" ] = "Pointer" },
+					},
+					new() {
+						Type = ActionGroupType.LeftRight,
+						Name = XrActionGroup.Configuration,
+						Actions = new() {
+							new() {
+								Name = XrAction.ToggleMenu,
+								Type = ActionType.Boolean,
+								Requirement = Requirement.Suggested,
+								Localizations = new() { [ "en_us" ] = "Toggle configuration panel" }
+							}
+						},
+						Localizations = new() { [ "en_us" ] = "Configuration" }
+					},
+					new() {
+						Type = ActionGroupType.LeftRight,
+						Name = XrActionGroup.Haptics,
+						Actions = new() {
+							new() {
+								Name = XrAction.Feedback,
+								Type = ActionType.Vibration,
+								Requirement = Requirement.Suggested,
+								Localizations = new() { [ "en_us" ] = "Feedback" }
+							}
+						},
+						Localizations = new() { [ "en_us" ] = "Haptics" }
+					},
+				},
+				DefaultBindings = new() {
+					new() {
+						ControllerType = "knuckles",
+						Path = "knuckles.json"
+					},
+					new() {
+						ControllerType = "vive_controller",
+						Path = "vive_controller.json"
+					}
+				}
+			} );
 		}
 
-        private Dictionary<XrController, ControllerMode> modes = new();
-        private void temporaryInputMode ( System.Action<XrController> action ) {
-            revertTemporaryInputMode();
-            foreach ( var i in controllers ) {
-                modes.Add( i.Value, i.Value.Mode );
-                action( i.Value );
+		Bindable<InputMode> inputModeBindable = new();
+		Bindable<float> screenHeightBindable = new( 1.8f );
+
+		Bindable<int> screenResX = new( 1920 * 2 );
+		Bindable<int> screenResY = new( 1080 );
+
+		void onControllerInputModeChanged () {
+			var main = MainController;
+			if ( inputModeBindable.Value == InputMode.SinglePointer ) {
+				foreach ( var controller in controllers.Values ) {
+					controller.Mode = controller == main ? ControllerMode.Pointer : ControllerMode.Disabled;
+				}
 			}
-		}
-        private void revertTemporaryInputMode () {
-            foreach ( var (c,m) in modes ) {
-                c.Mode = m;
+			else if ( inputModeBindable.Value == InputMode.DoublePointer ) {
+				foreach ( var controller in controllers.Values ) {
+					controller.Mode = ControllerMode.Pointer;
+				}
 			}
-            modes.Clear();
+			else if ( inputModeBindable.Value == InputMode.TouchScreen ) {
+				foreach ( var controller in controllers.Values ) {
+					controller.Mode = ControllerMode.Touch;
+				}
+			}
 		}
 
+		private Dictionary<XrController, ControllerMode> modes = new();
+		private void temporaryInputMode ( System.Action<XrController> action ) {
+			foreach ( var i in controllers ) {
+				action( i.Value );
+			}
+		}
+
+		bool wasInKeyboardProximity = false;
 		protected override void Update () {
 			base.Update();
-            var inKeyboardProximity = controllers.Values.Any( i => {
-                return i.Position.X - Keyboard.Position.X > -Keyboard.ChildSize.X * Keyboard.Scale.X * 2 && i.Position.X - Keyboard.Position.X < Keyboard.ChildSize.X * Keyboard.Scale.X * 2
-                    && i.Position.Z - Keyboard.Position.Z > -Keyboard.ChildSize.Z * Keyboard.Scale.Z * 2 && i.Position.Z - Keyboard.Position.Z < Keyboard.ChildSize.Z * Keyboard.Scale.Z * 2
-                    && i.Position.Y + 0.1 > Keyboard.Position.Y;
-            } );
-            if ( modes.Any() ) {
-                if ( !inKeyboardProximity ) revertTemporaryInputMode();
-			}
-            else if ( inKeyboardProximity ) {
-                temporaryInputMode( c => c.Mode = ControllerMode.Touch );
+			var inKeyboardProximity = controllers.Values.Any( i => {
+				return i.Position.X - Keyboard.Position.X > -Keyboard.ChildSize.X * Keyboard.Scale.X * 2 && i.Position.X - Keyboard.Position.X < Keyboard.ChildSize.X * Keyboard.Scale.X * 2
+					&& i.Position.Z - Keyboard.Position.Z > -Keyboard.ChildSize.Z * Keyboard.Scale.Z * 2 && i.Position.Z - Keyboard.Position.Z < Keyboard.ChildSize.Z * Keyboard.Scale.Z * 2
+					&& i.Position.Y + 0.1 > Keyboard.Position.Y;
+			} );
+			if ( inKeyboardProximity != wasInKeyboardProximity ) {
+				if ( inKeyboardProximity ) {
+					foreach ( var i in controllers ) {
+						i.Value.Mode = ControllerMode.Touch;
+					}
+				}
+				else {
+					onControllerInputModeChanged();
+				}
+				wasInKeyboardProximity = inKeyboardProximity;
 			}
 		}
 
 		protected override void LoadComplete () {
-            base.LoadComplete();
+			base.LoadComplete();
 
-            OsuGame = new OsuGame( args ) { RelativeSizeAxes = Axes.None, Size = new Vector2( 1920 * 2, 1080 ) };
-            OsuGame.SetHost( Host );
-            AddInternal( OsuGame );
+			OsuGame = new OsuGame( args ) { RelativeSizeAxes = Axes.None, Size = new Vector2( 1920 * 2, 1080 ) };
+			OsuGame.SetHost( Host );
+			AddInternal( OsuGame );
 
-            // this is done like this because otherwise DI stealing is harder to do
-            OsuGame.OnLoadComplete += _ => {
-                RemoveInternal( OsuGame );
-                osuLoaded();
-            };
-        }
+			// this is done like this because otherwise DI stealing is harder to do
+			OsuGame.OnLoadComplete += _ => {
+				RemoveInternal( OsuGame );
+				osuLoaded();
+			};
+		}
 
-        void stealOsuDI () {
-            // TODO somehow just cache everything osugame caches ( either set our dep container to osu's + ours or somehow retreive all of its cache )
-            // or maybe we can put the scene root as osus child and proxy it but i dont think it is possible
-            Resources.AddStore( new DllResourceStore( typeof( OsuGameXr ).Assembly ) );
-            Resources.AddStore( new DllResourceStore( typeof( OsuGame ).Assembly ) );
-            Resources.AddStore( new DllResourceStore( OsuResources.ResourceAssembly ) );
+		void stealOsuDI () {
+			// TODO somehow just cache everything osugame caches ( either set our dep container to osu's + ours or somehow retreive all of its cache )
+			// or maybe we can put the scene root as osus child and proxy it but i dont think it is possible
+			Resources.AddStore( new DllResourceStore( typeof( OsuGameXr ).Assembly ) );
+			Resources.AddStore( new DllResourceStore( typeof( OsuGame ).Assembly ) );
+			Resources.AddStore( new DllResourceStore( OsuResources.ResourceAssembly ) );
 
-            AddFont( Resources, @"Fonts/osuFont" );
-            AddFont( Resources, @"Fonts/Torus-Regular" );
-            AddFont( Resources, @"Fonts/Torus-Light" );
-            AddFont( Resources, @"Fonts/Torus-SemiBold" );
-            AddFont( Resources, @"Fonts/Torus-Bold" );
-            AddFont( Resources, @"Fonts/Noto-Basic" );
-            AddFont( Resources, @"Fonts/Noto-Hangul" );
-            AddFont( Resources, @"Fonts/Noto-CJK-Basic" );
-            AddFont( Resources, @"Fonts/Noto-CJK-Compatibility" );
-            AddFont( Resources, @"Fonts/Noto-Thai" );
-            AddFont( Resources, @"Fonts/Venera-Light" );
-            AddFont( Resources, @"Fonts/Venera-Bold" );
-            AddFont( Resources, @"Fonts/Venera-Black" );
+			AddFont( Resources, @"Fonts/osuFont" );
+			AddFont( Resources, @"Fonts/Torus-Regular" );
+			AddFont( Resources, @"Fonts/Torus-Light" );
+			AddFont( Resources, @"Fonts/Torus-SemiBold" );
+			AddFont( Resources, @"Fonts/Torus-Bold" );
+			AddFont( Resources, @"Fonts/Noto-Basic" );
+			AddFont( Resources, @"Fonts/Noto-Hangul" );
+			AddFont( Resources, @"Fonts/Noto-CJK-Basic" );
+			AddFont( Resources, @"Fonts/Noto-CJK-Compatibility" );
+			AddFont( Resources, @"Fonts/Noto-Thai" );
+			AddFont( Resources, @"Fonts/Venera-Light" );
+			AddFont( Resources, @"Fonts/Venera-Bold" );
+			AddFont( Resources, @"Fonts/Venera-Black" );
 
-            dependency.CacheAs( OsuGame.Dependencies.Get<PreviewTrackManager>() );
-            dependency.CacheAs( OsuGame.Dependencies.Get<OsuColour>() );
-            dependency.CacheAs( OsuGame.Dependencies.Get<RulesetStore>() );
-            dependency.CacheAs( OsuGame.Dependencies.Get<SessionStatics>() );
-            dependency.CacheAs( OsuGame.Dependencies.Get<IBindable<WorkingBeatmap>>() );
-            dependency.CacheAs<OsuGameBase>( OsuGame );
-            dependency.CacheAs<Framework.Game>( OsuGame );
-        }
+			dependency.CacheAs( OsuGame.Dependencies.Get<PreviewTrackManager>() );
+			dependency.CacheAs( OsuGame.Dependencies.Get<OsuColour>() );
+			dependency.CacheAs( OsuGame.Dependencies.Get<RulesetStore>() );
+			dependency.CacheAs( OsuGame.Dependencies.Get<SessionStatics>() );
+			dependency.CacheAs( OsuGame.Dependencies.Get<IBindable<WorkingBeatmap>>() );
+			dependency.CacheAs<OsuGameBase>( OsuGame );
+			dependency.CacheAs<Framework.Game>( OsuGame );
+		}
 
-        void osuLoaded () {
-            stealOsuDI();
+		void osuLoaded () {
+			stealOsuDI();
 
-            OsuPanel.Source.Add( OsuGame );
-            OsuPanel.AutosizeBoth();
+			OsuPanel.Source.Add( OsuGame );
+			OsuPanel.AutosizeBoth();
 
-            // TODO transparency that either doesnt depend on order or is transparent-shader agnostic
-            // for now we are just sorting objects here
-            AddInternal( BeatProvider );
-            AddInternal( Scene );
-            Scene.Add( new SkyBox() );
-            Scene.Add( new FloorGrid() );
-            Scene.Add( new BeatingScenery() );
-            Scene.Add( Camera );
-            Scene.Add( OsuPanel );
-            Scene.Add( new HandheldMenu().With( s => s.Panels.AddRange( new FlatPanel[] { new XrConfigPanel(), Notifications } ) ) );
-            Scene.Add( Keyboard );
-            Keyboard.LoadModel( @".\Resources\keyboard.obj" );
+			// TODO transparency that either doesnt depend on order or is transparent-shader agnostic
+			// for now we are just sorting objects here
+			AddInternal( BeatProvider );
+			AddInternal( Scene );
+			Scene.Add( new SkyBox() );
+			Scene.Add( new FloorGrid() );
+			Scene.Add( new BeatingScenery() );
+			Scene.Add( Camera );
+			Scene.Add( OsuPanel );
+			Scene.Add( new HandheldMenu().With( s => s.Panels.AddRange( new FlatPanel[] { new XrConfigPanel(), Notifications } ) ) );
+			Scene.Add( Keyboard );
+			Keyboard.LoadModel( @".\Resources\keyboard.obj" );
 
-            Config.BindWith( XrConfigSetting.InputMode, inputModeBindable );
-            inputModeBindable.BindValueChanged( v => {
-                onControllerInputModeChanged();
-            }, true );
+			Config.BindWith( XrConfigSetting.InputMode, inputModeBindable );
+			inputModeBindable.BindValueChanged( v => {
+				onControllerInputModeChanged();
+			}, true );
 
-            Config.BindWith( XrConfigSetting.ScreenHeight, screenHeightBindable );
-            screenHeightBindable.BindValueChanged( v => OsuPanel.Y = v.NewValue, true );
+			Config.BindWith( XrConfigSetting.ScreenHeight, screenHeightBindable );
+			screenHeightBindable.BindValueChanged( v => OsuPanel.Y = v.NewValue, true );
 
-            screenResX.BindValueChanged( v => OsuGame.Width = v.NewValue, true );
-            screenResY.BindValueChanged( v => OsuGame.Height = v.NewValue, true );
+			screenResX.BindValueChanged( v => OsuGame.Width = v.NewValue, true );
+			screenResY.BindValueChanged( v => OsuGame.Height = v.NewValue, true );
 
-            Config.BindWith( XrConfigSetting.ScreenRadius, OsuPanel.RadiusBindable );
-            Config.BindWith( XrConfigSetting.ScreenArc, OsuPanel.ArcBindable );
+			Config.BindWith( XrConfigSetting.ScreenRadius, OsuPanel.RadiusBindable );
+			Config.BindWith( XrConfigSetting.ScreenArc, OsuPanel.ArcBindable );
 
-            Config.BindWith( XrConfigSetting.ScreenResolutionX, screenResX );
-            Config.BindWith( XrConfigSetting.ScreenResolutionY, screenResY );
+			Config.BindWith( XrConfigSetting.ScreenResolutionX, screenResX );
+			Config.BindWith( XrConfigSetting.ScreenResolutionY, screenResY );
 
-            VR.BindNewControllerAdded( c => {
-                this.ScheduleAfterChildren( () => {
-                    var controller = new XrController( c );
-                    controllers.Add( c, controller );
-                    Scene.Add( controller );
+			VR.BindNewControllerAdded( c => {
+				this.ScheduleAfterChildren( () => {
+					var controller = new XrController( c );
+					controllers.Add( c, controller );
+					Scene.Add( controller );
 
-                    c.BindEnabled( () => {
-                        onControllerInputModeChanged();
-                    }, true );
-                    c.BindDisabled( () => {
-                        onControllerInputModeChanged();
-                    }, true );
-                } );
-            }, true );
+					c.BindEnabled( () => {
+						onControllerInputModeChanged();
+					}, true );
+					c.BindDisabled( () => {
+						onControllerInputModeChanged();
+					}, true );
+				} );
+			}, true );
 
-            VR.BindComponentsLoaded( () => {
-                var haptic = VR.GetControllerComponent<ControllerHaptic>( XrAction.Feedback );
-                haptic.TriggerVibration( 0.5 ); // NOTE haptics dont work yet
-            } );
-        }
+			VR.BindComponentsLoaded( () => {
+				var haptic = VR.GetControllerComponent<ControllerHaptic>( XrAction.Feedback );
+				haptic.TriggerVibration( 0.5 ); // NOTE haptics dont work yet
+			} );
+		}
 	}
 }
