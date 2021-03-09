@@ -54,6 +54,10 @@ namespace osu.XR {
 
 	// TODO clap bindings and general user ruleset action bindings
 
+	// TODO rigs
+	// TODO 3rd person
+	// TODO setting presets
+
 	/// <summary>
 	/// The full osu! experience in VR.
 	/// </summary>
@@ -180,11 +184,15 @@ namespace osu.XR {
 				DefaultBindings = new() {
 					new() {
 						ControllerType = "knuckles",
-						Path = "knuckles.json"
+						Path = "DefaultBindings/knuckles.json"
 					},
 					new() {
 						ControllerType = "vive_controller",
-						Path = "vive_controller.json"
+						Path = "DefaultBindings/vive_controller.json"
+					},
+					new() {
+						ControllerType = "oculus_touch",
+						Path = "DefaultBindings/oculus_touch.json"
 					}
 				}
 			} );

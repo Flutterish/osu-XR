@@ -1,4 +1,5 @@
-﻿using osu.Framework.XR.Graphics;
+﻿using osu.Framework.XR.Components;
+using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Projection;
 using osuTK;
 using osuTK.Graphics;

@@ -1,4 +1,5 @@
-﻿using osu.XR.Physics;
+﻿using osu.Framework.XR.Components;
+using osu.XR.Physics;
 using System;
 using System.Collections.Generic;
 using System.Linq;

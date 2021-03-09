@@ -1,6 +1,6 @@
-﻿using osu.Framework.XR.Graphics;
+﻿using osu.Framework.XR.Components;
+using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Maths;
-using osu.XR.Components;
 using osuTK;
 using System;
 

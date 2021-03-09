@@ -12,7 +12,6 @@ using osu.Framework.XR.GameHosts;
 using osu.Framework.XR.Graphics;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
-using osu.XR.Components;
 using osu.XR.Components.Panels;
 using osu.XR.Physics;
 using osuTK;

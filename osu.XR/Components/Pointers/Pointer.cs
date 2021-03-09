@@ -1,5 +1,6 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.XR.Components;
 using osu.XR.Physics;
 using osuTK.Graphics.ES20;
 using System;
