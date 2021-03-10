@@ -234,8 +234,8 @@ namespace osu.XR {
 		protected override void Update () {
 			base.Update();
 			var inKeyboardProximity = controllers.Values.Any( i => {
-				return i.Position.X - Keyboard.Position.X > -Keyboard.ChildSize.X * Keyboard.Scale.X * 2 && i.Position.X - Keyboard.Position.X < Keyboard.ChildSize.X * Keyboard.Scale.X * 2
-					&& i.Position.Z - Keyboard.Position.Z > -Keyboard.ChildSize.Z * Keyboard.Scale.Z * 2 && i.Position.Z - Keyboard.Position.Z < Keyboard.ChildSize.Z * Keyboard.Scale.Z * 2
+				return i.Position.X - Keyboard.Position.X > -Keyboard.Size.X * Keyboard.Scale.X * 2 && i.Position.X - Keyboard.Position.X < Keyboard.Size.X * Keyboard.Scale.X * 2
+					&& i.Position.Z - Keyboard.Position.Z > -Keyboard.Size.Z * Keyboard.Scale.Z * 2 && i.Position.Z - Keyboard.Position.Z < Keyboard.Size.Z * Keyboard.Scale.Z * 2
 					&& i.Position.Y + 0.1 > Keyboard.Position.Y;
 			} );
 			if ( inKeyboardProximity != wasInKeyboardProximity ) {

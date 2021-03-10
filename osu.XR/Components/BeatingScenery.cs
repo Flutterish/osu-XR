@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace osu.XR.Components {
-	public class BeatingScenery : XrObject {
+	public class BeatingScenery : CompositeXrObject {
 		public BeatingScenery ( int? seed = null ) {
 			Random random;
 			if ( seed.HasValue ) random = new( seed.Value );

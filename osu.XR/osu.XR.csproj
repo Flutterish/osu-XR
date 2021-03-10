@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="vive_controller.json">
+    <Content Include="DefaultBindings\vive_controller.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="openvr_api.dll">
@@ -35,7 +35,7 @@
     <Content Include="Resources\shpere.obj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="knuckles.json">
+    <Content Include="DefaultBindings\knuckles.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

@@ -8,8 +8,8 @@ using static osu.XR.Physics.Raycast;
 namespace osu.XR.Physics {
 	public class PhysicsSystem : IDisposable {
 		private List<IHasCollider> colliders = new();
-		private XrObject root;
-		public XrObject Root {
+		private CompositeXrObject root;
+		public CompositeXrObject Root {
 			get => root;
 			set {
 				if ( root == value ) return;

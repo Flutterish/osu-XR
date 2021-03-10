@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace osu.XR.Components.Groups {
-	public class BeatingGroup : XrObject {
+	public class BeatingGroup : XrGroup {
 		public readonly Bindable<Beat> BindableBeat = new();
 
 		public BeatingGroup () {

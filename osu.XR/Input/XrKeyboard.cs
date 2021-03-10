@@ -26,7 +26,7 @@ using System.Threading.Tasks;
 
 namespace osu.XR.Input {
 	// TODO enable touch by proximity
-	public class XrKeyboard : XrObject {
+	public class XrKeyboard : CompositeXrObject {
 		public readonly Bindable<KeyboardLayout> LayoutBindable = new( KeyboardLayout.Default );
 		private List<XrKey> keys = new();
 		[Resolved]
@@ -171,8 +171,13 @@ namespace osu.XR.Input {
 			}
 		}
 
-		private class XrKey : MeshedXrObject {
+		private class XrKey : CompositeXrObject {
 			public readonly Bindable<KeyboardKey> KeyBindalbe = new();
+			public Mesh Mesh {
+				set => KeyMesh.Mesh = value;
+				get => KeyMesh.Mesh;
+			}
+			MeshedXrObject KeyMesh = new();
 			FlatPanel panel = new FlatPanel { CanHaveGlobalFocus = false };
 			XrKeyDrawable drawable;
 
@@ -181,7 +186,8 @@ namespace osu.XR.Input {
 			public event Action<KeyboardKey> Released;
 
 			public XrKey () {
-				MainTexture = Textures.Pixel( Color4.Gray ).TextureGL;
+				KeyMesh.MainTexture = Textures.Pixel( Color4.Gray ).TextureGL;
+				Add( KeyMesh );
 				Add( panel );
 				panel.AutosizeBoth();
 
@@ -218,7 +224,7 @@ namespace osu.XR.Input {
 					drawable.Width = Mesh.BoundingBox.Size.X * 100;
 
 					panel.EulerRotX = MathF.PI / 2;
-					panel.Position = Centre;
+					panel.Position = KeyMesh.Centre;
 					panel.Y += Mesh.BoundingBox.Size.Y / 2 + 0.01f;
 				}
 			}

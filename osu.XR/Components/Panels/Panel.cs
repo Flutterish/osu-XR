@@ -98,7 +98,7 @@ namespace osu.XR.Components.Panels {
 
 			SourceCapture.Add( EmulatedInput );
 			EmulatedInput.Add( platformActions );
-			Add( SourceCapture );
+			AddDrawable( SourceCapture );
 		}
 
 		[BackgroundDependencyLoader]

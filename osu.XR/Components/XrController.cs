@@ -21,9 +21,10 @@ using System.Threading.Tasks;
 using static osu.XR.Physics.Raycast;
 
 namespace osu.XR.Components {
-	public class XrController : MeshedXrObject {
+	public class XrController : CompositeXrObject {
 		public readonly Controller Source;
 
+		MeshedXrObject ControllerMesh = new();
 		RaycastPointer raycast = new() { IsVisible = false };
 		TouchPointer touch = new() { IsVisible = false };
 		private Pointer pointer { get => pointerBindable.Value; set => pointerBindable.Value = value; }
@@ -39,19 +40,20 @@ namespace osu.XR.Components {
 		private Bindable<Panel> focusedPanel { get; set; }
 
 		public XrController ( Controller controller ) {
-			MainTexture = Textures.Pixel( controller.IsMainController ? Color4.Orange : Color4.LightBlue ).TextureGL;
+			Add( ControllerMesh );
+			ControllerMesh.MainTexture = Textures.Pixel( controller.IsMainController ? Color4.Orange : Color4.LightBlue ).TextureGL;
 			touch.MainTexture = raycast.MainTexture = Textures.Pixel( (controller.IsMainController ? Colour4.Orange : Colour4.LightBlue ).MultiplyAlpha( 100f / 255f ) ).TextureGL;
 			raycast.Source = this;
 			touch.Source = this;
 
 			Source = controller;
-			Mesh = new Mesh();
+			ControllerMesh.Mesh = new Mesh();
 			_ = controller.LoadModelAsync(
-				begin: () => Mesh.IsReady = false,
-				finish: () => Mesh.IsReady = true,
-				addVertice: v => Mesh.Vertices.Add( new osuTK.Vector3( v.X, v.Y, v.Z ) ),
-				addTextureCoordinate: uv => Mesh.TextureCoordinates.Add( new osuTK.Vector2( uv.X, uv.Y ) ),
-				addTriangle: (a,b,c) => Mesh.Tris.Add( new IndexedFace( (uint)a, (uint)b, (uint)c ) )
+				begin: () => ControllerMesh.Mesh.IsReady = false,
+				finish: () => ControllerMesh.Mesh.IsReady = true,
+				addVertice: v => ControllerMesh.Mesh.Vertices.Add( new osuTK.Vector3( v.X, v.Y, v.Z ) ),
+				addTextureCoordinate: uv => ControllerMesh.Mesh.TextureCoordinates.Add( new osuTK.Vector2( uv.X, uv.Y ) ),
+				addTriangle: (a,b,c) => ControllerMesh.Mesh.Tris.Add( new IndexedFace( (uint)a, (uint)b, (uint)c ) )
 			);
 
 			controller.BindDisabled( () => {
@@ -167,18 +169,18 @@ namespace osu.XR.Components {
 				if ( pointer is not null )
 					pointer.IsVisible = Mode != ControllerMode.Disabled && !IsHoldingAnything;
 				if ( Mode == ControllerMode.Disabled ) {
-					IsVisible = true;
+					ControllerMesh.IsVisible = true;
 				}
 				else if ( Mode == ControllerMode.Pointer ) {
-					IsVisible = true;
+					ControllerMesh.IsVisible = true;
 				}
 				else if ( Mode == ControllerMode.Touch ) {
-					IsVisible = false;
+					ControllerMesh.IsVisible = false;
 				}
 			}
 			else {
 				if ( pointer is not null ) pointer.IsVisible = false;
-				IsVisible = false;
+				ControllerMesh.IsVisible = false;
 			}
 		}
 
