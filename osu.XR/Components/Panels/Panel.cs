@@ -19,14 +19,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization.Json;
-using static osu.Framework.XR.Components.XrObject.XrObjectDrawNode;
+using static osu.Framework.XR.Components.Drawable3D.DrawNode3D;
 using static osu.XR.Physics.Raycast;
 
 namespace osu.XR.Components.Panels {
 	/// <summary>
 	/// A 3D panel that displays an image from a <see cref="BufferedCapture"/>.
 	/// </summary>
-	public abstract class Panel : MeshedXrObject, IHasCollider, IReactsToController {
+	public abstract class Panel : Model, IHasCollider, IReactsToController {
 		public bool CanHaveGlobalFocus = true;
 		public PanelInputMode RequestedInputMode { get; set; } = PanelInputMode.Regular;
 		public readonly XrInputManager EmulatedInput = new XrInputManager { RelativeSizeAxes = Axes.Both };

@@ -21,10 +21,10 @@ using System.Threading.Tasks;
 using static osu.XR.Physics.Raycast;
 
 namespace osu.XR.Components {
-	public class XrController : CompositeXrObject {
+	public class XrController : CompositeDrawable3D {
 		public readonly Controller Source;
 
-		MeshedXrObject ControllerMesh = new();
+		Model ControllerMesh = new();
 		RaycastPointer raycast = new() { IsVisible = false };
 		TouchPointer touch = new() { IsVisible = false };
 		private Pointer pointer { get => pointerBindable.Value; set => pointerBindable.Value = value; }

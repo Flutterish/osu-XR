@@ -9,7 +9,7 @@ namespace osu.XR.Components {
 	/// <summary>
 	/// White line grid on the floor with a fade.
 	/// </summary>
-	public class FloorGrid : MeshedXrObject {
+	public class FloorGrid : Model {
 		public FloorGrid () {
             MainTexture = Textures.Vertical2SidedGradient( Color4.Transparent, Color4.White, 200 ).TextureGL;
 

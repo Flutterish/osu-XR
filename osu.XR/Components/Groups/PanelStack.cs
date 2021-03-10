@@ -14,7 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace osu.XR.Components.Groups {
-	public abstract class PanelStack : CompositeXrObject {
+	public abstract class PanelStack : CompositeDrawable3D {
 		protected abstract Vector3 TargetPosition { get; }
 		protected abstract Quaternion TargetRotation { get; }
 		public readonly BindableList<FlatPanel> Panels = new();

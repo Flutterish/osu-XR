@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace osu.XR.Components {
-	public class Collider : MeshedXrObject, IHasCollider {
+	public class Collider : Model, IHasCollider {
 		public bool IsColliderEnabled { get; set; } = true;
 	}
 }

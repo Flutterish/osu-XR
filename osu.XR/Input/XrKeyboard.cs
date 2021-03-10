@@ -26,7 +26,7 @@ using System.Threading.Tasks;
 
 namespace osu.XR.Input {
 	// TODO enable touch by proximity
-	public class XrKeyboard : CompositeXrObject {
+	public class XrKeyboard : CompositeDrawable3D {
 		public readonly Bindable<KeyboardLayout> LayoutBindable = new( KeyboardLayout.Default );
 		private List<XrKey> keys = new();
 		[Resolved]
@@ -171,13 +171,13 @@ namespace osu.XR.Input {
 			}
 		}
 
-		private class XrKey : CompositeXrObject {
+		private class XrKey : CompositeDrawable3D {
 			public readonly Bindable<KeyboardKey> KeyBindalbe = new();
 			public Mesh Mesh {
 				set => KeyMesh.Mesh = value;
 				get => KeyMesh.Mesh;
 			}
-			MeshedXrObject KeyMesh = new();
+			Model KeyMesh = new();
 			FlatPanel panel = new FlatPanel { CanHaveGlobalFocus = false };
 			XrKeyDrawable drawable;
 

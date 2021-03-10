@@ -8,7 +8,7 @@ namespace osu.XR.Components {
 	/// <summary>
 	/// A hot pink skybox that fits the osu theme.
 	/// </summary>
-	public class SkyBox : MeshedXrObject, IBehindEverything {
+	public class SkyBox : Model, IBehindEverything {
 		public SkyBox () {
 			MainTexture = Textures.VerticalGradient( Color4.Black, Color4.HotPink, 100 ).TextureGL;
 			Mesh.Vertices.AddRange( new[] {
@@ -51,7 +51,7 @@ namespace osu.XR.Components {
 			} );
 		}
 
-		public override void BeforeDraw ( XrObjectDrawNode.DrawSettings settings ) {
+		public override void BeforeDraw ( DrawNode3D.DrawSettings settings ) {
 			base.BeforeDraw( settings );
 			Position = settings.Camera.Position;
 		}

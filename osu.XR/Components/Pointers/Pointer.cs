@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using static osu.XR.Physics.Raycast;
 
 namespace osu.XR.Components.Pointers {
-	public abstract class Pointer : MeshedXrObject {
+	public abstract class Pointer : Model {
 		[Resolved]
 		protected PhysicsSystem PhysicsSystem { get; private set; }
 

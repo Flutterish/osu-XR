@@ -102,7 +102,7 @@ namespace osu.XR.Physics {
 			}
 		}
 
-		public static bool TryHit ( Vector3 origin, double radius, MeshedXrObject target, out SphereHit hit ) {
+		public static bool TryHit ( Vector3 origin, double radius, Model target, out SphereHit hit ) {
 			var ok = TryHit( origin, radius, target.Mesh, target.Transform, out hit );
 			if ( ok ) {
 				hit = new SphereHit(

@@ -8,8 +8,8 @@ using static osu.XR.Physics.Raycast;
 namespace osu.XR.Physics {
 	public class PhysicsSystem : IDisposable {
 		private List<IHasCollider> colliders = new();
-		private CompositeXrObject root;
-		public CompositeXrObject Root {
+		private CompositeDrawable3D root;
+		public CompositeDrawable3D Root {
 			get => root;
 			set {
 				if ( root == value ) return;
@@ -24,12 +24,12 @@ namespace osu.XR.Physics {
 			}
 		}
 
-		private void addXrObject ( XrObject parent, XrObject child ) {
+		private void addXrObject ( Drawable3D parent, Drawable3D child ) {
 			if ( child is IHasCollider collider ) {
 				colliders.Add( collider );
 			}
 		}
-		private void removeXrObject ( XrObject parent, XrObject child ) {
+		private void removeXrObject ( Drawable3D parent, Drawable3D child ) {
 			if ( child is IHasCollider collider ) {
 				colliders.Remove( collider );
 			}
@@ -45,7 +45,7 @@ namespace osu.XR.Physics {
 
 			for ( int i = 0; i < colliders.Count; i++ ) {
 				var collider = colliders[ i ];
-				if ( collider.IsColliderEnabled && Raycast.TryHit( origin, direction, collider.Mesh, ( collider as XrObject ).Transform, out hit, includeBehind ) ) {
+				if ( collider.IsColliderEnabled && Raycast.TryHit( origin, direction, collider.Mesh, ( collider as Drawable3D ).Transform, out hit, includeBehind ) ) {
 					if ( closest is null || Math.Abs( closest.Value.Distance ) > Math.Abs( hit.Distance ) ) {
 						closest = hit;
 						closestCollider = collider;
@@ -81,7 +81,7 @@ namespace osu.XR.Physics {
 
 			for ( int i = 0; i < colliders.Count; i++ ) {
 				var collider = colliders[ i ];
-				if ( collider.IsColliderEnabled && Sphere.TryHit( origin, radius, collider.Mesh, ( collider as XrObject ).Transform, out hit ) ) {
+				if ( collider.IsColliderEnabled && Sphere.TryHit( origin, radius, collider.Mesh, ( collider as Drawable3D ).Transform, out hit ) ) {
 					if ( closest is null || Math.Abs( closest.Value.Distance ) > Math.Abs( hit.Distance ) ) {
 						closest = hit;
 						closestCollider = collider;
