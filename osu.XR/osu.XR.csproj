@@ -16,17 +16,15 @@
 
   <ItemGroup>
     <None Remove="knuckles.json" />
-    <None Remove="openvr_api.dll" />
     <None Remove="Resources\keyboard.obj" />
     <None Remove="Resources\shpere.obj" />
+    <None Remove="Shaders\sh_3DFrag.fs" />
+    <None Remove="Shaders\sh_3DVertex.vs" />
     <None Remove="vive_controller.json" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="DefaultBindings\vive_controller.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="openvr_api.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\keyboard.obj">
@@ -41,8 +39,8 @@
   </ItemGroup>
 
   <ItemGroup>
-	  <EmbeddedResource Include="Shaders\sh_3DFrag.fs" />
-	  <EmbeddedResource Include="Shaders\sh_3DVertex.vs" />
+    <EmbeddedResource Include="Shaders\sh_3DFrag.fs" />
+    <EmbeddedResource Include="Shaders\sh_3DVertex.vs" />
   </ItemGroup>
 
   <ItemGroup>

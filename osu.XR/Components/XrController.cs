@@ -48,7 +48,7 @@ namespace osu.XR.Components {
 
 			Source = controller;
 			ControllerMesh.Mesh = new Mesh();
-			_ = controller.LoadModelAsync(
+			_ = controller.Model.LoadAsync(
 				begin: () => ControllerMesh.Mesh.IsReady = false,
 				finish: () => ControllerMesh.Mesh.IsReady = true,
 				addVertice: v => ControllerMesh.Mesh.Vertices.Add( new osuTK.Vector3( v.X, v.Y, v.Z ) ),
