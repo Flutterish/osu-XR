@@ -74,8 +74,7 @@ namespace osu.XR {
 		[Cached]
 		public readonly Camera Camera = new() { Position = new Vector3( 0, 0, 0 ) };
 		public readonly CurvedPanel OsuPanel = new CurvedPanel { Y = 1.8f };
-		[Cached]
-		public readonly XrConfigManager Config = new();
+		public XrConfigManager Config { get; private set; }
 		OsuGame OsuGame;
 		[Cached]
 		public readonly BeatProvider BeatProvider = new();
@@ -227,13 +226,6 @@ namespace osu.XR {
 			}
 		}
 
-		private Dictionary<XrController, ControllerMode> modes = new();
-		private void temporaryInputMode ( System.Action<XrController> action ) {
-			foreach ( var i in controllers ) {
-				action( i.Value );
-			}
-		}
-
 		bool wasInKeyboardProximity = false;
 		protected override void Update () {
 			base.Update();
@@ -297,6 +289,9 @@ namespace osu.XR {
 			dependency.CacheAs( OsuGame.Dependencies.Get<IBindable<WorkingBeatmap>>() );
 			dependency.CacheAs<OsuGameBase>( OsuGame );
 			dependency.CacheAs<Framework.Game>( OsuGame );
+			dependency.CacheAs( OsuGame.Dependencies.Get<Storage>() );
+
+			dependency.CacheAs( Config = new XrConfigManager( OsuGame.Dependencies.Get<Storage>() ) );
 		}
 
 		void osuLoaded () {

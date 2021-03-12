@@ -1,5 +1,7 @@
-﻿using osu.Framework.Bindables;
+﻿using Newtonsoft.Json;
+using osu.Framework.Bindables;
 using osu.Framework.Configuration;
+using osu.Framework.Platform;
 using osu.Game.Configuration;
 using osu.Game.Rulesets;
 using osu.XR.Drawables;
@@ -7,12 +9,21 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace osu.XR.Settings {
 	public class XrConfigManager : InMemoryConfigManager<XrConfigSetting> {
+		Storage storage;
+		public XrConfigManager ( Storage storage ) {
+			this.storage = storage.GetStorageForDirectory( "XR" );
+
+			Load();
+			InitialiseDefaults();
+		}
+
 		protected override void InitialiseDefaults () {
 			base.InitialiseDefaults();
 			Set( XrConfigSetting.InputMode, InputMode.SinglePointer );
@@ -30,15 +41,15 @@ namespace osu.XR.Settings {
 
 		public static readonly SettingsPreset<XrConfigSetting> DefaultPreset = new() {
 			values = new() {
-				[ XrConfigSetting.InputMode ] = InputMode.SinglePointer,
-				[ XrConfigSetting.SinglePointerTouch ] = false,
-				[ XrConfigSetting.TapOnPress ] = false,
-				[ XrConfigSetting.Deadzone ] = 20,
-				[ XrConfigSetting.ScreenArc ] = MathF.PI * 1.2f,
-				[ XrConfigSetting.ScreenRadius ] = 1.6f,
-				[ XrConfigSetting.ScreenHeight ] = 1.8f,
-				[ XrConfigSetting.ScreenResolutionX ] = 1920 * 2,
-				[ XrConfigSetting.ScreenResolutionY ] = 1080
+				[XrConfigSetting.InputMode]				= InputMode.SinglePointer,
+				[XrConfigSetting.SinglePointerTouch]	= false,
+				[XrConfigSetting.TapOnPress]			= false,
+				[XrConfigSetting.Deadzone]				= 20,
+				[XrConfigSetting.ScreenArc]				= MathF.PI * 1.2f,
+				[XrConfigSetting.ScreenRadius]			= 1.6f,
+				[XrConfigSetting.ScreenHeight]			= 1.8f,
+				[XrConfigSetting.ScreenResolutionX]		= 1920 * 2,
+				[XrConfigSetting.ScreenResolutionY]		= 1080
 			}
 		};
 
@@ -70,12 +81,25 @@ namespace osu.XR.Settings {
 			}
 		};
 
+		const string saveFilePath = "XrSettings.json";
 		protected override void PerformLoad () {
-			// TODO PerformLoad
+			try {
+				if ( storage.Exists( saveFilePath ) ) {
+					using var s = storage.GetStream( saveFilePath );
+					var reader = new StreamReader( s );
+					Newtonsoft.Json.JsonConvert.DeserializeObject<SettingsPreset<XrConfigSetting>>( reader.ReadToEnd() ).Load( this );
+				}
+			}
+			catch { }
 		}
 
 		protected override bool PerformSave () {
-			return false; // TODO PerformSave
+			var preset = new SettingsPreset<XrConfigSetting>( this, DefaultPreset );
+			using var s = storage.GetStream( saveFilePath, FileAccess.Write );
+			var writer = new StreamWriter( s );
+			writer.Write( new StringBuilder( Newtonsoft.Json.JsonConvert.SerializeObject( preset, Newtonsoft.Json.Formatting.Indented ) ) );
+			writer.Flush();
+			return true;
 		}
 	}
 

@@ -27,6 +27,7 @@ namespace osu.XR.Drawables {
 			("Touchscreen Small", XrConfigManager.PresetTouchscreenSmall)
 		};
 
+		// TODO allow users to save their own presets
 		[BackgroundDependencyLoader]
 		private void load ( XrConfigManager config ) {
 			Children = presets.Select( x => new SettingsButton {
