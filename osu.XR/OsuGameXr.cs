@@ -40,6 +40,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Xml.Schema;
 using Pointer = osu.XR.Components.Pointers.RaycastPointer;
 
@@ -48,6 +49,7 @@ namespace osu.XR {
 
 	// TODO skybox settings:
 	// Rave!
+	// Tiled B/W sphere
 	// Storyboard
 
 	// ISSUE osu limits frasmerate to 60Hz when not focused
@@ -347,11 +349,6 @@ namespace osu.XR {
 					}, true );
 				} );
 			}, true );
-
-			VR.BindComponentsLoaded( () => {
-				var haptic = VR.GetControllerComponent<ControllerHaptic>( XrAction.Feedback );
-				haptic.TriggerVibration( 0.5 ); // NOTE haptics dont work yet
-			} );
 		}
 	}
 }

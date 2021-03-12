@@ -25,7 +25,6 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace osu.XR.Input {
-	// TODO enable touch by proximity
 	public class XrKeyboard : CompositeDrawable3D {
 		public readonly Bindable<KeyboardLayout> LayoutBindable = new( KeyboardLayout.Default );
 		private List<XrKey> keys = new();

@@ -36,7 +36,7 @@ namespace osu.XR.Components {
 			set => IsHoldingBindable.Value = value;
 		}
 		public readonly BindableBool IsHoldingBindable = new();
-		[Resolved( name: "FocusedPanel" )]
+		[Resolved( name: nameof( OsuGameXr.FocusedPanel ) )]
 		private Bindable<Panel> focusedPanel { get; set; }
 
 		public XrController ( Controller controller ) {
@@ -97,8 +97,15 @@ namespace osu.XR.Components {
 					if ( EmulatesTouch ) forceTouch = v.NewValue;
 					else RightButtonBindable.Value = v.NewValue;
 				} );
+
+				haptic = VR.GetControllerComponent<ControllerHaptic>( XrAction.Feedback, Source );
 			} );
 		}
+		ControllerHaptic haptic;
+		public void SendHapticVibration ( double duration, double frequency = 40, double amplitude = 1, double delay = 0 ) {
+			haptic?.TriggerVibration( duration, frequency, amplitude, delay );
+		}
+
 		private bool acceptsInputFrom ( Controller controller )
 			=> controller == Source || ( inputModeBindable.Value == InputMode.SinglePointer && Mode == ControllerMode.Pointer );
 
@@ -143,6 +150,7 @@ namespace osu.XR.Components {
 				PointerUp?.Invoke();
 
 				onPointerFocusChanged( new ValueChangedEvent<IHasCollider>( myFocus, null ) );
+				SendHapticVibration( 0.05, 20 );
 			}
 		}
 
@@ -152,6 +160,7 @@ namespace osu.XR.Components {
 
 				isTouchPointerDown = true;
 				PointerDown?.Invoke( hit );
+				SendHapticVibration( 0.05, 40 );
 			}
 			if ( !EmulatesTouch || isTouchPointerDown ) PointerMove?.Invoke( hit );
 		}

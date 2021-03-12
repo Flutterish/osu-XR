@@ -44,7 +44,7 @@ namespace osu.XR.Components.Groups {
 						Add( i );
 						i.AutoOffsetOriginX = 0.5f;
 						i.AutoOffsetAnchorX = 0.5f;
-						// HACK we should make out own sidebar
+						// HACK we should make our own sidebar
 						var button = new SidebarButton();
 						( typeof( SidebarButton ).GetField( "iconContainer", BindingFlags.NonPublic | BindingFlags.Instance ).GetValue( button ) as ConstrainedIconContainer ).Icon = (i as IHasIcon)?.CreateIcon() ?? new SpriteIcon { Icon = FontAwesome.Solid.QuestionCircle };
 						( typeof( SidebarButton ).GetField( "headerText", BindingFlags.NonPublic | BindingFlags.Instance ).GetValue( button ) as SpriteText ).Text = (i as IHasName)?.DisplayName ?? "Unnamed Panel";

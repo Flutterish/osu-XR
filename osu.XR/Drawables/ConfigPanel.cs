@@ -21,7 +21,8 @@ namespace osu.XR.Drawables {
 
 		protected override IEnumerable<SettingsSection> CreateSections () => new SettingsSection[] {
             new InputSettingSection(),
-            new GraphicsSettingSection()
+            new GraphicsSettingSection(),
+            new PresetsSection()
         };
 
         protected override Drawable CreateHeader () => new SettingsHeader( Title, Description );

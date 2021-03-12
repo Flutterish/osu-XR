@@ -28,6 +28,48 @@ namespace osu.XR.Settings {
 			Set( XrConfigSetting.ScreenResolutionY, 1080, 400, 4320 );
 		}
 
+		public static readonly SettingsPreset<XrConfigSetting> DefaultPreset = new() {
+			values = new() {
+				[ XrConfigSetting.InputMode ] = InputMode.SinglePointer,
+				[ XrConfigSetting.SinglePointerTouch ] = false,
+				[ XrConfigSetting.TapOnPress ] = false,
+				[ XrConfigSetting.Deadzone ] = 20,
+				[ XrConfigSetting.ScreenArc ] = MathF.PI * 1.2f,
+				[ XrConfigSetting.ScreenRadius ] = 1.6f,
+				[ XrConfigSetting.ScreenHeight ] = 1.8f,
+				[ XrConfigSetting.ScreenResolutionX ] = 1920 * 2,
+				[ XrConfigSetting.ScreenResolutionY ] = 1080
+			}
+		};
+
+		public static readonly SettingsPreset<XrConfigSetting> PresetTouchscreenBig = new() {
+			values = new() {
+				[XrConfigSetting.InputMode]				= InputMode.TouchScreen,
+				[XrConfigSetting.SinglePointerTouch]	= false,
+				[XrConfigSetting.TapOnPress]			= false,
+				[XrConfigSetting.Deadzone]				= 20,
+				[XrConfigSetting.ScreenArc]				= 1.2f,
+				[XrConfigSetting.ScreenRadius]			= 1.08f,
+				[XrConfigSetting.ScreenHeight]			= 1.58f,
+				[XrConfigSetting.ScreenResolutionX]		= 3840,
+				[XrConfigSetting.ScreenResolutionY]		= 2552
+			}
+		};
+
+		public static readonly SettingsPreset<XrConfigSetting> PresetTouchscreenSmall = new() {
+			values = new() {
+				[XrConfigSetting.InputMode]				= InputMode.TouchScreen,
+				[XrConfigSetting.SinglePointerTouch]	= false,
+				[XrConfigSetting.TapOnPress]			= false,
+				[XrConfigSetting.Deadzone]				= 20,
+				[XrConfigSetting.ScreenArc]				= 1.2f,
+				[XrConfigSetting.ScreenRadius]			= 0.69f /*nice*/,
+				[XrConfigSetting.ScreenHeight]			= 1.58f,
+				[XrConfigSetting.ScreenResolutionX]		= 3840,
+				[XrConfigSetting.ScreenResolutionY]		= 2552
+			}
+		};
+
 		protected override void PerformLoad () {
 			// TODO PerformLoad
 		}
