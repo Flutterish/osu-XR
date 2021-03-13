@@ -15,7 +15,7 @@ namespace osu.XR.Physics {
 	public static class Sphere {
 		public static bool TryHit ( Vector3 origin, double radius, Face face, out SphereHit hit ) {
 			Vector3 normal = Vector3.Cross( face.A - face.B, face.C - face.B ).Normalized();
-			Raycast.TryHit( origin, normal, face.A, normal, out var rh, true );
+			Raycast.TryHitPrenormalized( origin, normal, face.A, normal, out var rh, true );
 			if ( Triangles.IsPointInside( rh.Point, face ) ) {
 				if ( Math.Abs( rh.Distance ) <= radius ) {
 					hit = new SphereHit(
