@@ -4,23 +4,14 @@ using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Maths;
 using osuTK;
 using System;
-using System.Runtime.CompilerServices;
 
 namespace osu.XR.Physics {
 	// TODO all of the physics methods should include both a regular and a prenormalized version for preformance
-	// BUG something is wrong with some collisions ( flat Y normals )
 	public static class Raycast {
 		/// <summary>
-		/// Intersect a 3D line and a plane.
+		/// Intersect a 3D line and a place.
 		/// </summary>
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public static bool TryHit ( Vector3 origin, Vector3 direction, Vector3 pointOnPlane, Vector3 planeNormal, out RaycastHit hit, bool includeBehind = false )
-			=> TryHitPrenormalized( origin, direction.Normalized(), pointOnPlane, planeNormal.Normalized(), out hit, includeBehind );
-
-		/// <summary>
-		/// Intersect a 3D line and a plane. Direction and planeNormal must be normalized.
-		/// </summary>
-		public static bool TryHitPrenormalized ( Vector3 origin, Vector3 direction, Vector3 pointOnPlane, Vector3 planeNormal, out RaycastHit hit, bool includeBehind = false ) {
+		public static bool TryHit ( Vector3 origin, Vector3 direction, Vector3 pointOnPlane, Vector3 planeNormal, out RaycastHit hit, bool includeBehind = false ) { // BUG something is wrong with some collisions ( flat Y normals )
 			// plane := all points where ( point - pointOnPlane ) dot planeNormal = 0
 			// line := all points where ( point - pointOnLine ) - d * direction = 0
 			// in other words, point = pointOnLine + d * direction
@@ -28,12 +19,12 @@ namespace osu.XR.Physics {
 			// direction dot planeNormal * d + ( pointOnLine - pointOnPlane ) dot planeNormal = 0
 			// d = (( pointOnPlane - pointOnLine ) dot planeNormal) / (direction dot planeNormal)
 			// therefore if direction dot planeNormal is 0, there is no intersection or they are on top of each other
+			direction.Normalize();
+			planeNormal.Normalize();
 
-			var diff = pointOnPlane - origin;
-			Vector3.Dot( ref direction, ref planeNormal, out var dot );
+			var dot = Vector3.Dot( direction, planeNormal );
 			if ( dot == 0 ) {
-				Vector3.Dot( ref diff, ref planeNormal, out dot );
-				if ( dot == 0 ) {
+				if ( Vector3.Dot( origin - pointOnPlane, planeNormal ) == 0 ) {
 					hit = new RaycastHit(
 						origin,
 						origin,
@@ -49,9 +40,8 @@ namespace osu.XR.Physics {
 				}
 			}
 			else {
-				Vector3.Dot( ref diff, ref planeNormal, out var dot2 );
-				var distance = dot2 / dot;
-			
+				var distance = Vector3.Dot( pointOnPlane - origin, planeNormal ) / dot;
+
 				hit = new RaycastHit(
 					origin + direction * distance,
 					origin,
@@ -64,49 +54,54 @@ namespace osu.XR.Physics {
 		}
 
 		/// <summary>
-		/// Intersect 2 3D lines. Both directions need to be normalized.
-		/// </summary>
-		public static bool TryHitLinePrenormalized ( Vector3 pointOnLineA, Vector3 directionA, Vector3 pointOnLineB, Vector3 directionB, out Vector3 hit ) {
-			// for 2 lines to intersect we first need them to be on the same plane
-			Vector3.Cross( ref directionA, ref directionB, out var normal );
-			// plane := all points where ( point - pointOnPlane ) dot planeNormal = 0
-			// say the plane we are looking for embeds lineA:
-			// plane := all points where ( point - pointOnLineA ) dot planeNormal = 0
-			// now to find if lineB is on that plane:
-			// ( pointOnLineB - pointOnLineA ) dot planeNormal = 0
-			var dot = Vector3.Dot( pointOnLineB - pointOnLineA, normal );
-			if ( MathF.Abs( dot ) < 0.001f ) {
-				// now we can turn lineA into a plane...
-				Vector3.Cross( ref directionA, ref normal, out normal );
-				// ...and check where lineB intersects that plane
-				Vector3.Dot( ref directionB, ref normal, out dot );
-				var diff = pointOnLineA - pointOnLineB;
-				if ( dot == 0 ) { // this means the lines are parallel
-								  // we need to check if they are on top of each other
-								  // we can do that by checking if A, B and direction are colinear
-					diff.Normalize();
-					hit = pointOnLineA;
-					return diff == directionA || diff == -directionA;
-				}
-				else {
-					Vector3.Dot( ref diff, ref normal, out var dot2 ); // intersect that plane. Take a look at TryHitPrenormalized for an explaination
-					var distance = dot2 / dot;
-					hit = pointOnLineB + directionB * distance;
-					return true;
-				}
-			}
-			else {
-				hit = default;
-				return false;
-			}
-		}
-
-		/// <summary>
 		/// Intersect 2 3D lines.
 		/// </summary>
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public static bool TryHitLine ( Vector3 pointOnLineA, Vector3 directionA, Vector3 pointOnLineB, Vector3 directionB, out Vector3 hit )
-			=> TryHitLinePrenormalized( pointOnLineA, directionA.Normalized(), pointOnLineB, directionB.Normalized(), out hit );
+		public static bool TryHitLine ( Vector3 pointOnLineA, Vector3 directionA, Vector3 pointOnLineB, Vector3 directionB, out Vector3 hit ) {
+			bool Approx ( float a, float b, float tolerance = 0.001f )
+				=> MathF.Abs( a - b ) <= tolerance;
+
+			float sum = 0;
+			int count = 0;
+			// p = (o2.y - o1.y) + (d2.y/d2.x)(o1.x - o2.x)/(d1.y - (d2.y/d2.x)(d1.x))
+			if ( directionB.X != 0 ) {
+				var div = directionA.Y - directionA.X * directionB.Y / directionB.X;
+				if ( !Approx( div, 0 ) ) {
+					var q = ( pointOnLineB.Y - pointOnLineA.Y + ( pointOnLineA.X - pointOnLineB.X ) * directionB.Y / directionB.X ) / div;
+					if ( count == 0 || Approx( sum / count, q ) ) {
+						sum += q;
+						count++;
+					}
+				}
+			}
+			if ( directionB.Y != 0 ) {
+				var div = directionA.Z - directionA.Y * directionB.Z / directionB.Y;
+				if ( !Approx( div, 0 ) ) {
+					var q = ( pointOnLineB.Z - pointOnLineA.Z + ( pointOnLineA.Y - pointOnLineB.Y ) * directionB.Z / directionB.Y ) / div;
+					if ( count == 0 || Approx( sum / count, q ) ) {
+						sum += q;
+						count++;
+					}
+				}
+			}
+			if ( directionB.Z != 0 ) {
+				var div = directionA.X - directionA.Z * directionB.X / directionB.Z;
+				if ( !Approx( div, 0 ) ) {
+					var q = ( pointOnLineB.X - pointOnLineA.X + ( pointOnLineA.Z - pointOnLineB.Z ) * directionB.X / directionB.Z ) / div;
+					if ( count == 0 || Approx( sum / count, q ) ) {
+						sum += q;
+						count++;
+					}
+				}
+			}
+
+			if ( sum != 0 ) {
+				hit = pointOnLineA + sum / count * directionA;
+				return true;
+			}
+
+			hit = default;
+			return false;
+		}
 
 		/// <summary>
 		/// Intersect 2 2D lines.
@@ -176,7 +171,8 @@ namespace osu.XR.Physics {
 			}
 
 			if ( TryHit( origin, direction, face.A, normal, out hit, includeBehind ) ) {
-				if ( TryHitLine( hit.Point, face.C - hit.Point, face.A, face.B - face.A, out var pointOnAB ) ) {
+				var directionFromC = ( face.C - hit.Point ).Normalized();
+				if ( TryHitLine( hit.Point, directionFromC, face.A, face.B - face.A, out var pointOnAB ) ) {
 					var distanceFromAToB = Extensions.SignedDistance( face.A, pointOnAB, face.B );
 					if ( distanceFromAToB >= -0.01f && distanceFromAToB <= ( face.B - face.A ).Length + 0.01f ) {
 						var distanceToC = Extensions.SignedDistance( face.C, hit.Point, pointOnAB );

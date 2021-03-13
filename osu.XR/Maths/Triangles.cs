@@ -39,7 +39,8 @@ namespace osu.XR.Maths {
 		}
 
 		public static bool IsPointInside ( Vector3 p, Face face ) {
-			if ( Raycast.TryHitLine( p, face.C - p, face.A, face.B - face.A, out var pointOnAB ) ) {
+			var directionFromC = ( face.C -p ).Normalized();
+			if ( Raycast.TryHitLine( p, directionFromC, face.A, face.B - face.A, out var pointOnAB ) ) {
 				var distanceFromAToB = Extensions.SignedDistance( face.A, pointOnAB, face.B );
 				if ( distanceFromAToB >= -0.01f && distanceFromAToB <= ( face.B - face.A ).Length + 0.01f ) {
 					var distanceToC = Extensions.SignedDistance( face.C, p, pointOnAB );
