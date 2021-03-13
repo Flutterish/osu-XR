@@ -49,6 +49,7 @@ namespace osu.XR {
 
 	// TODO skybox settings:
 	// Rave!
+	// Color squares
 	// Tiled B/W sphere
 	// Storyboard
 
@@ -58,7 +59,6 @@ namespace osu.XR {
 
 	// TODO rigs
 	// TODO 3rd person
-	// TODO setting presets
 
 	// TODO move shaders to out osu.Framework.XR ( problem is that we will need a resource store )
 

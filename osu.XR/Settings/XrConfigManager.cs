@@ -21,7 +21,6 @@ namespace osu.XR.Settings {
 			this.storage = storage.GetStorageForDirectory( "XR" );
 
 			Load();
-			InitialiseDefaults();
 		}
 
 		protected override void InitialiseDefaults () {
@@ -60,8 +59,8 @@ namespace osu.XR.Settings {
 				[XrConfigSetting.TapOnPress]			= false,
 				[XrConfigSetting.Deadzone]				= 20,
 				[XrConfigSetting.ScreenArc]				= 1.2f,
-				[XrConfigSetting.ScreenRadius]			= 1.08f,
-				[XrConfigSetting.ScreenHeight]			= 1.58f,
+				[XrConfigSetting.ScreenRadius]			= 1.01f,
+				[XrConfigSetting.ScreenHeight]			= 1.47f,
 				[XrConfigSetting.ScreenResolutionX]		= 3840,
 				[XrConfigSetting.ScreenResolutionY]		= 2552
 			}
@@ -85,9 +84,9 @@ namespace osu.XR.Settings {
 		protected override void PerformLoad () {
 			try {
 				if ( storage.Exists( saveFilePath ) ) {
-					using var s = storage.GetStream( saveFilePath );
+					using var s = storage.GetStream( saveFilePath, mode: FileMode.Create );
 					var reader = new StreamReader( s );
-					Newtonsoft.Json.JsonConvert.DeserializeObject<SettingsPreset<XrConfigSetting>>( reader.ReadToEnd() ).Load( this );
+					Newtonsoft.Json.JsonConvert.DeserializeObject<SettingsPreset<XrConfigSetting>>( reader.ReadToEnd() ).Load( this, DefaultPreset );
 				}
 			}
 			catch { }
@@ -97,7 +96,7 @@ namespace osu.XR.Settings {
 			var preset = new SettingsPreset<XrConfigSetting>( this, DefaultPreset );
 			using var s = storage.GetStream( saveFilePath, FileAccess.Write );
 			var writer = new StreamWriter( s );
-			writer.Write( new StringBuilder( Newtonsoft.Json.JsonConvert.SerializeObject( preset, Newtonsoft.Json.Formatting.Indented ) ) );
+			writer.Write( Newtonsoft.Json.JsonConvert.SerializeObject( preset, Newtonsoft.Json.Formatting.Indented ) );
 			writer.Flush();
 			return true;
 		}

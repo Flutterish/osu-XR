@@ -34,12 +34,12 @@ namespace osu.XR.Drawables {
 				Text = x.name,
 				Action = () => {
 					lastPreset = new( config, XrConfigManager.DefaultPreset );
-					x.preset.Load( config );
+					x.preset.Load( config, XrConfigManager.DefaultPreset );
 				}
 			} ).Append( new SettingsButton {
 				Text = "Previous",
 				Action = () => {
-					lastPreset?.Load( config );
+					lastPreset?.Load( config, XrConfigManager.DefaultPreset );
 				}
 			} ).Append( new SettingsButton {
 				Text = "Print Current (Runtime Logs)",
