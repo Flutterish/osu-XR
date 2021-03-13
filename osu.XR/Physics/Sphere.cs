@@ -1,4 +1,5 @@
-﻿using osu.Framework.XR.Components;
+﻿using osu.Framework.XR;
+using osu.Framework.XR.Components;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Maths;
 using osu.XR.Maths;
@@ -74,8 +75,13 @@ namespace osu.XR.Physics {
 		}
 
 		public static bool TryHit ( Vector3 origin, double radius, Mesh mesh, Transform transform, out SphereHit hit ) {
+			var aabb = transform.Matrix * mesh.BoundingBox;
+			if ( ( aabb.Min + aabb.Size / 2 - origin ).Length > aabb.Size.Length + radius ) {
+				hit = default;
+				return false;
+			}
+
 			SphereHit? closest = null;
-			// TODO optimize this with an AABB check
 			for ( int i = 0; i < mesh.Tris.Count; i++ ) {
 				var face = mesh.Faces[ i ];
 				face.A = ( transform.Matrix * new Vector4( face.A, 1 ) ).Xyz;
@@ -102,8 +108,39 @@ namespace osu.XR.Physics {
 			}
 		}
 
+		public static bool TryHit ( Vector3 origin, double radius, Mesh mesh, Transform transform, ReadonlyIndexer<int,Face> indexer, out SphereHit hit ) {
+			var aabb = transform.Matrix * mesh.BoundingBox;
+			if ( ( aabb.Min + aabb.Size / 2 - origin ).Length > aabb.Size.Length + radius ) {
+				hit = default;
+				return false;
+			}
+
+			SphereHit? closest = null;
+			for ( int i = 0; i < mesh.Tris.Count; i++ ) {
+				var face = indexer[ i ];
+				if ( TryHit( origin, radius, face, out hit ) && ( closest is null || closest.Value.Distance > hit.Distance ) ) {
+					closest = new SphereHit(
+						distance: hit.Distance,
+						origin: hit.Origin,
+						radius: hit.Radius,
+						point: hit.Point,
+						trisIndex: i
+					);
+				}
+			}
+
+			if ( closest is null ) {
+				hit = default;
+				return false;
+			}
+			else {
+				hit = closest.Value;
+				return true;
+			}
+		}
+
 		public static bool TryHit ( Vector3 origin, double radius, Model target, out SphereHit hit ) {
-			var ok = TryHit( origin, radius, target.Mesh, target.Transform, out hit );
+			var ok = TryHit( origin, radius, target.Mesh, target.Transform, target.Faces, out hit );
 			if ( ok ) {
 				hit = new SphereHit(
 					distance: hit.Distance,

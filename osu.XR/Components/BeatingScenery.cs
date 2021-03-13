@@ -11,10 +11,8 @@ using System.Threading.Tasks;
 
 namespace osu.XR.Components {
 	public class BeatingScenery : CompositeDrawable3D {
-		public BeatingScenery ( int? seed = null ) {
-			Random random;
-			if ( seed.HasValue ) random = new( seed.Value );
-			else random = new();
+		public BeatingScenery ( int? seed = 0 ) {
+			Random random = seed.HasValue ? new( seed.Value ) : new();
 
 			double next () => random.NextDouble( 0.02, 0.1 );
 			for ( double theta = next(); theta < Math.PI * 2; theta += next() ) {

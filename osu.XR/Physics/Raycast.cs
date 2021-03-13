@@ -1,4 +1,5 @@
-﻿using osu.Framework.XR.Components;
+﻿using osu.Framework.XR;
+using osu.Framework.XR.Components;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Maths;
 using osuTK;
@@ -272,10 +273,44 @@ namespace osu.XR.Physics {
 		/// <summary>
 		/// Intersect a 3D line and a Mesh.
 		/// </summary>
+		public static bool TryHit ( Vector3 origin, Vector3 direction, Mesh mesh, Transform transform, ReadonlyIndexer<int,Face> indexer, out RaycastHit hit, bool includeBehind = false ) {
+			if ( mesh.Tris.Count > 6 ) {
+				if ( !Intersects( origin, direction, transform.Matrix * mesh.BoundingBox, includeBehind ) ) {
+					hit = default;
+					return false;
+				}
+			}
+			RaycastHit? closest = null;
+
+			for ( int i = 0; i < mesh.Tris.Count; i++ ) {
+				var face = indexer[ i ];
+				if ( TryHit( origin, direction, face, out hit, includeBehind ) && ( closest is null || Math.Abs( closest.Value.Distance ) > Math.Abs( hit.Distance ) ) ) {
+					closest = new RaycastHit(
+						hit.Point,
+						hit.Origin,
+						hit.Normal,
+						hit.Direction,
+						hit.Distance,
+						i
+					);
+				}
+			}
+
+			if ( closest is null ) {
+				hit = default;
+				return false;
+			}
+			else {
+				hit = closest.Value;
+				return true;
+			}
+		}
+
+		/// <summary>
+		/// Intersect a 3D line and a Mesh.
+		/// </summary>
 		public static bool TryHit ( Vector3 origin, Vector3 direction, Model target, out RaycastHit hit, bool includeBehind = false ) {
-			// TODO if we do more than one check ( we are doing 1 per controller ) we are doing matrix multiplication multiple times. we should cache that until its transform is invalidated.
-			// additionaly, multiple tris share one vertice. not caching that is wasting our computing time.
-			var ok = TryHit( origin, direction, target.Mesh, target.Transform, out hit, includeBehind );
+			var ok = TryHit( origin, direction, target.Mesh, target.Transform, target.Faces, out hit, includeBehind );
 			if ( ok ) {
 				hit = new RaycastHit(
 					hit.Point,

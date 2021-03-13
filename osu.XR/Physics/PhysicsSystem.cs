@@ -45,10 +45,20 @@ namespace osu.XR.Physics {
 
 			for ( int i = 0; i < colliders.Count; i++ ) {
 				var collider = colliders[ i ];
-				if ( collider.IsColliderEnabled && Raycast.TryHit( origin, direction, collider.Mesh, ( collider as Drawable3D ).Transform, out hit, includeBehind ) ) {
-					if ( closest is null || Math.Abs( closest.Value.Distance ) > Math.Abs( hit.Distance ) ) {
-						closest = hit;
-						closestCollider = collider;
+				if ( collider is Model model ) {
+					if ( collider.IsColliderEnabled && Raycast.TryHit( origin, direction, collider as Model, out hit, includeBehind ) ) {
+						if ( closest is null || Math.Abs( closest.Value.Distance ) > Math.Abs( hit.Distance ) ) {
+							closest = hit;
+							closestCollider = collider;
+						}
+					}
+				}
+				else {
+					if ( collider.IsColliderEnabled && Raycast.TryHit( origin, direction, collider.Mesh, ( collider as Drawable3D ).Transform, out hit, includeBehind ) ) {
+						if ( closest is null || Math.Abs( closest.Value.Distance ) > Math.Abs( hit.Distance ) ) {
+							closest = hit;
+							closestCollider = collider;
+						}
 					}
 				}
 			}
@@ -81,10 +91,20 @@ namespace osu.XR.Physics {
 
 			for ( int i = 0; i < colliders.Count; i++ ) {
 				var collider = colliders[ i ];
-				if ( collider.IsColliderEnabled && Sphere.TryHit( origin, radius, collider.Mesh, ( collider as Drawable3D ).Transform, out hit ) ) {
-					if ( closest is null || Math.Abs( closest.Value.Distance ) > Math.Abs( hit.Distance ) ) {
-						closest = hit;
-						closestCollider = collider;
+				if ( collider is Model model ) {
+					if ( collider.IsColliderEnabled && Sphere.TryHit( origin, radius, model, out hit ) ) {
+						if ( closest is null || Math.Abs( closest.Value.Distance ) > Math.Abs( hit.Distance ) ) {
+							closest = hit;
+							closestCollider = collider;
+						}
+					}
+				}
+				else {
+					if ( collider.IsColliderEnabled && Sphere.TryHit( origin, radius, collider.Mesh, ( collider as Drawable3D ).Transform, out hit ) ) {
+						if ( closest is null || Math.Abs( closest.Value.Distance ) > Math.Abs( hit.Distance ) ) {
+							closest = hit;
+							closestCollider = collider;
+						}
 					}
 				}
 			}
