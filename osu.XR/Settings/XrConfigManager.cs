@@ -84,7 +84,7 @@ namespace osu.XR.Settings {
 		protected override void PerformLoad () {
 			try {
 				if ( storage.Exists( saveFilePath ) ) {
-					using var s = storage.GetStream( saveFilePath, mode: FileMode.Create );
+					using var s = storage.GetStream( saveFilePath );
 					var reader = new StreamReader( s );
 					Newtonsoft.Json.JsonConvert.DeserializeObject<SettingsPreset<XrConfigSetting>>( reader.ReadToEnd() ).Load( this, DefaultPreset );
 				}
@@ -94,7 +94,7 @@ namespace osu.XR.Settings {
 
 		protected override bool PerformSave () {
 			var preset = new SettingsPreset<XrConfigSetting>( this, DefaultPreset );
-			using var s = storage.GetStream( saveFilePath, FileAccess.Write );
+			using var s = storage.GetStream( saveFilePath, FileAccess.Write, mode: FileMode.Create );
 			var writer = new StreamWriter( s );
 			writer.Write( Newtonsoft.Json.JsonConvert.SerializeObject( preset, Newtonsoft.Json.Formatting.Indented ) );
 			writer.Flush();
