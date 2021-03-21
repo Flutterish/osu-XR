@@ -7,11 +7,7 @@ using osu.Game.Overlays.Settings;
 using osu.XR.Components.Panels;
 using osuTK;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Components.Groups {
 	public abstract class PanelStack : CompositeDrawable3D {

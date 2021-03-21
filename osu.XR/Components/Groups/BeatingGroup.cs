@@ -4,11 +4,6 @@ using osu.Framework.Graphics;
 using osu.Framework.XR.Components;
 using osu.XR.Drawables;
 using osuTK;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Components.Groups {
 	public class BeatingGroup : Container3D {

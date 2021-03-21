@@ -2,11 +2,6 @@
 using osu.Framework.Bindables;
 using osu.Game.Beatmaps.ControlPoints;
 using osu.Game.Graphics.Containers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Drawables {
 	public class BeatProvider : BeatSyncedContainer {

@@ -1,15 +1,9 @@
 ﻿using osu.Framework.Graphics;
-using osu.Framework.Graphics.Cursor;
-using osu.Framework.Input.Events;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays;
 using osu.Game.Overlays.Settings;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Drawables {
 	public class ConfigPanel : SettingsPanel {

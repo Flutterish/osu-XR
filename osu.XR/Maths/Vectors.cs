@@ -1,10 +1,5 @@
 ﻿using osu.XR.Physics;
 using osuTK;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Maths {
 	public static class Vectors {

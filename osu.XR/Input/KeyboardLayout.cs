@@ -1,10 +1,7 @@
-﻿using osu.Framework.Input.Events;
-using osuTK.Input;
+﻿using osuTK.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using K = osu.XR.Input.KeyboardKey;
 using KKey = osuTK.Input.Key;
 

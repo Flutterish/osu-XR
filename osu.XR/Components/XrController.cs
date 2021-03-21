@@ -5,19 +5,12 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.XR.Components;
 using osu.Framework.XR.Graphics;
-using osu.Game.Beatmaps;
 using osu.XR.Components.Panels;
 using osu.XR.Components.Pointers;
-using osu.XR.Drawables;
 using osu.XR.Physics;
 using osu.XR.Settings;
 using osuTK;
 using osuTK.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static osu.XR.Physics.Raycast;
 
 namespace osu.XR.Components {

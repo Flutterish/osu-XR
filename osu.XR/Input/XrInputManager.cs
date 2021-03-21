@@ -7,16 +7,12 @@ using osu.Framework.Input.Handlers.Mouse;
 using osu.Framework.Input.StateChanges;
 using osu.Framework.Platform;
 using osu.XR.Components.Pointers;
-using osu.XR.Maths;
 using osu.XR.Settings;
 using osuTK;
 using osuTK.Input;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Linq;
-using System.Security.Cryptography.Pkcs;
-using static osu.XR.Physics.Raycast;
 using TKKey = osuTK.Input.Key;
 
 namespace osu.XR.Input {

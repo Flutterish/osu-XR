@@ -1,18 +1,8 @@
-﻿using Newtonsoft.Json;
-using osu.Framework.Bindables;
-using osu.Framework.Configuration;
-using osu.Framework.Platform;
+﻿using osu.Framework.Platform;
 using osu.Game.Configuration;
-using osu.Game.Rulesets;
-using osu.XR.Drawables;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Settings {
 	public class XrConfigManager : InMemoryConfigManager<XrConfigSetting> {

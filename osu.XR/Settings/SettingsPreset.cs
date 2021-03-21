@@ -1,10 +1,7 @@
 ﻿using osu.Framework.Configuration;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Settings {
 	public class SettingsPreset<T> where T : struct, Enum {
@@ -21,7 +18,7 @@ namespace osu.XR.Settings {
 
 		public void Load ( ConfigManager<T> config, SettingsPreset<T> typeLookup ) {
 			foreach ( var (k,v) in values ) {
-				( (dynamic)config ).Set( k, CastToReflected( v, typeLookup.values[ k ].GetType() ) );
+				( (dynamic)config ).SetValue( k, CastToReflected( v, typeLookup.values[ k ].GetType() ) );
 			}
 		}
 

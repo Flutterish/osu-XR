@@ -2,12 +2,7 @@
 using osu.Framework.Bindables;
 using osu.Framework.XR.Components;
 using osu.XR.Physics;
-using osuTK.Graphics.ES20;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static osu.XR.Physics.Raycast;
 
 namespace osu.XR.Components.Pointers {

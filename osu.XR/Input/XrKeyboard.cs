@@ -1,5 +1,4 @@
-﻿using osu.Framework;
-using osu.Framework.Allocation;
+﻿using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -11,7 +10,6 @@ using osu.Framework.XR.Components;
 using osu.Framework.XR.GameHosts;
 using osu.Framework.XR.Graphics;
 using osu.Game.Graphics;
-using osu.Game.Graphics.Sprites;
 using osu.XR.Components.Panels;
 using osu.XR.Physics;
 using osuTK;
@@ -21,7 +19,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace osu.XR.Input {

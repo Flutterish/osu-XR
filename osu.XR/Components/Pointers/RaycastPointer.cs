@@ -1,11 +1,8 @@
-﻿using osu.Framework.Allocation;
-using osu.Framework.Bindables;
+﻿using osu.Framework.Bindables;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Maths;
 using osu.XR.Physics;
 using osuTK;
-using System;
-using static osu.XR.Physics.Raycast;
 
 namespace osu.XR.Components.Pointers {
 	/// <summary>

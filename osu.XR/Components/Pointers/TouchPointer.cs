@@ -1,14 +1,8 @@
-﻿using osu.Framework.Allocation;
-using osu.Framework.Bindables;
+﻿using osu.Framework.Bindables;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Maths;
 using osu.XR.Physics;
 using osuTK;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Components.Pointers {
 	public class TouchPointer : Pointer {

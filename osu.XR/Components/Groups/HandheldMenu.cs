@@ -5,12 +5,8 @@ using osu.Framework.Bindables;
 using osu.XR.Components.Panels;
 using osu.XR.Settings;
 using osuTK;
-using Remotion.Linq.Parsing.ExpressionVisitors.MemberBindings;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Components.Groups {
 	public class HandheldMenu : PanelStack {

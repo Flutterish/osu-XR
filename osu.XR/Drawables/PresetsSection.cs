@@ -4,12 +4,8 @@ using osu.Framework.Graphics.Sprites;
 using osu.Framework.Logging;
 using osu.Game.Overlays.Settings;
 using osu.XR.Settings;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Drawables {
 	public class PresetsSection : SettingsSection {

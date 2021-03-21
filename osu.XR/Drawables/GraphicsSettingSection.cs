@@ -1,7 +1,6 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
-using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays.Settings;
 using osu.XR.Settings;
 

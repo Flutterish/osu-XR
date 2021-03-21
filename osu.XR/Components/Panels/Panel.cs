@@ -1,24 +1,19 @@
 ﻿using Microsoft.EntityFrameworkCore.Internal;
-using NUnit.Framework;
 using OpenVR.NET;
-using OpenVR.NET.Manifests;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Input;
 using osu.Framework.XR.Components;
-using osu.XR.Drawables;
+using osu.Framework.XR.Rendering;
 using osu.XR.Input;
 using osu.XR.Maths;
 using osu.XR.Physics;
-using osu.XR.Rendering;
 using osu.XR.Settings;
 using osuTK;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization.Json;
 using static osu.Framework.XR.Components.Drawable3D.DrawNode3D;
 using static osu.XR.Physics.Raycast;
 

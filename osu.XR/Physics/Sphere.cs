@@ -4,12 +4,7 @@ using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Maths;
 using osu.XR.Maths;
 using osuTK;
-using SixLabors.ImageSharp.Processing.Processors.Transforms;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Physics {
 	public static class Sphere {
