@@ -18,8 +18,6 @@
     <None Remove="knuckles.json" />
     <None Remove="Resources\keyboard.obj" />
     <None Remove="Resources\shpere.obj" />
-    <None Remove="Shaders\sh_3DFrag.fs" />
-    <None Remove="Shaders\sh_3DVertex.vs" />
     <None Remove="vive_controller.json" />
   </ItemGroup>
 
@@ -36,11 +34,6 @@
     <Content Include="DefaultBindings\knuckles.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Shaders\sh_3DFrag.fs" />
-    <EmbeddedResource Include="Shaders\sh_3DVertex.vs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -69,8 +69,6 @@ namespace osu.XR {
 	public class OsuGameXr : XrGame {
 		[Cached]
 		public readonly PhysicsSystem PhysicsSystem = new();
-		internal InputManager _inputManager;
-		private InputManager inputManager => _inputManager ??= GetContainingInputManager();
 		[Cached]
 		public readonly Camera Camera = new() { Position = new Vector3( 0, 0, 0 ) };
 		public readonly CurvedPanel OsuPanel = new CurvedPanel { Y = 1.8f };
@@ -267,6 +265,7 @@ namespace osu.XR {
 			Resources.AddStore( new DllResourceStore( typeof( OsuGameXr ).Assembly ) );
 			Resources.AddStore( new DllResourceStore( typeof( OsuGame ).Assembly ) );
 			Resources.AddStore( new DllResourceStore( OsuResources.ResourceAssembly ) );
+			Resources.AddStore( new DllResourceStore( osu.Framework.XR.Resources.ResourceAssembly ) );
 
 			AddFont( Resources, @"Fonts/osuFont" );
 			AddFont( Resources, @"Fonts/Torus-Regular" );
