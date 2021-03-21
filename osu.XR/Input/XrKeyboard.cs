@@ -28,7 +28,7 @@ namespace osu.XR.Input {
 		private List<XrKey> keys = new();
 		[Resolved]
 		private OsuGameXr Game { get; set; }
-		[Resolved( name: nameof(OsuGameXr.GlobalFocusBindable) )]
+		[Resolved]
 		private Bindable<IFocusable> globalFocusBindable { get; set; }
 
 		public XrKeyboard () {

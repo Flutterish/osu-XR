@@ -3,6 +3,7 @@ using OpenVR.NET.Manifests;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
+using osu.Framework.XR;
 using osu.Framework.XR.Components;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Physics;
@@ -11,6 +12,7 @@ using osu.XR.Components.Pointers;
 using osu.XR.Settings;
 using osuTK;
 using osuTK.Graphics;
+using System.Linq;
 using static osu.Framework.XR.Physics.Raycast;
 
 namespace osu.XR.Components {
@@ -24,12 +26,13 @@ namespace osu.XR.Components {
 		private Bindable<Pointer> pointerBindable = new();
 		public ControllerMode Mode { get => ModeBindable.Value; set => ModeBindable.Value = value; }
 		public readonly Bindable<ControllerMode> ModeBindable = new( ControllerMode.Disabled );
+
+		public BindableSet<object> HeldObjects = new();
 		public bool IsHoldingAnything {
-			get => IsHoldingBindable.Value;
-			set => IsHoldingBindable.Value = value;
+			get => isHoldingBindable.Value;
 		}
-		public readonly BindableBool IsHoldingBindable = new();
-		[Resolved( name: nameof( OsuGameXr.GlobalFocusBindable ) )]
+		private readonly BindableBool isHoldingBindable = new();
+		[Resolved]
 		private Bindable<IFocusable> globalFocusBindable { get; set; }
 
 		public XrController ( Controller controller ) {
@@ -60,7 +63,7 @@ namespace osu.XR.Components {
 			ModeBindable.BindValueChanged( v => {
 				setPointer();
 			}, true );
-			IsHoldingBindable.BindValueChanged( _ => updateVisibility() );
+			isHoldingBindable.BindValueChanged( _ => updateVisibility() );
 			pointerBindable.BindValueChanged( v => {
 				if ( v.OldValue is not null ) v.OldValue.IsVisible = false;
 				updateVisibility();
@@ -93,14 +96,20 @@ namespace osu.XR.Components {
 
 				haptic = VR.GetControllerComponent<ControllerHaptic>( XrAction.Feedback, Source );
 			} );
+
+			HeldObjects.BindCollectionChanged( () => {
+				isHoldingBindable.Value = HeldObjects.Any();
+			}, true );
 		}
 		ControllerHaptic haptic;
 		public void SendHapticVibration ( double duration, double frequency = 40, double amplitude = 1, double delay = 0 ) {
 			haptic?.TriggerVibration( duration, frequency, amplitude, delay );
 		}
 
+		public bool IsSoloMode;
+		public bool IsLoneController => IsSoloMode || VR.EnabledControllerCount == 1;
 		private bool acceptsInputFrom ( Controller controller )
-			=> controller == Source || ( inputModeBindable.Value == InputMode.SinglePointer && Mode == ControllerMode.Pointer );
+			=> controller == Source || IsLoneController;
 
 		void setPointer () {
 			if ( Mode == ControllerMode.Disabled ) {
@@ -131,8 +140,10 @@ namespace osu.XR.Components {
 
 		public bool EmulatesTouch
 			=> Mode == ControllerMode.Touch
-			|| inputModeBindable.Value == InputMode.DoublePointer
-			|| ( inputModeBindable.Value == InputMode.SinglePointer && singlePointerTouchBindable.Value );
+			|| ( Mode == ControllerMode.Pointer && (
+				!IsLoneController
+				|| singlePointerTouchBindable.Value
+			) );
 
 		private bool isTouchPointerDown;
 		private bool forceTouch;
@@ -205,12 +216,10 @@ namespace osu.XR.Components {
 			}
 		}
 
-		Bindable<InputMode> inputModeBindable = new();
 		Bindable<bool> singlePointerTouchBindable = new();
 		Bindable<bool> tapTouchBindable = new();
 		[BackgroundDependencyLoader]
 		private void load ( XrConfigManager config ) {
-			config.BindWith( XrConfigSetting.InputMode, inputModeBindable );
 			config.BindWith( XrConfigSetting.SinglePointerTouch, singlePointerTouchBindable );
 			config.BindWith( XrConfigSetting.TapOnPress, tapTouchBindable );
 		}
@@ -230,16 +239,6 @@ namespace osu.XR.Components {
 		public readonly Bindable<Vector2> ScrollBindable = new();
 		public readonly BindableBool LeftButtonBindable = new();
 		public readonly BindableBool RightButtonBindable = new();
-	}
-
-	public interface IFocusSource {
-
-	}
-
-	public interface IFocusable {
-		void OnControllerFocusGained ( IFocusSource controller );
-		void OnControllerFocusLost ( IFocusSource controller );
-		bool CanHaveGlobalFocus { get; }
 	}
 
 	public enum ControllerMode {

@@ -58,7 +58,7 @@ namespace osu.XR {
 		public readonly BeatProvider BeatProvider = new();
 		[Cached]
 		public readonly XrNotificationPanel Notifications = new XrNotificationPanel();
-		[Cached( name: nameof(GlobalFocusBindable) )]
+		[Cached]
 		public readonly Bindable<IFocusable> GlobalFocusBindable = new();
 		[Cached]
 		public readonly XrKeyboard Keyboard = new() { Scale = new Vector3( 0.04f ) };
@@ -185,21 +185,24 @@ namespace osu.XR {
 		Bindable<int> screenResX = new( 1920 * 2 );
 		Bindable<int> screenResY = new( 1080 );
 
-		void onControllerInputModeChanged () {
+		void onControllersMutated () {
 			var main = MainController;
 			if ( inputModeBindable.Value == InputMode.SinglePointer ) {
 				foreach ( var controller in controllers.Values ) {
 					controller.Mode = controller == main ? ControllerMode.Pointer : ControllerMode.Disabled;
+					controller.IsSoloMode = true;
 				}
 			}
 			else if ( inputModeBindable.Value == InputMode.DoublePointer ) {
 				foreach ( var controller in controllers.Values ) {
 					controller.Mode = ControllerMode.Pointer;
+					controller.IsSoloMode = false;
 				}
 			}
 			else if ( inputModeBindable.Value == InputMode.TouchScreen ) {
 				foreach ( var controller in controllers.Values ) {
 					controller.Mode = ControllerMode.Touch;
+					controller.IsSoloMode = false;
 				}
 			}
 		}
@@ -219,7 +222,7 @@ namespace osu.XR {
 					}
 				}
 				else {
-					onControllerInputModeChanged();
+					onControllersMutated();
 				}
 				wasInKeyboardProximity = inKeyboardProximity;
 			}
@@ -294,7 +297,7 @@ namespace osu.XR {
 
 			Config.BindWith( XrConfigSetting.InputMode, inputModeBindable );
 			inputModeBindable.BindValueChanged( v => {
-				onControllerInputModeChanged();
+				onControllersMutated();
 			}, true );
 
 			Config.BindWith( XrConfigSetting.ScreenHeight, screenHeightBindable );
@@ -316,10 +319,10 @@ namespace osu.XR {
 					Scene.Add( controller );
 
 					c.BindEnabled( () => {
-						onControllerInputModeChanged();
+						onControllersMutated();
 					}, true );
 					c.BindDisabled( () => {
-						onControllerInputModeChanged();
+						onControllersMutated();
 					}, true );
 				} );
 			}, true );

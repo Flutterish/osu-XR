@@ -95,9 +95,9 @@ namespace osu.XR.Components.Groups {
 			base.Update();
 
 			if ( HoldingController != previousHoldingController ) {
-				if ( previousHoldingController is not null ) previousHoldingController.IsHoldingAnything = false;
+				if ( previousHoldingController is not null ) previousHoldingController.HeldObjects.Remove( this );
 				previousHoldingController = HoldingController;
-				if ( previousHoldingController is not null ) previousHoldingController.IsHoldingAnything = true;
+				if ( previousHoldingController is not null ) previousHoldingController.HeldObjects.Add( this );
 			}
 			if ( Panels.Any( x => x.IsColliderEnabled ) ) {
 				if ( VR.EnabledControllerCount == 0 ) {
