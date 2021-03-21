@@ -11,6 +11,7 @@ using osu.Framework.XR.GameHosts;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Physics;
 using osu.Game.Graphics;
+using osu.XR.Components;
 using osu.XR.Components.Panels;
 using osuTK;
 using osuTK.Graphics;
@@ -27,8 +28,8 @@ namespace osu.XR.Input {
 		private List<XrKey> keys = new();
 		[Resolved]
 		private OsuGameXr Game { get; set; }
-		[Resolved( name: nameof(OsuGameXr.FocusedPanel) )]
-		private Bindable<Panel> focusedPanel { get; set; }
+		[Resolved( name: nameof(OsuGameXr.GlobalFocusBindable) )]
+		private Bindable<IFocusable> globalFocusBindable { get; set; }
 
 		public XrKeyboard () {
 			LayoutBindable.BindValueChanged( _ => remapKeys(), true );
@@ -38,7 +39,7 @@ namespace osu.XR.Input {
 			modifiers.BindCollectionChanged( (a,b) => {
 				if ( b.Action == NotifyCollectionChangedAction.Add ) {
 					foreach ( Key i in b.NewItems ) {
-						focusedPanel.Value?.EmulatedInput.HoldKey( i );
+						( globalFocusBindable.Value as Panel )?.EmulatedInput.HoldKey( i );
 						foreach ( var k in keys.Where( x => x.KeyBindalbe.Value.Key == i ) ) {
 							k.MarkActive();
 						}
@@ -46,7 +47,7 @@ namespace osu.XR.Input {
 				}
 				else if ( b.Action is NotifyCollectionChangedAction.Reset or NotifyCollectionChangedAction.Remove ) {
 					foreach ( Key i in b.OldItems.Cast<Key>().Except( b.NewItems?.Cast<Key>() ?? Array.Empty<Key>() ) ) {
-						focusedPanel.Value?.EmulatedInput.ReleaseKey( i );
+						( globalFocusBindable.Value as Panel )?.EmulatedInput.ReleaseKey( i );
 						foreach ( var k in keys.Where( x => x.KeyBindalbe.Value.Key == i ) ) {
 							k.Unmark();
 						}
@@ -62,10 +63,10 @@ namespace osu.XR.Input {
 		protected override void LoadComplete () {
 			base.LoadComplete();
 
-			focusedPanel.BindValueChanged( v => {
+			globalFocusBindable.BindValueChanged( v => {
 				foreach ( var i in modifiers ) {
-					v.OldValue?.EmulatedInput.ReleaseKey( i );
-					v.NewValue?.EmulatedInput.HoldKey( i );
+					( v.OldValue as Panel )?.EmulatedInput.ReleaseKey( i );
+					( v.NewValue as Panel )?.EmulatedInput.HoldKey( i );
 				}
 			}, true );
 
@@ -140,10 +141,10 @@ namespace osu.XR.Input {
 				}
 			}
 			else {
-				if ( focusedPanel.Value is null ) return;
+				if ( globalFocusBindable.Value is null ) return;
 
 				if ( key.Key is Key k ) {
-					focusedPanel.Value.EmulatedInput.PressKey( k );
+					( globalFocusBindable.Value as Panel )?.EmulatedInput.PressKey( k );
 				}
 
 				if ( !(modifiers.Contains( Key.ControlLeft ) || modifiers.Contains( Key.ControlRight )) ) // workaround really, we need a better way

@@ -20,28 +20,23 @@ namespace osu.XR.Input {
 	/// XR input is passed to 2D drawables though this manger.
 	/// </summary>
 	public class XrInputManager : CustomInputManager {
-		internal XrMouseHandler mouseHandler;
-		internal XrKeyboardHandler keyboardHandler;
-		internal XrTouchHandler touchHandler;
+		internal VirtualMouseHandler mouseHandler;
+		internal VirtualKeyboardHandler keyboardHandler;
+		internal VirtualTouchHandler touchHandler;
 
 		new public bool HasFocus;
 		protected override bool HandleHoverEvents => HasFocus;
 
-		/// <summary>
-		/// Whether to pass keyboard input to the children.
-		/// </summary>
-		public Bindable<bool> IsKeyboardActiveBindable => keyboardHandler.IsActiveBindable;
-
 		protected override void LoadComplete () {
 			base.LoadComplete();
-			AddHandler( mouseHandler = new XrMouseHandler() );
-			AddHandler( keyboardHandler = new XrKeyboardHandler() );
-			AddHandler( touchHandler = new XrTouchHandler() );
+			AddHandler( mouseHandler = new VirtualMouseHandler() );
+			AddHandler( keyboardHandler = new VirtualKeyboardHandler() );
+			AddHandler( touchHandler = new VirtualTouchHandler() );
 		}
 
 		protected override void Update () {
 			base.Update();
-			touchHandler.update( Time.Current );
+			touchHandler.Update( Time.Current );
 		}
 
 		private bool isLeftPressed = false;
@@ -51,9 +46,9 @@ namespace osu.XR.Input {
 				if ( isLeftPressed == value ) return;
 				isLeftPressed = value;
 				if ( isLeftPressed )
-					mouseHandler.handleMouseDown( MouseButton.Left );
+					mouseHandler.EmulateMouseDown( MouseButton.Left );
 				else
-					mouseHandler.handleMouseUp( MouseButton.Left );
+					mouseHandler.EmulateMouseUp( MouseButton.Left );
 			}
 		}
 		private bool isRightPressed = false;
@@ -63,48 +58,48 @@ namespace osu.XR.Input {
 				if ( isRightPressed == value ) return;
 				isRightPressed = value;
 				if ( isRightPressed )
-					mouseHandler.handleMouseDown( MouseButton.Right );
+					mouseHandler.EmulateMouseDown( MouseButton.Right );
 				else
-					mouseHandler.handleMouseUp( MouseButton.Right );
+					mouseHandler.EmulateMouseUp( MouseButton.Right );
 			}
 		}
 		private Vector2 scroll;
 		public Vector2 Scroll {
 			get => scroll;
 			set {
-				mouseHandler.handleMouseWheel( value - scroll, false );
+				mouseHandler.EmulateMouseWheel( value - scroll, false );
 				scroll = value;
 			}
 		}
 
 		public void TouchDown ( object source, Vector2 position ) {
-			touchHandler.touchDown( source, position, Time.Current );
+			touchHandler.EmulateTouchDown( source, position, Time.Current );
 		}
 		public void TouchMove ( object source, Vector2 position ) {
-			touchHandler.move( source, position, Time.Current );
+			touchHandler.EmulateTouchMove( source, position, Time.Current );
 		}
 		public void TouchUp ( object source ) {
-			touchHandler.touchUp( source, Time.Current );
+			touchHandler.EmulateTouchUp( source, Time.Current );
 		}
 		public void ReleaseAllTouch () {
-			touchHandler.releaseAll( Time.Current );
+			touchHandler.ReleaseAllSources( Time.Current );
 		}
 
 		public void PressKey ( TKKey key ) {
-			keyboardHandler.HandleKeyDown( key );
-			keyboardHandler.HandleKeyUp( key );
+			keyboardHandler.EmulateKeyDown( key );
+			keyboardHandler.EmulateKeyUp( key );
 		}
 		public void HoldKey ( TKKey key ) {
-			keyboardHandler.HandleKeyDown( key );
+			keyboardHandler.EmulateKeyDown( key );
 		}
 		public void ReleaseKey ( TKKey key ) {
-			keyboardHandler.HandleKeyUp( key );
+			keyboardHandler.EmulateKeyUp( key );
 		}
 
 		/// <summary>
 		/// A copy of <see cref="MouseHandler"/> overriden to use <see cref="RaycastPointer"/> input.
 		/// </summary>
-		internal class XrMouseHandler : InputHandler {
+		internal class VirtualMouseHandler : InputHandler {
 			public override bool IsActive => true;
 			public override int Priority => 0;
 
@@ -114,56 +109,31 @@ namespace osu.XR.Input {
 				PendingInputs.Enqueue( input );
 			}
 
-			internal void handleMouseMove ( Vector2 position ) => enqueueInput( new MousePositionAbsoluteInput { Position = position } );
-			internal void handleMouseDown ( MouseButton button ) => enqueueInput( new MouseButtonInput( button, true ) );
-			internal void handleMouseUp ( MouseButton button ) => enqueueInput( new MouseButtonInput( button, false ) );
-			internal void handleMouseWheel ( Vector2 delta, bool precise ) => enqueueInput( new MouseScrollRelativeInput { Delta = delta, IsPrecise = precise } );
+			public void EmulateMouseMove ( Vector2 position ) => enqueueInput( new MousePositionAbsoluteInput { Position = position } );
+			public void EmulateMouseDown ( MouseButton button ) => enqueueInput( new MouseButtonInput( button, true ) );
+			public void EmulateMouseUp ( MouseButton button ) => enqueueInput( new MouseButtonInput( button, false ) );
+			public void EmulateMouseWheel ( Vector2 delta, bool precise ) => enqueueInput( new MouseScrollRelativeInput { Delta = delta, IsPrecise = precise } );
 		}
 
 		/// <summary>
 		/// A copy of <see cref="KeyboardHandler"/> which can be disabled.
 		/// </summary>
-		internal class XrKeyboardHandler : InputHandler {
-			public Bindable<bool> IsActiveBindable = new( false );
+		internal class VirtualKeyboardHandler : InputHandler {
 			public override bool IsActive => true;
 			public override int Priority => 0;
 
-			public override bool Initialize ( GameHost host ) {
-				if ( !( host.Window is SDL2DesktopWindow window ) )
-					return false;
-
-				Enabled.BindValueChanged( e => {
-					if ( e.NewValue ) {
-						window.KeyDown += handleKeyDown;
-						window.KeyUp += handleKeyUp;
-					}
-					else {
-						window.KeyDown -= handleKeyDown;
-						window.KeyUp -= handleKeyUp;
-					}
-				}, true );
-
-				return true;
-			}
+			public override bool Initialize ( GameHost host ) => true;
 
 			private void enqueueInput ( IInput input ) {
-				if ( IsActiveBindable.Value )
-					PendingInputs.Enqueue( input );
-			}
-
-			private void EnqueueInput ( IInput input ) {
 				PendingInputs.Enqueue( input );
 			}
 
-			public void HandleKeyDown ( TKKey key ) => EnqueueInput( new KeyboardKeyInput( key, true ) );
+			public void EmulateKeyDown ( TKKey key ) => enqueueInput( new KeyboardKeyInput( key, true ) );
 
-			public void HandleKeyUp ( TKKey key ) => EnqueueInput( new KeyboardKeyInput( key, false ) );
-			private void handleKeyDown ( TKKey key ) => enqueueInput( new KeyboardKeyInput( key, true ) );
-
-			private void handleKeyUp ( TKKey key ) => enqueueInput( new KeyboardKeyInput( key, false ) );
+			public void EmulateKeyUp ( TKKey key ) => enqueueInput( new KeyboardKeyInput( key, false ) );
 		}
 
-		internal class XrTouchHandler : InputHandler {
+		internal class VirtualTouchHandler : InputHandler {
 			public override bool Initialize ( GameHost host ) => true;
 			public override bool IsActive => true;
 			public override int Priority => 0;
@@ -181,13 +151,13 @@ namespace osu.XR.Input {
 			}
 
 			Dictionary<object, TouchObject> sources = new();
-			internal void touchDown ( object source, Vector2 position, double time ) {
+			public void EmulateTouchDown ( object source, Vector2 position, double time ) {
 				var touch = new TouchObject { LastUpdateTime = time, StartTime = time, Position = position, StartPosition = position, Index = Enum.GetValues<TouchSource>().Except( sources.Select( x => x.Value.Index ) ).First() };
 				sources.Add( source, touch );
 				enqueueInput( new TouchInput( touch.Touch, true ) );
 			}
 
-			internal void move ( object source, Vector2 position, double time ) {
+			public void EmulateTouchMove ( object source, Vector2 position, double time ) {
 				if ( !sources.ContainsKey( source ) ) return;
 
 				var touch = sources[ source ];
@@ -200,7 +170,7 @@ namespace osu.XR.Input {
 					enqueueInput( new TouchInput( touch.Touch, true ) ); // drag
 			}
 
-			internal void touchUp ( object source, double time ) {
+			public void EmulateTouchUp ( object source, double time ) {
 				if ( !sources.ContainsKey( source ) ) return;
 
 				var touch = sources[ source ];
@@ -219,13 +189,14 @@ namespace osu.XR.Input {
 					PendingInputs.Enqueue( new MouseButtonInput( MouseButton.Right, false ) );
 				}
 			}
-			internal void releaseAll ( double time ) {
+
+			public void ReleaseAllSources ( double time ) {
 				foreach ( var i in sources.ToArray() ) {
-					touchUp( i.Key, time );
+					EmulateTouchUp( i.Key, time );
 				}
 			}
 
-			internal void update ( double time ) {
+			public void Update ( double time ) {
 				//foreach ( var i in sources ) {
 				//	var touch = i.Value;
 				//	if ( touch.InDeadzone ) {

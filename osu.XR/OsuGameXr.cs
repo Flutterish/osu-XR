@@ -58,8 +58,8 @@ namespace osu.XR {
 		public readonly BeatProvider BeatProvider = new();
 		[Cached]
 		public readonly XrNotificationPanel Notifications = new XrNotificationPanel();
-		[Cached( name: nameof(FocusedPanel) )]
-		public readonly Bindable<Panel> FocusedPanel = new();
+		[Cached( name: nameof(GlobalFocusBindable) )]
+		public readonly Bindable<IFocusable> GlobalFocusBindable = new();
 		[Cached]
 		public readonly XrKeyboard Keyboard = new() { Scale = new Vector3( 0.04f ) };
 

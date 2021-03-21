@@ -21,8 +21,8 @@ namespace osu.XR.Components.Panels {
 	/// <summary>
 	/// A 3D panel that displays an image from a <see cref="BufferedCapture"/>.
 	/// </summary>
-	public abstract class Panel : Model, IHasCollider, IReactsToController {
-		public bool CanHaveGlobalFocus = true;
+	public abstract class Panel : Model, IHasCollider, IFocusable {
+		public bool CanHaveGlobalFocus { get; set; } = true;
 		public PanelInputMode RequestedInputMode { get; set; } = PanelInputMode.Regular;
 		public readonly XrInputManager EmulatedInput = new XrInputManager { RelativeSizeAxes = Axes.Both };
 		private PlatformActionContainer platformActions = new() { RelativeSizeAxes = Axes.Both };
@@ -169,7 +169,9 @@ namespace osu.XR.Components.Panels {
 		List<XrController> focusedControllers = new();
 		IEnumerable<Controller> focusedControllerSources => focusedControllers.Select( x => x.Source );
 		Dictionary<XrController, System.Action> eventUnsubs = new();
-		public void OnControllerFocusGained ( XrController controller ) {
+		public void OnControllerFocusGained ( IFocusSource focus ) {
+			if ( focus is not XrController controller ) return;
+
 			System.Action<ValueChangedEvent<Vector2>> onScroll = v => { EmulatedInput.Scroll += v.NewValue - v.OldValue; };
 			System.Action<ValueChangedEvent<bool>> onLeft = v => { handleButton( isLeft: true, isDown: v.NewValue ); };
 			System.Action<ValueChangedEvent<bool>> onRight = v => { handleButton( isLeft: false, isDown: v.NewValue ); };
@@ -194,7 +196,9 @@ namespace osu.XR.Components.Panels {
 
 			updateFocus();
 		}
-		public void OnControllerFocusLost ( XrController controller ) {
+		public void OnControllerFocusLost ( IFocusSource focus ) {
+			if ( focus is not XrController controller ) return;
+
 			eventUnsubs[ controller ].Invoke();
 			eventUnsubs.Remove( controller );
 			focusedControllers.Remove( controller );
@@ -215,7 +219,7 @@ namespace osu.XR.Components.Panels {
 			else {
 				pointerPosition = position;
 				if ( ( pointerPosition - deadzoneCenter ).Length > deadzoneBindable.Value ) inDeadzone = false;
-				if ( !inDeadzone ) EmulatedInput.mouseHandler.handleMouseMove( position );
+				if ( !inDeadzone ) EmulatedInput.mouseHandler.EmulateMouseMove( position );
 			}
 		}
 

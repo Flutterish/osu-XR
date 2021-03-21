@@ -14,7 +14,7 @@ using osuTK.Graphics;
 using static osu.Framework.XR.Physics.Raycast;
 
 namespace osu.XR.Components {
-	public class XrController : CompositeDrawable3D {
+	public class XrController : CompositeDrawable3D, IFocusSource {
 		public readonly Controller Source;
 
 		Model ControllerMesh = new();
@@ -29,8 +29,8 @@ namespace osu.XR.Components {
 			set => IsHoldingBindable.Value = value;
 		}
 		public readonly BindableBool IsHoldingBindable = new();
-		[Resolved( name: nameof( OsuGameXr.FocusedPanel ) )]
-		private Bindable<Panel> focusedPanel { get; set; }
+		[Resolved( name: nameof( OsuGameXr.GlobalFocusBindable ) )]
+		private Bindable<IFocusable> globalFocusBindable { get; set; }
 
 		public XrController ( Controller controller ) {
 			Add( ControllerMesh );
@@ -160,10 +160,12 @@ namespace osu.XR.Components {
 
 		IHasCollider myFocus;
 		void onPointerFocusChanged ( ValueChangedEvent<IHasCollider> v ) {
-			if ( myFocus is IReactsToController old ) old.OnControllerFocusLost( this );
+			if ( myFocus is IFocusable old ) old.OnControllerFocusLost( this );
 			myFocus = v.NewValue;
-			if ( myFocus is IReactsToController @new ) @new.OnControllerFocusGained( this );
-			if ( myFocus is Panel panel && panel.CanHaveGlobalFocus ) focusedPanel.Value = panel;
+			if ( myFocus is IFocusable @new ) {
+				@new.OnControllerFocusGained( this );
+				if ( @new.CanHaveGlobalFocus ) globalFocusBindable.Value = @new;
+			}
 		}
 
 		void updateVisibility () {
@@ -230,9 +232,14 @@ namespace osu.XR.Components {
 		public readonly BindableBool RightButtonBindable = new();
 	}
 
-	public interface IReactsToController {
-		void OnControllerFocusGained ( XrController controller );
-		void OnControllerFocusLost ( XrController controller );
+	public interface IFocusSource {
+
+	}
+
+	public interface IFocusable {
+		void OnControllerFocusGained ( IFocusSource controller );
+		void OnControllerFocusLost ( IFocusSource controller );
+		bool CanHaveGlobalFocus { get; }
 	}
 
 	public enum ControllerMode {
