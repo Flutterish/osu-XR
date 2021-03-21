@@ -22,9 +22,9 @@ namespace osu.XR.Components.Panels {
 	/// A 3D panel that displays an image from a <see cref="BufferedCapture"/>.
 	/// </summary>
 	public abstract class Panel : Model, IHasCollider, IFocusable {
-		public bool CanHaveGlobalFocus { get; set; } = true;
+		public bool CanHaveGlobalFocus { get; init; } = true;
 		public PanelInputMode RequestedInputMode { get; set; } = PanelInputMode.Regular;
-		public readonly XrInputManager EmulatedInput = new XrInputManager { RelativeSizeAxes = Axes.Both };
+		public readonly VirtualInputManager EmulatedInput = new VirtualInputManager { RelativeSizeAxes = Axes.Both };
 		private PlatformActionContainer platformActions = new() { RelativeSizeAxes = Axes.Both };
 		public Container Source => platformActions;
 		/// <summary>

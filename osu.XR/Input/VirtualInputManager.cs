@@ -19,7 +19,7 @@ namespace osu.XR.Input {
 	/// <summary>
 	/// XR input is passed to 2D drawables though this manger.
 	/// </summary>
-	public class XrInputManager : CustomInputManager {
+	public class VirtualInputManager : CustomInputManager {
 		internal VirtualMouseHandler mouseHandler;
 		internal VirtualKeyboardHandler keyboardHandler;
 		internal VirtualTouchHandler touchHandler;
@@ -177,17 +177,17 @@ namespace osu.XR.Input {
 				sources.Remove( source );
 				if ( !touch.RightClick )
 					enqueueInput( new TouchInput( touch.Touch, false ) ); // tap if in deadzone
-				else {
-					touch.Position += new Vector2( 50 );
-					enqueueInput( new TouchInput( touch.Touch, true ) );
-					touch.Position = touch.StartPosition;
-					enqueueInput( new TouchInput( touch.Touch, true ) );
-					enqueueInput( new TouchInput( touch.Touch, false ) );
-
-					PendingInputs.Enqueue( new MousePositionAbsoluteInput { Position = touch.StartPosition } );
-					PendingInputs.Enqueue( new MouseButtonInput( MouseButton.Right, true ) );
-					PendingInputs.Enqueue( new MouseButtonInput( MouseButton.Right, false ) );
-				}
+				//else {
+				//	touch.Position += new Vector2( 50 );
+				//	enqueueInput( new TouchInput( touch.Touch, true ) );
+				//	touch.Position = touch.StartPosition;
+				//	enqueueInput( new TouchInput( touch.Touch, true ) );
+				//	enqueueInput( new TouchInput( touch.Touch, false ) );
+				//
+				//	PendingInputs.Enqueue( new MousePositionAbsoluteInput { Position = touch.StartPosition } );
+				//	PendingInputs.Enqueue( new MouseButtonInput( MouseButton.Right, true ) );
+				//	PendingInputs.Enqueue( new MouseButtonInput( MouseButton.Right, false ) );
+				//}
 			}
 
 			public void ReleaseAllSources ( double time ) {
