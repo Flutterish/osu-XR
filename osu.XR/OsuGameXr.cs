@@ -59,7 +59,7 @@ namespace osu.XR {
 		[Cached]
 		public readonly XrNotificationPanel Notifications = new XrNotificationPanel();
 		[Cached]
-		public readonly Bindable<IFocusable> GlobalFocusBindable = new();
+		public readonly Bindable<IFocusable> GlobalFocusBindable = new(); // TODO this will be moved to Scene
 		[Cached]
 		public readonly XrKeyboard Keyboard = new() { Scale = new Vector3( 0.04f ) };
 
@@ -186,6 +186,11 @@ namespace osu.XR {
 		Bindable<int> screenResY = new( 1080 );
 
 		void onControllersMutated () {
+			wasInKeyboardProximity = false;
+			foreach ( var controller in controllers.Values ) {
+				controller.ModeOverrideBindable.Value = ControllerMode.Disabled;
+			}
+
 			var main = MainController;
 			if ( inputModeBindable.Value == InputMode.SinglePointer ) {
 				foreach ( var controller in controllers.Values ) {
@@ -218,11 +223,13 @@ namespace osu.XR {
 			if ( inKeyboardProximity != wasInKeyboardProximity ) {
 				if ( inKeyboardProximity ) {
 					foreach ( var i in controllers ) {
-						i.Value.Mode = ControllerMode.Touch;
+						i.Value.ModeOverrideBindable.Value = ControllerMode.Touch;
 					}
 				}
 				else {
-					onControllersMutated();
+					foreach ( var i in controllers ) {
+						i.Value.ModeOverrideBindable.Value = ControllerMode.Disabled;
+					}
 				}
 				wasInKeyboardProximity = inKeyboardProximity;
 			}
@@ -324,6 +331,9 @@ namespace osu.XR {
 					c.BindDisabled( () => {
 						onControllersMutated();
 					}, true );
+
+					Config.BindWith( XrConfigSetting.SinglePointerTouch, controller.SinglePointerTouchBindable );
+					Config.BindWith( XrConfigSetting.TapOnPress, controller.TapTouchBindable );
 				} );
 			}, true );
 		}

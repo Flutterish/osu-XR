@@ -24,16 +24,27 @@ namespace osu.XR.Components {
 		TouchPointer touch = new() { IsVisible = false };
 		private Pointer pointer { get => pointerBindable.Value; set => pointerBindable.Value = value; }
 		private Bindable<Pointer> pointerBindable = new();
-		public ControllerMode Mode { get => ModeBindable.Value; set => ModeBindable.Value = value; }
-		public readonly Bindable<ControllerMode> ModeBindable = new( ControllerMode.Disabled );
-
-		public BindableSet<object> HeldObjects = new();
-		public bool IsHoldingAnything {
-			get => isHoldingBindable.Value;
+		public ControllerMode Mode {
+			get {
+				return ModeOverrideBindable.Value == ControllerMode.Disabled
+					? ModeBindable.Value
+					: ModeOverrideBindable.Value;
+			}
+			set {
+				ModeBindable.Value = value;
+			}
 		}
-		private readonly BindableBool isHoldingBindable = new();
+		public readonly Bindable<ControllerMode> ModeBindable = new( ControllerMode.Disabled );
+		public readonly Bindable<ControllerMode> ModeOverrideBindable = new( ControllerMode.Disabled );
+
+		public readonly BindableSet<object> HeldObjects = new();
+		public bool IsHoldingAnything {
+			get => HeldObjects.Any();
+		}
 		[Resolved]
 		private Bindable<IFocusable> globalFocusBindable { get; set; }
+		public readonly Bindable<bool> SinglePointerTouchBindable = new();
+		public readonly Bindable<bool> TapTouchBindable = new();
 
 		public XrController ( Controller controller ) {
 			Add( ControllerMesh );
@@ -55,15 +66,16 @@ namespace osu.XR.Components {
 			controller.BindDisabled( () => {
 				pointer = null;
 			}, true );
-
 			controller.BindEnabled( () => {
-				setPointer();
+				updatePointer();
 			}, true );
 
 			ModeBindable.BindValueChanged( v => {
-				setPointer();
+				updatePointer();
 			}, true );
-			isHoldingBindable.BindValueChanged( _ => updateVisibility() );
+			ModeOverrideBindable.BindValueChanged( v => {
+				updatePointer();
+			}, true );
 			pointerBindable.BindValueChanged( v => {
 				if ( v.OldValue is not null ) v.OldValue.IsVisible = false;
 				updateVisibility();
@@ -82,7 +94,6 @@ namespace osu.XR.Components {
 				mouseLeft.BindValueChangedDetailed( v => {
 					if ( !acceptsInputFrom( v.Source ) ) return;
 
-					if ( EmulatesTouch ) forceTouch = v.NewValue;
 					else LeftButtonBindable.Value = v.NewValue;
 				} );
 
@@ -90,7 +101,6 @@ namespace osu.XR.Components {
 				mouseRight.BindValueChangedDetailed( v => {
 					if ( !acceptsInputFrom( v.Source ) ) return;
 
-					if ( EmulatesTouch ) forceTouch = v.NewValue;
 					else RightButtonBindable.Value = v.NewValue;
 				} );
 
@@ -98,7 +108,7 @@ namespace osu.XR.Components {
 			} );
 
 			HeldObjects.BindCollectionChanged( () => {
-				isHoldingBindable.Value = HeldObjects.Any();
+				updateVisibility();
 			}, true );
 		}
 		ControllerHaptic haptic;
@@ -111,7 +121,7 @@ namespace osu.XR.Components {
 		private bool acceptsInputFrom ( Controller controller )
 			=> controller == Source || IsLoneController;
 
-		void setPointer () {
+		void updatePointer () {
 			if ( Mode == ControllerMode.Disabled ) {
 				pointer = null;
 			}
@@ -138,16 +148,16 @@ namespace osu.XR.Components {
 			onPointerFocusChanged( new ValueChangedEvent<IHasCollider>(myFocus, current?.CurrentFocus) );
 		}
 
+		private bool isTouchPointerDown;
 		public bool EmulatesTouch
 			=> Mode == ControllerMode.Touch
 			|| ( Mode == ControllerMode.Pointer && (
 				!IsLoneController
-				|| singlePointerTouchBindable.Value
+				|| SinglePointerTouchBindable.Value
 			) );
 
-		private bool isTouchPointerDown;
-		private bool forceTouch;
-		private bool canTouch => ( Mode == ControllerMode.Touch && !tapTouchBindable.Value ) || forceTouch;
+		private bool anyButtonDown => LeftButtonBindable.Value || RightButtonBindable.Value;
+		private bool canTouch => !TapTouchBindable.Value || anyButtonDown;
 		private void onPointerNoHit () {
 			if ( isTouchPointerDown ) {
 				isTouchPointerDown = false;
@@ -159,7 +169,7 @@ namespace osu.XR.Components {
 		}
 
 		private void onPointerHit ( RaycastHit hit ) {
-			if ( !isTouchPointerDown && EmulatesTouch && canTouch ) {
+			if ( EmulatesTouch && !isTouchPointerDown && canTouch ) {
 				onPointerFocusChanged( new ValueChangedEvent<IHasCollider>( myFocus, hit.Collider ) );
 
 				isTouchPointerDown = true;
@@ -214,14 +224,6 @@ namespace osu.XR.Components {
 				isTouchPointerDown = false;
 				PointerUp?.Invoke();
 			}
-		}
-
-		Bindable<bool> singlePointerTouchBindable = new();
-		Bindable<bool> tapTouchBindable = new();
-		[BackgroundDependencyLoader]
-		private void load ( XrConfigManager config ) {
-			config.BindWith( XrConfigSetting.SinglePointerTouch, singlePointerTouchBindable );
-			config.BindWith( XrConfigSetting.TapOnPress, tapTouchBindable );
 		}
 
 		/// <summary>
