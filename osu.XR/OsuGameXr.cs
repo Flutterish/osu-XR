@@ -8,6 +8,7 @@ using osu.Framework.IO.Stores;
 using osu.Framework.Platform;
 using osu.Framework.XR;
 using osu.Framework.XR.Components;
+using osu.Framework.XR.Physics;
 using osu.Framework.XR.Projection;
 using osu.Game;
 using osu.Game.Audio;
@@ -22,7 +23,6 @@ using osu.XR.Components.Groups;
 using osu.XR.Components.Panels;
 using osu.XR.Drawables;
 using osu.XR.Input;
-using osu.XR.Physics;
 using osu.XR.Settings;
 using osuTK;
 using System.Collections.Generic;
@@ -37,14 +37,10 @@ namespace osu.XR {
 	// Tiled B/W sphere
 	// Storyboard
 
-	// ISSUE osu limits frasmerate to 60Hz when not focused
-
 	// TODO clap bindings and general user ruleset action bindings
 
 	// TODO rigs
 	// TODO 3rd person
-
-	// TODO move shaders to out osu.Framework.XR ( problem is that we will need a resource store )
 
 	/// <summary>
 	/// The full osu! experience in VR.

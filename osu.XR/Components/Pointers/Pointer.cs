@@ -1,9 +1,9 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.XR.Components;
-using osu.XR.Physics;
+using osu.Framework.XR.Physics;
 using System;
-using static osu.XR.Physics.Raycast;
+using static osu.Framework.XR.Physics.Raycast;
 
 namespace osu.XR.Components.Pointers {
 	public abstract class Pointer : Model {

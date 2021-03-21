@@ -6,16 +6,16 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Input;
 using osu.Framework.XR.Components;
+using osu.Framework.XR.Maths;
+using osu.Framework.XR.Physics;
 using osu.Framework.XR.Rendering;
 using osu.XR.Input;
-using osu.XR.Maths;
-using osu.XR.Physics;
 using osu.XR.Settings;
 using osuTK;
 using System.Collections.Generic;
 using System.Linq;
 using static osu.Framework.XR.Components.Drawable3D.DrawNode3D;
-using static osu.XR.Physics.Raycast;
+using static osu.Framework.XR.Physics.Raycast;
 
 namespace osu.XR.Components.Panels {
 	/// <summary>

@@ -5,13 +5,13 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.XR.Components;
 using osu.Framework.XR.Graphics;
+using osu.Framework.XR.Physics;
 using osu.XR.Components.Panels;
 using osu.XR.Components.Pointers;
-using osu.XR.Physics;
 using osu.XR.Settings;
 using osuTK;
 using osuTK.Graphics;
-using static osu.XR.Physics.Raycast;
+using static osu.Framework.XR.Physics.Raycast;
 
 namespace osu.XR.Components {
 	public class XrController : CompositeDrawable3D {
