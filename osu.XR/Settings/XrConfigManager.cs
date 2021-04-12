@@ -15,17 +15,19 @@ namespace osu.XR.Settings {
 
 		protected override void InitialiseDefaults () {
 			base.InitialiseDefaults();
-			Set( XrConfigSetting.InputMode, InputMode.SinglePointer );
-			Set( XrConfigSetting.SinglePointerTouch, false );
-			Set( XrConfigSetting.TapOnPress, false );
-			Set( XrConfigSetting.Deadzone, 20, 0, 100 );
+			SetDefault( XrConfigSetting.InputMode, InputMode.SinglePointer );
+			SetDefault( XrConfigSetting.SinglePointerTouch, false );
+			SetDefault( XrConfigSetting.TapOnPress, false );
+			SetDefault( XrConfigSetting.Deadzone, 20, 0, 100 );
 
-			Set( XrConfigSetting.ScreenArc, MathF.PI * 1.2f, MathF.PI / 18, MathF.PI * 2 );
-			Set( XrConfigSetting.ScreenRadius, 1.6f, 0.4f, 4 );
-			Set( XrConfigSetting.ScreenHeight, 1.8f, 0f, 3 );
+			SetDefault( XrConfigSetting.ScreenArc, MathF.PI * 1.2f, MathF.PI / 18, MathF.PI * 2 );
+			SetDefault( XrConfigSetting.ScreenRadius, 1.6f, 0.4f, 4 );
+			SetDefault( XrConfigSetting.ScreenHeight, 1.8f, 0f, 3 );
 
-			Set( XrConfigSetting.ScreenResolutionX, 1920 * 2, 500, 7680 );
-			Set( XrConfigSetting.ScreenResolutionY, 1080, 400, 4320 );
+			SetDefault( XrConfigSetting.ScreenResolutionX, 1920 * 2, 500, 7680 );
+			SetDefault( XrConfigSetting.ScreenResolutionY, 1080, 400, 4320 );
+
+			SetDefault( XrConfigSetting.RenderToScreen, false );
 		}
 
 		public static readonly SettingsPreset<XrConfigSetting> DefaultPreset = new() {
@@ -104,6 +106,8 @@ namespace osu.XR.Settings {
 
 		ScreenResolutionX,
 		ScreenResolutionY,
+
+		RenderToScreen
 	}
 
 	public enum InputMode {

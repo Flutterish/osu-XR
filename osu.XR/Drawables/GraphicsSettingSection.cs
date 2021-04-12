@@ -21,6 +21,8 @@ namespace osu.XR.Drawables {
 
                 new SettingsSlider<int,PxSliderBar> { Current = config.GetBindable<int>( XrConfigSetting.ScreenResolutionX ), LabelText = "Screen resolution X" },
                 new SettingsSlider<int,PxSliderBar> { Current = config.GetBindable<int>( XrConfigSetting.ScreenResolutionY ), LabelText = "Screen resolution Y" },
+
+                new SettingsCheckbox { Current = config.GetBindable<bool>( XrConfigSetting.RenderToScreen ), LabelText = "Render to screen" },
             };
         }
     }

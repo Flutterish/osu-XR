@@ -15,6 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="DefaultBindings\oculus_touch.json" />
     <None Remove="knuckles.json" />
     <None Remove="Resources\keyboard.obj" />
     <None Remove="Resources\shpere.obj" />
@@ -22,6 +23,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="DefaultBindings\oculus_touch.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="DefaultBindings\vive_controller.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

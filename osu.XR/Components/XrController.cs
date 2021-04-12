@@ -9,7 +9,6 @@ using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Physics;
 using osu.XR.Components.Panels;
 using osu.XR.Components.Pointers;
-using osu.XR.Settings;
 using osuTK;
 using osuTK.Graphics;
 using System.Linq;
@@ -94,14 +93,14 @@ namespace osu.XR.Components {
 				mouseLeft.BindValueChangedDetailed( v => {
 					if ( !acceptsInputFrom( v.Source ) ) return;
 
-					else LeftButtonBindable.Value = v.NewValue;
+					LeftButtonBindable.Value = v.NewValue;
 				} );
 
 				var mouseRight = VR.GetControllerComponent<ControllerButton>( XrAction.MouseRight );
 				mouseRight.BindValueChangedDetailed( v => {
 					if ( !acceptsInputFrom( v.Source ) ) return;
 
-					else RightButtonBindable.Value = v.NewValue;
+					RightButtonBindable.Value = v.NewValue;
 				} );
 
 				haptic = VR.GetControllerComponent<ControllerHaptic>( XrAction.Feedback, Source );
@@ -157,7 +156,9 @@ namespace osu.XR.Components {
 			) );
 
 		private bool anyButtonDown => LeftButtonBindable.Value || RightButtonBindable.Value;
-		private bool canTouch => !TapTouchBindable.Value || anyButtonDown;
+		private bool canTouch => 
+			( Mode == ControllerMode.Pointer && anyButtonDown )
+			|| ( Mode == ControllerMode.Touch && ( !TapTouchBindable.Value || anyButtonDown ) );
 		private void onPointerNoHit () {
 			if ( isTouchPointerDown ) {
 				isTouchPointerDown = false;

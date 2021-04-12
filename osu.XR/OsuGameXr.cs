@@ -96,13 +96,19 @@ namespace osu.XR {
 			PhysicsSystem.Root = Scene.Root;
 
 			setManifest();
+
+			VR.BindVrStateChanged( v => {
+				if ( v == VrState.OK ) {
+					OpenVR.NET.Events.Message( $"Headset model: {VR.Current.Headset.Model.Name}" );
+				}
+			}, true );
 		}
 
 		private void setManifest () {
 			VR.SetManifest( new Manifest<XrActionGroup, XrAction> {
 				LaunchType = LaunchType.Binary,
 				IsDashBoardOverlay = false,
-				Name = "perigee.osuXR",
+				Name = "system.generated.osu.xr.exe", // TODO this is the only name steamVR accepts for now
 				Localizations = new() {
 					new( "en_us" ) {
 						Name = "osu!XR",
@@ -336,6 +342,8 @@ namespace osu.XR {
 					Config.BindWith( XrConfigSetting.TapOnPress, controller.TapTouchBindable );
 				} );
 			}, true );
+
+			Config.BindWith( XrConfigSetting.RenderToScreen, Scene.RenderToScreenBindable );
 		}
 	}
 }

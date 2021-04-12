@@ -25,7 +25,7 @@ namespace osu.XR.Input {
 		internal VirtualTouchHandler touchHandler;
 
 		new public bool HasFocus;
-		protected override bool HandleHoverEvents => HasFocus;
+		public override bool HandleHoverEvents => HasFocus;
 
 		protected override void LoadComplete () {
 			base.LoadComplete();
@@ -101,7 +101,6 @@ namespace osu.XR.Input {
 		/// </summary>
 		internal class VirtualMouseHandler : InputHandler {
 			public override bool IsActive => true;
-			public override int Priority => 0;
 
 			public override bool Initialize ( GameHost host ) => true;
 
@@ -120,7 +119,6 @@ namespace osu.XR.Input {
 		/// </summary>
 		internal class VirtualKeyboardHandler : InputHandler {
 			public override bool IsActive => true;
-			public override int Priority => 0;
 
 			public override bool Initialize ( GameHost host ) => true;
 
@@ -136,7 +134,6 @@ namespace osu.XR.Input {
 		internal class VirtualTouchHandler : InputHandler {
 			public override bool Initialize ( GameHost host ) => true;
 			public override bool IsActive => true;
-			public override int Priority => 0;
 
 			public readonly BindableInt DeadzoneBindable = new( 20 );
 			double holdDuration = 500;
