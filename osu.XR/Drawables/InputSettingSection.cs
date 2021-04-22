@@ -21,7 +21,8 @@ namespace osu.XR.Drawables {
                 new SettingsCheckbox { LabelText = "Emulate touch with single pointer", Current = config.GetBindable<bool>( XrConfigSetting.SinglePointerTouch ), TooltipText = "In single pointer mode, send position only when holding a button" },
                 new SettingsCheckbox { LabelText = "Tap only on press", Current = config.GetBindable<bool>( XrConfigSetting.TapOnPress ), TooltipText = "In touchscreen mode, hold a button to touch the screen" },
                 new SettingsSlider<int, PxSliderBar> { LabelText = "Deadzone", Current = config.GetBindable<int>( XrConfigSetting.Deadzone ), TooltipText = "Pointer deadzone after touching the screen or pressing a button" },
-                new SettingsSlider<float> { LabelText = "Player Height Offset", Current = (host as ExtendedRealityGameHost).PlayerHeightOffset }
+                new SettingsSlider<float> { LabelText = "Player Height Offset", Current = (host as ExtendedRealityGameHost).PlayerHeightOffset },
+                new SettingsEnumDropdown<Hand> { LabelText = "Dominant hand", Current = config.GetBindable<Hand>( XrConfigSetting.DominantHand ) }
             };
         }
     }

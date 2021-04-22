@@ -27,6 +27,7 @@ using osu.XR.Settings;
 using osuTK;
 using System.Collections.Generic;
 using System.Linq;
+using Valve.VR;
 
 namespace osu.XR {
 	// TODO separate out osu.Framework.XR
@@ -63,7 +64,12 @@ namespace osu.XR {
 		[Cached]
 		public readonly XrKeyboard Keyboard = new() { Scale = new Vector3( 0.04f ) };
 
-		public XrController MainController => controllers.Values.FirstOrDefault( x => x.Source.IsEnabled && x.Source.IsMainController ) ?? controllers.Values.FirstOrDefault( x => x.Source.IsEnabled );
+		ETrackedControllerRole dominantHandRole => dominantHandBindable.Value switch {
+			Hand.Right => ETrackedControllerRole.RightHand,
+			Hand.Left => ETrackedControllerRole.LeftHand,
+			Hand.Auto or _ => VR.DominantHand
+		};
+		public XrController MainController => controllers.Values.FirstOrDefault( x => x.Source.IsEnabled && x.Source.Role == dominantHandRole ) ?? controllers.Values.FirstOrDefault( x => x.Source.IsEnabled );
 		public XrController SecondaryController {
 			get {
 				var main = MainController;
@@ -216,6 +222,10 @@ namespace osu.XR {
 					controller.IsSoloMode = false;
 				}
 			}
+
+			foreach ( var controller in controllers.Values ) {
+				controller.IsMainControllerBindable.Value = controller == main;
+			}
 		}
 
 		bool wasInKeyboardProximity = false;
@@ -289,6 +299,7 @@ namespace osu.XR {
 			dependency.CacheAs( Config = new XrConfigManager( OsuGame.Dependencies.Get<Storage>() ) );
 		}
 
+		readonly Bindable<Hand> dominantHandBindable = new( Hand.Auto );
 		void osuLoaded () {
 			stealOsuDI();
 
@@ -309,9 +320,13 @@ namespace osu.XR {
 			Keyboard.LoadModel( @".\Resources\keyboard.obj" );
 
 			Config.BindWith( XrConfigSetting.InputMode, inputModeBindable );
+			Config.BindWith( XrConfigSetting.DominantHand, dominantHandBindable );
 			inputModeBindable.BindValueChanged( v => {
 				onControllersMutated();
 			}, true );
+			dominantHandBindable.BindValueChanged( v => {
+				onControllersMutated();
+			} );
 
 			Config.BindWith( XrConfigSetting.ScreenHeight, screenHeightBindable );
 			screenHeightBindable.BindValueChanged( v => OsuPanel.Y = v.NewValue, true );

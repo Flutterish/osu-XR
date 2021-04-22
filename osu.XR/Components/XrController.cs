@@ -35,6 +35,7 @@ namespace osu.XR.Components {
 		}
 		public readonly Bindable<ControllerMode> ModeBindable = new( ControllerMode.Disabled );
 		public readonly Bindable<ControllerMode> ModeOverrideBindable = new( ControllerMode.Disabled );
+		public readonly BindableBool IsMainControllerBindable = new BindableBool( false );
 
 		public readonly BindableSet<object> HeldObjects = new();
 		public bool IsHoldingAnything {
@@ -93,14 +94,30 @@ namespace osu.XR.Components {
 				mouseLeft.BindValueChangedDetailed( v => {
 					if ( !acceptsInputFrom( v.Source ) ) return;
 
-					leftButtonBindable.Value = v.NewValue;
+					if ( VR.EnabledControllerCount == 1 ) {
+						leftButtonBindable.Value = v.NewValue;
+					}
+					else {
+						if ( ( Source.Role == Valve.VR.ETrackedControllerRole.LeftHand ) != IsMainControllerBindable.Value )
+							leftButtonBindable.Value = v.NewValue;
+						else
+							rightButtonBindable.Value = v.NewValue;
+					}
 				} );
 
 				var mouseRight = VR.GetControllerComponent<ControllerButton>( XrAction.MouseRight );
 				mouseRight.BindValueChangedDetailed( v => {
 					if ( !acceptsInputFrom( v.Source ) ) return;
 
-					rightButtonBindable.Value = v.NewValue;
+					if ( VR.EnabledControllerCount == 1 ) {
+						leftButtonBindable.Value = v.NewValue;
+					}
+					else {
+						if ( ( Source.Role == Valve.VR.ETrackedControllerRole.RightHand ) == IsMainControllerBindable.Value )
+							rightButtonBindable.Value = v.NewValue;
+						else
+							leftButtonBindable.Value = v.NewValue;
+					}
 				} );
 
 				haptic = VR.GetControllerComponent<ControllerHaptic>( XrAction.Feedback, Source );
@@ -116,6 +133,12 @@ namespace osu.XR.Components {
 			leftButtonBindable.ValueChanged += v => {
 				if ( !EmulatesTouch ) LeftButtonBindable.Value = v.NewValue;
 			};
+
+			// to prevent it being stuck at true after swapping
+			IsMainControllerBindable.BindValueChanged( v => {
+				leftButtonBindable.Value = false;
+				rightButtonBindable.Value = false;
+			} );
 		}
 		ControllerHaptic haptic;
 		public void SendHapticVibration ( double duration, double frequency = 40, double amplitude = 1, double delay = 0 ) {

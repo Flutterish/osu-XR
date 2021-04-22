@@ -28,7 +28,24 @@ namespace osu.XR.Settings {
 			SetDefault( XrConfigSetting.ScreenResolutionY, 1080, 400, 4320 );
 
 			SetDefault( XrConfigSetting.RenderToScreen, false );
+			SetDefault( XrConfigSetting.DominantHand, Hand.Auto );
 		}
+
+		public static readonly SettingsPreset<XrConfigSetting> TypeLookpuPreset = new() {
+			values = new() {
+				[ XrConfigSetting.InputMode ] = InputMode.SinglePointer,
+				[ XrConfigSetting.SinglePointerTouch ] = false,
+				[ XrConfigSetting.TapOnPress ] = false,
+				[ XrConfigSetting.Deadzone ] = 20,
+				[ XrConfigSetting.ScreenArc ] = MathF.PI * 1.2f,
+				[ XrConfigSetting.ScreenRadius ] = 1.6f,
+				[ XrConfigSetting.ScreenHeight ] = 1.8f,
+				[ XrConfigSetting.ScreenResolutionX ] = 1920 * 2,
+				[ XrConfigSetting.ScreenResolutionY ] = 1080,
+				[ XrConfigSetting.RenderToScreen ] = false,
+				[ XrConfigSetting.DominantHand ] = Hand.Auto
+			}
+		};
 
 		public static readonly SettingsPreset<XrConfigSetting> DefaultPreset = new() {
 			values = new() {
@@ -78,14 +95,14 @@ namespace osu.XR.Settings {
 				if ( storage.Exists( saveFilePath ) ) {
 					using var s = storage.GetStream( saveFilePath );
 					var reader = new StreamReader( s );
-					Newtonsoft.Json.JsonConvert.DeserializeObject<SettingsPreset<XrConfigSetting>>( reader.ReadToEnd() ).Load( this, DefaultPreset );
+					Newtonsoft.Json.JsonConvert.DeserializeObject<SettingsPreset<XrConfigSetting>>( reader.ReadToEnd() ).Load( this, TypeLookpuPreset );
 				}
 			}
 			catch { }
 		}
 
 		protected override bool PerformSave () {
-			var preset = new SettingsPreset<XrConfigSetting>( this, DefaultPreset );
+			var preset = new SettingsPreset<XrConfigSetting>( this, TypeLookpuPreset );
 			using var s = storage.GetStream( saveFilePath, FileAccess.Write, mode: FileMode.Create );
 			var writer = new StreamWriter( s );
 			writer.Write( Newtonsoft.Json.JsonConvert.SerializeObject( preset, Newtonsoft.Json.Formatting.Indented ) );
@@ -107,7 +124,8 @@ namespace osu.XR.Settings {
 		ScreenResolutionX,
 		ScreenResolutionY,
 
-		RenderToScreen
+		RenderToScreen,
+		DominantHand
 	}
 
 	public enum InputMode {
@@ -117,5 +135,11 @@ namespace osu.XR.Settings {
 		DoublePointer,
 		[Description( "Touchscreen" )]
 		TouchScreen
+	}
+
+	public enum Hand {
+		Auto,
+		Left,
+		Right
 	}
 }

@@ -29,18 +29,18 @@ namespace osu.XR.Drawables {
 			Children = presets.Select( x => new SettingsButton {
 				Text = x.name,
 				Action = () => {
-					lastPreset = new( config, XrConfigManager.DefaultPreset );
-					x.preset.Load( config, XrConfigManager.DefaultPreset );
+					lastPreset = new( config, XrConfigManager.TypeLookpuPreset );
+					x.preset.Load( config, XrConfigManager.TypeLookpuPreset );
 				}
 			} ).Append( new SettingsButton {
 				Text = "Previous",
 				Action = () => {
-					lastPreset?.Load( config, XrConfigManager.DefaultPreset );
+					lastPreset?.Load( config, XrConfigManager.TypeLookpuPreset );
 				}
 			} ).Append( new SettingsButton {
 				Text = "Print Current (Runtime Logs)",
 				Action = () => {
-					var preset = new SettingsPreset<XrConfigSetting>( config, XrConfigManager.DefaultPreset );
+					var preset = new SettingsPreset<XrConfigSetting>( config, XrConfigManager.TypeLookpuPreset );
 					foreach ( var (k,v) in preset.values ) {
 						Logger.Log( $"{k}: {v}" );
 					}
