@@ -93,14 +93,14 @@ namespace osu.XR.Components {
 				mouseLeft.BindValueChangedDetailed( v => {
 					if ( !acceptsInputFrom( v.Source ) ) return;
 
-					LeftButtonBindable.Value = v.NewValue;
+					leftButtonBindable.Value = v.NewValue;
 				} );
 
 				var mouseRight = VR.GetControllerComponent<ControllerButton>( XrAction.MouseRight );
 				mouseRight.BindValueChangedDetailed( v => {
 					if ( !acceptsInputFrom( v.Source ) ) return;
 
-					RightButtonBindable.Value = v.NewValue;
+					rightButtonBindable.Value = v.NewValue;
 				} );
 
 				haptic = VR.GetControllerComponent<ControllerHaptic>( XrAction.Feedback, Source );
@@ -109,6 +109,13 @@ namespace osu.XR.Components {
 			HeldObjects.BindCollectionChanged( () => {
 				updateVisibility();
 			}, true );
+
+			rightButtonBindable.ValueChanged += v => {
+				if ( !EmulatesTouch ) RightButtonBindable.Value = v.NewValue;
+			};
+			leftButtonBindable.ValueChanged += v => {
+				if ( !EmulatesTouch ) LeftButtonBindable.Value = v.NewValue;
+			};
 		}
 		ControllerHaptic haptic;
 		public void SendHapticVibration ( double duration, double frequency = 40, double amplitude = 1, double delay = 0 ) {
@@ -155,7 +162,7 @@ namespace osu.XR.Components {
 				|| SinglePointerTouchBindable.Value
 			) );
 
-		private bool anyButtonDown => LeftButtonBindable.Value || RightButtonBindable.Value;
+		private bool anyButtonDown => leftButtonBindable.Value || rightButtonBindable.Value;
 		private bool canTouch => 
 			( Mode == ControllerMode.Pointer && anyButtonDown )
 			|| ( Mode == ControllerMode.Touch && ( !TapTouchBindable.Value || anyButtonDown ) );
@@ -240,6 +247,8 @@ namespace osu.XR.Components {
 		/// </summary>
 		public event System.Action PointerUp;
 		public readonly Bindable<Vector2> ScrollBindable = new();
+		private readonly BindableBool leftButtonBindable = new();
+		private readonly BindableBool rightButtonBindable = new();
 		public readonly BindableBool LeftButtonBindable = new();
 		public readonly BindableBool RightButtonBindable = new();
 	}
