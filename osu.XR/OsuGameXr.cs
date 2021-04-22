@@ -63,6 +63,8 @@ namespace osu.XR {
 		public readonly Bindable<IFocusable> GlobalFocusBindable = new(); // TODO this will be moved to Scene
 		[Cached]
 		public readonly XrKeyboard Keyboard = new() { Scale = new Vector3( 0.04f ) };
+		[Cached]
+		public readonly XrInspectorPanel Inspector = new();
 
 		ETrackedControllerRole dominantHandRole => dominantHandBindable.Value switch {
 			Hand.Right => ETrackedControllerRole.RightHand,
@@ -315,7 +317,7 @@ namespace osu.XR {
 			Scene.Add( new BeatingScenery() );
 			Scene.Add( Camera );
 			Scene.Add( OsuPanel );
-			Scene.Add( new HandheldMenu().With( s => s.Panels.AddRange( new FlatPanel[] { new XrConfigPanel(), Notifications } ) ) );
+			Scene.Add( new HandheldMenu().With( s => s.Panels.AddRange( new FlatPanel[] { new XrConfigPanel(), Notifications, Inspector } ) ) );
 			Scene.Add( Keyboard );
 			Keyboard.LoadModel( @".\Resources\keyboard.obj" );
 

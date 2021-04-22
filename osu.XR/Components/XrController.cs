@@ -132,6 +132,7 @@ namespace osu.XR.Components {
 			};
 			leftButtonBindable.ValueChanged += v => {
 				if ( !EmulatesTouch ) LeftButtonBindable.Value = v.NewValue;
+				if ( v.NewValue && inspector.Panel.IsSelectingBindable.Value ) inspector.Panel.IsSelectingBindable.Value = false;
 			};
 
 			// to prevent it being stuck at true after swapping
@@ -189,6 +190,9 @@ namespace osu.XR.Components {
 		private bool canTouch => 
 			( Mode == ControllerMode.Pointer && anyButtonDown )
 			|| ( Mode == ControllerMode.Touch && ( !TapTouchBindable.Value || anyButtonDown ) );
+
+		[Resolved]
+		private XrInspectorPanel inspector { get; set; }
 		private void onPointerNoHit () {
 			if ( isTouchPointerDown ) {
 				isTouchPointerDown = false;
@@ -197,9 +201,23 @@ namespace osu.XR.Components {
 				onPointerFocusChanged( new ValueChangedEvent<IHasCollider>( myFocus, null ) );
 				SendHapticVibration( 0.05, 20 );
 			}
+
+			if ( inspector.Panel.IsSelectingBindable.Value ) {
+				if ( IsMainControllerBindable.Value ) {
+					inspector.Panel.SelectedElementBindable.Value = null;
+				}
+			}
 		}
 
 		private void onPointerHit ( RaycastHit hit ) {
+			if ( inspector.Panel.IsSelectingBindable.Value ) {
+				if ( IsMainControllerBindable.Value ) {
+					inspector.Panel.SelectedElementBindable.Value = hit.Collider as Drawable3D;
+				}
+
+				return;
+			}
+
 			if ( EmulatesTouch && !isTouchPointerDown && canTouch ) {
 				onPointerFocusChanged( new ValueChangedEvent<IHasCollider>( myFocus, hit.Collider ) );
 
@@ -244,6 +262,13 @@ namespace osu.XR.Components {
 			base.LoadComplete();
 			Root.Add( touch );
 			Root.Add( raycast );
+
+			inspector.Panel.IsSelectingBindable.BindValueChanged( v => {
+				if ( v.NewValue ) {
+					onPointerNoHit();
+					if ( myFocus != null ) onPointerFocusChanged( new ValueChangedEvent<IHasCollider>( myFocus, null ) );
+				}
+			}, true );
 		}
 
 		protected override void Update () {
