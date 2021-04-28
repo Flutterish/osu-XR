@@ -103,8 +103,6 @@ namespace osu.XR {
 			Scene = new SceneWithMirrorWarning { RelativeSizeAxes = Axes.Both, Camera = Camera };
 			PhysicsSystem.Root = Scene.Root;
 
-			setManifest();
-
 			VR.BindVrStateChanged( v => {
 				if ( v == VrState.OK ) {
 					OpenVR.NET.Events.Message( $"Headset model: {VR.Current.Headset.Model.Name}" );
@@ -112,86 +110,84 @@ namespace osu.XR {
 			}, true );
 		}
 
-		private void setManifest () {
-			VR.SetManifest( new Manifest<XrActionGroup, XrAction> {
-				LaunchType = LaunchType.Binary,
-				IsDashBoardOverlay = false,
-				Name = "system.generated.osu.xr.exe", // TODO this is the only name steamVR accepts for now
-				Localizations = new() {
-					new( "en_us" ) {
-						Name = "osu!XR",
-						Description = "The full osu! experience in VR"
-					}
-				},
-				Groups = new() {
-					new() {
-						Type = ActionGroupType.LeftRight,
-						Name = XrActionGroup.Pointer,
-						Actions = new() {
-							new() {
-								Name = XrAction.MouseLeft,
-								Type = ActionType.Boolean,
-								Requirement = Requirement.Mandatory,
-								Localizations = new() { [ "en_us" ] = "Left Click" }
-							},
-							new() {
-								Name = XrAction.MouseRight,
-								Type = ActionType.Boolean,
-								Requirement = Requirement.Mandatory,
-								Localizations = new() { [ "en_us" ] = "Right Click" }
-							},
-							new() {
-								Name = XrAction.Scroll,
-								Type = ActionType.Vector2,
-								Requirement = Requirement.Suggested,
-								Localizations = new() { [ "en_us" ] = "Scroll" }
-							}
-						},
-						Localizations = new() { [ "en_us" ] = "Pointer" },
-					},
-					new() {
-						Type = ActionGroupType.LeftRight,
-						Name = XrActionGroup.Configuration,
-						Actions = new() {
-							new() {
-								Name = XrAction.ToggleMenu,
-								Type = ActionType.Boolean,
-								Requirement = Requirement.Suggested,
-								Localizations = new() { [ "en_us" ] = "Toggle configuration panel" }
-							}
-						},
-						Localizations = new() { [ "en_us" ] = "Configuration" }
-					},
-					new() {
-						Type = ActionGroupType.LeftRight,
-						Name = XrActionGroup.Haptics,
-						Actions = new() {
-							new() {
-								Name = XrAction.Feedback,
-								Type = ActionType.Vibration,
-								Requirement = Requirement.Suggested,
-								Localizations = new() { [ "en_us" ] = "Feedback" }
-							}
-						},
-						Localizations = new() { [ "en_us" ] = "Haptics" }
-					},
-				},
-				DefaultBindings = new() {
-					new() {
-						ControllerType = "knuckles",
-						Path = "DefaultBindings/knuckles.json"
-					},
-					new() {
-						ControllerType = "vive_controller",
-						Path = "DefaultBindings/vive_controller.json"
-					},
-					new() {
-						ControllerType = "oculus_touch",
-						Path = "DefaultBindings/oculus_touch.json"
-					}
+		public override Manifest XrManifest => new Manifest<XrActionGroup, XrAction> {
+			LaunchType = LaunchType.Binary,
+			IsDashBoardOverlay = false,
+			Name = "system.generated.osu.xr.exe", // TODO this is the only name steamVR accepts for now
+			Localizations = new() {
+				new( "en_us" ) {
+					Name = "osu!XR",
+					Description = "The full osu! experience in VR"
 				}
-			} );
-		}
+			},
+			Groups = new() {
+				new() {
+					Type = ActionGroupType.LeftRight,
+					Name = XrActionGroup.Pointer,
+					Actions = new() {
+						new() {
+							Name = XrAction.MouseLeft,
+							Type = ActionType.Boolean,
+							Requirement = Requirement.Mandatory,
+							Localizations = new() { [ "en_us" ] = "Left Click" }
+						},
+						new() {
+							Name = XrAction.MouseRight,
+							Type = ActionType.Boolean,
+							Requirement = Requirement.Mandatory,
+							Localizations = new() { [ "en_us" ] = "Right Click" }
+						},
+						new() {
+							Name = XrAction.Scroll,
+							Type = ActionType.Vector2,
+							Requirement = Requirement.Suggested,
+							Localizations = new() { [ "en_us" ] = "Scroll" }
+						}
+					},
+					Localizations = new() { [ "en_us" ] = "Pointer" },
+				},
+				new() {
+					Type = ActionGroupType.LeftRight,
+					Name = XrActionGroup.Configuration,
+					Actions = new() {
+						new() {
+							Name = XrAction.ToggleMenu,
+							Type = ActionType.Boolean,
+							Requirement = Requirement.Suggested,
+							Localizations = new() { [ "en_us" ] = "Toggle configuration panel" }
+						}
+					},
+					Localizations = new() { [ "en_us" ] = "Configuration" }
+				},
+				new() {
+					Type = ActionGroupType.LeftRight,
+					Name = XrActionGroup.Haptics,
+					Actions = new() {
+						new() {
+							Name = XrAction.Feedback,
+							Type = ActionType.Vibration,
+							Requirement = Requirement.Suggested,
+							Localizations = new() { [ "en_us" ] = "Feedback" }
+						}
+					},
+					Localizations = new() { [ "en_us" ] = "Haptics" }
+				},
+			},
+			DefaultBindings = new() {
+				new() {
+					ControllerType = "knuckles",
+					Path = "DefaultBindings/knuckles.json"
+				},
+				new() {
+					ControllerType = "vive_controller",
+					Path = "DefaultBindings/vive_controller.json"
+				},
+				new() {
+					ControllerType = "oculus_touch",
+					Path = "DefaultBindings/oculus_touch.json"
+				}
+			}
+		};
 
 		Bindable<InputMode> inputModeBindable = new();
 		Bindable<float> screenHeightBindable = new( 1.8f );

@@ -14,5 +14,9 @@ namespace osu.XR {
 			else if ( self.Parent is not null ) return self.Parent.GetClosestInspectable();
 			else return null;
 		}
+
+		public static string GetInspectorName ( this Drawable3D drawable ) {
+			return string.IsNullOrWhiteSpace( drawable.Name ) ? drawable.GetType().Name : drawable.Name;
+		}
 	}
 }

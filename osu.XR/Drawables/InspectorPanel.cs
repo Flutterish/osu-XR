@@ -54,6 +54,7 @@ namespace osu.XR.Drawables {
 				Margin = new MarginPadding { Left = 15, Right = 15 }
 			} );
 
+			InspectedElementBindable.ValueChanged += v => setInspected( v.NewValue );
 			SelectedElementBindable.BindValueChanged( v => {
 				if ( GranularSelectionBindable.Value ) {
 					InspectedElementBindable.Value = v.NewValue;
@@ -62,8 +63,6 @@ namespace osu.XR.Drawables {
 					InspectedElementBindable.Value = (v.NewValue?.GetClosestInspectable() as Drawable3D) ?? v.NewValue;
 				}
 			}, true );
-
-			InspectedElementBindable.ValueChanged += v => setInspected( v.NewValue );
 		}
 
 		string elementLabel {
@@ -83,11 +82,12 @@ namespace osu.XR.Drawables {
 				return;
 			}
 
-			elementLabel = string.IsNullOrWhiteSpace( element.Name ) ? element.GetType().Name : element.Name;
+			elementLabel = element.GetInspectorName();
 			subsections.Add( new TransformInspectorSection( element ) );
 			if ( element is IConfigurableInspectable inspectable ) {
 				subsections.AddRange( inspectable.CreateInspectorSubsections() );
 			}
+			subsections.Add( new HierarchyInspectorSubsection( element, v => InspectedElementBindable.Value = v ) );
 			
 			elements.AddRange( subsections );
 		}
@@ -141,8 +141,13 @@ namespace osu.XR.Drawables {
 			} );
 		}
 
+		double timer;
 		protected override void Update () {
 			base.Update();
+			timer += Time.Elapsed;
+			if ( timer < 500 ) {
+				return;
+			}
 
 			scaleX.Value = drawable.ScaleX.ToString();
 			scaleY.Value = drawable.ScaleY.ToString();
@@ -155,6 +160,8 @@ namespace osu.XR.Drawables {
 			posX.Value = drawable.X.ToString();
 			posY.Value = drawable.Y.ToString();
 			posZ.Value = drawable.Z.ToString();
+
+			timer = 0;
 		}
 	}
 
@@ -270,6 +277,57 @@ namespace osu.XR.Drawables {
 		}
 		public string LabelText {
 			set => label.Text = value;
+		}
+	}
+
+	public class HierarchyInspectorSubsection : SettingsSubsection {
+		protected override string Header => "Hierarchy";
+
+		Drawable3D drawable;
+		FillFlowContainer list;
+		Action<Drawable3D> drawableSelected;
+		public HierarchyInspectorSubsection ( Drawable3D drawable, Action<Drawable3D> drawableSelected ) {
+			this.drawableSelected = drawableSelected;
+			this.drawable = drawable;
+			AutoSizeAxes = Axes.Y;
+			RelativeSizeAxes = Axes.X;
+			Add( list = new FillFlowContainer {
+				Direction = FillDirection.Vertical,
+				RelativeSizeAxes = Axes.X,
+				AutoSizeAxes = Axes.Y
+			} );
+
+			refresh();
+			if ( drawable is CompositeDrawable3D comp ) {
+				comp.ChildAdded += (_,_) => refresh();
+				comp.ChildRemoved += (_,_) => refresh();
+			}
+		}
+
+		void addButton ( Drawable3D drawable, string name, bool enabled = true, float width = 1 ) {
+			OsuButton button;
+			list.Add( button = new OsuButton {
+				RelativeSizeAxes = Axes.X,
+				Anchor = Anchor.TopCentre,
+				Origin = Anchor.TopCentre,
+				Width = width,
+				Height = 15,
+				Text = name,
+				Action = () => drawableSelected( drawable )
+			} );
+			button.Enabled.Value = enabled;
+		}
+
+		void refresh () {
+			if ( drawable.Parent is not null ) {
+				addButton( drawable.Parent, $".. ({drawable.Parent.GetInspectorName()})" );
+			}
+			addButton( drawable, drawable.GetInspectorName(), enabled: false, width: 0.9f );
+			if ( drawable is CompositeDrawable3D comp ) {
+				foreach ( var i in comp.Children ) {
+					addButton( i, i.GetInspectorName() );
+				}
+			}
 		}
 	}
 }
