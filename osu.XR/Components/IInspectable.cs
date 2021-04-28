@@ -10,7 +10,14 @@ namespace osu.XR.Components {
 	/// <summary>
 	/// An object whose properties can be inspected
 	/// </summary>
-	public interface IInspectable : IHasCollider {
+	public interface IInspectable {
+		
+	}
+
+	/// <summary>
+	/// An object whose properties can be inspected and that has custom inspector subsections
+	/// </summary>
+	public interface IConfigurableInspectable : IInspectable {
 		IEnumerable<SettingsSubsection> CreateInspectorSubsections ();
 	}
 }

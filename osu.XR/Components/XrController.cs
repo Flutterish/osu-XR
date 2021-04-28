@@ -3,6 +3,7 @@ using OpenVR.NET.Manifests;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
+using osu.Framework.Layout;
 using osu.Framework.XR;
 using osu.Framework.XR.Components;
 using osu.Framework.XR.Graphics;
@@ -193,6 +194,7 @@ namespace osu.XR.Components {
 
 		[Resolved]
 		private XrInspectorPanel inspector { get; set; }
+
 		private void onPointerNoHit () {
 			if ( isTouchPointerDown ) {
 				isTouchPointerDown = false;
@@ -230,6 +232,8 @@ namespace osu.XR.Components {
 
 		IHasCollider myFocus;
 		void onPointerFocusChanged ( ValueChangedEvent<IHasCollider> v ) {
+			if ( inspector.Panel.IsSelectingBindable.Value && v.NewValue is not null ) return;
+
 			if ( myFocus is IFocusable old ) old.OnControllerFocusLost( this );
 			myFocus = v.NewValue;
 			if ( myFocus is IFocusable @new ) {
@@ -267,6 +271,9 @@ namespace osu.XR.Components {
 				if ( v.NewValue ) {
 					onPointerNoHit();
 					if ( myFocus != null ) onPointerFocusChanged( new ValueChangedEvent<IHasCollider>( myFocus, null ) );
+				}
+				else {
+					onPointerFocusChanged( new ValueChangedEvent<IHasCollider>( myFocus, pointer?.CurrentFocus ) );
 				}
 			}, true );
 		}

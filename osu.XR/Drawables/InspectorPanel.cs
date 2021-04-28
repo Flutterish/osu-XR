@@ -47,6 +47,7 @@ namespace osu.XR.Drawables {
 			text.AddParagraph( "these settings are not persistent", s => { s.Font = OsuFont.GetFont( Typeface.Torus, 18 ); s.Colour = Colour4.HotPink; } );
 
 			elements.Add( new SettingsCheckbox { LabelText = "Select element to inspect", Current = IsSelectingBindable } );
+			elements.Add( new SettingsCheckbox { LabelText = "Granular selection", Current = GranularSelectionBindable } );
 			elements.Add( elementName = new TextFlowContainer( s => s.Font = OsuFont.GetFont( Typeface.Torus, 20 ) ) {
 				RelativeSizeAxes = Axes.X,
 				AutoSizeAxes = Axes.Y,
@@ -54,8 +55,15 @@ namespace osu.XR.Drawables {
 			} );
 
 			SelectedElementBindable.BindValueChanged( v => {
-				setSelected( v.NewValue );
+				if ( GranularSelectionBindable.Value ) {
+					InspectedElementBindable.Value = v.NewValue;
+				}
+				else {
+					InspectedElementBindable.Value = (v.NewValue?.GetClosestInspectable() as Drawable3D) ?? v.NewValue;
+				}
 			}, true );
+
+			InspectedElementBindable.ValueChanged += v => setInspected( v.NewValue );
 		}
 
 		string elementLabel {
@@ -66,7 +74,7 @@ namespace osu.XR.Drawables {
 		}
 		readonly List<SettingsSubsection> subsections = new();
 		public readonly Bindable<Drawable3D> SelectedElementBindable = new();
-		private void setSelected ( Drawable3D element ) {
+		private void setInspected ( Drawable3D element ) {
 			elements.RemoveAll( x => subsections.Contains( x ) );
 			subsections.Clear();
 			
@@ -77,31 +85,22 @@ namespace osu.XR.Drawables {
 
 			elementLabel = string.IsNullOrWhiteSpace( element.Name ) ? element.GetType().Name : element.Name;
 			subsections.Add( new TransformInspectorSection( element ) );
-			if ( element is IInspectable inspectable ) {
+			if ( element is IConfigurableInspectable inspectable ) {
 				subsections.AddRange( inspectable.CreateInspectorSubsections() );
 			}
 			
 			elements.AddRange( subsections );
 		}
 
+		public readonly Bindable<Drawable3D> InspectedElementBindable = new();
 		public readonly BindableBool IsSelectingBindable = new( false );
+		public readonly BindableBool GranularSelectionBindable = new( false );
 	}
 
 	public class TransformInspectorSection : SettingsSubsection {
 		private Drawable3D drawable;
 		public TransformInspectorSection ( Drawable3D drawable ) {
 			this.drawable = drawable;
-			scaleX.Value = drawable.ScaleX.ToString();
-			scaleY.Value = drawable.ScaleY.ToString();
-			scaleZ.Value = drawable.ScaleZ.ToString();
-
-			rotX.Value = drawable.EulerRotX.ToString();
-			rotY.Value = drawable.EulerRotY.ToString();
-			rotZ.Value = drawable.EulerRotZ.ToString();
-
-			posX.Value = drawable.X.ToString();
-			posY.Value = drawable.Y.ToString();
-			posZ.Value = drawable.Z.ToString();
 		}
 		
 		protected override string Header => "Transform";
@@ -140,6 +139,22 @@ namespace osu.XR.Drawables {
 				CurrentB = posY,
 				CurrentC = posZ
 			} );
+		}
+
+		protected override void Update () {
+			base.Update();
+
+			scaleX.Value = drawable.ScaleX.ToString();
+			scaleY.Value = drawable.ScaleY.ToString();
+			scaleZ.Value = drawable.ScaleZ.ToString();
+
+			rotX.Value = drawable.EulerRotX.ToString();
+			rotY.Value = drawable.EulerRotY.ToString();
+			rotZ.Value = drawable.EulerRotZ.ToString();
+
+			posX.Value = drawable.X.ToString();
+			posY.Value = drawable.Y.ToString();
+			posZ.Value = drawable.Z.ToString();
 		}
 	}
 

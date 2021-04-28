@@ -23,7 +23,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace osu.XR.Input {
-	public class XrKeyboard : CompositeDrawable3D {
+	public class XrKeyboard : CompositeDrawable3D, IInspectable {
 		public readonly Bindable<KeyboardLayout> LayoutBindable = new( KeyboardLayout.Default );
 		private List<XrKey> keys = new();
 		[Resolved]
