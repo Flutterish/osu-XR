@@ -57,10 +57,10 @@ namespace osu.XR.Drawables {
 			InspectedElementBindable.ValueChanged += v => setInspected( v.NewValue );
 			SelectedElementBindable.BindValueChanged( v => {
 				if ( GranularSelectionBindable.Value ) {
-					InspectedElementBindable.Value = v.NewValue;
+					InspectedElementBindable.Value = v.NewValue.GetValidInspectable();
 				}
 				else {
-					InspectedElementBindable.Value = (v.NewValue?.GetClosestInspectable() as Drawable3D) ?? v.NewValue;
+					InspectedElementBindable.Value = (v.NewValue?.GetClosestInspectable() as Drawable3D) ?? v.NewValue?.GetValidInspectable();
 				}
 			}, true );
 		}
@@ -319,15 +319,26 @@ namespace osu.XR.Drawables {
 		}
 
 		void refresh () {
-			if ( drawable.Parent is not null ) {
-				addButton( drawable.Parent, $".. ({drawable.Parent.GetInspectorName()})" );
+			Drawable3D parent = drawable.Parent?.GetValidInspectable();
+			if ( parent is not null ) {
+				addButton( parent, $".. ({parent.GetInspectorName()})" );
 			}
 			addButton( drawable, drawable.GetInspectorName(), enabled: false, width: 0.9f );
-			if ( drawable is CompositeDrawable3D comp ) {
-				foreach ( var i in comp.Children ) {
-					addButton( i, i.GetInspectorName() );
+
+			void addRange ( Drawable3D drawable ) {
+				if ( drawable is CompositeDrawable3D comp ) {
+					foreach ( var i in comp.Children ) {
+						if ( i is INotInspectable ) {
+							addRange( i );
+						}
+						else {
+							addButton( i, i.GetInspectorName() );
+						}
+					}
 				}
 			}
+
+			addRange( drawable );
 		}
 	}
 }

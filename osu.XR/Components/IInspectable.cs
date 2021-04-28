@@ -10,9 +10,7 @@ namespace osu.XR.Components {
 	/// <summary>
 	/// An object whose properties can be inspected
 	/// </summary>
-	public interface IInspectable {
-		
-	}
+	public interface IInspectable { }
 
 	/// <summary>
 	/// An object whose properties can be inspected and that has custom inspector subsections
@@ -20,4 +18,9 @@ namespace osu.XR.Components {
 	public interface IConfigurableInspectable : IInspectable {
 		IEnumerable<SettingsSubsection> CreateInspectorSubsections ();
 	}
+
+	/// <summary>
+	/// An object that should never be seen in the inspector
+	/// </summary>
+	public interface INotInspectable { }
 }
