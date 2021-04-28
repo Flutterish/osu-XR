@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -22,6 +23,7 @@ namespace osu.XR.Drawables {
 	public class InspectorPanel : CompositeDrawable {
 		FillFlowContainer elements;
 		TextFlowContainer elementName;
+
 		public InspectorPanel () {
 			AddInternal( new Box {
 				RelativeSizeAxes = Axes.Both,
@@ -60,9 +62,19 @@ namespace osu.XR.Drawables {
 					InspectedElementBindable.Value = v.NewValue.GetValidInspectable();
 				}
 				else {
-					InspectedElementBindable.Value = (v.NewValue?.GetClosestInspectable() as Drawable3D) ?? v.NewValue?.GetValidInspectable();
+					InspectedElementBindable.Value = ( v.NewValue?.GetClosestInspectable() as Drawable3D ) ?? v.NewValue?.GetValidInspectable();
 				}
 			}, true );
+		}
+
+		Selection selection = new();
+
+		protected override void Update () {
+			base.Update();
+			selection.IsVisible = IsPresent && InspectedElementBindable.Value is not null;
+			if ( selection.IsVisible ) {
+				selection.Select( InspectedElementBindable.Value );
+			}
 		}
 
 		string elementLabel {
@@ -74,6 +86,8 @@ namespace osu.XR.Drawables {
 		readonly List<SettingsSubsection> subsections = new();
 		public readonly Bindable<Drawable3D> SelectedElementBindable = new();
 		private void setInspected ( Drawable3D element ) {
+			if ( element is not null ) selection.Parent = element.Root;
+
 			elements.RemoveAll( x => subsections.Contains( x ) );
 			subsections.Clear();
 			
