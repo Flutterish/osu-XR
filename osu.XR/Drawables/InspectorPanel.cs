@@ -117,7 +117,7 @@ namespace osu.XR.Drawables {
 			this.drawable = drawable;
 		}
 		
-		protected override string Header => "Transform";
+		protected override string Header => "Transform (Preview)";
 
 		private readonly Bindable<string> scaleX = new();
 		private readonly Bindable<string> scaleY = new();

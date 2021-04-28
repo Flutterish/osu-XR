@@ -290,6 +290,7 @@ namespace osu.XR {
 			dependency.CacheAs( OsuGame.Dependencies.Get<RulesetStore>() );
 			dependency.CacheAs( OsuGame.Dependencies.Get<SessionStatics>() );
 			dependency.CacheAs( OsuGame.Dependencies.Get<IBindable<WorkingBeatmap>>() );
+			dependency.CacheAs( OsuGame.Dependencies.Get<IBindable<RulesetInfo>>() );
 			dependency.CacheAs<OsuGameBase>( OsuGame );
 			dependency.CacheAs<Framework.Game>( OsuGame );
 			dependency.CacheAs( OsuGame.Dependencies.Get<Storage>() );
@@ -313,7 +314,7 @@ namespace osu.XR {
 			Scene.Add( new BeatingScenery() );
 			Scene.Add( Camera );
 			Scene.Add( OsuPanel );
-			Scene.Add( new HandheldMenu().With( s => s.Panels.AddRange( new FlatPanel[] { new XrConfigPanel(), Notifications, Inspector } ) ) );
+			Scene.Add( new HandheldMenu().With( s => s.Panels.AddRange( new FlatPanel[] { new XrConfigPanel(), Notifications, Inspector, new XrRulesetInfoPanel() } ) ) );
 			Scene.Add( Keyboard );
 			Keyboard.LoadModel( @".\Resources\keyboard.obj" );
 

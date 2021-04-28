@@ -23,4 +23,7 @@ namespace osu.XR.Components {
 	/// An object that should never be seen in the inspector
 	/// </summary>
 	public interface INotInspectable { }
+
+	// TODO IHasInspectorVisuals will be able to render things when selected by the inspector
+	public interface IHasInspectorVisuals { }
 }
