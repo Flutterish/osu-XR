@@ -1,5 +1,6 @@
 ﻿using osu.Framework.XR.Components;
 using osu.Framework.XR.Graphics;
+using osuTK;
 using osuTK.Graphics;
 using System;
 using System.Collections.Generic;
@@ -27,7 +28,7 @@ namespace osu.XR.Components {
 				return;
 			}
 
-			Scale = selected.RequiredParentSizeToFit + new osuTK.Vector3( 0.1f );
+			Scale = selected.RequiredParentSizeToFit * 1.03f;
 		}
 	}
 }
