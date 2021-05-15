@@ -1,4 +1,5 @@
-﻿using osu.Framework.Allocation;
+﻿using Microsoft.CodeAnalysis;
+using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions;
 using osu.Framework.Graphics;
@@ -7,9 +8,11 @@ using osu.Framework.Graphics.Shapes;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays.Settings;
 using osu.Game.Rulesets;
 using osu.XR.Input.Custom;
+using osuTK.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,6 +57,7 @@ namespace osu.XR.Drawables {
 		private IBindable<RulesetInfo> ruleset { get; set; }
 		List<Drawable> sections = new();
 
+		Dictionary<RulesetInfo, RulesetXrBindingsSubsection> settings = new();
 		protected override void LoadComplete () {
 			base.LoadComplete();
 
@@ -66,8 +70,13 @@ namespace osu.XR.Drawables {
 				rulesetName.Text = "Ruleset: ";
 				rulesetName.AddText( v.NewValue.Name, s => s.Font = s.Font = OsuFont.GetFont( Typeface.Torus, 20, FontWeight.Bold ) );
 
-				var ruleset = v.NewValue.CreateInstance();
-				sections.Add( new RulesetXrBindingsSubsection( ruleset ) );
+				if ( settings.ContainsKey( v.NewValue ) ) {
+					sections.Add( settings[ v.NewValue ] );
+				}
+				else {
+					var ruleset = v.NewValue.CreateInstance();
+					sections.Add( new RulesetXrBindingsSubsection( ruleset ) );
+				}
 
 				container.AddRange( sections );
 			}, true );
@@ -78,46 +87,133 @@ namespace osu.XR.Drawables {
 		protected override string Header => "Bindings (Not functional)";
 
 		Ruleset ruleset;
-		Dictionary<object,CustomInput> rulesetActions = new();
+		List<object> rulesetActions = new();
+
+		static Dictionary<string, Func<CustomInput>> avaiableInputs = new() {
+			[ "Clap" ] = () => new ClapInput(),
+			[ "Left Joystick" ] = () => new JoystickInput { Hand = Settings.Hand.Left },
+			[ "Right Joystick" ] = () => new JoystickInput { Hand = Settings.Hand.Right },
+			[ "Left Buttons" ] = () => new ButtonInput { Hand = Settings.Hand.Left },
+			[ "Right Buttons" ] = () => new ButtonInput { Hand = Settings.Hand.Right }
+		};
+
+		Dictionary<string, CustomInput> removedInputs = new();
+		Dictionary<string, CustomInput> selectedInputs = new();
+		Dictionary<string, Drawable> inputDrawables = new();
+		FillFlowContainer container;
+		OsuButton addButton;
+		SettingsDropdown<string> dropdown;
+
 		public RulesetXrBindingsSubsection ( Ruleset ruleset ) {
 			this.ruleset = ruleset;
-			foreach ( var i in ruleset.GetDefaultKeyBindings().Select( x => x.Action ).Distinct() ) {
-				rulesetActions.Add( i, null );
+			rulesetActions = ruleset.GetDefaultKeyBindings().Select( x => x.Action ).Distinct().ToList();
+
+			Add( container = new FillFlowContainer {
+				RelativeSizeAxes = Axes.X,
+				AutoSizeAxes = Axes.Y,
+				Direction = FillDirection.Vertical
+			} );
+
+			container.Add( addButton = new OsuButton {
+				Height = 25,
+				Width = 120,
+				Text = "Add",
+				Action = () => {
+					addCustomInput( dropdown.Current.Value );
+				}
+			} );
+
+			container.Add( dropdown = new SettingsDropdown<string> {
+				Current = new Bindable<string>( "Select type" )
+			} );
+
+			dropdown.Current.BindValueChanged( v => {
+				addButton.Enabled.Value = v.NewValue != dropdown.Current.Default;
+			}, true );
+
+			updateDropdown();
+		}
+
+		protected override void Update () {
+			base.Update();
+		}
+
+		void updateDropdown () {
+			dropdown.Items = avaiableInputs.Keys.Except( selectedInputs.Keys ).Prepend( dropdown.Current.Default );
+			dropdown.Current.SetDefault();
+		}
+
+		void addCustomInput ( string ID ) {
+			CustomInput input;
+			if ( removedInputs.ContainsKey( ID ) ) {
+				removedInputs.Remove( ID, out input );
+				selectedInputs.Add( ID, input );
+
+				container.Add( inputDrawables[ ID ] );
+				updateDropdown();
+				return;
 			}
+			
+			input = avaiableInputs[ ID ]();
 
-			foreach ( var (i,_) in rulesetActions ) {
-				List<CustomInput> customInputs = new() {
-					new ClapInput(),
-					new JoystickInput { Hand = Settings.Hand.Left },
-					new JoystickInput { Hand = Settings.Hand.Right },
-					new ButtonInput { Hand = Settings.Hand.Left },
-					new ButtonInput { Hand = Settings.Hand.Right }
-				};
+			selectedInputs.Add( ID, input );
 
-				SettingsDropdown<string> dropdown;
-				Add( dropdown = new SettingsDropdown<string> {
-					LabelText = i.ToString(),
-					Current = new Bindable<string>( "Default" ),
-					Items = customInputs.Select( x => x.Name ).Prepend( "Default" )
-				} );
-				Container setttingContainer;
-				Add( setttingContainer = new Container {
-					RelativeSizeAxes = Axes.X,
-					AutoSizeAxes = Axes.Y
-				} );
-
-				dropdown.Current.ValueChanged += v => {
-					if ( v.NewValue == "Default" ) {
-						rulesetActions[ i ] = null;
-						setttingContainer.Clear( false );
+			inputDrawables.Add( ID, new Container {
+				Margin = new MarginPadding { Bottom = 2 },
+				Masking = true,
+				CornerRadius = 5,
+				RelativeSizeAxes = Axes.X,
+				AutoSizeAxes = Axes.Y,
+				Children = new Drawable[] {
+					new Box {
+						RelativeSizeAxes = Axes.Both,
+						Colour = OsuColour.Gray( 0.05f )
+					},
+					new FillFlowContainer {
+						RelativeSizeAxes = Axes.X,
+						AutoSizeAxes = Axes.Y,
+						Direction = FillDirection.Vertical,
+						Children = new Drawable[] {
+							new Container {
+								RelativeSizeAxes = Axes.X,
+								AutoSizeAxes = Axes.Y,
+								Children = new Drawable[] {
+									new OsuTextFlowContainer( x => x.Font = OsuFont.GetFont( size: 20 ) ) {
+										Text = ID,
+										Margin = new MarginPadding { Bottom = 4 },
+										RelativeSizeAxes = Axes.X,
+										AutoSizeAxes = Axes.Y
+									},
+									new OsuButton {
+										Anchor = Anchor.CentreRight,
+										Origin = Anchor.CentreRight,
+										Text = "X",
+										BackgroundColour = Color4.HotPink,
+										Action = () => removeCustomInput( ID ),
+										Width = 25,
+										Height = 25,
+										Margin = new MarginPadding { Right = 4 }
+									}
+								}
+							},
+							new Container {
+								RelativeSizeAxes = Axes.X,
+								AutoSizeAxes = Axes.Y,
+								Child = input.SettingDrawable
+							}
+						}
 					}
-					else {
-						rulesetActions[ i ] = customInputs.First( x => x.Name == v.NewValue );
-						setttingContainer.Clear( false );
-						setttingContainer.Add( rulesetActions[ i ].SettingDrawable );
-					}
-				};
-			}
+				}
+			} );
+			container.Add( inputDrawables[ ID ] );
+			updateDropdown();
+		}
+
+		void removeCustomInput ( string ID ) {
+			container.Remove( inputDrawables[ ID ] );
+			selectedInputs.Remove( ID, out var input );
+			removedInputs.Add( ID, input );
+			updateDropdown();
 		}
 	}
 }

@@ -1,4 +1,5 @@
-﻿using osu.Framework.Graphics;
+﻿using osu.Framework.Allocation;
+using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
@@ -15,6 +16,11 @@ namespace osu.XR.Input.Custom {
 		private Drawable settingDrawable;
 		public Drawable SettingDrawable => settingDrawable ??= CreateSettingDrawable();
 
+		[Resolved]
+		protected List<object> rulesetActions { get; private set; }
+		[Resolved]
+		protected OsuGameXr game { get; private set; }
+
 		protected virtual Drawable CreateSettingDrawable () {
 			var x = new OsuTextFlowContainer {
 				Anchor = Anchor.Centre,
@@ -24,7 +30,7 @@ namespace osu.XR.Input.Custom {
 			};
 
 			x.AddText( Name, x => x.Font = OsuFont.GetFont( weight: FontWeight.Bold ) );
-			x.AddText( " is not configurable" );
+			x.AddText( $" {((Name.EndsWith('s'))?"are":"is")} not configurable" );
 
 			return x;
 		}

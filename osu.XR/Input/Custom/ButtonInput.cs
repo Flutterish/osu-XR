@@ -8,6 +8,6 @@ using System.Threading.Tasks;
 namespace osu.XR.Input.Custom {
 	public class ButtonInput : CustomInput {
 		public Hand Hand = Hand.Auto;
-		public override string Name => $"{Hand} Button";
+		public override string Name => $"{Hand} Buttons";
 	}
 }
