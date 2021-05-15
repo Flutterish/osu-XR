@@ -70,13 +70,11 @@ namespace osu.XR.Drawables {
 				rulesetName.Text = "Ruleset: ";
 				rulesetName.AddText( v.NewValue.Name, s => s.Font = s.Font = OsuFont.GetFont( Typeface.Torus, 20, FontWeight.Bold ) );
 
-				if ( settings.ContainsKey( v.NewValue ) ) {
-					sections.Add( settings[ v.NewValue ] );
-				}
-				else {
+				if ( !settings.ContainsKey( v.NewValue ) ) {
 					var ruleset = v.NewValue.CreateInstance();
-					sections.Add( new RulesetXrBindingsSubsection( ruleset ) );
+					settings.Add( v.NewValue, new RulesetXrBindingsSubsection( ruleset ) );
 				}
+				sections.Add( settings[ v.NewValue ] );
 
 				container.AddRange( sections );
 			}, true );
@@ -117,6 +115,7 @@ namespace osu.XR.Drawables {
 			container.Add( addButton = new OsuButton {
 				Height = 25,
 				Width = 120,
+				Margin = new MarginPadding { Left = 16 },
 				Text = "Add",
 				Action = () => {
 					addCustomInput( dropdown.Current.Value );
@@ -135,6 +134,9 @@ namespace osu.XR.Drawables {
 		}
 
 		protected override void Update () {
+			foreach ( var i in inputDrawables.Values ) {
+				i.Width = container.DrawWidth - 32;
+			}
 			base.Update();
 		}
 
@@ -159,15 +161,14 @@ namespace osu.XR.Drawables {
 			selectedInputs.Add( ID, input );
 
 			inputDrawables.Add( ID, new Container {
-				Margin = new MarginPadding { Bottom = 2 },
 				Masking = true,
 				CornerRadius = 5,
-				RelativeSizeAxes = Axes.X,
 				AutoSizeAxes = Axes.Y,
+				Margin = new MarginPadding { Left = 16, Right = 16, Bottom = 4 },
 				Children = new Drawable[] {
 					new Box {
 						RelativeSizeAxes = Axes.Both,
-						Colour = OsuColour.Gray( 0.05f )
+						Colour = OsuColour.Gray( 0.1f )
 					},
 					new FillFlowContainer {
 						RelativeSizeAxes = Axes.X,
@@ -180,7 +181,7 @@ namespace osu.XR.Drawables {
 								Children = new Drawable[] {
 									new OsuTextFlowContainer( x => x.Font = OsuFont.GetFont( size: 20 ) ) {
 										Text = ID,
-										Margin = new MarginPadding { Bottom = 4 },
+										Margin = new MarginPadding { Bottom = 4, Left = 6 },
 										RelativeSizeAxes = Axes.X,
 										AutoSizeAxes = Axes.Y
 									},
@@ -191,8 +192,7 @@ namespace osu.XR.Drawables {
 										BackgroundColour = Color4.HotPink,
 										Action = () => removeCustomInput( ID ),
 										Width = 25,
-										Height = 25,
-										Margin = new MarginPadding { Right = 4 }
+										Height = 25
 									}
 								}
 							},

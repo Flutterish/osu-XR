@@ -26,7 +26,8 @@ namespace osu.XR.Input.Custom {
 				Anchor = Anchor.Centre,
 				Origin = Anchor.Centre,
 				AutoSizeAxes = Axes.Both,
-				TextAnchor = Anchor.Centre
+				TextAnchor = Anchor.Centre,
+				Margin = new MarginPadding( 6 )
 			};
 
 			x.AddText( Name, x => x.Font = OsuFont.GetFont( weight: FontWeight.Bold ) );
