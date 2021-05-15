@@ -66,11 +66,13 @@ namespace osu.XR {
 		[Cached]
 		public readonly XrInspectorPanel Inspector = new();
 
-		ETrackedControllerRole dominantHandRole => dominantHandBindable.Value switch {
+		public static ETrackedControllerRole RoleForHand ( Hand hand ) => hand switch {
 			Hand.Right => ETrackedControllerRole.RightHand,
 			Hand.Left => ETrackedControllerRole.LeftHand,
 			Hand.Auto or _ => VR.DominantHand
 		};
+		ETrackedControllerRole dominantHandRole => RoleForHand( dominantHandBindable.Value );
+
 		public XrController MainController => controllers.Values.FirstOrDefault( x => x.Source.IsEnabled && x.Source.Role == dominantHandRole ) ?? controllers.Values.FirstOrDefault( x => x.Source.IsEnabled );
 		public XrController SecondaryController {
 			get {
@@ -82,6 +84,8 @@ namespace osu.XR {
 
 		Dictionary<Controller, XrController> controllers = new();
 		public XrController GetControllerFor ( Controller controller ) => controller is null ? null : ( controllers.TryGetValue( controller, out var c ) ? c : null );
+		public XrController GetControllerFor ( Hand hand ) => GetControllerFor( RoleForHand( hand ) );
+		XrController GetControllerFor ( ETrackedControllerRole role ) => controllers.Values.FirstOrDefault( x => x.Source.Role == role );
 
 		DependencyContainer dependency;
 		protected override IReadOnlyDependencyContainer CreateChildDependencies ( IReadOnlyDependencyContainer parent ) {

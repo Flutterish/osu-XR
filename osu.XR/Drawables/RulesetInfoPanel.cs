@@ -85,6 +85,7 @@ namespace osu.XR.Drawables {
 		protected override string Header => "Bindings (Not functional)";
 
 		Ruleset ruleset;
+		[Cached]
 		List<object> rulesetActions = new();
 
 		static Dictionary<string, Func<CustomInput>> avaiableInputs = new() {
@@ -150,6 +151,7 @@ namespace osu.XR.Drawables {
 			if ( removedInputs.ContainsKey( ID ) ) {
 				removedInputs.Remove( ID, out input );
 				selectedInputs.Add( ID, input );
+				Add( input );
 
 				container.Add( inputDrawables[ ID ] );
 				updateDropdown();
@@ -159,6 +161,7 @@ namespace osu.XR.Drawables {
 			input = avaiableInputs[ ID ]();
 
 			selectedInputs.Add( ID, input );
+			Add( input );
 
 			inputDrawables.Add( ID, new Container {
 				Masking = true,
@@ -178,6 +181,7 @@ namespace osu.XR.Drawables {
 							new Container {
 								RelativeSizeAxes = Axes.X,
 								AutoSizeAxes = Axes.Y,
+								Margin = new MarginPadding { Bottom = 8 },
 								Children = new Drawable[] {
 									new OsuTextFlowContainer( x => x.Font = OsuFont.GetFont( size: 20 ) ) {
 										Text = ID,
@@ -212,6 +216,7 @@ namespace osu.XR.Drawables {
 		void removeCustomInput ( string ID ) {
 			container.Remove( inputDrawables[ ID ] );
 			selectedInputs.Remove( ID, out var input );
+			Remove( input );
 			removedInputs.Add( ID, input );
 			updateDropdown();
 		}

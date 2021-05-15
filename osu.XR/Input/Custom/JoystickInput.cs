@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace osu.XR.Input.Custom {
 	public class JoystickInput : CustomInput {
-		public Hand Hand = Hand.Auto;
+		public Hand Hand { get; init; } = Hand.Auto;
 		public override string Name => $"{Hand} Joystick";
 	}
 }

@@ -10,16 +10,24 @@ using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Physics;
 using osu.XR.Components.Panels;
 using osu.XR.Components.Pointers;
+using osu.XR.Settings;
 using osuTK;
 using osuTK.Graphics;
+using System;
 using System.Linq;
+using Valve.VR;
 using static osu.Framework.XR.Physics.Raycast;
 
 namespace osu.XR.Components {
 	public class XrController : CompositeDrawable3D, IFocusSource {
 		public readonly Controller Source;
+		public Hand Role => Source.Role switch {
+			ETrackedControllerRole.RightHand => Hand.Right,
+			ETrackedControllerRole.LeftHand => Hand.Left,
+			_ => throw new InvalidOperationException()
+		};
 
-		Model ControllerMesh = new();
+	Model ControllerMesh = new();
 		RaycastPointer raycast = new() { IsVisible = false };
 		TouchPointer touch = new() { IsVisible = false };
 		private Pointer pointer { get => pointerBindable.Value; set => pointerBindable.Value = value; }

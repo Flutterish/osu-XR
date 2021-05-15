@@ -17,8 +17,6 @@ namespace osu.XR.Input.Custom {
 		public Drawable SettingDrawable => settingDrawable ??= CreateSettingDrawable();
 
 		[Resolved]
-		protected List<object> rulesetActions { get; private set; }
-		[Resolved]
 		protected OsuGameXr game { get; private set; }
 
 		protected virtual Drawable CreateSettingDrawable () {
