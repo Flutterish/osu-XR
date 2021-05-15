@@ -78,6 +78,7 @@ namespace osu.XR {
 				return controllers.Values.FirstOrDefault( x => x != main && x.Source.IsEnabled );
 			}
 		}
+		public IEnumerable<XrController> FreeControllers => controllers.Values.Where( x => x.Source.IsEnabled && !x.IsHoldingAnything );
 
 		Dictionary<Controller, XrController> controllers = new();
 		public XrController GetControllerFor ( Controller controller ) => controller is null ? null : ( controllers.TryGetValue( controller, out var c ) ? c : null );

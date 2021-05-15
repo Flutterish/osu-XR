@@ -44,6 +44,8 @@ namespace osu.XR.Components {
 		}
 		[Resolved]
 		private Bindable<IFocusable> globalFocusBindable { get; set; }
+		[Resolved]
+		private OsuGameXr Game { get; set; }
 		public readonly Bindable<bool> SinglePointerTouchBindable = new();
 		public readonly Bindable<bool> TapTouchBindable = new();
 
@@ -148,7 +150,7 @@ namespace osu.XR.Components {
 		}
 
 		public bool IsSoloMode;
-		public bool IsLoneController => IsSoloMode || VR.EnabledControllerCount == 1;
+		public bool IsLoneController => IsSoloMode || Game.FreeControllers.Count() == 1;
 		private bool acceptsInputFrom ( Controller controller )
 			=> controller == Source || IsLoneController;
 
