@@ -13,6 +13,7 @@ using osu.Framework.XR.Physics;
 using osu.Game.Graphics;
 using osu.XR.Components;
 using osu.XR.Components.Panels;
+using osu.XR.Inspector;
 using osuTK;
 using osuTK.Graphics;
 using osuTK.Input;

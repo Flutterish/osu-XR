@@ -9,6 +9,7 @@ using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Overlays.Settings;
 using osu.Game.Rulesets;
+using osu.XR.Input.Custom;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -77,31 +78,45 @@ namespace osu.XR.Drawables {
 		protected override string Header => "Bindings (Not functional)";
 
 		Ruleset ruleset;
-		List<object> rulesetActions;
+		Dictionary<object,CustomInput> rulesetActions = new();
 		public RulesetXrBindingsSubsection ( Ruleset ruleset ) {
 			this.ruleset = ruleset;
-			rulesetActions = ruleset.GetDefaultKeyBindings().Select( x => x.Action ).Distinct().ToList();
+			foreach ( var i in ruleset.GetDefaultKeyBindings().Select( x => x.Action ).Distinct() ) {
+				rulesetActions.Add( i, null );
+			}
 
-			foreach ( var i in rulesetActions ) {
-				Add( new SettingsDropdown<string> {
+			foreach ( var (i,_) in rulesetActions ) {
+				List<CustomInput> customInputs = new() {
+					new ClapInput(),
+					new JoystickInput { Hand = Settings.Hand.Left },
+					new JoystickInput { Hand = Settings.Hand.Right },
+					new ButtonInput { Hand = Settings.Hand.Left },
+					new ButtonInput { Hand = Settings.Hand.Right }
+				};
+
+				SettingsDropdown<string> dropdown;
+				Add( dropdown = new SettingsDropdown<string> {
 					LabelText = i.ToString(),
-					Items = new string[] {
-						"Default",
-						"Clap",
-						"Right controller primary button",
-						"Right controller secondary button",
-						"Right controller scroll up",
-						"Right controller scroll down",
-						"Right controller scroll left",
-						"Right controller scroll right",
-						"Left controller primary button",
-						"Left controller secondary button",
-						"Left controller scroll up",
-						"Left controller scroll down",
-						"Left controller scroll left",
-						"Left controller scroll right",
-					}
+					Current = new Bindable<string>( "Default" ),
+					Items = customInputs.Select( x => x.Name ).Prepend( "Default" )
 				} );
+				Container setttingContainer;
+				Add( setttingContainer = new Container {
+					RelativeSizeAxes = Axes.X,
+					AutoSizeAxes = Axes.Y
+				} );
+
+				dropdown.Current.ValueChanged += v => {
+					if ( v.NewValue == "Default" ) {
+						rulesetActions[ i ] = null;
+						setttingContainer.Clear( false );
+					}
+					else {
+						rulesetActions[ i ] = customInputs.First( x => x.Name == v.NewValue );
+						setttingContainer.Clear( false );
+						setttingContainer.Add( rulesetActions[ i ].SettingDrawable );
+					}
+				};
 			}
 		}
 	}

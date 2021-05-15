@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace osu.XR.Components {
+namespace osu.XR.Inspector {
 	/// <summary>
 	/// An object whose properties can be inspected
 	/// </summary>
@@ -20,7 +20,7 @@ namespace osu.XR.Components {
 	}
 
 	/// <summary>
-	/// An object that should never be seen in the inspector
+	/// An object that should never be seen in the inspector. Its children will still be visible.
 	/// </summary>
 	public interface INotInspectable { }
 

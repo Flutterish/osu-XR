@@ -12,6 +12,7 @@ using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays.News;
 using osu.Game.Overlays.Settings;
 using osu.XR.Components;
+using osu.XR.Inspector;
 using osuTK.Graphics;
 using System;
 using System.Collections.Generic;
@@ -56,7 +57,7 @@ namespace osu.XR.Drawables {
 				Margin = new MarginPadding { Left = 15, Right = 15 }
 			} );
 
-			InspectedElementBindable.ValueChanged += v => setInspected( v.NewValue );
+			InspectedElementBindable.BindValueChanged( v => setInspected( v.NewValue ), true );
 			SelectedElementBindable.BindValueChanged( v => {
 				if ( GranularSelectionBindable.Value ) {
 					InspectedElementBindable.Value = v.NewValue.GetValidInspectable();
@@ -64,7 +65,7 @@ namespace osu.XR.Drawables {
 				else {
 					InspectedElementBindable.Value = ( v.NewValue?.GetClosestInspectable() as Drawable3D ) ?? v.NewValue?.GetValidInspectable();
 				}
-			}, true );
+			} );
 		}
 
 		Selection selection = new();

@@ -1,5 +1,5 @@
 ﻿using osu.Framework.XR.Components;
-using osu.XR.Components;
+using osu.XR.Inspector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
