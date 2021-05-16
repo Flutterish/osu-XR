@@ -5,6 +5,7 @@ using osu.Framework.Graphics.Sprites;
 using osu.Framework.IO.Stores;
 using osu.Framework.XR.Components;
 using osu.Game.Graphics;
+using osu.XR.Drawables;
 using osuTK;
 using osuTK.Graphics;
 using System;
@@ -15,18 +16,22 @@ using System.Threading.Tasks;
 
 namespace osu.XR {
 	public class SceneWithMirrorWarning : Scene {
-		TextFlowContainer text;
+		FormatedTextContainer text;
 		SpriteIcon iconA;
 		SpriteIcon iconB;
 
 		public SceneWithMirrorWarning () {
 			Add( new Container {
 				Children = new Drawable[] {
-					text = new TextFlowContainer( s => s.Font = OsuFont.GetFont( Typeface.Torus, 30 ) ) {
+					text = new FormatedTextContainer( () => new FontSetings { Size = 30 } ) {
 						Origin = Anchor.Centre,
 						Anchor = Anchor.Centre,
 						TextAnchor = Anchor.Centre,
-						AutoSizeAxes = Axes.Both
+						AutoSizeAxes = Axes.Both,
+						Text = "^^**Warning**^^\n" +
+						"Screen mirroring is turned ||off||\n" +
+						"You can enable it in XrSettings\n" +
+						"~~If the screen jitters, alt-enter a few times~~"
 					},
 
 					iconA = new SpriteIcon {
@@ -53,12 +58,6 @@ namespace osu.XR {
 				Origin = Anchor.Centre,
 				Anchor = Anchor.Centre
 			} );
-
-			text.AddText( "Warning", s => s.Font = OsuFont.GetFont( Typeface.Torus, 40, FontWeight.Bold ) );
-			text.AddParagraph( "Screen mirroring is turned " );
-			text.AddText( "off", s => { s.Font = OsuFont.GetFont( Typeface.Torus, 30, FontWeight.Bold ); s.Colour = Colour4.HotPink; } );
-			text.AddParagraph( "You can enable it in XrSettings" );
-			text.AddParagraph( "If the screen jitters, alt-enter a few times", s => { s.Font = OsuFont.GetFont( Typeface.Torus, 20 ); s.Colour = new Colour4( 255, 255, 255, 128 ); } );
 
 			RenderToScreenBindable.BindValueChanged( v => {
 				if ( v.NewValue ) {
