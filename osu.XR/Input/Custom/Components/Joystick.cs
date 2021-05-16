@@ -26,9 +26,6 @@ namespace osu.XR.Input.Custom.Components {
 		CircularContainer inside;
 
 		public JoystickVisual () {
-			Margin = new MarginPadding( 10 );
-			Size = new Vector2( 320 );
-
 			AddInternal( new Circle {
 				Anchor = Anchor.Centre,
 				Origin = Anchor.Centre,
@@ -43,6 +40,7 @@ namespace osu.XR.Input.Custom.Components {
 				Masking = true,
 				BorderThickness = 10,
 				BorderColour = Colour4.HotPink,
+				RelativeSizeAxes = Axes.Both,
 				Anchor = Anchor.Centre,
 				Origin = Anchor.Centre,
 				Child = new Box {
@@ -75,7 +73,6 @@ namespace osu.XR.Input.Custom.Components {
 			base.Update();
 
 			outside.BorderThickness = 10 * DrawSize.X / 320;
-			outside.Size = DrawSize + new Vector2( outside.BorderThickness );
 			inside.BorderThickness = 5 * DrawSize.X / 320;
 			inside.Size = DrawSize * 74f / 320 + new Vector2( inside.BorderThickness );
 		}

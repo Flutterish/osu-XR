@@ -86,6 +86,8 @@ namespace osu.XR.Drawables {
 
 		Ruleset ruleset;
 		[Cached]
+		BindableList<object> sharedSettings = new(); 
+		[Cached]
 		List<object> rulesetActions = new();
 
 		static Dictionary<string, Func<CustomInput>> avaiableInputs = new() {
