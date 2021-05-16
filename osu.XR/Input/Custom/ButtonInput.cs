@@ -17,6 +17,13 @@ namespace osu.XR.Input.Custom {
 		public Hand Hand { get; init; } = Hand.Auto;
 		public override string Name => $"{Hand} Buttons";
 
+		event System.Action onDispose;
+		protected override void Dispose ( bool isDisposing ) {
+			base.Dispose( isDisposing );
+
+			onDispose?.Invoke();
+		}
+
 		protected override Drawable CreateSettingDrawable () {
 			Drawable SetupButton ( bool isPrimary ) {
 				ActivationIndicator indicator = null;
@@ -45,9 +52,12 @@ namespace osu.XR.Input.Custom {
 					if ( controller.Role != OsuGameXr.RoleForHand( Hand ) ) return;
 
 					var comp = VR.GetControllerComponent<ControllerButton>( isPrimary ? XrAction.MouseLeft : XrAction.MouseRight, controller );
-					comp.BindValueChanged( v => { // TODO remove on disposal
-						indicator.IsActive.Value = v;
-					}, true );
+					System.Action<ValueUpdatedEvent<bool>> action = v => {
+						indicator.IsActive.Value = v.NewValue;
+					};
+					comp.BindValueChangedDetailed( action, true );
+					onDispose += () => comp.ValueChanged -= action;
+					VR.NewControllerAdded -= lookForValidController;
 				}
 
 				VR.BindComponentsLoaded( () => {
