@@ -23,7 +23,8 @@ namespace osu.XR.Components.Groups {
 		private XrController previousHoldingController;
 		public XrController HoldingController {
 			get {
-				if ( inputModeBindable.Value == InputMode.SinglePointer || VR.EnabledControllerCount <= 1 ) return null;
+				if ( VR.EnabledControllerCount <= 1 ) return null;
+				if ( inputModeBindable.Value == InputMode.SinglePointer ) return Game.SecondaryController;
 				if ( openingController?.IsEnabled == true ) return Game.GetControllerFor( openingController );
 				else return null;
 			}
@@ -35,7 +36,7 @@ namespace osu.XR.Components.Groups {
 				toggleMenu.BindValueChangedDetailed( v => {
 					if ( v.NewValue ) {
 						if ( Panels.Any( x => x.IsColliderEnabled ) ) {
-							if ( HoldingController is null || HoldingController.Source == v.Source ) {
+							if ( HoldingController is null || inputModeBindable.Value == InputMode.SinglePointer || HoldingController.Source == v.Source ) {
 								Hide();
 							}
 							else {

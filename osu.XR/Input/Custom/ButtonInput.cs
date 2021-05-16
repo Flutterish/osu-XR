@@ -19,7 +19,7 @@ namespace osu.XR.Input.Custom {
 
 		protected override Drawable CreateSettingDrawable () {
 			Drawable SetupButton ( bool isPrimary ) {
-				Circle indicator = null;
+				ActivationIndicator indicator = null;
 				var drawable = new FillFlowContainer {
 					Direction = FillDirection.Vertical,
 					RelativeSizeAxes = Axes.X,
@@ -30,9 +30,7 @@ namespace osu.XR.Input.Custom {
 							AutoSizeAxes = Axes.Y,
 							Children = new Drawable[] {
 								new OsuSpriteText { Text = $"{(isPrimary ? "Primary" : "Secondary")} Button", Margin = new MarginPadding { Left = 16 } },
-								indicator = new Circle {
-									Colour = Colour4.HotPink.Darken( 0.9f ),
-									Size = new osuTK.Vector2( 30, 16 ),
+								indicator = new ActivationIndicator {
 									Margin = new MarginPadding { Right = 16 },
 									Origin = Anchor.CentreRight,
 									Anchor = Anchor.CentreRight
@@ -48,15 +46,7 @@ namespace osu.XR.Input.Custom {
 
 					var comp = VR.GetControllerComponent<ControllerButton>( isPrimary ? XrAction.MouseLeft : XrAction.MouseRight, controller );
 					comp.BindValueChanged( v => { // TODO remove on disposal
-						if ( v ) {
-							indicator.FadeColour( Colour4.HotPink );
-							indicator.FlashColour( Colour4.White, 200 );
-							indicator.ResizeWidthTo( 45, 100, Easing.Out );
-						}
-						else {
-							indicator.FadeColour( Colour4.HotPink.Darken( 0.9f ), 200 );
-							indicator.ResizeWidthTo( 30, 100, Easing.Out );
-						}
+						indicator.IsActive.Value = v;
 					}, true );
 				}
 

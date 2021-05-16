@@ -1,5 +1,6 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Extensions;
 using osu.Game.Overlays.Settings;
 using System;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace osu.XR.Input.Custom.Components {
 
 		protected override void LoadComplete () {
 			base.LoadComplete();
-			Items = rulesetActions.Select( x => x.ToString() ).Prepend( "None" );
+			Items = rulesetActions.Select( x => x.GetDescription() ).Prepend( "None" );
 		}
 	}
 }

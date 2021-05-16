@@ -18,12 +18,28 @@ namespace osu.XR.Input.Custom {
 
 		protected override Drawable CreateSettingDrawable () {
 			Drawable fill = null;
-			Distance.BindValueChanged( v => {
-				fill.Width = 1 - (float)Math.Clamp( v.NewValue / maxDistance, 0, 1 );
-			} );
 			SettingsDropdown<string> dropdown = null;
 			ThresholdBar thresholdA = null;
 			ThresholdBar thresholdB = null;
+			ActivationIndicator indicator = null;
+			Container thresholdBar = null;
+			bool isActive = false;
+			Distance.BindValueChanged( v => {
+				var progress = (float)Math.Clamp( v.NewValue / maxDistance, 0, 1 );
+				fill.Width = 1 - progress;
+
+				if ( isActive && progress > Math.Max( thresholdA.Progress.Value, thresholdB.Progress.Value ) ) {
+					isActive = false;
+				}
+				else if ( !isActive && progress < Math.Min( thresholdA.Progress.Value, thresholdB.Progress.Value ) ) {
+					isActive = true;
+				}
+				indicator.IsActive.Value = isActive;
+			} );
+
+			OnUpdate += x => {
+				thresholdBar.Width = thresholdBar.Parent.DrawWidth - 32;
+			};
 
 			var drawable = new FillFlowContainer {
 				Direction = FillDirection.Vertical,
@@ -32,9 +48,18 @@ namespace osu.XR.Input.Custom {
 				Children = new Drawable[] {
 					new Container {
 						RelativeSizeAxes = Axes.X,
+						AutoSizeAxes = Axes.Y,
+						Child = indicator = new() { 
+							Anchor = Anchor.Centre, 
+							Origin = Anchor.Centre,
+							Margin = new MarginPadding { Bottom = 6 }
+						}
+					},
+					thresholdBar = new Container {
 						Height = 32,
 						Masking = true,
 						CornerRadius = 5,
+						Margin = new MarginPadding { Left = 16, Right = 16 },
 						Children = new Drawable[] {
 							new Box {
 								RelativeSizeAxes = Axes.Both,

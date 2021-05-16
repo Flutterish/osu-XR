@@ -183,9 +183,9 @@ namespace osu.XR.Drawables {
 								AutoSizeAxes = Axes.Y,
 								Margin = new MarginPadding { Bottom = 8 },
 								Children = new Drawable[] {
-									new OsuTextFlowContainer( x => x.Font = OsuFont.GetFont( size: 20 ) ) {
+									new OsuTextFlowContainer( x => x.Font = OsuFont.GetFont( size: 24 ) ) {
 										Text = ID,
-										Margin = new MarginPadding { Bottom = 4, Left = 6 },
+										Margin = new MarginPadding { Bottom = 4, Left = 6, Top = 4 },
 										RelativeSizeAxes = Axes.X,
 										AutoSizeAxes = Axes.Y
 									},
