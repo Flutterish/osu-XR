@@ -18,6 +18,7 @@ using osuTK;
 using osuTK.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -56,6 +57,22 @@ namespace osu.XR.Input.Custom {
 		public JoystickBindingHandler ( Hand hand ) {
 			AddInternal( joystick = new( XrAction.Scroll, x => x.Role == OsuGameXr.RoleForHand( hand ), x => new Vector2( x.X, -x.Y ) ) );
 			// TODO use the handlers
+
+			Handlers.BindCollectionChanged( (_,a) => {
+				if ( a.Action == NotifyCollectionChangedAction.Add ) {
+					if ( a.NewItems is null ) return;
+					foreach ( JoystickHandler i in a.NewItems ) {
+						i.JoystickPosition.BindTo( joystick.Current );
+						AddInternal( i );
+					}
+				}
+				else {
+					if ( a.OldItems is null ) return;
+					foreach ( JoystickHandler i in a.OldItems ) {
+						RemoveInternal( i );
+					}
+				}
+			}, true );
 		}
 	}
 
@@ -63,6 +80,13 @@ namespace osu.XR.Input.Custom {
 		OsuButton addButton;
 		SettingsDropdown<string> dropdown;
 		JoystickBindingHandler handler;
+
+		const string ZONE = "Zone";
+		const string MOVEMENT = "Movement";
+		static readonly Dictionary<string, Func<JoystickHandler>> factory = new() {
+			[ ZONE ] = () => new JoystickZoneHandler(),
+			[ MOVEMENT ] = () => new JoystickMovementHandler()
+		};
 
 		public JoystickBindingSettings ( JoystickBindingHandler handler ) {
 			this.handler = handler;
@@ -76,7 +100,7 @@ namespace osu.XR.Input.Custom {
 				Margin = new MarginPadding { Left = 16 },
 				Text = "Add",
 				Action = () => {
-					addSetting( dropdown.Current.Value );
+					handler.Handlers.Add( factory[ dropdown.Current.Value ]() );
 				}
 			} );
 
@@ -89,10 +113,10 @@ namespace osu.XR.Input.Custom {
 			}, true );
 		}
 
-		List<Drawable> settings = new();
+		Dictionary<JoystickHandler, Drawable> settings = new();
 		protected override void Update () {
 			base.Update();
-			foreach ( var i in settings ) {
+			foreach ( var i in settings.Values ) {
 				i.Width = DrawWidth - 32;
 			}
 		}
@@ -102,6 +126,17 @@ namespace osu.XR.Input.Custom {
 			sharedSettings.BindCollectionChanged( ( _, _ ) => {
 				updateDropdown();
 			}, true );
+
+			handler.Handlers.BindCollectionChanged( (_,b) => {
+				if ( b.Action is NotifyCollectionChangedAction.Add ) {
+					if ( b.NewItems is null ) return;
+					foreach ( JoystickHandler i in b.NewItems ) addSetting( i );
+				}
+				else {
+					if ( b.OldItems is null ) return;
+					foreach ( JoystickHandler i in b.OldItems ) removeSetting( i );
+				}
+			}, true );
 		}
 
 		private class JoystickMovementLock { }
@@ -110,23 +145,26 @@ namespace osu.XR.Input.Custom {
 
 		void updateDropdown () {
 			if ( sharedSettings.Any( x => x is JoystickMovementLock ) ) {
-				dropdown.Items = new string[] { "Zone" }.Prepend( dropdown.Current.Default );
+				dropdown.Items = new string[] { ZONE }.Prepend( dropdown.Current.Default );
 			}
 			else {
-				dropdown.Items = new string[] { "Zone", "Movement" }.Prepend( dropdown.Current.Default );
+				dropdown.Items = new string[] { ZONE, MOVEMENT }.Prepend( dropdown.Current.Default );
 			}
 			dropdown.Current.SetDefault();
 		}
 
-		void removeSetting ( Drawable drawable, bool isMovement ) {
-			Remove( drawable );
-			settings.Remove( drawable );
-			if ( isMovement ) sharedSettings.RemoveAll( x => x is JoystickMovementLock );
+		void removeSetting ( JoystickHandler handler ) {
+			Remove( settings[ handler ] );
+			settings.Remove( handler );
+
+			if ( handler is JoystickMovementHandler ) sharedSettings.RemoveAll( x => x is JoystickMovementLock );
 
 			updateDropdown();
 		}
-		void addSetting ( string type ) {
-			if ( type == "Movement" ) sharedSettings.Add( new JoystickMovementLock() );
+		void addSetting ( JoystickHandler handler ) {
+			if ( handler is JoystickMovementHandler ) sharedSettings.Add( new JoystickMovementLock() );
+
+			var setting = handler.CreateSettings();
 
 			Drawable drawable = null;
 			drawable = new Container {
@@ -135,21 +173,22 @@ namespace osu.XR.Input.Custom {
 				AutoSizeAxes = Axes.Y,
 				Margin = new MarginPadding { Left = 16, Right = 16, Bottom = 4 },
 				Children = new Drawable[] {
-						new Box {
-							RelativeSizeAxes = Axes.Both,
-							Colour = OsuColour.Gray( 0.075f )
-						},
-						new FillFlowContainer {
-							RelativeSizeAxes = Axes.X,
-							AutoSizeAxes = Axes.Y,
-							Direction = FillDirection.Vertical,
-							Children = (new Container {
+					new Box {
+						RelativeSizeAxes = Axes.Both,
+						Colour = OsuColour.Gray( 0.075f )
+					},
+					new FillFlowContainer {
+						RelativeSizeAxes = Axes.X,
+						AutoSizeAxes = Axes.Y,
+						Direction = FillDirection.Vertical,
+						Children = new Drawable[] {
+							new Container {
 								RelativeSizeAxes = Axes.X,
 								AutoSizeAxes = Axes.Y,
 								Margin = new MarginPadding { Bottom = 8 },
 								Children = new Drawable[] {
 									new OsuTextFlowContainer( x => x.Font = OsuFont.GetFont( size: 24 ) ) {
-										Text = type,
+										Text = setting.LabelText,
 										Margin = new MarginPadding { Bottom = 4, Left = 6, Top = 4 },
 										RelativeSizeAxes = Axes.X,
 										AutoSizeAxes = Axes.Y
@@ -159,86 +198,180 @@ namespace osu.XR.Input.Custom {
 										Origin = Anchor.CentreRight,
 										Text = "X",
 										BackgroundColour = Color4.HotPink,
-										Action = () => removeSetting( drawable, type == "Movement" ),
+										Action = () => removeSetting( handler ),
 										Width = 25,
 										Height = 25
 									}
 								}
-							}).Yield().Concat( type == "Zone" ? makeZone() : makeMovement() ).ToArray()
+							},
+							setting
 						}
 					}
+				}
 			};
 
-			IEnumerable<Drawable> makeZone () {
-				JoystickZoneVisual visual = new JoystickZoneVisual();
-				var zone = style( visual );
-				var indicator = new ActivationIndicator { Anchor = Anchor.Centre, Origin = Anchor.Centre };
-				yield return zone;
-				yield return new Container {
-					RelativeSizeAxes = Axes.X,
-					AutoSizeAxes = Axes.Y,
-					Child = indicator
-				};
-				visual.JoystickPosition.BindTo( handler.joystick.Current );
-				visual.IsActive.BindValueChanged( v => indicator.IsActive.Value = v.NewValue );
-				yield return new RulesetActionDropdown();
-			}
-
-			IEnumerable<Drawable> makeMovement () {
-				JoystickVisual visual = new JoystickVisual();
-				visual.JoystickPosition.BindTo( handler.joystick.Current );
-				yield return style( visual );
-				yield return new SettingsDropdown<string> {
-					Current = new Bindable<string>( "Absolute" ),
-					Items = new string[] {
-							"Absolute",
-							"Delta"
-						}
-				};
-				yield return new SettingsSlider<double> {
-					LabelText = "Distance",
-					Current = new BindableDouble( 100 ) { MinValue = 0, MaxValue = 100 }
-				};
-			}
-
-			Container style ( Drawable d ) {
-				d.Size = new Vector2( 300 );
-				d.Origin = Anchor.TopCentre;
-				d.Anchor = Anchor.TopCentre;
-
-				return new Container {
-					Child = d,
-					Margin = new MarginPadding { Bottom = 16 },
-					RelativeSizeAxes = Axes.X,
-					AutoSizeAxes = Axes.Y
-				};
-			}
-
-			settings.Add( drawable );
+			settings.Add( handler, drawable );
 			Add( drawable );
 
 			updateDropdown();
 		}
 	}
 
-	public class JoystickSettings : CompositeDrawable {
+	public abstract class JoystickSettings : FillFlowContainer {
+		public JoystickSettings () {
+			RelativeSizeAxes = Axes.X;
+			AutoSizeAxes = Axes.Y;
+			Direction = FillDirection.Vertical;
+		}
 
+		public abstract string LabelText { get; }
 	}
-	public class JoystickHandler : Component {
+	public abstract class JoystickHandler : Component {
+		public readonly Bindable<Vector2> JoystickPosition = new();
+		[Resolved]
+		public CustomRulesetInputBindingHandler Handler { get; private set; }
 
+		public abstract JoystickSettings CreateSettings ();
 	}
 
 	public class JoystickZoneSettings : JoystickSettings {
+		public override string LabelText => "Zone";
 
+		public JoystickZoneSettings ( JoystickZoneHandler handler ) {
+			JoystickZoneVisual visual;
+			RulesetActionDropdown dropdown;
+			ActivationIndicator indicator;
+
+			Children = new Drawable[] {
+				new Container {
+					Child = visual = new JoystickZoneVisual {
+						Size = new Vector2( 300 ),
+						Origin = Anchor.TopCentre,
+						Anchor = Anchor.TopCentre
+					},
+					Margin = new MarginPadding { Bottom = 16 },
+					RelativeSizeAxes = Axes.X,
+					AutoSizeAxes = Axes.Y
+				},
+				new Container {
+					RelativeSizeAxes = Axes.X,
+					AutoSizeAxes = Axes.Y,
+					Child = indicator = new ActivationIndicator { 
+						Anchor = Anchor.Centre, 
+						Origin = Anchor.Centre
+					}
+				},
+				dropdown = new()
+			};
+
+			visual.JoystickPosition.BindTo( handler.JoystickPosition );
+			visual.ZoneStartAngle.BindTo( handler.StartAngle );
+			visual.ZoneDeltaAngle.BindTo( handler.Arc );
+			visual.DeadzonePercentage.BindTo( handler.Deadzone );
+
+			indicator.IsActive.BindTo( handler.Binding.IsActive );
+			dropdown.RulesetAction.BindTo( handler.Binding.RulesetAction );
+		}
 	}
 	public class JoystickZoneHandler : JoystickHandler {
+		public readonly RulesetActionBinding Binding = new();
+		public readonly BindableDouble StartAngle = new( -30 );
+		public readonly BindableDouble Arc = new( 60 ) { MinValue = 0, MaxValue = 360 };
+		public readonly BindableDouble Deadzone = new( 0.4 ) { MinValue = 0, MaxValue = 1 };
 
+		public override JoystickSettings CreateSettings () => new JoystickZoneSettings( this );
+
+		public JoystickZoneHandler () {
+			StartAngle.ValueChanged += v => updateActivation();
+			Arc.ValueChanged += v => updateActivation();
+			Deadzone.ValueChanged += v => updateActivation();
+			JoystickPosition.ValueChanged += v => updateActivation();
+		}
+
+		protected override void LoadComplete () {
+			base.LoadComplete();
+
+			Binding.Press += Handler.TriggerPress;
+			Binding.Release += Handler.TriggerRelease;
+		}
+
+		double deltaAngle ( double current, double goal ) {
+			var diff = ( goal - current ) % 360;
+			if ( diff < 0 ) diff += 360;
+			if ( diff > 180 ) diff -= 360;
+
+			return diff;
+		}
+		public bool IsNormalizedPointInside ( Vector2 pos ) {
+			if ( pos.Length < Deadzone.Value ) return false;
+			if ( pos.Length == 0 ) return true;
+			return IsAngleInside( pos );
+		}
+		public bool IsAngleInside ( Vector2 direction ) {
+			var angle = Math.Atan2( direction.Y, direction.X ) / Math.PI * 180;
+			angle = deltaAngle( StartAngle.Value, angle );
+			if ( angle < 0 ) angle += 360;
+			return angle <= Arc.Value;
+		}
+		void updateActivation () {
+			Binding.IsActive.Value = IsNormalizedPointInside( JoystickPosition.Value ); // NOTE this is copied from the visual
+		}
 	}
 
-	public class JoystickMovementSettings : JoystickSettings {
+	public enum JoystickMovementType {
+		Absolute,
 
+		[System.ComponentModel.Description( "Delta (TBD)" )]
+		Delta
+	}
+	public class JoystickMovementSettings : JoystickSettings {
+		public override string LabelText => "Movement";
+
+		public JoystickMovementSettings ( JoystickMovementHandler hander ) {
+			JoystickVisual visual;
+			SettingsSlider<double> slider;
+			SettingsEnumDropdown<JoystickMovementType> type;
+
+			Children = new Drawable[] {
+				new Container {
+					Child = visual = new JoystickVisual {
+						Size = new Vector2( 300 ),
+						Origin = Anchor.TopCentre,
+						Anchor = Anchor.TopCentre
+					},
+					Margin = new MarginPadding { Bottom = 16 },
+					RelativeSizeAxes = Axes.X,
+					AutoSizeAxes = Axes.Y
+				},
+				type = new() {
+					Current = hander.MovementType
+				},
+				slider = new() {
+					LabelText = "Distance",
+					Current = hander.Distance
+				}
+			};
+
+			visual.JoystickPosition.BindTo( hander.JoystickPosition );
+		}
 	}
 	public class JoystickMovementHandler : JoystickHandler {
+		public readonly Bindable<JoystickMovementType> MovementType = new( JoystickMovementType.Absolute );
+		public readonly BindableDouble Distance = new( 100 ) { MinValue = 0, MaxValue = 100 };
 
+		protected override void LoadComplete () {
+			base.LoadComplete();
+
+			JoystickPosition.BindValueChanged( v => {
+				if ( MovementType.Value == JoystickMovementType.Absolute ) {
+					Handler.MoveToAbsolute( JoystickPosition.Value * (float)Distance.Value / 100, isNormalized: true );
+				}
+				else {
+					// TODO delta
+				}
+			} );
+		}
+
+		public override JoystickSettings CreateSettings () => new JoystickMovementSettings( this );
 	}
 }

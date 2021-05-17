@@ -49,15 +49,15 @@ namespace osu.XR.Input.Custom {
 	}
 
 	public abstract class CustomRulesetInputBindingHandler : CompositeDrawable {
-		protected void TriggerPress ( object rulesetAction ) {
+		public void TriggerPress ( object rulesetAction ) {
 
 		}
 
-		protected void TriggerRelease ( object rulesetAction ) {
+		public void TriggerRelease ( object rulesetAction ) {
 
 		}
 
-		protected void MoveTo ( Vector2 position ) {
+		public void MoveToAbsolute ( Vector2 position, bool isNormalized = false ) {
 
 		}
 	}
