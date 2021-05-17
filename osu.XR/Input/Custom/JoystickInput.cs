@@ -44,7 +44,7 @@ namespace osu.XR.Input.Custom {
 		public override JoystickBindingHandler CreateHandler () {
 			var handler = new JoystickBindingHandler( Hand );
 
-			handler.Handlers.BindTo( Handler.Handlers );
+			handler.Factories.BindTo( Handler.Factories );
 
 			return handler;
 		}
@@ -52,24 +52,33 @@ namespace osu.XR.Input.Custom {
 
 	public class JoystickBindingHandler : CustomRulesetInputBindingHandler {
 		public readonly BoundComponent<Controller2DVector, System.Numerics.Vector2, Vector2> joystick;
-		public readonly BindableList<JoystickHandler> Handlers = new(); // TODO these should be factories, not the handlers themselves
+		public readonly BindableList<JoystickFactory> Factories = new();
+		Dictionary<JoystickFactory, JoystickHandler> handlers = new();
 
 		public JoystickBindingHandler ( Hand hand ) {
 			AddInternal( joystick = new( XrAction.Scroll, x => x.Role == OsuGameXr.RoleForHand( hand ), x => new Vector2( x.X, -x.Y ) ) );
 
-			Handlers.BindCollectionChanged( (_,a) => {
+			Factories.BindCollectionChanged( (_,a) => {
 				if ( a.Action == NotifyCollectionChangedAction.Add ) {
 					if ( a.NewItems is null ) return;
-					foreach ( JoystickHandler i in a.NewItems ) {
-						i.JoystickPosition.BindTo( joystick.Current );
-						if ( i.Parent is null ) AddInternal( i );
-						i.Handler = this;
+					foreach ( JoystickFactory i in a.NewItems ) {
+						if ( !i.IsBacked ) {
+							i.IsBacked = true;
+							i.JoystickPosition.BindTo( joystick.Current );
+						}
+
+						var handler = i.CreateHandler();
+						handler.JoystickPosition.BindTo( joystick.Current );
+						handler.Handler = this;
+						AddInternal( handler );
+						handlers.Add( i, handler );
 					}
 				}
 				else {
 					if ( a.OldItems is null ) return;
-					foreach ( JoystickHandler i in a.OldItems ) {
-						if ( i.Parent == this ) RemoveInternal( i );
+					foreach ( JoystickFactory i in a.OldItems ) {
+						handlers.Remove( i, out var handler );
+						RemoveInternal( handler );
 					}
 				}
 			}, true );
@@ -83,9 +92,9 @@ namespace osu.XR.Input.Custom {
 
 		const string ZONE = "Zone";
 		const string MOVEMENT = "Movement";
-		static readonly Dictionary<string, Func<JoystickHandler>> factory = new() {
-			[ ZONE ] = () => new JoystickZoneHandler(),
-			[ MOVEMENT ] = () => new JoystickMovementHandler()
+		static readonly Dictionary<string, Func<JoystickFactory>> factory = new() {
+			[ ZONE ] = () => new JoystickZoneFactory(),
+			[ MOVEMENT ] = () => new JoystickMovementFactory()
 		};
 
 		public JoystickBindingSettings ( JoystickBindingHandler handler ) {
@@ -100,7 +109,7 @@ namespace osu.XR.Input.Custom {
 				Margin = new MarginPadding { Left = 16 },
 				Text = "Add",
 				Action = () => {
-					handler.Handlers.Add( factory[ dropdown.Current.Value ]() );
+					handler.Factories.Add( factory[ dropdown.Current.Value ]() );
 				}
 			} );
 
@@ -113,7 +122,7 @@ namespace osu.XR.Input.Custom {
 			}, true );
 		}
 
-		Dictionary<JoystickHandler, Drawable> settings = new();
+		Dictionary<JoystickFactory, Drawable> settings = new();
 		protected override void Update () {
 			base.Update();
 			foreach ( var i in settings.Values ) {
@@ -127,14 +136,14 @@ namespace osu.XR.Input.Custom {
 				updateDropdown();
 			}, true );
 
-			handler.Handlers.BindCollectionChanged( (_,b) => {
+			handler.Factories.BindCollectionChanged( (_,b) => {
 				if ( b.Action is NotifyCollectionChangedAction.Add ) {
 					if ( b.NewItems is null ) return;
-					foreach ( JoystickHandler i in b.NewItems ) addSetting( i );
+					foreach ( JoystickFactory i in b.NewItems ) addSetting( i );
 				}
 				else {
 					if ( b.OldItems is null ) return;
-					foreach ( JoystickHandler i in b.OldItems ) removeSetting( i );
+					foreach ( JoystickFactory i in b.OldItems ) removeSetting( i );
 				}
 			}, true );
 		}
@@ -153,16 +162,16 @@ namespace osu.XR.Input.Custom {
 			dropdown.Current.SetDefault();
 		}
 
-		void removeSetting ( JoystickHandler handler ) {
+		void removeSetting ( JoystickFactory handler ) {
 			Remove( settings[ handler ] );
 			settings.Remove( handler );
 
-			if ( handler is JoystickMovementHandler ) sharedSettings.RemoveAll( x => x is JoystickMovementLock );
+			if ( handler is JoystickMovementFactory ) sharedSettings.RemoveAll( x => x is JoystickMovementLock );
 
 			updateDropdown();
 		}
-		void addSetting ( JoystickHandler handler ) {
-			if ( handler is JoystickMovementHandler ) sharedSettings.Add( new JoystickMovementLock() );
+		void addSetting ( JoystickFactory handler ) {
+			if ( handler is JoystickMovementFactory ) sharedSettings.Add( new JoystickMovementLock() );
 
 			var setting = handler.CreateSettings();
 
@@ -229,8 +238,13 @@ namespace osu.XR.Input.Custom {
 	public abstract class JoystickHandler : Component {
 		public readonly Bindable<Vector2> JoystickPosition = new();
 		public CustomRulesetInputBindingHandler Handler;
+	}
+	public abstract class JoystickFactory : CompositeDrawable {
+		public bool IsBacked = false;
+		public readonly Bindable<Vector2> JoystickPosition = new();
 
 		public abstract JoystickSettings CreateSettings ();
+		public abstract JoystickHandler CreateHandler ();
 	}
 
 	public class JoystickZoneSettings : JoystickSettings {
@@ -278,8 +292,6 @@ namespace osu.XR.Input.Custom {
 		public readonly BindableDouble Arc = new( 60 ) { MinValue = 0, MaxValue = 360 };
 		public readonly BindableDouble Deadzone = new( 0.4 ) { MinValue = 0, MaxValue = 1 };
 
-		public override JoystickSettings CreateSettings () => new JoystickZoneSettings( this );
-
 		public JoystickZoneHandler () {
 			StartAngle.ValueChanged += v => updateActivation();
 			Arc.ValueChanged += v => updateActivation();
@@ -290,8 +302,8 @@ namespace osu.XR.Input.Custom {
 		protected override void LoadComplete () {
 			base.LoadComplete();
 
-			Binding.Press += Handler.TriggerPress;
-			Binding.Release += Handler.TriggerRelease;
+			Binding.Press += x => Handler?.TriggerPress( x );
+			Binding.Release += x => Handler?.TriggerRelease( x );
 		}
 
 		double deltaAngle ( double current, double goal ) {
@@ -314,6 +326,31 @@ namespace osu.XR.Input.Custom {
 		}
 		void updateActivation () {
 			Binding.IsActive.Value = IsNormalizedPointInside( JoystickPosition.Value ); // NOTE this is copied from the visual
+		}
+	}
+	public class JoystickZoneFactory : JoystickFactory {
+		public override JoystickSettings CreateSettings ()
+			=> new JoystickZoneSettings( Handler );
+
+		JoystickZoneHandler handler;
+		JoystickZoneHandler Handler {
+			get {
+				if ( handler is null ) {
+					AddInternal( handler = new() );
+					handler.JoystickPosition.BindTo( JoystickPosition );
+				}
+				return handler;
+			}
+		}
+		public override JoystickZoneHandler CreateHandler () {
+			var handler = new JoystickZoneHandler();
+
+			handler.Binding.RulesetAction.BindTo( Handler.Binding.RulesetAction );
+			handler.StartAngle.BindTo( Handler.StartAngle );
+			handler.Arc.BindTo( Handler.Arc );
+			handler.Deadzone.BindTo( Handler.Deadzone );
+
+			return handler;
 		}
 	}
 
@@ -370,7 +407,25 @@ namespace osu.XR.Input.Custom {
 				}
 			} );
 		}
+	}
+	public class JoystickMovementFactory : JoystickFactory {
+		public override JoystickSettings CreateSettings ()
+			=> new JoystickMovementSettings( Handler );
 
-		public override JoystickSettings CreateSettings () => new JoystickMovementSettings( this );
+		JoystickMovementHandler handler;
+		JoystickMovementHandler Handler {
+			get {
+				if ( handler is null ) {
+					AddInternal( handler = new() );
+					handler.JoystickPosition.BindTo( JoystickPosition );
+				}
+				return handler;
+			}
+		}
+		public override JoystickMovementHandler CreateHandler () {
+			var handler = new JoystickMovementHandler();
+
+			return handler;
+		}
 	}
 }
