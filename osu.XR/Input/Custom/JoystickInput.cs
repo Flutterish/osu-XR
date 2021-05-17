@@ -28,114 +28,113 @@ namespace osu.XR.Input.Custom {
 		public override string Name => $"{Hand} Joystick";
 
 		protected override Drawable CreateSettingDrawable () {
-			return new JoystickInputList { Hand = Hand };
+			return new JoystickBindingSettings( Handler );
 		}
 
-		private class BoundJoystick<T> : CompositeDrawable where T : JoystickVisual, new() {
-			public readonly T Joystick = new() { RelativeSizeAxes = Axes.Both, FillMode = FillMode.Fit };
-
-			event System.Action onDispose;
-			protected override void Dispose ( bool isDisposing ) {
-				base.Dispose( isDisposing );
-
-				onDispose?.Invoke();
-			}
-
-			public BoundJoystick ( Hand hand ) {
-				void lookForValidController ( Controller controller ) {
-					if ( controller.Role != OsuGameXr.RoleForHand( hand ) ) return;
-
-					var comp = VR.GetControllerComponent<Controller2DVector>( XrAction.Scroll, controller );
-					System.Action<ValueUpdatedEvent<System.Numerics.Vector2>> action = v => {
-						Joystick.JoystickPosition.Value = new osuTK.Vector2( v.NewValue.X, -v.NewValue.Y );
-					};
-					comp.BindValueChangedDetailed( action, true );
-					onDispose += () => comp.ValueChanged -= action;
-					VR.NewControllerAdded -= lookForValidController;
+		JoystickBindingHandler handler;
+		JoystickBindingHandler Handler {
+			get {
+				if ( handler is null ) {
+					AddInternal( handler = new( Hand ) );
 				}
+				return handler;
+			}
+		}
+		public override JoystickBindingHandler CreateHandler () {
+			var handler = new JoystickBindingHandler( Hand );
 
-				VR.BindComponentsLoaded( () => {
-					VR.BindNewControllerAdded( lookForValidController, true );
-				} );
+			handler.Handlers.BindTo( Handler.Handlers );
 
-				AddInternal( Joystick );
+			return handler;
+		}
+	}
+
+	public class JoystickBindingHandler : CustomRulesetInputBindingHandler {
+		public readonly BoundComponent<Controller2DVector, System.Numerics.Vector2, Vector2> joystick;
+		public readonly BindableList<JoystickHandler> Handlers = new();
+
+		public JoystickBindingHandler ( Hand hand ) {
+			AddInternal( joystick = new( XrAction.Scroll, x => x.Role == OsuGameXr.RoleForHand( hand ), x => new Vector2( x.X, -x.Y ) ) );
+			// TODO use the handlers
+		}
+	}
+
+	public class JoystickBindingSettings : FillFlowContainer {
+		OsuButton addButton;
+		SettingsDropdown<string> dropdown;
+		JoystickBindingHandler handler;
+
+		public JoystickBindingSettings ( JoystickBindingHandler handler ) {
+			this.handler = handler;
+
+			Direction = FillDirection.Vertical;
+			RelativeSizeAxes = Axes.X;
+			AutoSizeAxes = Axes.Y;
+			Add( addButton = new OsuButton {
+				Height = 25,
+				Width = 120,
+				Margin = new MarginPadding { Left = 16 },
+				Text = "Add",
+				Action = () => {
+					addSetting( dropdown.Current.Value );
+				}
+			} );
+
+			Add( dropdown = new SettingsDropdown<string> {
+				Current = new Bindable<string>( "Select type" )
+			} );
+
+			dropdown.Current.BindValueChanged( v => {
+				addButton.Enabled.Value = v.NewValue != dropdown.Current.Default;
+			}, true );
+		}
+
+		List<Drawable> settings = new();
+		protected override void Update () {
+			base.Update();
+			foreach ( var i in settings ) {
+				i.Width = DrawWidth - 32;
 			}
 		}
 
-		private class JoystickInputList : FillFlowContainer {
-			public Hand Hand { get; init; } = Hand.Auto;
-			OsuButton addButton;
-			SettingsDropdown<string> dropdown;
-
-			public JoystickInputList () {
-				Direction = FillDirection.Vertical;
-				RelativeSizeAxes = Axes.X;
-				AutoSizeAxes = Axes.Y;
-				Add( addButton = new OsuButton {
-					Height = 25,
-					Width = 120,
-					Margin = new MarginPadding { Left = 16 },
-					Text = "Add",
-					Action = () => {
-						addSetting( dropdown.Current.Value );
-					}
-				} );
-
-				Add( dropdown = new SettingsDropdown<string> {
-					Current = new Bindable<string>( "Select type" )
-				} );
-
-				dropdown.Current.BindValueChanged( v => {
-					addButton.Enabled.Value = v.NewValue != dropdown.Current.Default;
-				}, true );
-			}
-
-			List<Drawable> settings = new();
-			protected override void Update () {
-				base.Update();
-				foreach ( var i in settings ) {
-					i.Width = DrawWidth - 32;
-				}
-			}
-
-			protected override void LoadComplete () {
-				base.LoadComplete();
-				sharedSettings.BindCollectionChanged( (_,_) => {
-					updateDropdown();
-				}, true );
-			}
-
-			private class JoystickMovementLock { }
-			[Resolved]
-			BindableList<object> sharedSettings { get; set; }
-
-			void updateDropdown () {
-				if ( sharedSettings.Any( x => x is JoystickMovementLock ) ) {
-					dropdown.Items = new string[] { "Zone" }.Prepend( dropdown.Current.Default );
-				}
-				else {
-					dropdown.Items = new string[] { "Zone", "Movement" }.Prepend( dropdown.Current.Default );
-				}
-				dropdown.Current.SetDefault();
-			}
-
-			void removeSetting ( Drawable drawable, bool isMovement ) {
-				Remove( drawable );
-				settings.Remove( drawable );
-				if ( isMovement ) sharedSettings.RemoveAll( x => x is JoystickMovementLock );
-
+		protected override void LoadComplete () {
+			base.LoadComplete();
+			sharedSettings.BindCollectionChanged( ( _, _ ) => {
 				updateDropdown();
-			}
-			void addSetting ( string type ) {
-				if ( type == "Movement" ) sharedSettings.Add( new JoystickMovementLock() );
+			}, true );
+		}
 
-				Drawable drawable = null;
-				drawable = new Container {
-					Masking = true,
-					CornerRadius = 5,
-					AutoSizeAxes = Axes.Y,
-					Margin = new MarginPadding { Left = 16, Right = 16, Bottom = 4 },
-					Children = new Drawable[] {
+		private class JoystickMovementLock { }
+		[Resolved]
+		BindableList<object> sharedSettings { get; set; }
+
+		void updateDropdown () {
+			if ( sharedSettings.Any( x => x is JoystickMovementLock ) ) {
+				dropdown.Items = new string[] { "Zone" }.Prepend( dropdown.Current.Default );
+			}
+			else {
+				dropdown.Items = new string[] { "Zone", "Movement" }.Prepend( dropdown.Current.Default );
+			}
+			dropdown.Current.SetDefault();
+		}
+
+		void removeSetting ( Drawable drawable, bool isMovement ) {
+			Remove( drawable );
+			settings.Remove( drawable );
+			if ( isMovement ) sharedSettings.RemoveAll( x => x is JoystickMovementLock );
+
+			updateDropdown();
+		}
+		void addSetting ( string type ) {
+			if ( type == "Movement" ) sharedSettings.Add( new JoystickMovementLock() );
+
+			Drawable drawable = null;
+			drawable = new Container {
+				Masking = true,
+				CornerRadius = 5,
+				AutoSizeAxes = Axes.Y,
+				Margin = new MarginPadding { Left = 16, Right = 16, Bottom = 4 },
+				Children = new Drawable[] {
 						new Box {
 							RelativeSizeAxes = Axes.Both,
 							Colour = OsuColour.Gray( 0.075f )
@@ -168,54 +167,78 @@ namespace osu.XR.Input.Custom {
 							}).Yield().Concat( type == "Zone" ? makeZone() : makeMovement() ).ToArray()
 						}
 					}
+			};
+
+			IEnumerable<Drawable> makeZone () {
+				JoystickZoneVisual visual = new JoystickZoneVisual();
+				var zone = style( visual );
+				var indicator = new ActivationIndicator { Anchor = Anchor.Centre, Origin = Anchor.Centre };
+				yield return zone;
+				yield return new Container {
+					RelativeSizeAxes = Axes.X,
+					AutoSizeAxes = Axes.Y,
+					Child = indicator
 				};
+				visual.JoystickPosition.BindTo( handler.joystick.Current );
+				visual.IsActive.BindValueChanged( v => indicator.IsActive.Value = v.NewValue );
+				yield return new RulesetActionDropdown();
+			}
 
-				IEnumerable<Drawable> makeZone () {
-					var zone = style( new BoundJoystick<JoystickZoneVisual>( Hand ) );
-					var indicator = new ActivationIndicator { Anchor = Anchor.Centre, Origin = Anchor.Centre };
-					yield return zone;
-					yield return new Container {
-						RelativeSizeAxes = Axes.X,
-						AutoSizeAxes = Axes.Y,
-						Child = indicator
-					};
-					( zone.Child as BoundJoystick<JoystickZoneVisual> ).Joystick.IsActive.BindValueChanged( v => indicator.IsActive.Value = v.NewValue );
-					yield return new RulesetActionDropdown();
-				}
-
-				IEnumerable<Drawable> makeMovement () {
-					yield return style( new BoundJoystick<JoystickVisual>( Hand ) );
-					yield return new SettingsDropdown<string> {
-						Current = new Bindable<string>( "Absolute" ),
-						Items = new string[] {
+			IEnumerable<Drawable> makeMovement () {
+				JoystickVisual visual = new JoystickVisual();
+				visual.JoystickPosition.BindTo( handler.joystick.Current );
+				yield return style( visual );
+				yield return new SettingsDropdown<string> {
+					Current = new Bindable<string>( "Absolute" ),
+					Items = new string[] {
 							"Absolute",
 							"Delta"
 						}
-					};
-					yield return new SettingsSlider<double> {
-						LabelText = "Distance",
-						Current = new BindableDouble( 100 ) { MinValue = 0, MaxValue = 100 }
-					};
-				}
-
-				Container style ( Drawable d ) {
-					d.Size = new Vector2( 300 );
-					d.Origin = Anchor.TopCentre;
-					d.Anchor = Anchor.TopCentre;
-
-					return new Container {
-						Child = d,
-						Margin = new MarginPadding { Bottom = 16 },
-						RelativeSizeAxes = Axes.X,
-						AutoSizeAxes = Axes.Y
-					};
-				}
-
-				settings.Add( drawable );
-				Add( drawable );
-
-				updateDropdown();
+				};
+				yield return new SettingsSlider<double> {
+					LabelText = "Distance",
+					Current = new BindableDouble( 100 ) { MinValue = 0, MaxValue = 100 }
+				};
 			}
+
+			Container style ( Drawable d ) {
+				d.Size = new Vector2( 300 );
+				d.Origin = Anchor.TopCentre;
+				d.Anchor = Anchor.TopCentre;
+
+				return new Container {
+					Child = d,
+					Margin = new MarginPadding { Bottom = 16 },
+					RelativeSizeAxes = Axes.X,
+					AutoSizeAxes = Axes.Y
+				};
+			}
+
+			settings.Add( drawable );
+			Add( drawable );
+
+			updateDropdown();
 		}
+	}
+
+	public class JoystickSettings : CompositeDrawable {
+
+	}
+	public class JoystickHandler : Component {
+
+	}
+
+	public class JoystickZoneSettings : JoystickSettings {
+
+	}
+	public class JoystickZoneHandler : JoystickHandler {
+
+	}
+
+	public class JoystickMovementSettings : JoystickSettings {
+
+	}
+	public class JoystickMovementHandler : JoystickHandler {
+
 	}
 }

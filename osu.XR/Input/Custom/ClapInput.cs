@@ -19,13 +19,21 @@ namespace osu.XR.Input.Custom {
 	public class ClapInput : CustomInput {
 		public override string Name => "Clap";
 
-		ClapBindingHandler Handler = new();
+		ClapBindingHandler? handler;
+		ClapBindingHandler Handler {
+			get {
+				if ( handler is null ) {
+					AddInternal( handler = new() );
+				}
+				return handler;
+			}
+		}
 		public override ClapBindingHandler CreateHandler () {
 			var handler = new ClapBindingHandler();
 
 			handler.ThresholdABindable.BindTo( Handler.ThresholdABindable );
 			handler.ThresholdBBindable.BindTo( Handler.ThresholdBBindable );
-			handler.RulesetAction.BindTo( Handler.RulesetAction );
+			handler.binding.RulesetAction.BindTo( Handler.binding.RulesetAction );
 
 			return handler;
 		}
@@ -34,8 +42,10 @@ namespace osu.XR.Input.Custom {
 			=> new ClapBindingSettings( Handler );
 	}
 
-	public class ClapBindingHandler : RulesetActionBindingHandler {
-		[Resolved]
+	public class ClapBindingHandler : CustomRulesetInputBindingHandler {
+		public readonly RulesetActionBinding binding = new();
+
+		[Resolved, MaybeNull, NotNull]
 		protected OsuGameXr game { get; private set; }
 
 		public readonly BindableDouble ThresholdABindable = new( 0.325 );
@@ -44,17 +54,17 @@ namespace osu.XR.Input.Custom {
 		public readonly BindableDouble ProgressBindable = new();
 		const double maxDistance = 0.5;
 
-#nullable disable
 		public ClapBindingHandler () {
 			DistanceBindable.BindValueChanged( v => ProgressBindable.Value = Math.Clamp( v.NewValue / maxDistance, 0, 1 ) );
+			binding.Press += TriggerPress;
+			binding.Release += TriggerRelease;
 		}
-#nullable enable
 
 		void updateActivation () {
-			if ( IsActive.Value )
-				IsActive.Value = ProgressBindable.Value < Math.Max( ThresholdABindable.Value, ThresholdBBindable.Value );
+			if ( binding.IsActive.Value )
+				binding.IsActive.Value = ProgressBindable.Value < Math.Max( ThresholdABindable.Value, ThresholdBBindable.Value );
 			else
-				IsActive.Value = ProgressBindable.Value < Math.Min( ThresholdABindable.Value, ThresholdBBindable.Value );
+				binding.IsActive.Value = ProgressBindable.Value < Math.Min( ThresholdABindable.Value, ThresholdBBindable.Value );
 		}
 
 		protected override void Update () {
@@ -84,7 +94,6 @@ namespace osu.XR.Input.Custom {
 			RelativeSizeAxes = Axes.X;
 			AutoSizeAxes = Axes.Y;
 			Children = new Drawable[] {
-				handler,
 				new Container {
 					RelativeSizeAxes = Axes.X,
 					AutoSizeAxes = Axes.Y,
@@ -118,9 +127,9 @@ namespace osu.XR.Input.Custom {
 			handler.ProgressBindable.BindValueChanged( v => {
 				fill.Width = 1 - (float)v.NewValue;
 			}, true );
-			indicator.IsActive.BindTo( handler.IsActive );
+			indicator.IsActive.BindTo( handler.binding.IsActive );
 
-			dropdown.RulesetAction.BindTo( handler.RulesetAction );
+			dropdown.RulesetAction.BindTo( handler.binding.RulesetAction );
 			thresholdA.Progress.BindTo( handler.ThresholdABindable );
 			thresholdB.Progress.BindTo( handler.ThresholdBBindable );
 		}

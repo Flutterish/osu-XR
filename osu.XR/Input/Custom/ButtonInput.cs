@@ -17,64 +17,90 @@ namespace osu.XR.Input.Custom {
 		public Hand Hand { get; init; } = Hand.Auto;
 		public override string Name => $"{Hand} Buttons";
 
-		event System.Action onDispose;
-		protected override void Dispose ( bool isDisposing ) {
-			base.Dispose( isDisposing );
+		ButtonsBindingHandler handler;
+		ButtonsBindingHandler Handler {
+			get {
+				if ( handler is null ) {
+					AddInternal( handler = new( Hand ) );
+				}
+				return handler;
+			}
+		}
+		public override ButtonsBindingHandler CreateHandler () {
+			var handler = new ButtonsBindingHandler( Hand );
 
-			onDispose?.Invoke();
+			handler.primaryBinding.RulesetAction.BindTo( Handler.primaryBinding.RulesetAction );
+			handler.secondaryBinding.RulesetAction.BindTo( Handler.secondaryBinding.RulesetAction );
+
+			return handler;
 		}
 
-		protected override Drawable CreateSettingDrawable () {
-			Drawable SetupButton ( bool isPrimary ) {
-				ActivationIndicator indicator = null;
-				var drawable = new FillFlowContainer {
-					Direction = FillDirection.Vertical,
-					RelativeSizeAxes = Axes.X,
-					AutoSizeAxes = Axes.Y,
-					Children = new Drawable[] {
-						new Container {
-							RelativeSizeAxes = Axes.X,
-							AutoSizeAxes = Axes.Y,
-							Children = new Drawable[] {
-								new OsuSpriteText { Text = $"{(isPrimary ? "Primary" : "Secondary")} Button", Margin = new MarginPadding { Left = 16 } },
-								indicator = new ActivationIndicator {
-									Margin = new MarginPadding { Right = 16 },
-									Origin = Anchor.CentreRight,
-									Anchor = Anchor.CentreRight
-								}
-							}
-						},
-						new RulesetActionDropdown()
-					}
-				};
+		protected override Drawable CreateSettingDrawable ()
+			=> new ButtonBindingSettings( Handler );
+	}
 
-				void lookForValidController ( Controller controller ) {
-					if ( controller.Role != OsuGameXr.RoleForHand( Hand ) ) return;
+	public class ButtonsBindingHandler : CustomRulesetInputBindingHandler {
+		public readonly RulesetActionBinding primaryBinding = new();
+		public readonly RulesetActionBinding secondaryBinding = new();
 
-					var comp = VR.GetControllerComponent<ControllerButton>( isPrimary ? XrAction.MouseLeft : XrAction.MouseRight, controller );
-					System.Action<ValueUpdatedEvent<bool>> action = v => {
-						indicator.IsActive.Value = v.NewValue;
-					};
-					comp.BindValueChangedDetailed( action, true );
-					onDispose += () => comp.ValueChanged -= action;
-					VR.NewControllerAdded -= lookForValidController;
-				}
+		BoundComponent<ControllerButton, bool> primary;
+		BoundComponent<ControllerButton, bool> secondary;
+		public ButtonsBindingHandler ( Hand hand ) {
+			AddInternal( primary = new( XrAction.MouseLeft, x => x.Role == OsuGameXr.RoleForHand( hand ) ) );
+			AddInternal( secondary = new( XrAction.MouseRight, x => x.Role == OsuGameXr.RoleForHand( hand ) ) );
 
-				VR.BindComponentsLoaded( () => {
-					VR.BindNewControllerAdded( lookForValidController, true );
-				} );
-				return drawable;
-			}
-			
-			return new FillFlowContainer {
-				Direction = FillDirection.Vertical,
-				RelativeSizeAxes = Axes.X,
-				AutoSizeAxes = Axes.Y,
-				Children = new Drawable[] {
-					SetupButton( true ),
-					SetupButton( false )
-				}
+			primaryBinding.IsActive.BindTo( primary.Current );
+			secondaryBinding.IsActive.BindTo( secondary.Current );
+
+			primaryBinding.Press += TriggerPress;
+			secondaryBinding.Press += TriggerPress;
+			primaryBinding.Release += TriggerRelease;
+			secondaryBinding.Release += TriggerRelease;
+		}
+	}
+
+	public class ButtonBindingSettings : FillFlowContainer {
+		public ButtonBindingSettings ( ButtonsBindingHandler handler ) {
+			ButtonSetup primary;
+			ButtonSetup secondary;
+
+			Direction = FillDirection.Vertical;
+			RelativeSizeAxes = Axes.X;
+			AutoSizeAxes = Axes.Y;
+			Children = new Drawable[] {
+				primary = new ButtonSetup( true ),
+				secondary = new ButtonSetup( false )
 			};
+
+			primary.Indicator.IsActive.BindTo( handler.primaryBinding.IsActive );
+			primary.ActionDropdown.RulesetAction.BindTo( handler.primaryBinding.RulesetAction );
+			secondary.Indicator.IsActive.BindTo( handler.secondaryBinding.IsActive );
+			secondary.ActionDropdown.RulesetAction.BindTo( handler.secondaryBinding.RulesetAction );
+		}
+
+		private class ButtonSetup : FillFlowContainer {
+			public ActivationIndicator Indicator;
+			public RulesetActionDropdown ActionDropdown;
+			public ButtonSetup ( bool isPrimary ) {
+				Direction = FillDirection.Vertical;
+				RelativeSizeAxes = Axes.X;
+				AutoSizeAxes = Axes.Y;
+				Children = new Drawable[] {
+					new Container {
+						RelativeSizeAxes = Axes.X,
+						AutoSizeAxes = Axes.Y,
+						Children = new Drawable[] {
+							new OsuSpriteText { Text = $"{(isPrimary ? "Primary" : "Secondary")} Button", Margin = new MarginPadding { Left = 16 } },
+							Indicator = new ActivationIndicator {
+								Margin = new MarginPadding { Right = 16 },
+								Origin = Anchor.CentreRight,
+								Anchor = Anchor.CentreRight
+							}
+						}
+					},
+					ActionDropdown = new RulesetActionDropdown()
+				};
+			}
 		}
 	}
 }

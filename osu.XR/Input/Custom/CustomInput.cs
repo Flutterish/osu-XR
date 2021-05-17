@@ -1,6 +1,7 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input;
 using osu.Game.Graphics;
@@ -14,7 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace osu.XR.Input.Custom {
-	public abstract class CustomInput : Component {
+	public abstract class CustomInput : CompositeDrawable {
 		new public abstract string Name { get; }
 		private Drawable settingDrawable;
 		public Drawable SettingDrawable => settingDrawable ??= CreateSettingDrawable();
@@ -44,10 +45,10 @@ namespace osu.XR.Input.Custom {
 		/// Creates a component which actually manages the binding.
 		/// You should create one for backing fields and bind the new one's to them here.
 		/// </summary>
-		public virtual CustomRulesetInputBindingHandler CreateHandler () => null;
+		public abstract CustomRulesetInputBindingHandler CreateHandler ();
 	}
 
-	public abstract class CustomRulesetInputBindingHandler : Component {
+	public abstract class CustomRulesetInputBindingHandler : CompositeDrawable {
 		protected void TriggerPress ( object rulesetAction ) {
 
 		}
@@ -61,29 +62,32 @@ namespace osu.XR.Input.Custom {
 		}
 	}
 
-	public abstract class RulesetActionBindingHandler : CustomRulesetInputBindingHandler {
+	public class RulesetActionBinding {
 		public readonly BindableBool IsActive = new();
 		public readonly Bindable<object> RulesetAction = new();
 
-		public RulesetActionBindingHandler () {
+		public RulesetActionBinding () {
 			IsActive.BindValueChanged( v => {
 				if ( RulesetAction.Value == null ) return;
 
 				if ( v.NewValue )
-					TriggerPress( RulesetAction.Value );
+					Press?.Invoke( RulesetAction.Value );
 				else
-					TriggerRelease( RulesetAction.Value );
+					Release?.Invoke( RulesetAction.Value );
 			} );
 
 			RulesetAction.BindValueChanged( v => {
 				if ( IsActive.Value ) {
 					if ( v.OldValue != null )
-						TriggerRelease( v.OldValue );
+						Release?.Invoke( v.OldValue );
 
 					if ( v.NewValue != null )
-						TriggerPress( v.NewValue );
+						Press?.Invoke( v.NewValue );
 				}
 			} );
 		}
+
+		public event Action<object> Press;
+		public event Action<object> Release;
 	}
 }
