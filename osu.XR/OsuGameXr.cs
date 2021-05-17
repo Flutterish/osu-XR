@@ -4,6 +4,8 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.Input;
+using osu.Framework.Input.Bindings;
 using osu.Framework.IO.Stores;
 using osu.Framework.Platform;
 using osu.Framework.XR;
@@ -18,13 +20,18 @@ using osu.Game.Graphics;
 using osu.Game.Overlays.Notifications;
 using osu.Game.Resources;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.UI;
+using osu.Game.Screens;
+using osu.Game.Screens.Play;
 using osu.XR.Components;
 using osu.XR.Components.Groups;
 using osu.XR.Components.Panels;
 using osu.XR.Drawables;
 using osu.XR.Input;
+using osu.XR.Input.Custom;
 using osu.XR.Settings;
 using osuTK;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Valve.VR;
@@ -65,6 +72,8 @@ namespace osu.XR {
 		public readonly XrKeyboard Keyboard = new() { Scale = new Vector3( 0.04f ) };
 		[Cached]
 		public readonly XrInspectorPanel Inspector = new();
+		[Cached]
+		public readonly XrRulesetInfoPanel InputBindings = new();
 
 		public static ETrackedControllerRole RoleForHand ( Hand hand ) => hand switch {
 			Hand.Right => ETrackedControllerRole.RightHand,
@@ -262,6 +271,7 @@ namespace osu.XR {
 			OsuGame.OnLoadComplete += _ => {
 				RemoveInternal( OsuGame );
 				osuLoaded();
+				listenForPlayer();
 			};
 		}
 
@@ -316,7 +326,7 @@ namespace osu.XR {
 			Scene.Add( new BeatingScenery() );
 			Scene.Add( Camera );
 			Scene.Add( OsuPanel );
-			Scene.Add( new HandheldMenu().With( s => s.Panels.AddRange( new FlatPanel[] { new XrConfigPanel(), Notifications, Inspector, new XrRulesetInfoPanel() } ) ) );
+			Scene.Add( new HandheldMenu().With( s => s.Panels.AddRange( new FlatPanel[] { new XrConfigPanel(), Notifications, Inspector, InputBindings } ) ) );
 			Scene.Add( Keyboard );
 			Keyboard.LoadModel( @".\Resources\keyboard.obj" );
 
@@ -360,6 +370,54 @@ namespace osu.XR {
 			}, true );
 
 			Config.BindWith( XrConfigSetting.RenderToScreen, Scene.RenderToScreenBindable );
+		}
+
+		PlayerInfo lastPlayer;
+		void listenForPlayer () {
+			var screens = OsuGame.GetField<OsuScreenStack>();
+
+			screens.ScreenPushed += ( p, n ) => {
+				if ( p != null && p == lastPlayer.Player ) {
+					onPlayerExit( lastPlayer );
+					lastPlayer = default;
+				}
+				if ( n is Player player ) {
+					var drawableRuleset = player.GetProperty<DrawableRuleset>();
+					var inputManager = drawableRuleset.GetField<PassThroughInputManager>();
+
+					var managerType = inputManager.GetType();
+					while ( !managerType.IsGenericType || managerType.GetGenericTypeDefinition() != typeof( RulesetInputManager<> ) ) {
+						if ( managerType.BaseType != null ) {
+							managerType = managerType.BaseType;
+						}
+						else {
+							return;
+						}
+					}
+
+					var actionType = managerType.GetGenericArguments()[ 0 ];
+					var bindings = inputManager.GetField<KeyBindingContainer>();
+
+					lastPlayer = new PlayerInfo {
+						Player = player,
+						DrawableRuleset = drawableRuleset,
+						InputManager = inputManager,
+						RulesetActionType = actionType,
+						KeyBindingContainer = bindings
+					};
+
+					onPlayerEntered( lastPlayer );
+				}
+			};
+		}
+
+		InjectedInput injectedInput;
+		void onPlayerEntered ( PlayerInfo info ) {
+			info.InputManager.Add( injectedInput = new InjectedInput( InputBindings.CurrentBindings, info ) );
+		}
+
+		void onPlayerExit ( PlayerInfo info ) {
+			injectedInput = null;
 		}
 	}
 }

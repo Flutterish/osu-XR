@@ -4,6 +4,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
 using osu.XR.Components.Groups;
 using osu.XR.Drawables;
+using osu.XR.Input.Custom;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,7 @@ namespace osu.XR.Components.Panels {
 	public class XrRulesetInfoPanel : FlatPanel, IHasName, IHasIcon {
 		public readonly RulesetInfoPanel Panel = new() { Height = 500, Width = 400 };
 		public readonly Bindable<bool> IsVisibleBindable = new();
+		public BindableList<CustomInput> CurrentBindings => Panel.CurrentBindings;
 
 		[Resolved]
 		private OsuGameXr Game { get; set; }

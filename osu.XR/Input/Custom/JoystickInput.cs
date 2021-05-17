@@ -52,24 +52,24 @@ namespace osu.XR.Input.Custom {
 
 	public class JoystickBindingHandler : CustomRulesetInputBindingHandler {
 		public readonly BoundComponent<Controller2DVector, System.Numerics.Vector2, Vector2> joystick;
-		public readonly BindableList<JoystickHandler> Handlers = new();
+		public readonly BindableList<JoystickHandler> Handlers = new(); // TODO these should be factories, not the handlers themselves
 
 		public JoystickBindingHandler ( Hand hand ) {
 			AddInternal( joystick = new( XrAction.Scroll, x => x.Role == OsuGameXr.RoleForHand( hand ), x => new Vector2( x.X, -x.Y ) ) );
-			// TODO use the handlers
 
 			Handlers.BindCollectionChanged( (_,a) => {
 				if ( a.Action == NotifyCollectionChangedAction.Add ) {
 					if ( a.NewItems is null ) return;
 					foreach ( JoystickHandler i in a.NewItems ) {
 						i.JoystickPosition.BindTo( joystick.Current );
-						AddInternal( i );
+						if ( i.Parent is null ) AddInternal( i );
+						i.Handler = this;
 					}
 				}
 				else {
 					if ( a.OldItems is null ) return;
 					foreach ( JoystickHandler i in a.OldItems ) {
-						RemoveInternal( i );
+						if ( i.Parent == this ) RemoveInternal( i );
 					}
 				}
 			}, true );
@@ -228,8 +228,7 @@ namespace osu.XR.Input.Custom {
 	}
 	public abstract class JoystickHandler : Component {
 		public readonly Bindable<Vector2> JoystickPosition = new();
-		[Resolved]
-		public CustomRulesetInputBindingHandler Handler { get; private set; }
+		public CustomRulesetInputBindingHandler Handler;
 
 		public abstract JoystickSettings CreateSettings ();
 	}

@@ -56,6 +56,7 @@ namespace osu.XR.Drawables {
 		[Resolved]
 		private IBindable<RulesetInfo> ruleset { get; set; }
 		List<Drawable> sections = new();
+		public BindableList<CustomInput> CurrentBindings => settings[ ruleset.Value ].ActiveInputs;
 
 		Dictionary<RulesetInfo, RulesetXrBindingsSubsection> settings = new();
 		protected override void LoadComplete () {
@@ -99,6 +100,7 @@ namespace osu.XR.Drawables {
 		};
 
 		Dictionary<string, CustomInput> removedInputs = new();
+		public readonly BindableList<CustomInput> ActiveInputs = new();
 		Dictionary<string, CustomInput> selectedInputs = new();
 		Dictionary<string, Drawable> inputDrawables = new();
 		FillFlowContainer container;
@@ -153,6 +155,7 @@ namespace osu.XR.Drawables {
 			if ( removedInputs.ContainsKey( ID ) ) {
 				removedInputs.Remove( ID, out input );
 				selectedInputs.Add( ID, input );
+				ActiveInputs.Add( input );
 				Add( input );
 
 				container.Add( inputDrawables[ ID ] );
@@ -163,6 +166,7 @@ namespace osu.XR.Drawables {
 			input = avaiableInputs[ ID ]();
 
 			selectedInputs.Add( ID, input );
+			ActiveInputs.Add( input );
 			Add( input );
 
 			inputDrawables.Add( ID, new Container {
@@ -218,6 +222,7 @@ namespace osu.XR.Drawables {
 		void removeCustomInput ( string ID ) {
 			container.Remove( inputDrawables[ ID ] );
 			selectedInputs.Remove( ID, out var input );
+			ActiveInputs.Remove( input );
 			Remove( input );
 			removedInputs.Add( ID, input );
 			updateDropdown();

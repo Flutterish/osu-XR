@@ -4,6 +4,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input;
+using osu.Framework.Input.Bindings;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
@@ -11,6 +12,7 @@ using osuTK;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -49,15 +51,23 @@ namespace osu.XR.Input.Custom {
 	}
 
 	public abstract class CustomRulesetInputBindingHandler : CompositeDrawable {
-		public void TriggerPress ( object rulesetAction ) {
+		public InjectedInput InjectedInput { private get; set; }
 
+		public void TriggerPress ( object rulesetAction ) {
+			if ( rulesetAction is null || InjectedInput is null ) return;
+
+			InjectedInput.Info.KeyBindingContainer.GetMethod( nameof( KeyBindingContainer<int>.TriggerPressed ) ).Invoke( InjectedInput.Info.KeyBindingContainer, new object[] { rulesetAction } );
 		}
 
 		public void TriggerRelease ( object rulesetAction ) {
+			if ( rulesetAction is null || InjectedInput is null ) return;
 
+			InjectedInput.Info.KeyBindingContainer.GetMethod( nameof( KeyBindingContainer<int>.TriggerReleased ) ).Invoke( InjectedInput.Info.KeyBindingContainer, new object[] { rulesetAction } );
 		}
 
 		public void MoveToAbsolute ( Vector2 position, bool isNormalized = false ) {
+			if ( InjectedInput is null ) return;
+
 
 		}
 	}
