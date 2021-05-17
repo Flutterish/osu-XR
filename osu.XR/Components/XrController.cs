@@ -98,7 +98,7 @@ namespace osu.XR.Components {
 				scroll.BindValueUpdatedDetailed( v => {
 					if ( !acceptsInputFrom( v.Source ) ) return;
 
-					ScrollBindable.Value += new Vector2( v.NewValue.X, v.NewValue.Y ) * (float)VR.DeltaTime * 80;
+					ScrollBindable.Value += new Vector2( v.NewValue.X, v.NewValue.Y ) * (float)VR.DeltaTime * 30;
 				} );
 
 				var mouseLeft = VR.GetControllerComponent<ControllerButton>( XrAction.MouseLeft );
@@ -157,8 +157,7 @@ namespace osu.XR.Components {
 			haptic?.TriggerVibration( duration, frequency, amplitude, delay );
 		}
 
-		public bool IsSoloMode;
-		public bool IsLoneController => IsSoloMode || Game.FreeControllers.Count() == 1;
+		public bool IsLoneController => Game.FreeControllers.Count() == 1;
 		private bool acceptsInputFrom ( Controller controller )
 			=> controller == Source || IsLoneController;
 
@@ -296,6 +295,11 @@ namespace osu.XR.Components {
 			if ( isTouchPointerDown && ( !EmulatesTouch || !canTouch ) ) {
 				isTouchPointerDown = false;
 				PointerUp?.Invoke();
+			}
+
+			if ( EmulatesTouch ) {
+				LeftButtonBindable.Value = false;
+				RightButtonBindable.Value = false;
 			}
 		}
 

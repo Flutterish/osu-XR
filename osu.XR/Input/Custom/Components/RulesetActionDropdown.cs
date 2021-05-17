@@ -13,13 +13,29 @@ namespace osu.XR.Input.Custom.Components {
 		[Resolved]
 		protected List<object> rulesetActions { get; private set; }
 
+		public readonly Bindable<object> RulesetAction = new();
+		bool bindlock;
+
 		public RulesetActionDropdown () {
 			Current = new Bindable<string>( "None" );
+
+			RulesetAction.ValueChanged += v => {
+				if ( bindlock ) return;
+				bindlock = true;
+				Current.Value = ( v.NewValue is null ) ? Current.Default : v.NewValue.GetDescription();
+				bindlock = false;
+			};
 		}
 
 		protected override void LoadComplete () {
 			base.LoadComplete();
 			Items = rulesetActions.Select( x => x.GetDescription() ).Prepend( "None" );
+			Current.BindValueChanged( v => {
+				if ( bindlock ) return;
+				bindlock = true;
+				RulesetAction.Value = ( v.NewValue == Current.Default ) ? null : rulesetActions.FirstOrDefault( x => x.GetDescription() == v.NewValue );
+				bindlock = false;
+			} );
 		}
 	}
 }

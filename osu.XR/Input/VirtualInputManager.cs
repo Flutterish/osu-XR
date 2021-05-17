@@ -136,7 +136,7 @@ namespace osu.XR.Input {
 			public override bool IsActive => true;
 
 			public readonly BindableInt DeadzoneBindable = new( 20 );
-			double holdDuration = 500;
+			//double holdDuration = 500;
 
 			[BackgroundDependencyLoader]
 			private void load ( XrConfigManager config ) {
@@ -172,8 +172,9 @@ namespace osu.XR.Input {
 
 				var touch = sources[ source ];
 				sources.Remove( source );
-				if ( !touch.RightClick )
-					enqueueInput( new TouchInput( touch.Touch, false ) ); // tap if in deadzone
+				enqueueInput( new TouchInput( touch.Touch, false ) );
+				//if ( !touch.RightClick )
+				//	enqueueInput( new TouchInput( touch.Touch, false ) ); // tap if in deadzone
 				//else {
 				//	touch.Position += new Vector2( 50 );
 				//	enqueueInput( new TouchInput( touch.Touch, true ) );
@@ -213,7 +214,7 @@ namespace osu.XR.Input {
 				public double LastUpdateTime;
 				public bool InDeadzone = true;
 				public TouchSource Index;
-				public bool RightClick;
+				//public bool RightClick;
 
 				public Touch Touch => new Touch( Index, Position );
 			}

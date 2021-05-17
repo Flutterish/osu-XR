@@ -138,7 +138,7 @@ namespace osu.XR.Input.Custom {
 					Children = new Drawable[] {
 						new Box {
 							RelativeSizeAxes = Axes.Both,
-							Colour = OsuColour.Gray( 0.15f )
+							Colour = OsuColour.Gray( 0.075f )
 						},
 						new FillFlowContainer {
 							RelativeSizeAxes = Axes.X,

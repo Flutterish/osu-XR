@@ -80,7 +80,7 @@ namespace osu.XR {
 				return controllers.Values.FirstOrDefault( x => x != main && x.Source.IsEnabled );
 			}
 		}
-		public IEnumerable<XrController> FreeControllers => controllers.Values.Where( x => x.Source.IsEnabled && !x.IsHoldingAnything );
+		public IEnumerable<XrController> FreeControllers => controllers.Values.Where( x => x.Source.IsEnabled && !x.IsHoldingAnything && x.Mode != ControllerMode.Disabled );
 
 		Dictionary<Controller, XrController> controllers = new();
 		public XrController GetControllerFor ( Controller controller ) => controller is null ? null : ( controllers.TryGetValue( controller, out var c ) ? c : null );
@@ -210,19 +210,16 @@ namespace osu.XR {
 			if ( inputModeBindable.Value == InputMode.SinglePointer ) {
 				foreach ( var controller in controllers.Values ) {
 					controller.Mode = controller == main ? ControllerMode.Pointer : ControllerMode.Disabled;
-					controller.IsSoloMode = true;
 				}
 			}
 			else if ( inputModeBindable.Value == InputMode.DoublePointer ) {
 				foreach ( var controller in controllers.Values ) {
 					controller.Mode = ControllerMode.Pointer;
-					controller.IsSoloMode = false;
 				}
 			}
 			else if ( inputModeBindable.Value == InputMode.TouchScreen ) {
 				foreach ( var controller in controllers.Values ) {
 					controller.Mode = ControllerMode.Touch;
-					controller.IsSoloMode = false;
 				}
 			}
 

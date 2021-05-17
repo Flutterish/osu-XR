@@ -1,4 +1,5 @@
-﻿using osu.Framework.Bindables;
+﻿using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
@@ -8,92 +9,125 @@ using osu.Game.Overlays.Settings;
 using osu.XR.Input.Custom.Components;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+#nullable enable
 
 namespace osu.XR.Input.Custom {
 	public class ClapInput : CustomInput {
 		public override string Name => "Clap";
 
-		protected override Drawable CreateSettingDrawable () {
-			Drawable fill = null;
-			SettingsDropdown<string> dropdown = null;
-			ThresholdBar thresholdA = null;
-			ThresholdBar thresholdB = null;
-			ActivationIndicator indicator = null;
-			Container thresholdBar = null;
-			bool isActive = false;
-			Distance.BindValueChanged( v => {
-				var progress = (float)Math.Clamp( v.NewValue / maxDistance, 0, 1 );
-				fill.Width = 1 - progress;
+		ClapBindingHandler Handler = new();
+		public override ClapBindingHandler CreateHandler () {
+			var handler = new ClapBindingHandler();
 
-				if ( isActive && progress > Math.Max( thresholdA.Progress.Value, thresholdB.Progress.Value ) ) {
-					isActive = false;
-				}
-				else if ( !isActive && progress < Math.Min( thresholdA.Progress.Value, thresholdB.Progress.Value ) ) {
-					isActive = true;
-				}
-				indicator.IsActive.Value = isActive;
-			} );
+			handler.ThresholdABindable.BindTo( Handler.ThresholdABindable );
+			handler.ThresholdBBindable.BindTo( Handler.ThresholdBBindable );
+			handler.RulesetAction.BindTo( Handler.RulesetAction );
 
-			OnUpdate += x => {
-				thresholdBar.Width = thresholdBar.Parent.DrawWidth - 32;
-			};
-
-			var drawable = new FillFlowContainer {
-				Direction = FillDirection.Vertical,
-				RelativeSizeAxes = Axes.X,
-				AutoSizeAxes = Axes.Y,
-				Children = new Drawable[] {
-					new Container {
-						RelativeSizeAxes = Axes.X,
-						AutoSizeAxes = Axes.Y,
-						Child = indicator = new() { 
-							Anchor = Anchor.Centre, 
-							Origin = Anchor.Centre,
-							Margin = new MarginPadding { Bottom = 6 }
-						}
-					},
-					thresholdBar = new Container {
-						Height = 32,
-						Masking = true,
-						CornerRadius = 5,
-						Margin = new MarginPadding { Left = 16, Right = 16 },
-						Children = new Drawable[] {
-							new Box {
-								RelativeSizeAxes = Axes.Both,
-								Colour = Colour4.Cyan
-							},
-							fill = new Box {
-								Colour = Colour4.Orange,
-								RelativeSizeAxes = Axes.Both
-							},
-							thresholdA = new(),
-							thresholdB = new()
-						}
-					},
-					dropdown = new RulesetActionDropdown()
-				}
-			};
-
-			thresholdA.Progress.Value = 0.325;
-			thresholdB.Progress.Value = 0.275;
-
-			return drawable;
+			return handler;
 		}
 
-		public readonly BindableDouble Distance = new();
-		double maxDistance = 0.5;
+		protected override Drawable CreateSettingDrawable ()
+			=> new ClapBindingSettings( Handler );
+	}
+
+	public class ClapBindingHandler : RulesetActionBindingHandler {
+		[Resolved]
+		protected OsuGameXr game { get; private set; }
+
+		public readonly BindableDouble ThresholdABindable = new( 0.325 );
+		public readonly BindableDouble ThresholdBBindable = new( 0.275 );
+		public readonly BindableDouble DistanceBindable = new();
+		public readonly BindableDouble ProgressBindable = new();
+		const double maxDistance = 0.5;
+
+#nullable disable
+		public ClapBindingHandler () {
+			DistanceBindable.BindValueChanged( v => ProgressBindable.Value = Math.Clamp( v.NewValue / maxDistance, 0, 1 ) );
+		}
+#nullable enable
+
+		void updateActivation () {
+			if ( IsActive.Value )
+				IsActive.Value = ProgressBindable.Value < Math.Max( ThresholdABindable.Value, ThresholdBBindable.Value );
+			else
+				IsActive.Value = ProgressBindable.Value < Math.Min( ThresholdABindable.Value, ThresholdBBindable.Value );
+		}
+
 		protected override void Update () {
 			base.Update();
 
 			if ( game.SecondaryController != null ) {
-				Distance.Value = ( game.MainController.Position - game.SecondaryController.Position ).Length;
+				DistanceBindable.Value = ( game.MainController.Position - game.SecondaryController.Position ).Length;
 			}
 			else {
-				Distance.Value = 0;
+				DistanceBindable.Value = 0;
 			}
+
+			updateActivation();
+		}
+	}
+
+	public class ClapBindingSettings : FillFlowContainer {
+		Container thresholdBar;
+		public ClapBindingSettings ( ClapBindingHandler handler ) {
+			Drawable fill;
+			RulesetActionDropdown dropdown;
+			ThresholdBar thresholdA;
+			ThresholdBar thresholdB;
+			ActivationIndicator indicator;
+
+			Direction = FillDirection.Vertical;
+			RelativeSizeAxes = Axes.X;
+			AutoSizeAxes = Axes.Y;
+			Children = new Drawable[] {
+				handler,
+				new Container {
+					RelativeSizeAxes = Axes.X,
+					AutoSizeAxes = Axes.Y,
+					Child = indicator = new() {
+						Anchor = Anchor.Centre,
+						Origin = Anchor.Centre,
+						Margin = new MarginPadding { Bottom = 6 }
+					}
+				},
+				thresholdBar = new Container {
+					Height = 32,
+					Masking = true,
+					CornerRadius = 5,
+					Margin = new MarginPadding { Left = 16, Right = 16 },
+					Children = new Drawable[] {
+						new Box {
+							RelativeSizeAxes = Axes.Both,
+							Colour = Colour4.Cyan
+						},
+						fill = new Box {
+							Colour = Colour4.Orange,
+							RelativeSizeAxes = Axes.Both
+						},
+						thresholdA = new(),
+						thresholdB = new()
+					}
+				},
+				dropdown = new RulesetActionDropdown()
+			};
+
+			handler.ProgressBindable.BindValueChanged( v => {
+				fill.Width = 1 - (float)v.NewValue;
+			}, true );
+			indicator.IsActive.BindTo( handler.IsActive );
+
+			dropdown.RulesetAction.BindTo( handler.RulesetAction );
+			thresholdA.Progress.BindTo( handler.ThresholdABindable );
+			thresholdB.Progress.BindTo( handler.ThresholdBBindable );
+		}
+
+		protected override void Update () {
+			base.Update();
+			thresholdBar.Width = thresholdBar.Parent.DrawWidth - 32;
 		}
 	}
 
