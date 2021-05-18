@@ -83,7 +83,7 @@ namespace osu.XR.Drawables {
 	}
 
 	public class RulesetXrBindingsSubsection : SettingsSubsection {
-		protected override string Header => "Bindings (Not functional)";
+		protected override string Header => "Bindings (Not saveable)";
 
 		Ruleset ruleset;
 		[Cached]
