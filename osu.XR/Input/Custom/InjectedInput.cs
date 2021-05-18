@@ -3,6 +3,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Input;
 using osu.Framework.Input.Bindings;
+using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.UI;
 using osu.Game.Screens.Play;
 using System;
@@ -19,36 +20,46 @@ namespace osu.XR.Input.Custom {
 		public PassThroughInputManager InputManager;
 		public Type RulesetActionType;
 		public KeyBindingContainer KeyBindingContainer;
+		public Bindable<IReadOnlyList<Mod>> Mods;
 	}
 
 	public class InjectedInput : CompositeDrawable {
 		Dictionary<CustomInput, CustomRulesetInputBindingHandler> handlers = new();
 		public readonly PlayerInfo Info;
+		BindableList<CustomInput> inputs;
 
 		public InjectedInput ( BindableList<CustomInput> inputs, PlayerInfo info ) {
 			Info = info;
+			this.inputs = inputs;
 
-			inputs.BindCollectionChanged( (_,a) => {
-				if ( a.Action == NotifyCollectionChangedAction.Add ) {
-					if ( a.NewItems is null ) return;
+			inputs.BindCollectionChanged( inputsChanged, true );
+		}
 
-					foreach ( CustomInput i in a.NewItems ) {
-						var handler = i.CreateHandler();
-						handlers.Add( i, handler );
-						handler.InjectedInput = this;
-						AddInternal( handler );
-					}
+		private void inputsChanged ( object _, NotifyCollectionChangedEventArgs a ) {
+			if ( a.Action == NotifyCollectionChangedAction.Add ) {
+				if ( a.NewItems is null ) return;
+
+				foreach ( CustomInput i in a.NewItems ) {
+					var handler = i.CreateHandler();
+					handlers.Add( i, handler );
+					handler.InjectedInput = this;
+					AddInternal( handler );
 				}
-				else {
-					if ( a.OldItems is null ) return;
+			}
+			else {
+				if ( a.OldItems is null ) return;
 
-					foreach ( CustomInput i in a.OldItems ) {
-						handlers.Remove( i, out var handler );
-						handler.InjectedInput = null;
-						RemoveInternal( handler );
-					}
+				foreach ( CustomInput i in a.OldItems ) {
+					handlers.Remove( i, out var handler );
+					handler.InjectedInput = null;
+					RemoveInternal( handler );
 				}
-			}, true );
+			}
+		}
+
+		protected override void Dispose ( bool isDisposing ) {
+			base.Dispose( isDisposing );
+			inputs.CollectionChanged -= inputsChanged;
 		}
 	}
 }

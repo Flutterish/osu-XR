@@ -20,6 +20,7 @@ using osu.Game.Graphics;
 using osu.Game.Overlays.Notifications;
 using osu.Game.Resources;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.UI;
 using osu.Game.Screens;
 using osu.Game.Screens.Play;
@@ -381,7 +382,7 @@ namespace osu.XR {
 					onPlayerExit( lastPlayer );
 					lastPlayer = default;
 				}
-				if ( n is Player player ) {
+				if ( n is Player player ) { // TODO check if some player types should be excluded
 					var drawableRuleset = player.GetProperty<DrawableRuleset>();
 					var inputManager = drawableRuleset.GetField<PassThroughInputManager>();
 
@@ -403,7 +404,8 @@ namespace osu.XR {
 						DrawableRuleset = drawableRuleset,
 						InputManager = inputManager,
 						RulesetActionType = actionType,
-						KeyBindingContainer = bindings
+						KeyBindingContainer = bindings,
+						Mods = player.GetProperty<Bindable<IReadOnlyList<Mod>>>()
 					};
 
 					onPlayerEntered( lastPlayer );
@@ -413,6 +415,8 @@ namespace osu.XR {
 
 		InjectedInput injectedInput;
 		void onPlayerEntered ( PlayerInfo info ) {
+			if ( info.Mods.Value.Any( x => x is ModAutoplay ) ) return;
+
 			info.InputManager.Add( injectedInput = new InjectedInput( InputBindings.CurrentBindings, info ) );
 		}
 
