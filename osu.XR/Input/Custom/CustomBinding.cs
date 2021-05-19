@@ -2,6 +2,7 @@
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Input.Bindings;
+using osuTK;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -29,6 +30,12 @@ namespace osu.XR.Input.Custom {
 		}
 		protected void TriggerRelease ( object action ) {
 			Input?.TriggerRelease( action, this );
+		}
+		protected void MoveTo ( Vector2 position, bool isNormalized = false ) {
+			Input?.MoveTo( position, isNormalized );
+		}
+		protected void MoveBy ( Vector2 position, bool isNormalized = false ) {
+			Input?.MoveBy( position, isNormalized );
 		}
 	}
 	public abstract class CustomBindingDrawable : CompositeDrawable {

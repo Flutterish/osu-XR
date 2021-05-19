@@ -6,6 +6,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
+using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays.Settings;
 using osu.XR.Input.Custom.Components;
@@ -294,9 +295,7 @@ namespace osu.XR.Input.Custom {
 
 	public enum JoystickMovementType {
 		Absolute,
-
-		[System.ComponentModel.Description( "Delta (TBD)" )]
-		Delta
+		Relative
 	}
 	public class JoystickMovementBinding : CustomBinding {
 		public override string Name => "Movement";
@@ -315,15 +314,16 @@ namespace osu.XR.Input.Custom {
 		public JoystickMovementBindingHandler ( JoystickMovementBinding backing ) : base( backing ) {
 			MovementType.BindTo( backing.MovementType );
 			Distance.BindTo( backing.Distance );
+		}
 
-			JoystickPosition.BindValueChanged( v => {
-				if ( MovementType.Value == JoystickMovementType.Absolute ) {
-					// MoveToAbsolute( JoystickPosition.Value * (float)Distance.Value / 100, isNormalized: true );
-				}
-				else {
-					// TODO delta
-				}
-			} );
+		protected override void Update () {
+			base.Update();
+			if ( MovementType.Value == JoystickMovementType.Absolute ) {
+				MoveTo( JoystickPosition.Value * (float)Distance.Value / 100, isNormalized: true );
+			}
+			else {
+				MoveBy( JoystickPosition.Value * (float)(Distance.Value / 100 * Time.Elapsed / 100), isNormalized: true );
+			}
 		}
 
 		public override CustomBindingDrawable CreateSettingsDrawable ()
@@ -357,6 +357,9 @@ namespace osu.XR.Input.Custom {
 			} );
 
 			visual.JoystickPosition.BindTo( handler.JoystickPosition );
+			type.OnLoadComplete += x => {
+				type.WarningText = "Current implementation disables all input from outside the ruleset binding section.\nMake sure to bind your other buttons here too.";
+			};
 		}
 	}
 }

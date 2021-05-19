@@ -99,7 +99,7 @@ namespace osu.XR.Input {
 		/// <summary>
 		/// A copy of <see cref="MouseHandler"/> overriden to use <see cref="RaycastPointer"/> input.
 		/// </summary>
-		internal class VirtualMouseHandler : InputHandler {
+		public class VirtualMouseHandler : InputHandler {
 			public override bool IsActive => true;
 
 			public override bool Initialize ( GameHost host ) => true;
@@ -117,7 +117,7 @@ namespace osu.XR.Input {
 		/// <summary>
 		/// A copy of <see cref="KeyboardHandler"/> which can be disabled.
 		/// </summary>
-		internal class VirtualKeyboardHandler : InputHandler {
+		public class VirtualKeyboardHandler : InputHandler {
 			public override bool IsActive => true;
 
 			public override bool Initialize ( GameHost host ) => true;
@@ -131,7 +131,7 @@ namespace osu.XR.Input {
 			public void EmulateKeyUp ( TKKey key ) => enqueueInput( new KeyboardKeyInput( key, false ) );
 		}
 
-		internal class VirtualTouchHandler : InputHandler {
+		public class VirtualTouchHandler : InputHandler {
 			public override bool Initialize ( GameHost host ) => true;
 			public override bool IsActive => true;
 
