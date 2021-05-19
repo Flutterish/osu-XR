@@ -24,11 +24,11 @@ namespace osu.XR.Input.Custom {
 	}
 
 	public class InjectedInput : CompositeDrawable {
-		Dictionary<CustomInput, CustomRulesetInputBindingHandler> handlers = new();
+		Dictionary<CustomBinding, CustomBindingHandler> handlers = new();
 		public readonly PlayerInfo Info;
-		BindableList<CustomInput> inputs;
+		BindableList<CustomBinding> inputs;
 
-		public InjectedInput ( BindableList<CustomInput> inputs, PlayerInfo info ) {
+		public InjectedInput ( BindableList<CustomBinding> inputs, PlayerInfo info ) {
 			Info = info;
 			this.inputs = inputs;
 
@@ -39,19 +39,17 @@ namespace osu.XR.Input.Custom {
 			if ( a.Action == NotifyCollectionChangedAction.Add ) {
 				if ( a.NewItems is null ) return;
 
-				foreach ( CustomInput i in a.NewItems ) {
+				foreach ( CustomBinding i in a.NewItems ) {
 					var handler = i.CreateHandler();
 					handlers.Add( i, handler );
-					handler.InjectedInput = this;
 					AddInternal( handler );
 				}
 			}
 			else {
 				if ( a.OldItems is null ) return;
 
-				foreach ( CustomInput i in a.OldItems ) {
+				foreach ( CustomBinding i in a.OldItems ) {
 					handlers.Remove( i, out var handler );
-					handler.InjectedInput = null;
 					RemoveInternal( handler );
 				}
 			}
@@ -60,6 +58,18 @@ namespace osu.XR.Input.Custom {
 		protected override void Dispose ( bool isDisposing ) {
 			base.Dispose( isDisposing );
 			inputs.CollectionChanged -= inputsChanged;
+		}
+
+		public void TriggerPress ( object action, CustomBindingHandler source ) {
+			if ( action is null ) return;
+
+			Info.KeyBindingContainer.GetMethod( nameof( KeyBindingContainer<int>.TriggerPressed ) ).Invoke( Info.KeyBindingContainer, new object[] { action } );
+		}
+
+		public void TriggerRelease ( object action, CustomBindingHandler source ) {
+			if ( action is null ) return;
+
+			Info.KeyBindingContainer.GetMethod( nameof( KeyBindingContainer<int>.TriggerReleased ) ).Invoke( Info.KeyBindingContainer, new object[] { action } );
 		}
 	}
 }

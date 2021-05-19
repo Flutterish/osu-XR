@@ -1,8 +1,7 @@
-﻿using OpenVR.NET;
-using OpenVR.NET.Manifests;
+﻿using OpenVR.NET.Manifests;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics.Shapes;
 using osu.Game.Graphics.Sprites;
 using osu.XR.Input.Custom.Components;
 using osu.XR.Settings;
@@ -13,64 +12,61 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace osu.XR.Input.Custom {
-	public class ButtonInput : CustomInput {
-		public Hand Hand { get; init; } = Hand.Auto;
+	public class ButtonBinding : CustomBinding {
+		public readonly Hand Hand;
 		public override string Name => $"{Hand} Buttons";
-
-		ButtonsBindingHandler handler;
-		ButtonsBindingHandler Handler {
-			get {
-				if ( handler is null ) {
-					AddInternal( handler = new( Hand ) );
-				}
-				return handler;
-			}
-		}
-		public override ButtonsBindingHandler CreateHandler () {
-			var handler = new ButtonsBindingHandler( Hand );
-
-			handler.primaryBinding.RulesetAction.BindTo( Handler.primaryBinding.RulesetAction );
-			handler.secondaryBinding.RulesetAction.BindTo( Handler.secondaryBinding.RulesetAction );
-
-			return handler;
+		public ButtonBinding ( Hand hand ) {
+			Hand = hand;
 		}
 
-		protected override Drawable CreateSettingDrawable ()
-			=> new ButtonBindingSettings( Handler );
+		public readonly Bindable<object> PrimaryAction = new();
+		public readonly Bindable<object> SecondaryAction = new();
+		public override CustomBindingHandler CreateHandler ()
+			=> new ButtonBindingHandler( this );
 	}
 
-	public class ButtonsBindingHandler : CustomRulesetInputBindingHandler {
+	public class ButtonBindingHandler : CustomBindingHandler {
 		public readonly RulesetActionBinding primaryBinding = new();
 		public readonly RulesetActionBinding secondaryBinding = new();
 
 		BoundComponent<ControllerButton, bool> primary;
 		BoundComponent<ControllerButton, bool> secondary;
-		public ButtonsBindingHandler ( Hand hand ) {
-			AddInternal( primary = new( XrAction.MouseLeft, x => x.Role == OsuGameXr.RoleForHand( hand ) ) );
-			AddInternal( secondary = new( XrAction.MouseRight, x => x.Role == OsuGameXr.RoleForHand( hand ) ) );
+		public ButtonBindingHandler ( ButtonBinding backing ) : base( backing ) {
+			AddInternal( primary = new( XrAction.MouseLeft, x => x.Role == OsuGameXr.RoleForHand( backing.Hand ) ) );
+			AddInternal( secondary = new( XrAction.MouseRight, x => x.Role == OsuGameXr.RoleForHand( backing.Hand ) ) );
 
 			primaryBinding.IsActive.BindTo( primary.Current );
 			secondaryBinding.IsActive.BindTo( secondary.Current );
+			primaryBinding.RulesetAction.BindTo( backing.PrimaryAction );
+			secondaryBinding.RulesetAction.BindTo( backing.SecondaryAction );
 
 			primaryBinding.Press += TriggerPress;
 			secondaryBinding.Press += TriggerPress;
 			primaryBinding.Release += TriggerRelease;
 			secondaryBinding.Release += TriggerRelease;
 		}
+
+		public override CustomBindingDrawable CreateSettingsDrawable ()
+			=> new ButtonBindingDrawable( this );
 	}
 
-	public class ButtonBindingSettings : FillFlowContainer {
-		public ButtonBindingSettings ( ButtonsBindingHandler handler ) {
-			ButtonSetup primary;
-			ButtonSetup secondary;
+	public class ButtonBindingDrawable : CustomBindingDrawable {
+		ButtonSetup primary;
+		ButtonSetup secondary;
 
-			Direction = FillDirection.Vertical;
+		public ButtonBindingDrawable ( ButtonBindingHandler handler ) : base( handler ) {
 			RelativeSizeAxes = Axes.X;
 			AutoSizeAxes = Axes.Y;
-			Children = new Drawable[] {
-				primary = new ButtonSetup( true ),
-				secondary = new ButtonSetup( false )
-			};
+
+			AddInternal( new FillFlowContainer {
+				Direction = FillDirection.Vertical,
+				RelativeSizeAxes = Axes.X,
+				AutoSizeAxes = Axes.Y,
+				Children = new Drawable[] {
+					primary = new ButtonSetup( true ),
+					secondary = new ButtonSetup( false )
+				}
+			} );
 
 			primary.Indicator.IsActive.BindTo( handler.primaryBinding.IsActive );
 			primary.ActionDropdown.RulesetAction.BindTo( handler.primaryBinding.RulesetAction );

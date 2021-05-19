@@ -46,8 +46,6 @@ namespace osu.XR {
 	// Tiled B/W sphere
 	// Storyboard
 
-	// TODO clap bindings and general user ruleset action bindings
-
 	// TODO rigs
 	// TODO 3rd person
 

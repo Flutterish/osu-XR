@@ -12,6 +12,7 @@ using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays.Settings;
 using osu.Game.Rulesets;
 using osu.XR.Input.Custom;
+using osu.XR.Settings;
 using osuTK.Graphics;
 using System;
 using System.Collections.Generic;
@@ -56,7 +57,7 @@ namespace osu.XR.Drawables {
 		[Resolved]
 		private IBindable<RulesetInfo> ruleset { get; set; }
 		List<Drawable> sections = new();
-		public BindableList<CustomInput> CurrentBindings => settings[ ruleset.Value ].ActiveInputs;
+		public BindableList<CustomBinding> CurrentBindings => settings[ ruleset.Value ].ActiveInputs;
 
 		Dictionary<RulesetInfo, RulesetXrBindingsSubsection> settings = new();
 		protected override void LoadComplete () {
@@ -91,17 +92,17 @@ namespace osu.XR.Drawables {
 		[Cached]
 		List<object> rulesetActions = new();
 
-		static Dictionary<string, Func<CustomInput>> avaiableInputs = new() {
-			[ "Clap" ] = () => new ClapInput(),
-			[ "Left Joystick" ] = () => new JoystickInput { Hand = Settings.Hand.Left },
-			[ "Right Joystick" ] = () => new JoystickInput { Hand = Settings.Hand.Right },
-			[ "Left Buttons" ] = () => new ButtonInput { Hand = Settings.Hand.Left },
-			[ "Right Buttons" ] = () => new ButtonInput { Hand = Settings.Hand.Right }
+		static Dictionary<string, Func<CustomBinding>> avaiableInputs = new() {
+			[ "Clap" ] = () => new ClapBinding(),
+			[ "Left Joystick" ] = () => new JoystickBinding( Hand.Left ),
+			[ "Right Joystick" ] = () => new JoystickBinding( Hand.Right ),
+			[ "Left Buttons" ] = () => new ButtonBinding( Hand.Left ),
+			[ "Right Buttons" ] = () => new ButtonBinding( Hand.Right )
 		};
 
-		Dictionary<string, CustomInput> removedInputs = new();
-		public readonly BindableList<CustomInput> ActiveInputs = new();
-		Dictionary<string, CustomInput> selectedInputs = new();
+		Dictionary<string, CustomBinding> removedInputs = new();
+		public readonly BindableList<CustomBinding> ActiveInputs = new();
+		Dictionary<string, CustomBinding> selectedInputs = new();
 		Dictionary<string, Drawable> inputDrawables = new();
 		FillFlowContainer container;
 		OsuButton addButton;
@@ -151,12 +152,11 @@ namespace osu.XR.Drawables {
 		}
 
 		void addCustomInput ( string ID ) {
-			CustomInput input;
+			CustomBinding input;
 			if ( removedInputs.ContainsKey( ID ) ) {
 				removedInputs.Remove( ID, out input );
 				selectedInputs.Add( ID, input );
 				ActiveInputs.Add( input );
-				Add( input );
 
 				container.Add( inputDrawables[ ID ] );
 				updateDropdown();
@@ -167,8 +167,8 @@ namespace osu.XR.Drawables {
 
 			selectedInputs.Add( ID, input );
 			ActiveInputs.Add( input );
-			Add( input );
 
+			var handler = input.CreateHandler();
 			inputDrawables.Add( ID, new Container {
 				Masking = true,
 				CornerRadius = 5,
@@ -209,7 +209,10 @@ namespace osu.XR.Drawables {
 							new Container {
 								RelativeSizeAxes = Axes.X,
 								AutoSizeAxes = Axes.Y,
-								Child = input.SettingDrawable
+								Children = new Drawable[] {
+									handler,
+									handler.CreateSettingsDrawable()
+								}
 							}
 						}
 					}
@@ -223,7 +226,6 @@ namespace osu.XR.Drawables {
 			container.Remove( inputDrawables[ ID ] );
 			selectedInputs.Remove( ID, out var input );
 			ActiveInputs.Remove( input );
-			Remove( input );
 			removedInputs.Add( ID, input );
 			updateDropdown();
 		}

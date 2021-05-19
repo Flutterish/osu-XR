@@ -15,7 +15,7 @@ namespace osu.XR.Components.Panels {
 	public class XrRulesetInfoPanel : FlatPanel, IHasName, IHasIcon {
 		public readonly RulesetInfoPanel Panel = new() { Height = 500, Width = 400 };
 		public readonly Bindable<bool> IsVisibleBindable = new();
-		public BindableList<CustomInput> CurrentBindings => Panel.CurrentBindings;
+		public BindableList<CustomBinding> CurrentBindings => Panel.CurrentBindings;
 
 		[Resolved]
 		private OsuGameXr Game { get; set; }
