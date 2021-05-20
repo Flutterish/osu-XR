@@ -21,6 +21,7 @@ using osu.Game.Overlays.Notifications;
 using osu.Game.Resources;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
+using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.UI;
 using osu.Game.Screens;
 using osu.Game.Screens.Play;
@@ -403,7 +404,8 @@ namespace osu.XR {
 						InputManager = inputManager,
 						RulesetActionType = actionType,
 						KeyBindingContainer = bindings,
-						Mods = player.GetProperty<Bindable<IReadOnlyList<Mod>>>()
+						Mods = player.GetProperty<Bindable<IReadOnlyList<Mod>>>(),
+						Variant = drawableRuleset.GetProperty<int>( nameof( DrawableRuleset<HitObject>.Variant ) )
 					};
 
 					onPlayerEntered( lastPlayer );
@@ -415,7 +417,7 @@ namespace osu.XR {
 		void onPlayerEntered ( PlayerInfo info ) {
 			if ( info.Mods.Value.Any( x => x is ModAutoplay ) ) return;
 
-			info.InputManager.Add( injectedInput = new InjectedInput( InputBindings.CurrentBindings, info ) );
+			info.InputManager.Add( injectedInput = new InjectedInput( InputBindings.GetBindingsForVariant( info.Variant ), info ) );
 		}
 
 		void onPlayerExit ( PlayerInfo info ) {

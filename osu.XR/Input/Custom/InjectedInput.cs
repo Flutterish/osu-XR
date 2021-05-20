@@ -23,6 +23,7 @@ namespace osu.XR.Input.Custom {
 		public Type RulesetActionType;
 		public KeyBindingContainer KeyBindingContainer;
 		public Bindable<IReadOnlyList<Mod>> Mods;
+		public int Variant;
 	}
 
 	public class InjectedInput : CompositeDrawable {

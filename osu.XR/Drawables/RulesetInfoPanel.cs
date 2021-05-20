@@ -17,6 +17,7 @@ using osuTK.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -57,9 +58,11 @@ namespace osu.XR.Drawables {
 		[Resolved]
 		private IBindable<RulesetInfo> ruleset { get; set; }
 		List<Drawable> sections = new();
-		public BindableList<CustomBinding> CurrentBindings => settings[ ruleset.Value ].ActiveInputs;
 
-		Dictionary<RulesetInfo, RulesetXrBindingsSubsection> settings = new();
+		public BindableList<CustomBinding> GetBindingsForVariant ( int variant )
+			=> settings[ ruleset.Value ].GetBindingForVariant( variant );
+
+		Dictionary<RulesetInfo, RulesetXrBindingSection> settings = new();
 		protected override void LoadComplete () {
 			base.LoadComplete();
 
@@ -74,7 +77,7 @@ namespace osu.XR.Drawables {
 
 				if ( !settings.ContainsKey( v.NewValue ) ) {
 					var ruleset = v.NewValue.CreateInstance();
-					settings.Add( v.NewValue, new RulesetXrBindingsSubsection( ruleset ) );
+					settings.Add( v.NewValue, new RulesetXrBindingSection( ruleset ) );
 				}
 				sections.Add( settings[ v.NewValue ] );
 
@@ -83,9 +86,54 @@ namespace osu.XR.Drawables {
 		}
 	}
 
-	public class RulesetXrBindingsSubsection : SettingsSubsection {
+	public class RulesetXrBindingSection : SettingsSubsection {
 		protected override string Header => "Bindings (Not saveable)";
 
+		public BindableList<CustomBinding> GetBindingForVariant ( int variant )
+			=> getVariant( variant ).ActiveInputs;
+
+		Ruleset ruleset;
+		List<int> variants;
+		Dictionary<int, RulesetVariantXrBindingsSubsection> variantSettings = new();
+		RulesetVariantXrBindingsSubsection active;
+		public RulesetXrBindingSection ( Ruleset ruleset ) {
+			this.ruleset = ruleset;
+			variants = ruleset.AvailableVariants.ToList();
+			if ( variants.Count > 1 ) {
+				SettingsDropdown<string> settings;
+				Add( settings = new SettingsDropdown<string> {
+					LabelText = "Variant",
+					Items = variants.Select( x => ruleset.GetVariantName( x ) ),
+					Current = new Bindable<string>( ruleset.GetVariantName( variants.FirstOrDefault() ) )
+				} );
+
+				settings.Current.BindValueChanged( v => {
+					setVariant( variants.FirstOrDefault( x => ruleset.GetVariantName( x ) == v.NewValue ) );
+				}, true );
+			}
+			else {
+				setVariant( variants.FirstOrDefault() );
+			}
+		}
+
+		RulesetVariantXrBindingsSubsection getVariant ( int variant ) {
+			if ( !variantSettings.ContainsKey( variant ) ) {
+				variantSettings.Add( variant, new RulesetVariantXrBindingsSubsection( ruleset, variant ) );
+			}
+
+			return variantSettings[ variant ];
+		}
+
+		void setVariant ( int variant ) {
+			if ( active != null ) Remove( active );
+			Add( active = getVariant( variant ) );
+		}
+	}
+
+	public class RulesetVariantXrBindingsSubsection : SettingsSubsection {
+		protected override string Header => ruleset.GetVariantName( Variant );
+
+		public readonly int Variant;
 		Ruleset ruleset;
 		[Cached]
 		BindableList<object> sharedSettings = new(); 
@@ -108,9 +156,10 @@ namespace osu.XR.Drawables {
 		OsuButton addButton;
 		SettingsDropdown<string> dropdown;
 
-		public RulesetXrBindingsSubsection ( Ruleset ruleset ) {
+		public RulesetVariantXrBindingsSubsection ( Ruleset ruleset, int variant ) {
 			this.ruleset = ruleset;
-			rulesetActions = ruleset.GetDefaultKeyBindings().Select( x => x.Action ).Distinct().ToList();
+			this.Variant = variant;
+			rulesetActions = ruleset.GetDefaultKeyBindings( variant ).Select( x => x.Action ).Distinct().ToList();
 
 			Add( container = new FillFlowContainer {
 				RelativeSizeAxes = Axes.X,
