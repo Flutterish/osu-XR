@@ -1,4 +1,5 @@
 ﻿using MessagePack.Formatters;
+using Newtonsoft.Json.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -7,6 +8,7 @@ using osu.Framework.Graphics.Shapes;
 using osu.Framework.Input.Events;
 using osu.Game.Graphics.UserInterface;
 using osu.XR.Input.Custom.Components;
+using osu.XR.Input.Custom.Persistence;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -22,8 +24,27 @@ namespace osu.XR.Input.Custom {
 		public readonly BindableDouble ThresholdBBindable = new( 0.275 );
 		public readonly Bindable<object> Action = new();
 
+		public ClapBinding () {
+			ThresholdABindable.ValueChanged += v => OnSettingsChanged();
+			ThresholdBBindable.ValueChanged += v => OnSettingsChanged();
+			Action.ValueChanged += v => OnSettingsChanged();
+		}
+
 		public override CustomBindingHandler CreateHandler ()
 			=> new ClapBindingHandler( this );
+
+		public override object CreateSaveData ( SaveDataContext context )
+			=> new { 
+				Action = context.SaveActionBinding( Action.Value ),
+				ThresholdA = ThresholdABindable.Value,
+				ThresholdB = ThresholdBBindable.Value
+			};
+
+		public override void Load ( JToken data, SaveDataContext context ) {
+			Action.Value = context.LoadActionBinding( data, "Action" );
+			ThresholdABindable.Value = (double)( data as JObject )[ "ThresholdA" ];
+			ThresholdBBindable.Value = (double)( data as JObject )[ "ThresholdB" ];
+		}
 	}
 
 	public class ClapBindingHandler : CustomBindingHandler {

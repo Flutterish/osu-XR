@@ -1,4 +1,5 @@
-﻿using OpenVR.NET.Manifests;
+﻿using Newtonsoft.Json.Linq;
+using OpenVR.NET.Manifests;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -10,6 +11,7 @@ using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays.Settings;
 using osu.XR.Input.Custom.Components;
+using osu.XR.Input.Custom.Persistence;
 using osu.XR.Settings;
 using osuTK;
 using osuTK.Graphics;
@@ -30,13 +32,34 @@ namespace osu.XR.Input.Custom {
 
 		public override CompositeCustomBindingHandler CreateHandler ()
 			=> new JoystickBindingHandler( this );
+
+		protected override object CreateSaveData ( Dictionary<CustomBinding, object> childrenData )
+			=> childrenData.Select( x => new BindingData {
+				Type = x.Key is JoystickMovementBinding ? "Movement" : "Zone",
+				Data = x.Value
+			} ).ToList();
+
+		public override void Load ( JToken data, SaveDataContext context ) {
+			Children.Clear();
+
+			foreach ( var i in data.ToObject<List<BindingData>>() ) {
+				CustomBinding child;
+				if ( i.Type == "Movement" ) {
+					Children.Add( child = new JoystickMovementBinding() );
+				}
+				else {
+					Children.Add( child = new JoystickZoneBinding() );
+				}
+				child.Load( i.Data as JToken, context );
+			}
+		}
 	}
 
 	public class JoystickBindingHandler : CompositeCustomBindingHandler {
 		public readonly BoundComponent<Controller2DVector, System.Numerics.Vector2, Vector2> joystick;
 
 		public JoystickBindingHandler ( JoystickBinding backing ) : base( backing ) {
-			AddInternal( joystick = new( XrAction.Scroll, x => x.Role == OsuGameXr.RoleForHand( backing.Hand ), x => new Vector2( x.X, -x.Y ) ) );
+			AddInternal( joystick = new( XrAction.Scroll, x => x?.Role == OsuGameXr.RoleForHand( backing.Hand ), x => new Vector2( x.X, -x.Y ) ) );
 		}
 
 		public override CompositeCustomBindingDrawable CreateSettingsDrawable ()
@@ -168,14 +191,14 @@ namespace osu.XR.Input.Custom {
 		protected override void AddDrawable ( Drawable drawable, CustomBindingHandler source ) {
 			content.Add( drawable );
 
-			//if ( handler is JoystickMovementFactory ) sharedSettings.Add( new JoystickMovementLock() );
+			if ( source.Backing is JoystickMovementBinding ) sharedSettings.Add( new JoystickMovementLock() );
 			updateDropdown();
 		}
 
 		protected override void RemoveDrawable ( Drawable drawable, CustomBindingHandler source ) {
 			content.Remove( drawable );
 
-			//if ( handler is JoystickMovementFactory ) sharedSettings.RemoveAll( x => x is JoystickMovementLock );
+			if ( source.Backing is JoystickMovementBinding ) sharedSettings.RemoveAll( x => x is JoystickMovementLock );
 			updateDropdown();
 		}
 	}
@@ -207,6 +230,28 @@ namespace osu.XR.Input.Custom {
 
 		public override CustomBindingHandler CreateHandler ()
 			=> new JoystickZoneBindingHandler( this );
+
+		public JoystickZoneBinding () {
+			StartAngle.ValueChanged += v => OnSettingsChanged();
+			Arc.ValueChanged += v => OnSettingsChanged();
+			Deadzone.ValueChanged += v => OnSettingsChanged();
+			Action.ValueChanged += v => OnSettingsChanged();
+		}
+
+		public override object CreateSaveData ( SaveDataContext context )
+			=> new {
+				StartAngle = StartAngle.Value,
+				Arc = Arc.Value,
+				Deadzone = Deadzone.Value,
+				Action = context.SaveActionBinding( Action.Value )
+			};
+
+		public override void Load ( JToken data, SaveDataContext context ) {
+			Action.Value = context.LoadActionBinding( data, "Action" );
+			StartAngle.Value = (double)( data as JObject )[ "StartAngle" ];
+			Arc.Value = (double)( data as JObject )[ "Arc" ];
+			Deadzone.Value = (double)( data as JObject )[ "Deadzone" ];
+		}
 	}
 
 	public class JoystickZoneBindingHandler : CustomJoystickBindingHandler {
@@ -303,8 +348,24 @@ namespace osu.XR.Input.Custom {
 		public readonly Bindable<JoystickMovementType> MovementType = new( JoystickMovementType.Absolute );
 		public readonly BindableDouble Distance = new( 100 ) { MinValue = 0, MaxValue = 100 };
 
+		public JoystickMovementBinding () {
+			MovementType.ValueChanged += v => OnSettingsChanged();
+			Distance.ValueChanged += v => OnSettingsChanged();
+		}
+
 		public override CustomBindingHandler CreateHandler ()
 			=> new JoystickMovementBindingHandler( this );
+
+		public override object CreateSaveData ( SaveDataContext context )
+			=> new {
+				Type = MovementType.Value.ToString(),
+				Distance = Distance.Value
+			};
+
+		public override void Load ( JToken data, SaveDataContext context ) {
+			MovementType.Value = Enum.Parse<JoystickMovementType>( (string)( data as JObject )[ "Type" ] );
+			Distance.Value = (double)( data as JObject )[ "Distance" ];
+		}
 	}
 
 	public class JoystickMovementBindingHandler : CustomJoystickBindingHandler {

@@ -1,9 +1,11 @@
-﻿using OpenVR.NET.Manifests;
+﻿using Newtonsoft.Json.Linq;
+using OpenVR.NET.Manifests;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.XR.Input.Custom.Components;
+using osu.XR.Input.Custom.Persistence;
 using osu.XR.Settings;
 using System;
 using System.Collections.Generic;
@@ -17,12 +19,25 @@ namespace osu.XR.Input.Custom {
 		public override string Name => $"{Hand} Buttons";
 		public ButtonBinding ( Hand hand ) {
 			Hand = hand;
+			PrimaryAction.ValueChanged += v => OnSettingsChanged();
+			SecondaryAction.ValueChanged += v => OnSettingsChanged();
 		}
 
 		public readonly Bindable<object> PrimaryAction = new();
 		public readonly Bindable<object> SecondaryAction = new();
 		public override CustomBindingHandler CreateHandler ()
 			=> new ButtonBindingHandler( this );
+
+		public override object CreateSaveData ( SaveDataContext context )
+			=> new {
+				Primary = context.SaveActionBinding( PrimaryAction.Value ),
+				Secondary = context.SaveActionBinding( SecondaryAction.Value ),
+			};
+
+		public override void Load ( JToken data, SaveDataContext context ) {
+			PrimaryAction.Value = context.LoadActionBinding( data, "Primary" );
+			SecondaryAction.Value = context.LoadActionBinding( data, "Secondary" );
+		}
 	}
 
 	public class ButtonBindingHandler : CustomBindingHandler {
@@ -32,8 +47,8 @@ namespace osu.XR.Input.Custom {
 		BoundComponent<ControllerButton, bool> primary;
 		BoundComponent<ControllerButton, bool> secondary;
 		public ButtonBindingHandler ( ButtonBinding backing ) : base( backing ) {
-			AddInternal( primary = new( XrAction.MouseLeft, x => x.Role == OsuGameXr.RoleForHand( backing.Hand ) ) );
-			AddInternal( secondary = new( XrAction.MouseRight, x => x.Role == OsuGameXr.RoleForHand( backing.Hand ) ) );
+			AddInternal( primary = new( XrAction.MouseLeft, x => x?.Role == OsuGameXr.RoleForHand( backing.Hand ) ) );
+			AddInternal( secondary = new( XrAction.MouseRight, x => x?.Role == OsuGameXr.RoleForHand( backing.Hand ) ) );
 
 			primaryBinding.IsActive.BindTo( primary.Current );
 			secondaryBinding.IsActive.BindTo( secondary.Current );

@@ -112,7 +112,7 @@ namespace osu.XR {
 				Notifications.Post( new SimpleNotification() { Text = msg, Icon = FontAwesome.Solid.Bomb } );
 			};
 			OpenVR.NET.Events.OnException += (msg,e) => {
-				Notifications.Post( new SimpleNotification() { Text = msg, Icon = FontAwesome.Solid.Bomb } );
+				Notifications.Post( new SimpleNotification() { Text = msg + ": " + e.Message, Icon = FontAwesome.Solid.Bomb } );
 			};
 			Scene = new SceneWithMirrorWarning { RelativeSizeAxes = Axes.Both, Camera = Camera };
 			PhysicsSystem.Root = Scene.Root;

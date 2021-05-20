@@ -1,7 +1,9 @@
-﻿using osu.Framework.Bindables;
+﻿using Newtonsoft.Json.Linq;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Input.Bindings;
+using osu.XR.Input.Custom.Persistence;
 using osuTK;
 using System;
 using System.Collections.Generic;
@@ -15,6 +17,14 @@ namespace osu.XR.Input.Custom {
 	public abstract class CustomBinding {
 		public abstract string Name { get; }
 		public abstract CustomBindingHandler CreateHandler ();
+
+		public abstract object CreateSaveData ( SaveDataContext context );
+		public abstract void Load ( JToken data, SaveDataContext context );
+
+		public event Action? SettingsChanged;
+		protected void OnSettingsChanged () {
+			SettingsChanged?.Invoke();
+		}
 	}
 	public abstract class CustomBindingHandler : CompositeDrawable {
 		public readonly CustomBinding Backing;
@@ -48,8 +58,23 @@ namespace osu.XR.Input.Custom {
 	}
 
 	public abstract class CompositeCustomBinding : CustomBinding {
+		public CompositeCustomBinding () {
+			Children.BindCollectionChanged( (_,e) => {
+				if ( e.Action == NotifyCollectionChangedAction.Add ) {
+					if ( e.NewItems is null ) return;
+					foreach ( CustomBinding i in e.NewItems ) {
+						i.SettingsChanged += OnSettingsChanged;
+					}
+				}
+				OnSettingsChanged();
+			} );
+		}
+
 		public readonly BindableList<CustomBinding> Children = new();
 		public override abstract CompositeCustomBindingHandler CreateHandler ();
+		public sealed override object CreateSaveData ( SaveDataContext context )
+			=> CreateSaveData( Children.ToDictionary( x => x, x => x.CreateSaveData( context ) ) );
+		protected abstract object CreateSaveData ( Dictionary<CustomBinding,object> childrenData );
 	}
 	public abstract class CompositeCustomBindingHandler : CustomBindingHandler {
 		new public CompositeCustomBinding Backing => (CompositeCustomBinding)base.Backing;

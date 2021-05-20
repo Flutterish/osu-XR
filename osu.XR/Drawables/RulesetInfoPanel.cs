@@ -1,10 +1,15 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.EntityFrameworkCore.Internal;
+using Newtonsoft.Json.Linq;
+using NuGet.Packaging.Signing;
+using OpenVR.NET;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Platform;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
@@ -12,10 +17,12 @@ using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays.Settings;
 using osu.Game.Rulesets;
 using osu.XR.Input.Custom;
+using osu.XR.Input.Custom.Persistence;
 using osu.XR.Settings;
 using osuTK.Graphics;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text;
@@ -63,31 +70,103 @@ namespace osu.XR.Drawables {
 			=> settings[ ruleset.Value ].GetBindingForVariant( variant );
 
 		Dictionary<RulesetInfo, RulesetXrBindingSection> settings = new();
+		[Resolved]
+		Storage storage { get; set; }
+		const string saveFilePath = "Bindings.json";
 		protected override void LoadComplete () {
 			base.LoadComplete();
+			storage = storage.GetStorageForDirectory( "XR" );
 
-			ruleset.BindValueChanged( v => {
-				if ( v.NewValue is null ) return;
+			loadBindings();
+			ruleset.BindValueChanged( OnRulesetChanged, true );
+		}
 
-				container.RemoveAll( x => sections.Contains( x ) );
-				sections.Clear();
+		RulesetBindingsFile saveFile;
+		private void loadBindings () { // this will do until we have a breaking change
+			try {
+				if ( storage.Exists( saveFilePath ) ) {
+					using var s = storage.GetStream( saveFilePath );
+					var reader = new StreamReader( s );
+					JToken token = Newtonsoft.Json.JsonConvert.DeserializeObject<object>( reader.ReadToEnd() ) as JToken;
+					if ( token is null ) {
+						OpenVR.NET.Events.Error( "Could not load Bindings file: Invalid file" );
+					}
+					saveFile = RulesetBindingsFile.Load( token );
 
-				rulesetName.Text = "Ruleset: ";
-				rulesetName.AddText( v.NewValue.Name, s => s.Font = s.Font = OsuFont.GetFont( Typeface.Torus, 20, FontWeight.Bold ) );
-
-				if ( !settings.ContainsKey( v.NewValue ) ) {
-					var ruleset = v.NewValue.CreateInstance();
-					settings.Add( v.NewValue, new RulesetXrBindingSection( ruleset ) );
+					// create a backup file
+					using var ss = storage.GetStream( saveFilePath );
+					reader = new StreamReader( ss );
+					using var c = storage.GetStream( saveFilePath + "~", FileAccess.Write, mode: FileMode.Create );
+					var writer = new StreamWriter( c );
+					writer.Write( reader.ReadToEnd() );
+					writer.Flush();
 				}
-				sections.Add( settings[ v.NewValue ] );
+			}
+			catch ( Exception e ) {
+				saveFile = new();
+				OpenVR.NET.Events.Exception( e, "Could not load Bindings file" );
+			}
+		}
 
-				container.AddRange( sections );
-			}, true );
+		private void saveBindings () {
+			using var s = storage.GetStream( saveFilePath, FileAccess.Write, mode: FileMode.Create );
+			var writer = new StreamWriter( s );
+			writer.Write( Newtonsoft.Json.JsonConvert.SerializeObject( CreateSaveFile(), Newtonsoft.Json.Formatting.Indented ) );
+			writer.Flush();
+		}
+
+		public RulesetBindingsFile CreateSaveFile () {
+			RulesetBindingsFile file = new();
+
+			foreach ( var (ruleset,manager) in settings ) {
+				file.Rulesets.Add( manager.CreateSaveData() );
+			}
+
+			return file.MergeWith( saveFile );
+		}
+
+		double time;
+		protected override void Update () {
+			base.Update();
+
+			if ( time > 0 ) {
+				time -= Clock.ElapsedFrameTime;
+				if ( time < 0 ) {
+					saveBindings();
+				}
+			}
+		}
+
+		private void OnRulesetChanged ( ValueChangedEvent<RulesetInfo> v ) {
+			if ( v.NewValue is null ) return;
+
+			container.RemoveAll( x => sections.Contains( x ) );
+			sections.Clear();
+
+			rulesetName.Text = "Ruleset: ";
+			rulesetName.AddText( v.NewValue.Name, s => s.Font = s.Font = OsuFont.GetFont( Typeface.Torus, 20, FontWeight.Bold ) );
+
+			if ( !settings.ContainsKey( v.NewValue ) ) {
+				var ruleset = v.NewValue.CreateInstance();
+				var section = new RulesetXrBindingSection( ruleset );
+				section.SettingsChanged += onSettingsChanged;
+				settings.Add( v.NewValue, section );
+				if ( saveFile.Rulesets.FirstOrDefault( x => x.Name == v.NewValue.ShortName ) is RulesetBindings bindings ) {
+					settings[ v.NewValue ].LoadSaveFile( bindings );
+				}
+			}
+			sections.Add( settings[ v.NewValue ] );
+
+			container.AddRange( sections );
+		}
+
+		private void onSettingsChanged () {
+			time = 1000;
 		}
 	}
 
 	public class RulesetXrBindingSection : SettingsSubsection {
-		protected override string Header => "Bindings (Not saveable)";
+		protected override string Header => "Bindings";
 
 		public BindableList<CustomBinding> GetBindingForVariant ( int variant )
 			=> getVariant( variant ).ActiveInputs;
@@ -116,17 +195,65 @@ namespace osu.XR.Drawables {
 			}
 		}
 
+		public void LoadSaveFile ( RulesetBindings saveFile ) {
+			clearWarnings();
+			if ( saveFile.VariantNames.Count != variants.Count || !variants.All( x => saveFile.VariantNames.ContainsKey( x ) && saveFile.VariantNames[ x ] == ruleset.GetVariantName( x ) ) ) {
+				createWarning( "Variants for this ruleset defined in the save file do not match the detected variants. Your bindings might be corrupted." );
+			}
+
+			foreach ( var (variant,data) in saveFile.Variants ) {
+				var settings = getVariant( variant );
+				if ( settings is null ) {
+					createWarning( $"Could not load variant defined as \"{saveFile.VariantNames[variant]}\"" );
+				}
+				else {
+					settings.LoadSaveFile( data );
+				}
+			}
+		}
+		void clearWarnings () {
+
+		}
+		void createWarning ( string message ) {
+			OpenVR.NET.Events.Error( message );
+		}
+
 		RulesetVariantXrBindingsSubsection getVariant ( int variant ) {
+			if ( !variants.Contains( variant ) ) return null;
+
 			if ( !variantSettings.ContainsKey( variant ) ) {
-				variantSettings.Add( variant, new RulesetVariantXrBindingsSubsection( ruleset, variant ) );
+				var section = new RulesetVariantXrBindingsSubsection( ruleset, variant );
+				section.SettingsChanged += onSettingsChanged;
+				variantSettings.Add( variant, section );
 			}
 
 			return variantSettings[ variant ];
 		}
 
+		public event Action SettingsChanged;
+		private void onSettingsChanged () {
+			SettingsChanged?.Invoke();
+		}
+
 		void setVariant ( int variant ) {
 			if ( active != null ) Remove( active );
 			Add( active = getVariant( variant ) );
+		}
+
+		public RulesetBindings CreateSaveData () {
+			RulesetBindings data = new() {
+				Name = ruleset.RulesetInfo.ShortName
+			};
+
+			foreach ( var variant in variants ) {
+				data.VariantNames.Add( variant, ruleset.GetVariantName( variant ) );
+			}
+
+			foreach ( var (variant,manager) in variantSettings ) {
+				data.Variants.Add( variant, manager.CreateSaveData() );
+			}
+
+			return data;
 		}
 	}
 
@@ -138,7 +265,7 @@ namespace osu.XR.Drawables {
 		[Cached]
 		BindableList<object> sharedSettings = new(); 
 		[Cached]
-		List<object> rulesetActions = new();
+		public readonly List<object> RulesetActions = new();
 
 		static Dictionary<string, Func<CustomBinding>> avaiableInputs = new() {
 			[ "Clap" ] = () => new ClapBinding(),
@@ -159,7 +286,7 @@ namespace osu.XR.Drawables {
 		public RulesetVariantXrBindingsSubsection ( Ruleset ruleset, int variant ) {
 			this.ruleset = ruleset;
 			this.Variant = variant;
-			rulesetActions = ruleset.GetDefaultKeyBindings( variant ).Select( x => x.Action ).Distinct().ToList();
+			RulesetActions = ruleset.GetDefaultKeyBindings( variant ).Select( x => x.Action ).Distinct().ToList();
 
 			Add( container = new FillFlowContainer {
 				RelativeSizeAxes = Axes.X,
@@ -200,7 +327,7 @@ namespace osu.XR.Drawables {
 			dropdown.Current.SetDefault();
 		}
 
-		void addCustomInput ( string ID ) {
+		CustomBinding addCustomInput ( string ID ) {
 			CustomBinding input;
 			if ( removedInputs.ContainsKey( ID ) ) {
 				removedInputs.Remove( ID, out input );
@@ -209,10 +336,11 @@ namespace osu.XR.Drawables {
 
 				container.Add( inputDrawables[ ID ] );
 				updateDropdown();
-				return;
+				return input;
 			}
 			
 			input = avaiableInputs[ ID ]();
+			input.SettingsChanged += onSettingsChanged;
 
 			selectedInputs.Add( ID, input );
 			ActiveInputs.Add( input );
@@ -269,6 +397,13 @@ namespace osu.XR.Drawables {
 			} );
 			container.Add( inputDrawables[ ID ] );
 			updateDropdown();
+
+			return input;
+		}
+
+		public event Action SettingsChanged;
+		private void onSettingsChanged () {
+			SettingsChanged?.Invoke();
 		}
 
 		void removeCustomInput ( string ID ) {
@@ -277,6 +412,56 @@ namespace osu.XR.Drawables {
 			ActiveInputs.Remove( input );
 			removedInputs.Add( ID, input );
 			updateDropdown();
+		}
+
+		public RulesetVariantBindings CreateSaveData () {
+			RulesetVariantBindings data = new() {
+				Name = ruleset.GetVariantName( Variant )
+			};
+
+			foreach ( var (action,i) in RulesetActions.Zip( Enumerable.Range(0, RulesetActions.Count) ) ) {
+				data.Actions.Add( i, action.GetDescription() );
+			}
+
+			SaveDataContext context = new( this );
+			foreach ( var (ID,binding) in selectedInputs ) {
+				data.Bindings.Add( new BindingData {
+					Type = ID,
+					Data = binding.CreateSaveData( context )
+				} );
+			}
+
+			return data;
+		}
+
+		public void LoadSaveFile ( RulesetVariantBindings data ) {
+			clearWarnings();
+			if ( data.Actions.Count != RulesetActions.Count || !data.Actions.All( x => x.Key == RulesetActions.FindIndex( y => y.GetDescription() == x.Value ) ) ) {
+				createWarning( "Actions for this variant defined in the save file do not match the detected actions. Your bindings might be corrupted." );
+			}
+
+			foreach ( var i in selectedInputs.Keys.ToArray() ) {
+				removeCustomInput( i );
+			}
+
+			inputDrawables.Clear();
+			removedInputs.Clear();
+
+			var context = new SaveDataContext( this );
+			foreach ( var binding in data.Bindings ) {
+				if ( avaiableInputs.ContainsKey( binding.Type ) ) {
+					addCustomInput( binding.Type ).Load( binding.Data as JToken, context );
+				}
+				else {
+					createWarning( $"Could not add binding defined as \"{binding.Type}\"" );
+				}
+			}
+		}
+		void clearWarnings () {
+
+		}
+		void createWarning ( string message ) {
+			OpenVR.NET.Events.Error( message );
 		}
 	}
 }
