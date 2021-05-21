@@ -1,6 +1,7 @@
 ﻿using osu.Framework.XR.Components;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Maths;
+using osu.Framework.XR.Physics;
 using osuTK;
 using osuTK.Graphics;
 
@@ -44,5 +45,5 @@ namespace osu.XR.Components {
                 ), new Vector2( 0, 1 ), new Vector2( 1, 1 ), new Vector2( 0, 0 ), new Vector2( 1, 0 ) );
             }
         }
-	}
+    }
 }

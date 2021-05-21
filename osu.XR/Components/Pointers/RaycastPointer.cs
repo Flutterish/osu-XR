@@ -1,7 +1,9 @@
-﻿using osu.Framework.Bindables;
+﻿using OpenVR.NET;
+using osu.Framework.Bindables;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Maths;
 using osuTK;
+using System;
 
 namespace osu.XR.Components.Pointers {
 	/// <summary>
@@ -24,7 +26,12 @@ namespace osu.XR.Components.Pointers {
 		protected override void UpdatePointer () {
 			if ( PhysicsSystem.TryHit( Source.Position, Source.Forward, out var hit ) && hit.Distance < HitDistance ) {
 				Position = hit.Point;
-				Rotation = Matrix4.LookAt( Vector3.Zero, hit.Normal, Vector3.UnitY ).ExtractRotation().Inverted();
+
+				Rotation = hit.Normal.Y == 1 
+					? Quaternion.FromEulerAngles( MathF.PI / 2, 0, 0 )
+					: hit.Normal.Y == -1 
+					? Quaternion.FromEulerAngles( -MathF.PI / 2, 0, 0 )
+					: Matrix4.LookAt( Vector3.Zero, hit.Normal, Vector3.UnitY ).ExtractRotation().Inverted();
 
 				RaycastHit = hit;
 				CurrentHit = hit.Collider;

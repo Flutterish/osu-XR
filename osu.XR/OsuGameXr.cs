@@ -10,6 +10,7 @@ using osu.Framework.IO.Stores;
 using osu.Framework.Platform;
 using osu.Framework.XR;
 using osu.Framework.XR.Components;
+using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Physics;
 using osu.Framework.XR.Projection;
 using osu.Game;
@@ -322,6 +323,10 @@ namespace osu.XR {
 			Scene.Add( new SkyBox() );
 			Scene.Add( new FloorGrid() );
 			Scene.Add( new BeatingScenery() );
+			Scene.Add( new Collider {
+				Mesh = Mesh.XZPlane( 17, 17 ),
+				IsVisible = false
+			} );
 			Scene.Add( Camera );
 			Scene.Add( OsuPanel );
 			Scene.Add( new HandheldMenu().With( s => s.Panels.AddRange( new FlatPanel[] { new XrConfigPanel(), Notifications, Inspector, InputBindings } ) ) );

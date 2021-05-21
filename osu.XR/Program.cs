@@ -3,9 +3,12 @@
 
 using osu.Framework.Development;
 using osu.Framework.Logging;
+using osu.Framework.XR.Graphics;
+using osu.Framework.XR.Physics;
 using osu.Game.IPC;
 using osu.XR.GameHosts;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
