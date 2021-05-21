@@ -13,13 +13,19 @@ namespace osu.XR.Components {
 	public class Selection : Model, INotInspectable {
 		public Selection () {
 			Mesh = Mesh.FromOBJFile( "./Resources/selection.obj" );
-			MainTexture = Textures.Pixel( Color4.Lime ).TextureGL;
+			Tint = Color4.Lime;
+
+			AutoOffsetOrigin = Vector3.Zero;
 		}
 
 		Drawable3D selected;
+		public Drawable3D Selected {
+			get => selected;
+			set => Select( value );
+		}
 		public void Select ( Drawable3D drawable ) {
 			selected = drawable;
-			Transform.SetParent( drawable.Transform, transformKey );
+			Transform.SetParent( drawable?.Transform, transformKey );
 		}
 
 		protected override void Update () {
@@ -30,6 +36,7 @@ namespace osu.XR.Components {
 			}
 
 			Scale = selected.RequiredParentSizeToFit * 1.03f;
+			Position = selected.Centre;
 		}
 	}
 }

@@ -5,6 +5,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.Input.Events;
 using osu.Framework.XR.Components;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
@@ -69,6 +70,7 @@ namespace osu.XR.Drawables {
 		}
 
 		Selection selection = new();
+		Selection helperSelection = new() { Tint = Color4.Yellow };
 
 		protected override void Update () {
 			base.Update();
@@ -102,7 +104,14 @@ namespace osu.XR.Drawables {
 			if ( element is IConfigurableInspectable inspectable ) {
 				subsections.AddRange( inspectable.CreateInspectorSubsections() );
 			}
-			subsections.Add( new HierarchyInspectorSubsection( element, v => InspectedElementBindable.Value = v ) );
+			subsections.Add( new HierarchyInspectorSubsection( element, v => InspectedElementBindable.Value = v ) {
+				DrawableHovered = d => {
+					if ( helperSelection.Selected == d ) return;
+
+					helperSelection.Parent = d?.Root;
+					helperSelection.Select( d );
+				}
+			} );
 			
 			elements.AddRange( subsections );
 		}
@@ -301,6 +310,7 @@ namespace osu.XR.Drawables {
 		Drawable3D drawable;
 		FillFlowContainer list;
 		Action<Drawable3D> drawableSelected;
+		public Action<Drawable3D> DrawableHovered = _ => { };
 		public HierarchyInspectorSubsection ( Drawable3D drawable, Action<Drawable3D> drawableSelected ) {
 			this.drawableSelected = drawableSelected;
 			this.drawable = drawable;
@@ -321,16 +331,33 @@ namespace osu.XR.Drawables {
 
 		void addButton ( Drawable3D drawable, string name, bool enabled = true, float width = 1 ) {
 			OsuButton button;
-			list.Add( button = new OsuButton {
+			list.Add( button = new HoverableOsuButton {
 				RelativeSizeAxes = Axes.X,
 				Anchor = Anchor.TopCentre,
 				Origin = Anchor.TopCentre,
 				Width = width,
 				Height = 15,
 				Text = name,
-				Action = () => drawableSelected( drawable )
+				Action = () => drawableSelected( drawable ),
+				Hovered = () => DrawableHovered( drawable ),
+				HoverEnd = () => DrawableHovered( null )
 			} );
 			button.Enabled.Value = enabled;
+		}
+
+		private class HoverableOsuButton : OsuButton {
+			public Action Hovered;
+			public Action HoverEnd;
+
+			protected override void OnHoverLost ( HoverLostEvent e ) {
+				HoverEnd?.Invoke();
+				base.OnHoverLost( e );
+			}
+
+			protected override void Update () {
+				base.Update();
+				if ( IsHovered ) Hovered?.Invoke();
+			}
 		}
 
 		void refresh () {
