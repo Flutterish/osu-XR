@@ -12,6 +12,7 @@ namespace osu.XR.Components.Pointers {
 
 		public TouchPointer () {
 			Mesh = Mesh.FromOBJFile( "./Resources/shpere.obj" );
+			ShouldBeDepthSorted = true;
 		}
 
 		protected override void UpdatePointer () { // TODO back and forward motion should trigger a tap even while blocked

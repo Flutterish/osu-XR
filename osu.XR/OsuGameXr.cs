@@ -317,8 +317,6 @@ namespace osu.XR {
 			OsuPanel.Source.Add( OsuGame );
 			OsuPanel.AutosizeBoth();
 
-			// TODO transparency that either doesnt depend on order or is transparent-shader agnostic
-			// for now we are just sorting objects here
 			AddInternal( BeatProvider );
 			AddInternal( Scene );
 			Scene.Add( new SkyBox() );
