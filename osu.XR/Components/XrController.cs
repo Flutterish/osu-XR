@@ -27,7 +27,7 @@ namespace osu.XR.Components {
 			_ => throw new InvalidOperationException()
 		};
 
-	Model ControllerMesh = new();
+		Model ControllerMesh = new();
 		RaycastPointer raycast = new() { IsVisible = false };
 		TouchPointer touch = new() { IsVisible = false };
 		private Pointer pointer { get => pointerBindable.Value; set => pointerBindable.Value = value; }
@@ -63,6 +63,8 @@ namespace osu.XR.Components {
 			touch.MainTexture = raycast.MainTexture = Textures.Pixel( (controller.IsMainController ? Colour4.Orange : Colour4.LightBlue ).MultiplyAlpha( 100f / 255f ) ).TextureGL;
 			raycast.Source = this;
 			touch.Source = this;
+
+			Position = Vector3.UnitY;
 
 			Source = controller;
 			ControllerMesh.Mesh = new Mesh();

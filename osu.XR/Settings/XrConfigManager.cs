@@ -20,11 +20,11 @@ namespace osu.XR.Settings {
 			SetDefault( XrConfigSetting.TapOnPress, false );
 			SetDefault( XrConfigSetting.Deadzone, 20, 0, 100 );
 
-			SetDefault( XrConfigSetting.ScreenArc, MathF.PI * 1.2f, MathF.PI / 18, MathF.PI * 2 );
+			SetDefault( XrConfigSetting.ScreenArc, 2.5534892f, MathF.PI / 18, MathF.PI * 2 );
 			SetDefault( XrConfigSetting.ScreenRadius, 1.6f, 0.4f, 4 );
 			SetDefault( XrConfigSetting.ScreenHeight, 1.8f, 0f, 3 );
 
-			SetDefault( XrConfigSetting.ScreenResolutionX, 1920 * 2, 500, 7680 );
+			SetDefault( XrConfigSetting.ScreenResolutionX, 2512, 500, 7680 );
 			SetDefault( XrConfigSetting.ScreenResolutionY, 1080, 400, 4320 );
 
 			SetDefault( XrConfigSetting.RenderToScreen, false );
@@ -53,10 +53,10 @@ namespace osu.XR.Settings {
 				[XrConfigSetting.SinglePointerTouch]	= false,
 				[XrConfigSetting.TapOnPress]			= false,
 				[XrConfigSetting.Deadzone]				= 20,
-				[XrConfigSetting.ScreenArc]				= MathF.PI * 1.2f,
+				[XrConfigSetting.ScreenArc]				= 2.5534892f,
 				[XrConfigSetting.ScreenRadius]			= 1.6f,
 				[XrConfigSetting.ScreenHeight]			= 1.8f,
-				[XrConfigSetting.ScreenResolutionX]		= 1920 * 2,
+				[XrConfigSetting.ScreenResolutionX]		= 2512,
 				[XrConfigSetting.ScreenResolutionY]		= 1080
 			}
 		};
