@@ -1,10 +1,5 @@
 ﻿using osu.Framework.XR.Components;
 using osu.XR.Inspector;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 #nullable enable
 
 namespace osu.XR {

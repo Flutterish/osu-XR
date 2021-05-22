@@ -3,10 +3,6 @@ using OpenVR.NET.Manifests;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Input.Custom.Components {
 	public class BoundComponent<T,Tvalue> : Drawable where T : ControllerInputComponent<Tvalue> where Tvalue : struct, IEquatable<Tvalue> {

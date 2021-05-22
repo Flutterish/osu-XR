@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using osu.Framework.Allocation;
-using osu.Framework.Bindables;
+﻿using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
@@ -10,7 +8,6 @@ using osu.Framework.XR.Components;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.UserInterface;
-using osu.Game.Overlays.News;
 using osu.Game.Overlays.Settings;
 using osu.XR.Components;
 using osu.XR.Inspector;
@@ -18,8 +15,6 @@ using osuTK.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Drawables {
 	public class InspectorPanel : CompositeDrawable {

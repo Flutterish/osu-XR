@@ -2,11 +2,8 @@
 using osu.Framework.Bindables;
 using osu.Framework.Extensions;
 using osu.Game.Overlays.Settings;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Input.Custom.Components {
 	public class RulesetActionDropdown : SettingsDropdown<string> {

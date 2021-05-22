@@ -5,11 +5,6 @@ using osu.Framework.Graphics.Sprites;
 using osu.XR.Components.Groups;
 using osu.XR.Drawables;
 using osu.XR.Input.Custom;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Components.Panels {
 	public class XrRulesetInfoPanel : FlatPanel, IHasName, IHasIcon {

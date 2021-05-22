@@ -3,11 +3,6 @@ using osu.Framework.XR.Graphics;
 using osu.XR.Inspector;
 using osuTK;
 using osuTK.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Components {
 	public class Selection : Model, INotInspectable {

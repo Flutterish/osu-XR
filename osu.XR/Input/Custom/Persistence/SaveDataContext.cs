@@ -1,11 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using osu.Framework.Extensions;
 using osu.XR.Drawables;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Input.Custom.Persistence {
 	public class SaveDataContext {

@@ -1,12 +1,8 @@
 ﻿using osu.Framework;
 using osu.Framework.Extensions.TypeExtensions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Inspector {
 	public class ReflectedValue<T> {

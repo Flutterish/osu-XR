@@ -2,15 +2,12 @@
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.Input.Bindings;
 using osu.XR.Input.Custom.Persistence;
 using osuTK;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 #nullable enable
 
 namespace osu.XR.Input.Custom {

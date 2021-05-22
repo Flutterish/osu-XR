@@ -1,18 +1,10 @@
-﻿using Humanizer;
-using osu.Framework.Graphics;
+﻿using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
-using osu.Framework.IO.Stores;
 using osu.Framework.XR.Components;
-using osu.Game.Graphics;
 using osu.XR.Drawables;
 using osuTK;
 using osuTK.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR {
 	public class SceneWithMirrorWarning : Scene {

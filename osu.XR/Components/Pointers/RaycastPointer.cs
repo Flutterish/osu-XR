@@ -1,5 +1,4 @@
-﻿using OpenVR.NET;
-using osu.Framework.Bindables;
+﻿using osu.Framework.Bindables;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Maths;
 using osuTK;

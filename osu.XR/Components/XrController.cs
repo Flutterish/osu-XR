@@ -3,7 +3,6 @@ using OpenVR.NET.Manifests;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
-using osu.Framework.Layout;
 using osu.Framework.XR;
 using osu.Framework.XR.Components;
 using osu.Framework.XR.Graphics;

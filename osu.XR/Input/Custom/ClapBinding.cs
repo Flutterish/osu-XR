@@ -1,5 +1,4 @@
-﻿using MessagePack.Formatters;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -10,11 +9,7 @@ using osu.Game.Graphics.UserInterface;
 using osu.XR.Input.Custom.Components;
 using osu.XR.Input.Custom.Persistence;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Input.Custom {
 	public class ClapBinding : CustomBinding {

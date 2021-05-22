@@ -7,11 +7,6 @@ using osu.Game.Graphics.Sprites;
 using osu.XR.Input.Custom.Components;
 using osu.XR.Input.Custom.Persistence;
 using osu.XR.Settings;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Input.Custom {
 	public class ButtonBinding : CustomBinding {

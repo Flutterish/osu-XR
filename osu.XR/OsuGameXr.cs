@@ -34,7 +34,6 @@ using osu.XR.Input;
 using osu.XR.Input.Custom;
 using osu.XR.Settings;
 using osuTK;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Valve.VR;
