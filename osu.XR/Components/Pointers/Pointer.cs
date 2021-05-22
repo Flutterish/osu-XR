@@ -2,11 +2,12 @@
 using osu.Framework.Bindables;
 using osu.Framework.XR.Components;
 using osu.Framework.XR.Physics;
+using osu.Framework.XR.Projection;
 using System;
 using static osu.Framework.XR.Physics.Raycast;
 
 namespace osu.XR.Components.Pointers {
-	public abstract class Pointer : Model {
+	public abstract class Pointer : Model, IRenderedLast {
 		[Resolved]
 		protected PhysicsSystem PhysicsSystem { get; private set; }
 
