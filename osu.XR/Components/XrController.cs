@@ -63,8 +63,6 @@ namespace osu.XR.Components {
 			raycast.Source = this;
 			touch.Source = this;
 
-			Position = Vector3.UnitY;
-
 			Source = controller;
 			ControllerMesh.Mesh = new Mesh();
 			_ = controller.Model.LoadAsync(

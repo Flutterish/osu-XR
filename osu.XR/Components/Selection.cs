@@ -19,6 +19,8 @@ namespace osu.XR.Components {
 			set => Select( value );
 		}
 		public void Select ( Drawable3D drawable ) {
+			Parent = drawable?.Root;
+
 			selected = drawable;
 			Transform.SetParent( drawable?.Transform, transformKey );
 		}

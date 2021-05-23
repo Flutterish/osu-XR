@@ -1,0 +1,20 @@
+﻿[Current]
+Implemented saving and loading ruleset bindings.
+Ruleset bindings now support rulesets with variants like osu!mania.
+The inspector selection box now correctly selects objects with an offset.
+When you hover over a button in the inspector hiererchy, a seconday yellow selection box shows that object.
+Improved transparency rendering. The keyboard will no longer have jank visuals when pressing a key and the pointers will not make panels see-through.
+Fixed collisions not working on flat Y-planes. There is a floor collider now!
+The default preset has a better screen size now.
+Improved physics performance.
+
+
+[2021.05.19]
+When in 2 pointer mode and one hand is occupied (for example, holding a menu), the other pointer will act as if it was in 1 pointer mode.
+The menu now sticks to your offhand even in 1 pointer mode, as long as you have a secondary controller.
+Added ruleset bindings:
+* Clap - based on how close your primary and secondary controllers are
+* Buttons - primary and secondary buttons on each controller
+* Joystick:
+	* Zone - an arc with a deadzone
+	* Movement - you can move the cursor with the joystick

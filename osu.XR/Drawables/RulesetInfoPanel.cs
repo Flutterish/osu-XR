@@ -307,6 +307,8 @@ namespace osu.XR.Drawables {
 			}, true );
 
 			updateDropdown();
+
+			ActiveInputs.CollectionChanged += (_,_) => onSettingsChanged();
 		}
 
 		protected override void Update () {

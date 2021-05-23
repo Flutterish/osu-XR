@@ -324,7 +324,8 @@ namespace osu.XR {
 			Scene.Add( new BeatingScenery() );
 			Scene.Add( new Collider {
 				Mesh = Mesh.XZPlane( 17, 17 ),
-				IsVisible = false
+				IsVisible = false,
+				PhysicsLayer = GamePhysicsLayer.Floor
 			} );
 			Scene.Add( Camera );
 			Scene.Add( OsuPanel );

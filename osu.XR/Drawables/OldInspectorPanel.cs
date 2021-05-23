@@ -17,11 +17,11 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace osu.XR.Drawables {
-	public class InspectorPanel : CompositeDrawable {
+	public class OldInspectorPanel : CompositeDrawable {
 		FillFlowContainer elements;
 		TextFlowContainer elementName;
 
-		public InspectorPanel () {
+		public OldInspectorPanel () {
 			AddInternal( new Box {
 				RelativeSizeAxes = Axes.Both,
 				Colour = OsuColour.Gray( 0.05f )
@@ -356,6 +356,8 @@ namespace osu.XR.Drawables {
 		}
 
 		void refresh () {
+			list.Clear( true );
+
 			Drawable3D parent = drawable.Parent?.GetValidInspectable();
 			if ( parent is not null ) {
 				addButton( parent, $".. ({parent.GetInspectorName()})" );

@@ -19,15 +19,15 @@ namespace osu.XR.Components.Pointers {
 			var targetPos = Source.Position; // ISSUE this can get stuck behind the screen
 
 			var direction = ( targetPos - Position ).Normalized();
-			if ( PhysicsSystem.TryHit( Position, direction, out var rayHit ) && rayHit.Distance - Radius / 2 < ( Position - targetPos ).Length ) {
+			if ( PhysicsSystem.TryHit( Position, direction, out var rayHit, layer: GamePhysicsLayer.All.Except( GamePhysicsLayer.Floor ) ) && rayHit.Distance - Radius / 2 < ( Position - targetPos ).Length ) {
 				Position = rayHit.Point + rayHit.Normal * (float)Radius / 2;
 			}
 			else {
 				Position = targetPos;
 			}
-			
+
 			Scale = new Vector3( (float)Radius );
-			if ( PhysicsSystem.TryHit( Position, Radius, out var hit ) ) {
+			if ( PhysicsSystem.TryHit( Position, Radius, out var hit, layer: GamePhysicsLayer.All.Except( GamePhysicsLayer.Floor ) ) ) {
 				RaycastHit = new Raycast.RaycastHit(
 					point: hit.Point,
 					origin: hit.Origin,

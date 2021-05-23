@@ -4,6 +4,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
 using osu.XR.Components.Groups;
 using osu.XR.Drawables;
+using osu.XR.Inspector;
 
 namespace osu.XR.Components.Panels {
 	public class XrInspectorPanel : FlatPanel, IHasName, IHasIcon {
