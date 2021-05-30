@@ -8,6 +8,7 @@ using osu.Game.Overlays.Settings;
 using osu.XR.Components;
 using osu.XR.Drawables;
 using osu.XR.Inspector.Components;
+using osu.XR.Inspector.Components.Reflections;
 using osuTK.Graphics;
 using System;
 using System.Collections.Generic;
@@ -48,12 +49,13 @@ namespace osu.XR.Inspector {
 				selection.Select( v.NewValue );
 				inspectedName.Text = $"Inspected: ||{v.NewValue?.GetInspectorName() ?? "Nothing"}||";
 
+				if ( v.NewValue is null ) return;
 				// TODO add inspector sections
-				AddSection( new HiererchyInspector() );
-				AddSection( new ValueInspector { 
-					Title = "Inspected",
-					Inspected = v.NewValue
+				AddSection( new HiererchyInspector( v.NewValue ) {
+					DrawablePrevieved = d => SelectedElementBindable.Value = d,
+					DrawableSelected = d => InspectedElementBindable.Value = d
 				} );
+				AddSection( new ReflectionsInspector( v.NewValue, "Inspected" ) );
 			}, true );
 		}
 

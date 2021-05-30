@@ -367,7 +367,7 @@ namespace osu.XR.Drawables {
 			void addRange ( Drawable3D drawable ) {
 				if ( drawable is CompositeDrawable3D comp ) {
 					foreach ( var i in comp.Children ) {
-						if ( i is INotInspectable ) {
+						if ( i is ISelfNotInspectable ) {
 							addRange( i );
 						}
 						else {

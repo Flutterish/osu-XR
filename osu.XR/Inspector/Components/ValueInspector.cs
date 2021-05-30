@@ -37,84 +37,132 @@ namespace osu.XR.Inspector.Components {
 			AutoSizeAxes = Axes.Y;
 			Direction = FillDirection.Vertical;
 
-			CompositeSection = new() { Margin = new MarginPadding { Horizontal = 5 } };
-
 			InspectedObject.BindValueChanged( v => {
 				inspect( v.NewValue );
 			}, true );
 		}
 
 		protected ExpandableSection CompositeSection;
+		protected OsuTextFlowContainer PrimitiveSection;
 
 		void inspect ( object obj ) {
-			RemoveAll( x => x == CompositeSection );
 			Clear( true );
-			CompositeSection.Clear( true );
 
 			if ( obj is null ) {
-				Add( new OsuTextFlowContainer {
-					Margin = new MarginPadding { Left = 15 },
-					RelativeSizeAxes = Axes.X,
-					AutoSizeAxes = Axes.Y,
-					Width = 0.95f,
-					Text = $"{title}: Null"
-				} );
+				makePrimitive();
 				return;
 			}
 
 			var type = obj.GetType();
 
-			if ( type.IsValueType ) { // primitive, can be just stringified
-				Add( new OsuTextFlowContainer {
-					Margin = new MarginPadding { Left = 15 },
-					RelativeSizeAxes = Axes.X,
-					AutoSizeAxes = Axes.Y,
-					Width = 0.95f,
-					Text = $"{title}: {obj}"
-				} );
+			if ( isSimpleType( type ) ) { // primitive, can be just stringified
+				makePrimitive();
+				// TODO editors for simple types
 			}
 			else { // composite, needs to be decomposed
-				Add( CompositeSection );
-				CompositeSection.Title = $"{title} ({type.ReadableName()}): {obj}";
-				inspect( obj, type );
+				if ( type.IsValueType ) {
+					makePrimitive();
+					return;
+				}
+
+				var sections = getDeclaredSections( obj );
+				var count = sections.Count();
+				if ( count == 0 ) {
+					makePrimitive();
+				}
+				else {
+					makeComposite( sections, count );
+				}
+			}
+		}
+
+		static readonly Type[] simpleTypes = new Type[] {
+			typeof(string),
+			typeof(decimal),
+			typeof(DateTime),
+			typeof(DateTimeOffset),
+			typeof(TimeSpan),
+			typeof(Guid)
+		};
+		bool isSimpleType ( Type type ) {
+			return type.IsPrimitive
+				|| type.IsEnum
+				|| simpleTypes.Contains( type )
+				|| ( type.IsGenericType && type.GetGenericTypeDefinition() == typeof( Nullable<> ) && isSimpleType( type.GetGenericArguments()[ 0 ] ) );
+		}
+
+		IEnumerable<ReflectedValue<object>> getDeclaredValues ( object obj, Type type ) {
+			foreach ( var i in type.GetProperties( BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly ) ) {
+				if ( i.GetGetMethod() != null ) yield return new ReflectedValue<object>( obj, i );
 			}
 
-			IEnumerable<ReflectedValue<object>> refelct ( object obj, Type type ) {
-				foreach ( var i in type.GetProperties( BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly ) ) {
-					if ( i.GetGetMethod() != null ) yield return new ReflectedValue<object>( obj, i );
-				}
-
-				foreach ( var i in type.GetFields( BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly ) ) {
-					yield return new ReflectedValue<object>( obj, i );
-				}
+			foreach ( var i in type.GetFields( BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly ) ) {
+				yield return new ReflectedValue<object>( obj, i );
 			}
+		}
 
-			void inspect ( object obj, Type type ) {
-				var values = refelct( obj, type );
-				if ( values.Any() ) {
-					addSection( type.Name, d => {
-						foreach ( var i in values ) {
-							addProperty( d, i );
-						}
-					} );
-				}
+		IEnumerable<(Type type, IEnumerable<ReflectedValue<object>> values)> getDeclaredSections ( object obj ) {
+			Type type = obj.GetType();
 
-				if ( type.BaseType != null && type.BaseType != typeof( object ) ) {
-					inspect( obj, type.BaseType );
-				}
+			while ( type != null && type != typeof( object ) ) {
+				var declared = getDeclaredValues( obj, type );
+				if ( declared.Any() ) yield return (type, declared);
+
+				type = type.BaseType;
 			}
 		}
 
 		void addSection ( string name, Action<LazyExpandableSection> populate ) {
 			CompositeSection.Add( new LazyExpandableSection( populate ) {
 				Title = name,
-				Margin = new MarginPadding { Horizontal = 5 }
+				Margin = new MarginPadding { Horizontal = 0 }
 			} );
 		}
 
 		void addProperty ( Container<Drawable> container, ReflectedValue<object> value ) {
 			container.Add( new ReflectedValueInspector( value ) );
 		}
+
+		void makePrimitive () {
+
+			Clear( true );
+
+			Add( PrimitiveSection = new OsuTextFlowContainer {
+				Margin = new MarginPadding { Left = 15 },
+				RelativeSizeAxes = Axes.X,
+				AutoSizeAxes = Axes.Y,
+				Width = 0.95f,
+				//Text = $"[{type.ReadableName()}] {title}: {value}"
+			} );
+		}
+
+		void makeComposite ( IEnumerable<(Type type, IEnumerable<ReflectedValue<object>> values)> sections, int count ) {
+			Add( CompositeSection = new LazyExpandableSection( d => {
+				if ( count == 1 ) {
+					foreach ( var i in sections.Single().values ) {
+						addProperty( d, i );
+					}
+				}
+				else {
+					foreach ( var (t, values) in sections ) {
+						addSection( t.Name, d => {
+							foreach ( var i in values ) {
+								addProperty( d, i );
+							}
+						} );
+					}
+				}
+			} ) {
+				Title = $"[{InspectedObject.Value?.GetType().ReadableName()}] {title}: {InspectedObject.Value}",
+				Margin = new MarginPadding { Horizontal = 5 }
+			} );
+		}
+
+		protected virtual string GetDisplayType ()
+			=> $"{InspectedObject.Value?.GetType()}";
+
+		protected virtual string GetDisplayValue ()
+			=> $"{InspectedObject.Value}";
 
 		public string DisplayName => "Reflections";
 	}
@@ -123,7 +171,7 @@ namespace osu.XR.Inspector.Components {
 		ReflectedValue<object> value;
 		public ReflectedValueInspector ( ReflectedValue<object> value ) {
 			this.value = value;
-			Title = value.Name;
+			Title = value.DeclaredName;
 			updateValue();
 		}
 
@@ -132,21 +180,23 @@ namespace osu.XR.Inspector.Components {
 
 		protected override void Update () {
 			base.Update();
-			timer += Time.Elapsed;
+			if ( !erroredOut ) timer += Time.Elapsed;
 			if ( timer >= UpdateInterval ) {
 				timer = 0;
 				updateValue();
 			}
 		}
 
+		bool erroredOut = false;
 		void updateValue () {
 			try {
 				InspectedObject.Value = value.Value;
-				var type = InspectedObject.Value?.GetType();
-				if ( type != null )
-					CompositeSection.Title = $"{Title} ({type.ReadableName()}): {InspectedObject.Value}";
+				if ( CompositeSection != null ) CompositeSection.Title = $"[{value.DeclaredType.ReadableName()}] {Title}: {InspectedObject.Value}";
 			}
-			catch ( Exception e ) { InspectedObject.Value = $"Error: {e.Message}"; }
+			catch ( Exception e ) {
+				InspectedObject.Value = $"Error: {e.Message}";
+				erroredOut = true;
+			}
 		}
 	}
 }

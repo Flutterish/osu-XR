@@ -8,13 +8,14 @@ namespace osu.XR.Inspector.Components {
 	public class ReflectedValue<T> {
 		const BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic;
 		public ReflectedValue ( object source, string name ) {
-			Name = name;
+			DeclaredName = name;
 			var type = source.GetType();
 			if ( type.GetField( name, flags ) is FieldInfo field ) {
 				if ( !field.FieldType.IsAssignableTo( typeof( T ) ) ) {
 					throw new InvalidCastException( $"Field `{name}` of `{source}` is of type `{field.FieldType}`, but the expected type was `{typeof( T )}`" );
 				}
 
+				DeclaredType = field.FieldType;
 				Getter = createFieldGetter( field, source );
 				Setter = createFieldSetter( field, source );
 			}
@@ -23,6 +24,7 @@ namespace osu.XR.Inspector.Components {
 					throw new InvalidCastException( $"Property `{name}` of `{source}` is of type `{prop.PropertyType}`, but the expected type was `{typeof( T )}`" );
 				}
 
+				DeclaredType = prop.PropertyType;
 				Getter = createPropertyGetter( prop.GetGetMethod( true ), source );
 				Setter = createPropertySetter( prop.GetSetMethod( true ), source );
 			}
@@ -30,7 +32,9 @@ namespace osu.XR.Inspector.Components {
 		}
 
 		public ReflectedValue ( object source, FieldInfo field ) {
-			Name = field.Name;
+			DeclaredName = field.Name;
+			DeclaredType = field.FieldType;
+
 			if ( !field.FieldType.IsAssignableTo( typeof( T ) ) ) {
 				throw new InvalidCastException( $"Field `{field.Name}` of `{source}` is of type `{field.FieldType}`, but the expected type was `{typeof( T )}`" );
 			}
@@ -40,7 +44,9 @@ namespace osu.XR.Inspector.Components {
 		}
 
 		public ReflectedValue ( object source, PropertyInfo prop ) {
-			Name = prop.Name;
+			DeclaredName = prop.Name;
+			DeclaredType = prop.PropertyType;
+
 			if ( !prop.PropertyType.IsAssignableTo( typeof( T ) ) ) {
 				throw new InvalidCastException( $"Property `{prop.Name}` of `{source}` is of type `{prop.PropertyType}`, but the expected type was `{typeof( T )}`" );
 			}
@@ -49,44 +55,61 @@ namespace osu.XR.Inspector.Components {
 			Setter = createPropertySetter( prop.GetSetMethod( true ), source );
 		}
 
+
+
 		private static Func<T> createFieldGetter ( FieldInfo field, object source ) {
 			/*if ( !RuntimeInfo.SupportsJIT )*/ return () => (T)field.GetValue( source );
 
-			string methodName = $"{typeof( T ).ReadableName()}.{field.Name}.get_{Guid.NewGuid():N}";
-			DynamicMethod setterMethod = new DynamicMethod( methodName, typeof( T ), new Type[] { }, true );
+			string methodName = $"{field.FieldType.ReadableName()}.{field.Name}.get_{Guid.NewGuid():N}";
+			DynamicMethod setterMethod = new DynamicMethod( methodName, field.FieldType, new Type[] { }, true );
 			ILGenerator gen = setterMethod.GetILGenerator();
 			gen.Emit( OpCodes.Ldarg_0 );
 			gen.Emit( OpCodes.Ldfld, field );
 			gen.Emit( OpCodes.Ret );
-			return setterMethod.CreateDelegate<Func<T>>();
+
+			if ( typeof( T ) == field.FieldType )
+				return setterMethod.CreateDelegate<Func<T>>();
+			else
+				return setterMethod.CreateDelegate( typeof( Func<> ).MakeGenericType( field.FieldType ) ) as Func<T>;
 		}
 
 		private static Action<T> createFieldSetter ( FieldInfo field, object source ) {
 			/*if ( !RuntimeInfo.SupportsJIT )*/ return value => field.SetValue( source, value );
 
-			string methodName = $"{typeof( T ).ReadableName()}.{field.Name}.set_{Guid.NewGuid():N}";
-			DynamicMethod setterMethod = new DynamicMethod( methodName, null, new Type[] { typeof( T ) }, true );
+			string methodName = $"{field.FieldType.ReadableName()}.{field.Name}.set_{Guid.NewGuid():N}";
+			DynamicMethod setterMethod = new DynamicMethod( methodName, null, new Type[] { field.FieldType }, true );
 			ILGenerator gen = setterMethod.GetILGenerator();
 			gen.Emit( OpCodes.Ldarg_0 );
 			gen.Emit( OpCodes.Ldarg_1 );
 			gen.Emit( OpCodes.Stfld, field );
 			gen.Emit( OpCodes.Ret );
-			return setterMethod.CreateDelegate<Action<T>>();
+
+			if ( typeof( T ) == field.FieldType )
+				return setterMethod.CreateDelegate<Action<T>>();
+			else
+				return setterMethod.CreateDelegate( typeof( Action<> ).MakeGenericType( field.FieldType ) ) as Action<T>;
 		}
 
 		private static Func<T> createPropertyGetter ( MethodInfo getter, object source ) {
 			/*if ( !RuntimeInfo.SupportsJIT )*/ return () => (T)getter.Invoke( source, Array.Empty<object>() );
 
-			return getter.CreateDelegate<Func<T>>();
+			if ( typeof( T ) == getter.ReturnType )
+				return getter.CreateDelegate<Func<T>>();
+			else
+				return getter.CreateDelegate( typeof( Func<> ).MakeGenericType( getter.ReturnType ) ) as Func<T>;
 		}
 
 		private static Action<T> createPropertySetter ( MethodInfo setter, object source ) {
 			/*if ( !RuntimeInfo.SupportsJIT )*/ return value => setter.Invoke( source, new object[] { value } );
 
-			return setter.CreateDelegate<Action<T>>();
+			if ( typeof( T ) == setter.GetParameters()[ 0 ].ParameterType )
+				return setter.CreateDelegate<Action<T>>();
+			else
+				return setter.CreateDelegate( typeof( Action<> ).MakeGenericType( setter.GetParameters()[ 0 ].ParameterType ) ) as Action<T>;
 		}
 
-		public readonly string Name;
+		public readonly string DeclaredName;
+		public readonly Type DeclaredType;
 		public readonly Func<T> Getter;
 		public readonly Action<T> Setter;
 

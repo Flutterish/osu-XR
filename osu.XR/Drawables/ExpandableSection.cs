@@ -70,7 +70,7 @@ namespace osu.XR.Drawables {
 					Height = 25,
 					RelativeSizeAxes = Axes.X
 				},
-				title = new OsuTextFlowContainer {
+				title = new OsuTextFlowContainer( x => x.AllowMultiline = true ) {
 					AutoSizeAxes = Axes.Y,
 					Anchor = Anchor.CentreLeft,
 					Origin = Anchor.CentreLeft,

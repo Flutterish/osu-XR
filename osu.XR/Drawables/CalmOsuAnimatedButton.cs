@@ -1,4 +1,5 @@
-﻿using osu.Framework.Allocation;
+﻿using OpenVR.NET.Manifests;
+using osu.Framework.Allocation;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -7,6 +8,7 @@ using osu.Framework.Graphics.Shapes;
 using osu.Framework.Input.Events;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
+using osu.Game.Graphics.UserInterface;
 using osuTK.Graphics;
 
 namespace osu.XR.Drawables {
@@ -37,7 +39,7 @@ namespace osu.XR.Drawables {
         private readonly Container content;
         private readonly Box hover;
 
-        public CalmOsuAnimatedButton () {
+        public CalmOsuAnimatedButton ( HoverSampleSet sampleSet = HoverSampleSet.Normal ) : base( sampleSet ) {
             base.Content.Add( content = new Container {
                 Origin = Anchor.Centre,
                 Anchor = Anchor.Centre,
@@ -71,12 +73,16 @@ namespace osu.XR.Drawables {
             Enabled.BindValueChanged( enabled => this.FadeColour( enabled.NewValue ? Color4.White : colours.Gray9, 200, Easing.OutQuint ), true );
         }
 
+        public System.Action Hovered;
+        public System.Action HoverLost;
         protected override bool OnHover ( HoverEvent e ) {
+            Schedule( () => Hovered?.Invoke() );
             hover.FadeIn( 500, Easing.OutQuint );
             return base.OnHover( e );
         }
 
         protected override void OnHoverLost ( HoverLostEvent e ) {
+            HoverLost?.Invoke();
             hover.FadeOut( 500, Easing.OutQuint );
             base.OnHoverLost( e );
         }

@@ -62,7 +62,6 @@ namespace osu.XR {
 					iconA.FadeIn( 1000 );
 					iconB.FadeIn( 1000 );
 				}
-
 			}, true );
 		}
 	}

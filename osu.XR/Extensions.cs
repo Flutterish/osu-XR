@@ -18,11 +18,11 @@ namespace osu.XR {
 		}
 
 		/// <summary>
-		/// Gets the first non <see cref="INotInspectable"/> <see cref="Drawable3D"/> traveling upwards.
+		/// Gets the first non <see cref="ISelfNotInspectable"/> <see cref="Drawable3D"/> traveling upwards.
 		/// </summary>
 		public static Drawable3D? GetValidInspectable ( this Drawable3D self ) {
 			Drawable3D? inspectable = self;
-			while ( inspectable is not null and INotInspectable ) {
+			while ( inspectable is not null and ISelfNotInspectable ) {
 				inspectable = inspectable.Parent;
 			}
 			return inspectable;

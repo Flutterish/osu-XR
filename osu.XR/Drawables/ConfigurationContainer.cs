@@ -2,12 +2,14 @@
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Utils;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays.News;
 using osu.XR.Components.Groups;
+using osuTK;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,9 +23,12 @@ namespace osu.XR.Drawables {
 		SearchContainer content;
 		SearchTextBox searchTextBox;
 		Drawable stickyHeader;
+		Drawable stickyHeaderBackground;
 		OsuScrollContainer scroll;
 
 		public ConfigurationContainer () {
+			Masking = true;
+
 			AddInternal( new Box {
 				RelativeSizeAxes = Axes.Both,
 				Colour = OsuColour.Gray( 0.05f )
@@ -75,7 +80,7 @@ namespace osu.XR.Drawables {
 						AlwaysPresent = true
 					}
 				}
-			} ) );
+			}, filterable: false ) );
 
 			searchTextBox = new SearchTextBox {
 				RelativeSizeAxes = Axes.X,
@@ -85,7 +90,8 @@ namespace osu.XR.Drawables {
 				Margin = new MarginPadding { Vertical = 4 }
 			};
 
-			AddInternal( stickyHeader = wrap( CreateStickyHeader( searchTextBox ) ) );
+			AddInternal( stickyHeader = wrap( CreateStickyHeader( searchTextBox ), filterable: false ) );
+			stickyHeaderBackground = ( stickyHeader as Container ).Children[ 0 ];
 
 			searchTextBox.Current.ValueChanged += v => content.SearchTerm = v.NewValue;
 		}
@@ -127,6 +133,7 @@ namespace osu.XR.Drawables {
 		protected override void UpdateAfterChildren () {
 			base.UpdateAfterChildren();
 			stickyHeader.Y = Math.Max( -stickyHeader.Margin.Top - 1, header.LayoutSize.Y - scroll.Current );
+			stickyHeaderBackground.Colour = Interpolation.ValueAt( Math.Clamp( scroll.Current, 0, stickyHeader.LayoutSize.Y ), OsuColour.Gray( 0.05f ), OsuColour.Gray( 0.025f ), 0, stickyHeader.LayoutSize.Y, Easing.In );
 		}
 
 		protected override void Update () {
@@ -156,7 +163,7 @@ namespace osu.XR.Drawables {
 			header.AddParagraph( Description, s => { s.Font = OsuFont.GetFont( Typeface.Torus, 18 ); s.Colour = Colour4.HotPink; } );
 		}
 
-		Drawable wrap ( Drawable other ) {
+		FilterableContainer wrap ( Drawable other, bool filterable = true ) {
 			Drawable[] final;
 			var wrapper = new Container {
 				Margin = new MarginPadding { Vertical = 6 },
@@ -181,7 +188,7 @@ namespace osu.XR.Drawables {
 				final = new[] { wrapper };
 			}
 
-			return new Container {
+			return new FilterableContainer {
 				RelativeSizeAxes = Axes.X,
 				AutoSizeAxes = Axes.Y,
 				Children = new Drawable[] {
@@ -200,8 +207,36 @@ namespace osu.XR.Drawables {
 				},
 				Margin = new MarginPadding { Vertical = 1 },
 				Masking = true,
-				CornerRadius = 5
+				CornerRadius = 5,
+
+				FilterTerms = ( other is IHasName named ) ? new[] { named.DisplayName } : Array.Empty<string>(),
+				CanBeFiltered = filterable
 			};
 		}
+	}
+
+	public class FilterableContainer : Container, IFilterable {
+		public IEnumerable<string> FilterTerms { get; set; }
+		public bool MatchingFilter {
+			set {
+				if ( !CanBeFiltered ) return;
+
+				if ( value ) Show();
+				else Hide();
+			}
+		}
+
+		public override void Hide () {
+			this.ScaleTo( new Vector2( 1, 0 ), 100, Easing.Out );
+			this.Delay( 50 ).FadeOut( 50 );
+		}
+
+		public override void Show () {
+			this.ScaleTo( new Vector2( 1, 1 ), 100, Easing.Out );
+			this.FadeIn( 50 );
+		}
+
+		public bool FilteringActive { get; set; }
+		public bool CanBeFiltered = true;
 	}
 }
