@@ -51,10 +51,15 @@ namespace osu.XR.Inspector {
 
 				if ( v.NewValue is null ) return;
 				// TODO add inspector sections
-				AddSection( new HiererchyInspector( v.NewValue ) {
+				AddSection( new HiererchyInspector( v.NewValue ) { // TODO keep and merge sections if applicable
 					DrawablePrevieved = d => SelectedElementBindable.Value = d,
 					DrawableSelected = d => InspectedElementBindable.Value = d
 				} );
+				if ( v.NewValue is IConfigurableInspectable config ) {
+					foreach ( var i in config.CreateInspectorSubsections() ) {
+						AddSection( i );
+					}
+				}
 				AddSection( new ReflectionsInspector( v.NewValue, "Inspected" ) );
 			}, true );
 		}

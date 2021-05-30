@@ -97,7 +97,7 @@ namespace osu.XR.Drawables {
 			elementLabel = element.GetInspectorName();
 			subsections.Add( new TransformInspectorSection( element ) );
 			if ( element is IConfigurableInspectable inspectable ) {
-				subsections.AddRange( inspectable.CreateInspectorSubsections() );
+				//subsections.AddRange( inspectable.CreateInspectorSubsections() );
 			}
 			subsections.Add( new HierarchyInspectorSubsection( element, v => InspectedElementBindable.Value = v ) {
 				DrawableHovered = d => {

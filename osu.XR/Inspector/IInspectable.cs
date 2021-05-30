@@ -1,4 +1,5 @@
-﻿using osu.Game.Overlays.Settings;
+﻿using osu.Framework.Graphics;
+using osu.Game.Overlays.Settings;
 using System.Collections.Generic;
 
 namespace osu.XR.Inspector {
@@ -10,8 +11,9 @@ namespace osu.XR.Inspector {
 	/// <summary>
 	/// An object whose properties can be inspected and that has custom inspector subsections.
 	/// </summary>
-	public interface IConfigurableInspectable : IInspectable {
-		IEnumerable<SettingsSubsection> CreateInspectorSubsections ();
+	public interface IConfigurableInspectable {
+		IEnumerable<Drawable> CreateInspectorSubsections ();
+		bool AreSettingsPersistent { get; }
 	}
 
 	/// <summary>
@@ -29,4 +31,9 @@ namespace osu.XR.Inspector {
 
 	// TODO IHasInspectorVisuals will be able to render things when selected by the inspector.
 	public interface IHasInspectorVisuals { }
+
+	/// <summary>
+	/// This object is experimental.
+	/// </summary>
+	public interface IExperimental { }
 }
