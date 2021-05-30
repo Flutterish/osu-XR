@@ -9,7 +9,6 @@ using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays.Settings;
-using osu.XR.Components;
 using osu.XR.Inspector;
 using osuTK.Graphics;
 using System;
@@ -56,16 +55,16 @@ namespace osu.XR.Drawables {
 			InspectedElementBindable.BindValueChanged( v => setInspected( v.NewValue ), true );
 			SelectedElementBindable.BindValueChanged( v => {
 				if ( GranularSelectionBindable.Value ) {
-					InspectedElementBindable.Value = v.NewValue.GetValidInspectable();
+					//InspectedElementBindable.Value = v.NewValue.GetValidInspectable();
 				}
 				else {
-					InspectedElementBindable.Value = ( v.NewValue?.GetClosestInspectable() as Drawable3D ) ?? v.NewValue?.GetValidInspectable();
+					//InspectedElementBindable.Value = ( v.NewValue?.GetClosestInspectable() as Drawable3D ) ?? v.NewValue?.GetValidInspectable();
 				}
 			} );
 		}
 
-		Selection selection = new();
-		Selection helperSelection = new() { Tint = Color4.Yellow };
+		Selection3D selection = new();
+		Selection3D helperSelection = new() { Tint = Color4.Yellow };
 
 		protected override void Update () {
 			base.Update();
@@ -358,10 +357,10 @@ namespace osu.XR.Drawables {
 		void refresh () {
 			list.Clear( true );
 
-			Drawable3D parent = drawable.Parent?.GetValidInspectable();
-			if ( parent is not null ) {
-				addButton( parent, $".. ({parent.GetInspectorName()})" );
-			}
+			//Drawable3D parent = drawable.Parent?.GetValidInspectable();
+			//if ( parent is not null ) {
+			//	addButton( parent, $".. ({parent.GetInspectorName()})" );
+			//}
 			addButton( drawable, drawable.GetInspectorName(), enabled: false, width: 0.9f );
 
 			void addRange ( Drawable3D drawable ) {

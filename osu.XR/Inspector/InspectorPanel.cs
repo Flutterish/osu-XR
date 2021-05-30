@@ -1,11 +1,11 @@
 ﻿using osu.Framework.Bindables;
+using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.XR.Components;
 using osu.Game.Graphics;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays.Settings;
-using osu.XR.Components;
 using osu.XR.Drawables;
 using osu.XR.Inspector.Components;
 using osu.XR.Inspector.Components.Reflections;
@@ -17,23 +17,33 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace osu.XR.Inspector {
-	public class InspectorPanel : ConfigurationContainer {
-		public readonly Bindable<Drawable3D> SelectedElementBindable = new();
-		public readonly Bindable<Drawable3D> InspectedElementBindable = new();
+	public class InspectorPanel : ConfigurationContainer, INotInspectable {
+		public readonly Bindable<Drawable> SelectedElementBindable = new();
+		public readonly Bindable<Drawable> InspectedElementBindable = new();
 		public readonly BindableBool IsSelectingBindable = new( false );
 		public readonly BindableBool GranularSelectionBindable = new( false );
 		FormatedTextContainer selectedName;
 		FormatedTextContainer inspectedName;
 
-		Selection selection = new();
-		Selection helperSelection = new() { Tint = Color4.Yellow };
+		Selection3D selection3d = new();
+		Selection3D helperSelection3d = new() { Tint = Color4.Yellow };
+
+		Selection2D selection2d = new();
+		Selection2D helperSelection2d = new();
 
 		public InspectorPanel () {
 			Title = "Inspector";
 			Description = "inspect and modify properties\nthese settings are not persistent";
 
 			SelectedElementBindable.BindValueChanged( v => {
-				helperSelection.Select( getSelected() );
+				if ( getSelected() is Drawable3D d3 ) {
+					helperSelection3d.Select( d3 );
+					helperSelection2d.Select( null );
+				}
+				else {
+					helperSelection3d.Select( null );
+					helperSelection2d.Select( getSelected() );
+				}
 				selectedName.Text = $"Selected: **{v.NewValue?.GetInspectorName() ?? "Nothing"}**";
 			}, true );
 
@@ -46,7 +56,14 @@ namespace osu.XR.Inspector {
 
 			InspectedElementBindable.BindValueChanged( v => {
 				ClearSections();
-				selection.Select( v.NewValue );
+				if ( v.NewValue is Drawable3D d3 ) {
+					selection3d.Select( d3 );
+					selection2d.Select( null );
+				}
+				else {
+					selection3d.Select( null );
+					selection2d.Select( v.NewValue );
+				}
 				inspectedName.Text = $"Inspected: ||{v.NewValue?.GetInspectorName() ?? "Nothing"}||";
 
 				if ( v.NewValue is null ) return;
@@ -87,12 +104,12 @@ namespace osu.XR.Inspector {
 			};
 		}
 
-		Drawable3D getSelected () {
+		Drawable getSelected () {
 			if ( GranularSelectionBindable.Value ) {
 				return SelectedElementBindable.Value?.GetValidInspectable();
 			}
 			else {
-				return ( SelectedElementBindable.Value?.GetClosestInspectable() as Drawable3D ) ?? SelectedElementBindable.Value?.GetValidInspectable();
+				return ( SelectedElementBindable.Value?.GetClosestInspectable() as Drawable ) ?? SelectedElementBindable.Value?.GetValidInspectable();
 			}
 		}
 	}

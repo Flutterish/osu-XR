@@ -1,12 +1,11 @@
 ﻿using osu.Framework.XR.Components;
 using osu.Framework.XR.Graphics;
-using osu.XR.Inspector;
 using osuTK;
 using osuTK.Graphics;
 
-namespace osu.XR.Components {
-	public class Selection : Model, INotInspectable {
-		public Selection () {
+namespace osu.XR.Inspector {
+	public class Selection3D : Model, INotInspectable {
+		public Selection3D () {
 			Mesh = Mesh.FromOBJFile( "./Resources/selection.obj" );
 			Tint = Color4.Lime;
 
