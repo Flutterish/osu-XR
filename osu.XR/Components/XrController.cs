@@ -7,6 +7,7 @@ using osu.Framework.XR;
 using osu.Framework.XR.Components;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Physics;
+using osu.Game.Rulesets.Edit;
 using osu.XR.Components.Panels;
 using osu.XR.Components.Pointers;
 using osu.XR.Settings;
@@ -225,7 +226,18 @@ namespace osu.XR.Components {
 		private void onPointerHit ( RaycastHit hit ) {
 			if ( inspector.Panel.IsSelectingBindable.Value ) {
 				if ( IsMainControllerBindable.Value ) {
-					inspector.Panel.Select( hit.Collider as Drawable3D );
+					if ( inspector.Panel.Targets2DDrawables.Value ) {
+						var panel = hit.Collider as Panel;
+						if ( panel is null ) {
+							inspector.Panel.Select( null );
+						}
+						else {
+							inspector.Panel.Select( panel.EmulatedInput.GetFirstDrawableAt( panel.TexturePositionAt( hit.TrisIndex, hit.Point ) ) );
+						}
+					}
+					else {
+						inspector.Panel.Select( hit.Collider as Drawable3D );
+					}
 				}
 
 				return;

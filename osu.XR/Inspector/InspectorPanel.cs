@@ -21,6 +21,7 @@ namespace osu.XR.Inspector {
 		public readonly Bindable<Drawable> SelectedElementBindable = new();
 		public readonly Bindable<Drawable> InspectedElementBindable = new();
 		public readonly BindableBool IsSelectingBindable = new( false );
+		public readonly BindableBool Targets2DDrawables = new( false );
 		public readonly BindableBool GranularSelectionBindable = new( false );
 		FormatedTextContainer selectedName;
 		FormatedTextContainer inspectedName;
@@ -104,6 +105,7 @@ namespace osu.XR.Inspector {
 				Children = new Drawable[] {
 					new SettingsCheckbox { LabelText = "Select element to inspect", Current = IsSelectingBindable },
 					new SettingsCheckbox { LabelText = "Granular selection", Current = GranularSelectionBindable },
+					new SettingsCheckbox { LabelText = "Target 2D elements", Current = Targets2DDrawables },
 					selectedName = new FormatedTextContainer( () => new FontSetings { Size = 20 } ) {
 						RelativeSizeAxes = Axes.X,
 						AutoSizeAxes = Axes.Y,

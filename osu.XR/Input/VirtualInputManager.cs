@@ -1,12 +1,18 @@
-﻿using osu.Framework.Allocation;
+﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Primitives;
 using osu.Framework.Input;
 using osu.Framework.Input.Handlers;
 using osu.Framework.Input.Handlers.Keyboard;
 using osu.Framework.Input.Handlers.Mouse;
 using osu.Framework.Input.StateChanges;
 using osu.Framework.Platform;
+using osu.Framework.Utils;
 using osu.XR.Components.Pointers;
+using osu.XR.Inspector.Components;
 using osu.XR.Settings;
 using osuTK;
 using osuTK.Input;
@@ -23,6 +29,32 @@ namespace osu.XR.Input {
 		internal VirtualMouseHandler mouseHandler;
 		internal VirtualKeyboardHandler keyboardHandler;
 		internal VirtualTouchHandler touchHandler;
+
+		public Drawable GetFirstDrawableAt ( Vector2 position ) {
+			return firstDrawableAt( this, position, ScreenSpaceDrawQuad );
+		}
+
+		Drawable firstDrawableAt ( Drawable parent, Vector2 position, Quad mask ) {
+			if ( parent is CompositeDrawable composite ) {
+				if ( parent is osu.XR.Inspector.IChildrenNotInspectable ) return null;
+
+				foreach ( var i in HierarchyStep.getAliveInternalChildren( composite ).Reverse() ) {
+					if ( !i.IsPresent || i is Component ) 
+						continue;
+					if ( i.AlwaysPresent && Precision.AlmostEquals( i.Alpha, 0f ) )
+						continue;
+
+					var drawable = firstDrawableAt( i, position, ( composite.Masking || composite is BufferedContainer<Drawable> ) ? composite.ScreenSpaceDrawQuad : mask );
+					if ( drawable is not null ) return drawable;
+				}
+
+				return null;
+			}
+			else {
+				if ( parent is not osu.XR.Inspector.ISelfNotInspectable && parent.ScreenSpaceDrawQuad.Contains( position ) && mask.Contains( position ) ) return parent;
+				return null;
+			}
+		}
 
 		new public bool HasFocus;
 		public override bool HandleHoverEvents => HasFocus;

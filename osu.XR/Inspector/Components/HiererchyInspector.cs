@@ -358,8 +358,10 @@ namespace osu.XR.Inspector.Components {
 				OnUpdate += watch2dHierarchy;
 			}
 		}
-		static readonly MethodInfo getInternalChildrenMethod = typeof( CompositeDrawable ).GetProperty( nameof( InternalChildren ), BindingFlags.NonPublic | BindingFlags.Instance ).GetGetMethod( nonPublic: true );
-		static readonly Func<CompositeDrawable, IReadOnlyList<Drawable>> getInternalChildren = x => getInternalChildrenMethod.Invoke( x, Array.Empty<object>() ) as IReadOnlyList<Drawable>;
+		public static readonly MethodInfo getInternalChildrenMethod = typeof( CompositeDrawable ).GetProperty( nameof( InternalChildren ), BindingFlags.NonPublic | BindingFlags.Instance ).GetGetMethod( nonPublic: true );
+		public static readonly Func<CompositeDrawable, IReadOnlyList<Drawable>> getInternalChildren = x => getInternalChildrenMethod.Invoke( x, Array.Empty<object>() ) as IReadOnlyList<Drawable>;
+		public static readonly MethodInfo getAliveInternalChildrenMethod = typeof( CompositeDrawable ).GetProperty( nameof( AliveInternalChildren ), BindingFlags.NonPublic | BindingFlags.Instance ).GetGetMethod( nonPublic: true );
+		public static readonly Func<CompositeDrawable, IReadOnlyList<Drawable>> getAliveInternalChildren = x => getAliveInternalChildrenMethod.Invoke( x, Array.Empty<object>() ) as IReadOnlyList<Drawable>;
 		private void watch2dHierarchy ( Drawable obj ) {
 			var composite = this.Current as CompositeDrawable;
 
