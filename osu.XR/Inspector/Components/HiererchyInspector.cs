@@ -1,4 +1,5 @@
-﻿using osu.Framework.Extensions.Color4Extensions;
+﻿using osu.Framework.Bindables;
+using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Containers.Markdown;
@@ -16,6 +17,7 @@ using osuTK.Graphics.ES20;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -143,6 +145,11 @@ namespace osu.XR.Inspector.Components {
 		public System.Action<Drawable> DrawablePrevieved;
 		public System.Action<Drawable> DrawableSelected;
 
+		bool contains3DChildren ( Drawable drawable )
+			=> drawable is not IChildrenNotInspectable and CompositeDrawable3D; // not including "or Scene" because we really only care about having an observable hierarchy and not really the type of children
+		bool contains2DChildren ( Drawable drawable )
+			=> drawable is not IChildrenNotInspectable and ( Panel or ( CompositeDrawable and not Drawable3D ) );
+
 		public HierarchyStep ( Drawable drawable, bool isCurrent = false ) {
 			current = drawable;
 
@@ -157,55 +164,38 @@ namespace osu.XR.Inspector.Components {
 				Action = () => DrawableSelected?.Invoke( drawable )
 			} );
 
-			if ( current is not IChildrenNotInspectable ) {
-				if ( current is CompositeDrawable3D ) {
-					CalmOsuAnimatedButton toggleButton;
-					button.Add( toggleButton = new CalmOsuAnimatedButton {
-						Origin = Anchor.CentreRight,
-						Anchor = Anchor.CentreRight,
-						Action = () => toggle(),
-						Height = 15,
-						Width = 80,
-					} );
+			if ( contains3DChildren( current ) || contains2DChildren( current ) ) {
+				CalmOsuAnimatedButton toggleButton;
+				button.Add( toggleButton = new CalmOsuAnimatedButton {
+					Origin = Anchor.CentreRight,
+					Anchor = Anchor.CentreRight,
+					Action = IsExpanded.Toggle,
+					Height = 15,
+					Width = 80,
+				} );
 
-					toggleButton.Add( new SpriteIcon {
-						RelativeSizeAxes = Axes.Both,
-						Icon = FontAwesome.Solid.ChevronDown,
-						FillMode = FillMode.Fit,
-						Anchor = Anchor.Centre,
-						Origin = Anchor.Centre
-					} );
-				}
-				else if ( current is CompositeDrawable comp and ( not Drawable3D or Panel ) ) {
-					CalmOsuAnimatedButton toggleButton;
-					button.Add( toggleButton = new CalmOsuAnimatedButton {
-						Origin = Anchor.CentreRight,
-						Anchor = Anchor.CentreRight,
-						Action = () => toggle(),
-						Height = 15,
-						Width = 80,
-					} );
+				toggleButton.Add( dropdownChevron = new SpriteIcon {
+					RelativeSizeAxes = Axes.Both,
+					Icon = FontAwesome.Solid.ChevronDown,
+					FillMode = FillMode.Fit,
+					Anchor = Anchor.Centre,
+					Origin = Anchor.Centre
+				} );
 
-					toggleButton.Add( new SpriteIcon {
-						RelativeSizeAxes = Axes.Both,
-						Icon = FontAwesome.Solid.ChevronDown,
-						FillMode = FillMode.Fit,
-						Anchor = Anchor.Centre,
-						Origin = Anchor.Centre
-					} );
-				}
+				IsExpanded.BindValueChanged( v => {
+					if ( v.NewValue )
+						expand();
+					else
+						contract();
+				} );
 			}
 		}
 
-		bool state = false;
-		void toggle () {
-			state = !state;
-			if ( state )
-				expand();
-			else
-				contract();
-		}
+		SpriteIcon dropdownChevron;
+		public readonly BindableBool IsExpanded = new( false );
 		void expand () {
+			dropdownChevron.FadeTo( 0.3f, 100 );
+
 			if ( current is CompositeDrawable3D composite ) {
 				composite.ChildAdded += childAdded;
 				composite.ChildRemoved += childRemoved;
@@ -216,11 +206,13 @@ namespace osu.XR.Inspector.Components {
 				OnUpdate += watch2dHierarchy;
 			}
 		}
+		static readonly MethodInfo getInternalChildrenMethod = typeof( CompositeDrawable ).GetProperty( nameof( InternalChildren ), BindingFlags.NonPublic | BindingFlags.Instance ).GetGetMethod( nonPublic: true );
+		static readonly Func<CompositeDrawable, IReadOnlyList<Drawable>> getInternalChildren = x => getInternalChildrenMethod.Invoke( x, Array.Empty<object>() ) as IReadOnlyList<Drawable>;
 		private void watch2dHierarchy ( Drawable obj ) {
 			var composite = this.current as CompositeDrawable;
 
 			var previous = map.Keys;
-			var current = composite.GetProperty<IReadOnlyList<Drawable>>( "InternalChildren" ).Where( x => x is not ISelfNotInspectable );
+			var current = getInternalChildren( composite ).Where( X => X is not ISelfNotInspectable );
 			var @new = current.Except( previous );
 			var removed = previous.Except( current );
 
@@ -240,6 +232,8 @@ namespace osu.XR.Inspector.Components {
 			}
 		}
 		void contract () {
+			dropdownChevron.FadeTo( 1f, 100 );
+
 			if ( current is CompositeDrawable3D composite ) {
 				composite.ChildAdded -= childAdded;
 				composite.ChildRemoved -= childRemoved;
@@ -287,7 +281,7 @@ namespace osu.XR.Inspector.Components {
 		protected override void Dispose ( bool isDisposing ) {
 			base.Dispose( isDisposing );
 
-			if ( state ) {
+			if ( IsExpanded.Value ) {
 				if ( current is CompositeDrawable3D composite ) {
 					composite.ChildAdded -= childAdded;
 					composite.ChildRemoved -= childRemoved;

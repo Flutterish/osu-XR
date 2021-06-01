@@ -47,5 +47,10 @@ namespace osu.XR.Inspector {
 
 		protected override Quad ComputeScreenSpaceDrawQuad ()
 			=> selected?.ScreenSpaceDrawQuad ?? base.ComputeScreenSpaceDrawQuad();
+
+		protected override void Update () {
+			base.Update();
+			Invalidate( Invalidation.DrawInfo );
+		}
 	}
 }
