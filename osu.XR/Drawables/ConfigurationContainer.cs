@@ -1,4 +1,5 @@
 ﻿using Humanizer;
+using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
@@ -121,11 +122,19 @@ namespace osu.XR.Drawables {
 			sections.Remove( section, out var drawable );
 			content.Remove( drawable );
 			if ( dispose ) drawable.Dispose();
+			else ( section.Parent as Container ).Remove( section );
 		}
 
-		public void ClearSections ( IEnumerable<Drawable> sections = null, bool dispose = true ) {
-			sections ??= this.sections.Keys;
+		public void ClearSections ( bool dispose = true ) {
+			ClearSections( this.sections.Keys, dispose );
+		}
+		public void ClearSections ( IEnumerable<Drawable> sections, bool dispose = true ) {
 			foreach ( var i in sections.ToArray() ) {
+				RemoveSection( i, dispose );
+			}
+		}
+		public void ClearSections ( Func<Drawable,bool> sections, bool dispose = true ) {
+			foreach ( var i in this.sections.Keys.Where( sections ).ToArray() ) {
 				RemoveSection( i, dispose );
 			}
 		}
@@ -165,11 +174,13 @@ namespace osu.XR.Drawables {
 
 		FilterableContainer wrap ( Drawable other, bool filterable = true ) {
 			Drawable[] final;
-			var wrapper = new Container {
+			var wrapper = new FilterableContainer {
 				Margin = new MarginPadding { Vertical = 6 },
 				RelativeSizeAxes = Axes.X,
 				AutoSizeAxes = Axes.Y,
-				Child = other
+				Child = other,
+
+				FilterTerms = Array.Empty<string>()
 			};
 			if ( other is IHasName name ) {
 				final = new Drawable[] {
@@ -196,7 +207,7 @@ namespace osu.XR.Drawables {
 						RelativeSizeAxes = Axes.Both,
 						Colour = OsuColour.Gray( 0.05f )
 					},
-					new FillFlowContainer {
+					new FilterableFillFlowContainer {
 						RelativeSizeAxes = Axes.X,
 						AutoSizeAxes = Axes.Y,
 						Direction = FillDirection.Vertical,
@@ -215,8 +226,8 @@ namespace osu.XR.Drawables {
 		}
 	}
 
-	public class FilterableContainer : Container, IFilterable {
-		public IEnumerable<string> FilterTerms { get; set; }
+	public class FilterableContainer : Container, IFilterable, IHasFilterableChildren {
+		public IEnumerable<string> FilterTerms { get; set; } = Array.Empty<string>();
 		public bool MatchingFilter {
 			set {
 				if ( !CanBeFiltered ) return;
@@ -238,5 +249,36 @@ namespace osu.XR.Drawables {
 
 		public bool FilteringActive { get; set; }
 		public bool CanBeFiltered = true;
+
+		public IEnumerable<IFilterable> FilterableChildren
+			=> CanBeFiltered ? Children.OfType<IFilterable>() : Array.Empty<IFilterable>();
+	}
+
+	public class FilterableFillFlowContainer : FillFlowContainer, IFilterable, IHasFilterableChildren {
+		public IEnumerable<string> FilterTerms { get; set; } = Array.Empty<string>();
+		public bool MatchingFilter {
+			set {
+				if ( !CanBeFiltered ) return;
+
+				if ( value ) Show();
+				else Hide();
+			}
+		}
+
+		public override void Hide () {
+			this.ScaleTo( new Vector2( 1, 0 ), 100, Easing.Out );
+			this.Delay( 50 ).FadeOut( 50 );
+		}
+
+		public override void Show () {
+			this.ScaleTo( new Vector2( 1, 1 ), 100, Easing.Out );
+			this.FadeIn( 50 );
+		}
+
+		public bool FilteringActive { get; set; }
+		public bool CanBeFiltered = true;
+
+		public IEnumerable<IFilterable> FilterableChildren
+			=> CanBeFiltered ? Children.OfType<IFilterable>() : Array.Empty<IFilterable>();
 	}
 }

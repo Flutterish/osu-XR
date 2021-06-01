@@ -48,7 +48,6 @@ namespace osu.XR.Inspector {
 			}, true );
 
 			InspectedElementBindable.BindValueChanged( v => {
-				ClearSections();
 				if ( v.NewValue is Drawable3D d3 ) {
 					selection3d.Select( d3 );
 					selection2d.Select( null );
@@ -59,20 +58,34 @@ namespace osu.XR.Inspector {
 				}
 				inspectedName.Text = $"Inspected: ||{v.NewValue?.GetInspectorName() ?? "Nothing"}||";
 
-				if ( v.NewValue is null ) return;
-				// TODO add inspector sections
-				AddSection( new HiererchyInspector( v.NewValue ) { // TODO keep and merge sections if applicable
+				HiererchyInspector hierarchy = keepSections.OfType<HiererchyInspector>().FirstOrDefault();
+				if ( v.NewValue is null ) {
+					ClearSections();
+				}
+				else {
+					ClearSections( x => !keepSections.Contains( x ), true );
+					ClearSections( false );
+				}
+
+				AddSection( hierarchy ??= new HiererchyInspector() {
 					DrawablePrevieved = d => SelectedElementBindable.Value = d,
-					DrawableSelected = d => InspectedElementBindable.Value = d
+					DrawableSelected = d => {
+						keepSections.Add( hierarchy );
+						InspectedElementBindable.Value = d;
+					}
 				} );
+				hierarchy.SelectedDrawable.Value = v.NewValue;
+
 				if ( v.NewValue is IConfigurableInspectable config ) {
 					foreach ( var i in config.CreateInspectorSubsections() ) {
 						AddSection( i );
 					}
 				}
 				AddSection( new ReflectionsInspector( v.NewValue, "Inspected" ) );
+				keepSections.Clear();
 			}, true );
 		}
+		List<Drawable> keepSections = new();
 
 		protected override Drawable CreateStickyHeader ( SearchTextBox search ) {
 			return new FillFlowContainer {

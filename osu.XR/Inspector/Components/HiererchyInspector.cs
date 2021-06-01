@@ -1,5 +1,6 @@
 ﻿using osu.Framework.Bindables;
 using osu.Framework.Extensions.Color4Extensions;
+using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Containers.Markdown;
@@ -57,29 +58,22 @@ namespace osu.XR.Inspector.Components {
 		}
 	}
 
-	// TODO flesh out the logic
 	public class HiererchyInspector : FillFlowContainer, IHasName {
+		public readonly Bindable<Drawable> SelectedDrawable = new();
 		public System.Action<Drawable> DrawablePrevieved;
 		public System.Action<Drawable> DrawableSelected;
+		FillFlowContainer headers;
+		HierarchyStep top;
 
-		public HiererchyInspector ( Drawable drawable ) {
+		public HiererchyInspector () {
 			RelativeSizeAxes = Axes.X;
 			AutoSizeAxes = Axes.Y;
 			Direction = FillDirection.Vertical;
 
-			if ( drawable.Parent is Drawable parent ) {
-				Add( new HierarchyButton( parent ) { 
-					Hovered = () => DrawablePrevieved?.Invoke( parent ),
-					HoverLost = () => DrawablePrevieved?.Invoke( null ),
-					Action = () => DrawableSelected?.Invoke( parent ),
-					Margin = new MarginPadding { Horizontal = 15 }
-				} );
-			}
-
-			Add( new HierarchyStep( drawable, true ) {
-				DrawablePrevieved = d => DrawablePrevieved?.Invoke( d ),
-				DrawableSelected = d => DrawableSelected?.Invoke( d ),
-				Margin = new MarginPadding { Horizontal = 15 }
+			Add( headers = new FillFlowContainer {
+				RelativeSizeAxes = Axes.X,
+				AutoSizeAxes = Axes.Y,
+				Direction = FillDirection.Vertical
 			} );
 
 			Add( new ExpandableSection {
@@ -97,6 +91,62 @@ namespace osu.XR.Inspector.Components {
 					makeIconText( HierarchyIcons.ThreeD, " - This element is 3D." ),
 				},
 				Margin = new MarginPadding { Horizontal = 15, Top = 10 }
+			} );
+
+			SelectedDrawable.BindValueChanged( x => {
+				var drawable = x.NewValue;
+
+				void addParent () {
+					if ( drawable.Parent is Drawable parent ) {
+						headers.Add( new HierarchyButton( parent ) {
+							Hovered = () => DrawablePrevieved?.Invoke( parent ),
+							HoverLost = () => DrawablePrevieved?.Invoke( null ),
+							Action = () => DrawableSelected?.Invoke( parent ),
+							Margin = new MarginPadding { Horizontal = 15 }
+						} );
+					}
+				}
+				void addTop () {
+					headers.Add( top = new HierarchyStep( drawable ) {
+						DrawablePrevieved = d => DrawablePrevieved?.Invoke( d ),
+						DrawableSelected = d => DrawableSelected?.Invoke( d ),
+						Margin = new MarginPadding { Horizontal = 15 }
+					} );
+					top.SelectedDrawable.BindTo( SelectedDrawable );
+				}
+
+				if ( top is not null ) {
+					if ( drawable == top.Current.Parent ) {
+						headers.Clear( false );
+						addParent();
+						var previousTop = top;
+						previousTop.SelectedDrawable.UnbindFrom( SelectedDrawable );
+						addTop();
+						top.MergeChild( previousTop );
+					}
+					else if ( top.IsStepVisible( drawable, out var step ) ) {
+						headers.Clear( false );
+						addParent();
+						var parent = step.Parent as HierarchyStep;
+						parent?.Remove( step );
+						step.SelectedDrawable.UnbindFrom( parent?.SelectedDrawable ?? SelectedDrawable );
+						step.DrawablePrevieved = d => DrawablePrevieved?.Invoke( d );
+						step.DrawableSelected = d => DrawableSelected?.Invoke( d );
+						step.Margin = new MarginPadding { Horizontal = 15 };
+						headers.Add( top = step );
+						top.SelectedDrawable.BindTo( SelectedDrawable );
+					}
+					else {
+						headers.Clear( true );
+						addParent();
+						addTop();
+					}
+				}
+				else {
+					headers.Clear( true );
+					addParent();
+					addTop();
+				}
 			} );
 		}
 
@@ -140,8 +190,9 @@ namespace osu.XR.Inspector.Components {
 		public string DisplayName => "Hierarchy";
 	}
 
-	public class HierarchyStep : FillFlowContainer {
-		Drawable current;
+	public class HierarchyStep : SearchContainer, IFilterable {
+		public readonly Drawable Current;
+		public readonly Bindable<Drawable> SelectedDrawable = new();
 		public System.Action<Drawable> DrawablePrevieved;
 		public System.Action<Drawable> DrawableSelected;
 
@@ -150,36 +201,43 @@ namespace osu.XR.Inspector.Components {
 		bool contains2DChildren ( Drawable drawable )
 			=> drawable is not IChildrenNotInspectable and ( Panel or ( CompositeDrawable and not Drawable3D ) );
 
-		public HierarchyStep ( Drawable drawable, bool isCurrent = false ) {
-			current = drawable;
+		public HierarchyStep ( Drawable drawable ) {
+			Current = drawable;
 
 			AutoSizeAxes = Axes.Y;
 			Direction = FillDirection.Vertical;
 
 			HierarchyButton button;
-			Add( button = new HierarchyButton( drawable, isCurrent ) {
+			Add( button = new HierarchyButton( drawable ) {
 				Margin = new MarginPadding { Left = 5 },
 				Hovered = () => DrawablePrevieved?.Invoke( drawable ),
 				HoverLost = () => DrawablePrevieved?.Invoke( null ),
 				Action = () => DrawableSelected?.Invoke( drawable )
 			} );
+			button.SelectedDrawable.BindTo( SelectedDrawable );
 
-			if ( contains3DChildren( current ) || contains2DChildren( current ) ) {
+			if ( contains3DChildren( Current ) || contains2DChildren( Current ) ) {
 				CalmOsuAnimatedButton toggleButton;
 				button.Add( toggleButton = new CalmOsuAnimatedButton {
 					Origin = Anchor.CentreRight,
 					Anchor = Anchor.CentreRight,
 					Action = IsExpanded.Toggle,
-					Height = 15,
+					RelativeSizeAxes = Axes.Y,
 					Width = 80,
 				} );
 
-				toggleButton.Add( dropdownChevron = new SpriteIcon {
-					RelativeSizeAxes = Axes.Both,
-					Icon = FontAwesome.Solid.ChevronDown,
-					FillMode = FillMode.Fit,
+				toggleButton.Add( new Container {
+					RelativeSizeAxes = Axes.X,
+					Height = 15,
 					Anchor = Anchor.Centre,
-					Origin = Anchor.Centre
+					Origin = Anchor.Centre,
+					Child = dropdownChevron = new SpriteIcon {
+						RelativeSizeAxes = Axes.Both,
+						Icon = FontAwesome.Solid.ChevronDown,
+						FillMode = FillMode.Fit,
+						Anchor = Anchor.Centre,
+						Origin = Anchor.Centre
+					}
 				} );
 
 				IsExpanded.BindValueChanged( v => {
@@ -191,25 +249,39 @@ namespace osu.XR.Inspector.Components {
 			}
 		}
 
+		public bool IsStepVisible ( Drawable goal, out HierarchyStep step ) {
+			if ( Current == goal ) {
+				step = this;
+				return true;
+			}
+			else {
+				foreach ( var i in map.Values ) {
+					if ( i.IsStepVisible( goal, out step ) ) return true;
+				}
+				step = null;
+				return false;
+			}
+		}
+
 		SpriteIcon dropdownChevron;
 		public readonly BindableBool IsExpanded = new( false );
 		void expand () {
 			dropdownChevron.FadeTo( 0.3f, 100 );
 
-			if ( current is CompositeDrawable3D composite ) {
-				composite.ChildAdded += childAdded;
-				composite.ChildRemoved += childRemoved;
+			if ( Current is CompositeDrawable3D composite ) {
+				composite.ChildAdded += childAdded3D;
+				composite.ChildRemoved += childRemoved3D;
 				foreach ( var i in composite.Children )
-					childAdded( composite, i );
+					childAdded3D( composite, i );
 			}
-			else if ( current is CompositeDrawable comp ) {
+			else if ( Current is CompositeDrawable comp ) {
 				OnUpdate += watch2dHierarchy;
 			}
 		}
 		static readonly MethodInfo getInternalChildrenMethod = typeof( CompositeDrawable ).GetProperty( nameof( InternalChildren ), BindingFlags.NonPublic | BindingFlags.Instance ).GetGetMethod( nonPublic: true );
 		static readonly Func<CompositeDrawable, IReadOnlyList<Drawable>> getInternalChildren = x => getInternalChildrenMethod.Invoke( x, Array.Empty<object>() ) as IReadOnlyList<Drawable>;
 		private void watch2dHierarchy ( Drawable obj ) {
-			var composite = this.current as CompositeDrawable;
+			var composite = this.Current as CompositeDrawable;
 
 			var previous = map.Keys;
 			var current = getInternalChildren( composite ).Where( X => X is not ISelfNotInspectable );
@@ -217,51 +289,37 @@ namespace osu.XR.Inspector.Components {
 			var removed = previous.Except( current );
 
 			foreach ( var i in @new ) {
-				var step = new HierarchyStep( i ) {
-					Margin = new MarginPadding { Left = 10 },
-					DrawablePrevieved = d => DrawablePrevieved?.Invoke( d ),
-					DrawableSelected = d => DrawableSelected?.Invoke( d )
-				};
-				map.Add( i, step );
-				Add( step );
+				addChild( i );
 			}
 			foreach ( var i in removed ) {
-				map.Remove( i, out var step );
-				Remove( step );
-				step.Dispose();
+				removeChild( i );
 			}
 		}
 		void contract () {
 			dropdownChevron.FadeTo( 1f, 100 );
 
-			if ( current is CompositeDrawable3D composite ) {
-				composite.ChildAdded -= childAdded;
-				composite.ChildRemoved -= childRemoved;
-				foreach ( var i in map3d.Keys.ToArray() ) {
-					childRemoved( composite, i );
-				}
+			if ( Current is CompositeDrawable3D composite ) {
+				composite.ChildAdded -= childAdded3D;
+				composite.ChildRemoved -= childRemoved3D;
 			}
-			else if ( current is CompositeDrawable comp ) {
+			else if ( Current is CompositeDrawable comp ) {
 				OnUpdate -= watch2dHierarchy;
-				foreach ( var i in map.Keys.ToArray() ) {
-					map.Remove( i, out var step );
-					Remove( step );
-					step.Dispose();
-				}
+			}
+
+			foreach ( var i in map.Keys.ToArray() ) {
+				removeChild( i );
 			}
 		}
 
-		Dictionary<Drawable3D, Drawable> map3d = new();
-		Dictionary<Drawable, Drawable> map = new();
-		private void childRemoved ( Drawable3D parent, Drawable3D child ) {
-			if ( !map3d.ContainsKey( child ) ) return;
-
-			map3d.Remove( child, out var step );
-			Remove( step );
-			step.Dispose();
+		private void childRemoved3D ( Drawable3D parent, Drawable3D child ) {
+			removeChild( child );
+		}
+		private void childAdded3D ( Drawable3D parent, Drawable3D child ) {
+			addChild( child );
 		}
 
-		private void childAdded ( Drawable3D parent, Drawable3D child ) {
+		Dictionary<Drawable, HierarchyStep> map = new();
+		void addChild ( Drawable child ) {
 			if ( !child.IsInspectable() ) return;
 
 			var step = new HierarchyStep( child ) {
@@ -269,8 +327,29 @@ namespace osu.XR.Inspector.Components {
 				DrawablePrevieved = d => DrawablePrevieved?.Invoke( d ),
 				DrawableSelected = d => DrawableSelected?.Invoke( d )
 			};
-			map3d.Add( child, step );
+			step.SelectedDrawable.BindTo( SelectedDrawable );
+			map.Add( child, step );
 			Add( step );
+		}
+		void removeChild ( Drawable child ) {
+			if ( !map.ContainsKey( child ) ) return;
+
+			map.Remove( child, out var step );
+			Remove( step );
+			step.Dispose();
+		}
+
+		public void MergeChild ( HierarchyStep child ) {
+			IsExpanded.Value = true;
+
+			removeChild( child.Current );
+
+			child.Margin = new MarginPadding { Left = 10 };
+			child.DrawablePrevieved = d => DrawablePrevieved?.Invoke( d );
+			child.DrawableSelected = d => DrawableSelected?.Invoke( d );
+			child.SelectedDrawable.BindTo( SelectedDrawable );
+			map.Add( child.Current, child );
+			Add( child );
 		}
 
 		protected override void Update () {
@@ -282,31 +361,43 @@ namespace osu.XR.Inspector.Components {
 			base.Dispose( isDisposing );
 
 			if ( IsExpanded.Value ) {
-				if ( current is CompositeDrawable3D composite ) {
-					composite.ChildAdded -= childAdded;
-					composite.ChildRemoved -= childRemoved;
+				if ( Current is CompositeDrawable3D composite ) {
+					composite.ChildAdded -= childAdded3D;
+					composite.ChildRemoved -= childRemoved3D;
 				}
-				else if ( current is CompositeDrawable comp ) {
+				else if ( Current is CompositeDrawable comp ) {
 					OnUpdate -= watch2dHierarchy;
 				}
 			}
 		}
+
+		public bool MatchingFilter {
+			set {
+				this.FadeTo( value ? 1 : 0, 200 );
+			}
+		}
+		public bool FilteringActive { set { } }
+		public IEnumerable<string> FilterTerms => new[] { Current.GetInspectorName() };
 	}
 
 	public class HierarchyButton : CalmOsuAnimatedButton {
 		Drawable current;
 		OsuTextFlowContainer text;
-		public HierarchyButton ( Drawable drawable, bool isCurrent = false ) {
+
+		public readonly Bindable<Drawable> SelectedDrawable = new();
+		IEnumerable<Drawable> selectedIcon;
+
+		public HierarchyButton ( Drawable drawable ) {
 			current = drawable;
 			AutoSizeAxes = Axes.Y;
 
 			Add( text = new OsuTextFlowContainer {
 				AutoSizeAxes = Axes.Y,
-				RelativeSizeAxes = Axes.X,
 				Anchor = Anchor.CentreLeft,
 				Origin = Anchor.CentreLeft,
 				TextAnchor = Anchor.CentreLeft
 			} );
+			text.OnUpdate += d => d.Width = this.DrawWidth - 80;
 
 			text.AddText( " " );
 			if ( drawable is Drawable3D ) {
@@ -323,13 +414,20 @@ namespace osu.XR.Inspector.Components {
 			}
 			text.AddText( " " );
 			text.AddText( drawable.GetInspectorName() );
-			if ( isCurrent ) {
-				text.AddText( " " );
-				text.AddIcon( HierarchyIcons.Selected, f => {
-					f.Font = OsuFont.GetFont( size: 12 );
-					f.Colour = HierarchyIcons.IconColor;
-				} );
-			}
+
+			selectedIcon = text.AddText( " " ).Concat( text.AddIcon( HierarchyIcons.Selected, f => {
+				f.Font = OsuFont.GetFont( size: 12 );
+				f.Colour = HierarchyIcons.IconColor;
+			} ) );
+
+			SelectedDrawable.BindValueChanged( v => {
+				foreach ( var i in selectedIcon ) {
+					i.FadeTo( ( v.NewValue == current ) ? 1 : 0, 300 );
+					i.ScaleTo( new Vector2( ( v.NewValue == current ) ? 1 : 0, 1 ), 300, Easing.Out );
+				}
+			}, true );
+			FinishTransforms( true );
+
 			if ( drawable is CompositeDrawable3D or ( CompositeDrawable and not Drawable3D ) ) {
 				text.AddText( " " );
 				if ( drawable is IChildrenNotInspectable ) {
