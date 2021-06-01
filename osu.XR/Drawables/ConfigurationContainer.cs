@@ -22,7 +22,7 @@ namespace osu.XR.Drawables {
 		OsuTextFlowContainer header;
 		Drawable headerOffset;
 		SearchContainer content;
-		SearchTextBox searchTextBox;
+		protected readonly SearchTextBox SearchTextBox;
 		Drawable stickyHeader;
 		Drawable stickyHeaderBackground;
 		OsuScrollContainer scroll;
@@ -83,7 +83,7 @@ namespace osu.XR.Drawables {
 				}
 			}, filterable: false ) );
 
-			searchTextBox = new SearchTextBox {
+			SearchTextBox = new SearchTextBox {
 				RelativeSizeAxes = Axes.X,
 				Width = 0.95f,
 				Anchor = Anchor.TopCentre,
@@ -91,10 +91,11 @@ namespace osu.XR.Drawables {
 				Margin = new MarginPadding { Vertical = 4 }
 			};
 
-			AddInternal( stickyHeader = wrap( CreateStickyHeader( searchTextBox ), filterable: false ) );
+			AddInternal( stickyHeader = wrap( CreateStickyHeader( SearchTextBox ), filterable: false ) );
 			stickyHeaderBackground = ( stickyHeader as Container ).Children[ 0 ];
 
-			searchTextBox.Current.ValueChanged += v => content.SearchTerm = v.NewValue;
+			SearchTextBox.Current.Value = "";
+			SearchTextBox.Current.ValueChanged += v => content.SearchTerm = v.NewValue;
 		}
 
 		protected virtual Drawable CreateStickyHeader ( SearchTextBox search ) {
@@ -172,15 +173,13 @@ namespace osu.XR.Drawables {
 			header.AddParagraph( Description, s => { s.Font = OsuFont.GetFont( Typeface.Torus, 18 ); s.Colour = Colour4.HotPink; } );
 		}
 
-		FilterableContainer wrap ( Drawable other, bool filterable = true ) {
+		FilterableContainer wrap ( Drawable other, bool filterable = false ) {
 			Drawable[] final;
-			var wrapper = new FilterableContainer {
+			var wrapper = new Container {
 				Margin = new MarginPadding { Vertical = 6 },
 				RelativeSizeAxes = Axes.X,
 				AutoSizeAxes = Axes.Y,
-				Child = other,
-
-				FilterTerms = Array.Empty<string>()
+				Child = other
 			};
 			if ( other is IHasName name ) {
 				final = new Drawable[] {
@@ -207,7 +206,7 @@ namespace osu.XR.Drawables {
 						RelativeSizeAxes = Axes.Both,
 						Colour = OsuColour.Gray( 0.05f )
 					},
-					new FilterableFillFlowContainer {
+					new FillFlowContainer {
 						RelativeSizeAxes = Axes.X,
 						AutoSizeAxes = Axes.Y,
 						Direction = FillDirection.Vertical,

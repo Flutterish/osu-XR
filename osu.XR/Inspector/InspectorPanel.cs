@@ -75,6 +75,15 @@ namespace osu.XR.Inspector {
 					}
 				} );
 				hierarchy.SelectedDrawable.Value = v.NewValue;
+				hierarchy.Current = SearchTextBox.Current;
+				hierarchy.SearchTermRequested = t => {
+					if ( SearchTextBox.Current.Value.EndsWith( " " ) ) {
+						SearchTextBox.Current.Value += t;
+					}
+					else {
+						SearchTextBox.Current.Value += " " + t;
+					}
+				};
 
 				if ( v.NewValue is IConfigurableInspectable config ) {
 					foreach ( var i in config.CreateInspectorSubsections() ) {

@@ -6,6 +6,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Containers.Markdown;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.XR.Components;
+using osu.Framework.XR.Graphics.Containers;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.UserInterface;
@@ -25,14 +26,21 @@ using System.Threading.Tasks;
 namespace osu.XR.Inspector.Components {
 	public static class HierarchyIcons {
 		public static readonly IconUsage Container = FontAwesome.Solid.Sitemap;
+		public static readonly string ContainerTerm = "+has-children";
 		public static readonly IconUsage HasSettings = FontAwesome.Solid.Cog;
+		public static readonly string HasSettingsTerm = "+has-settings";
 		public static readonly IconUsage HasSettingsPersistent = FontAwesome.Solid.Download;
+		public static readonly string HasSettingsPersistentTerm = "+saves-settings";
 		public static readonly IconUsage HasVisuals = FontAwesome.Solid.Eye;
+		public static readonly string HasVisualsTerm = "+has-visuals";
 		public static readonly IconUsage Selected = FontAwesome.Solid.Search;
 		public static readonly IconUsage Experimental = FontAwesome.Solid.Flask;
+		public static readonly string ExperimentalTerm = "+experimental";
 		public static readonly IconUsage SwapProjection = FontAwesome.Solid.Random;
 		public static readonly IconUsage TwoD = FontAwesome.Solid.StickyNote;
+		public static readonly string TwoDTerm = "+2d";
 		public static readonly IconUsage ThreeD = FontAwesome.Solid.Cube;
+		public static readonly string ThreeDTerm = "+3d";
 
 		public static readonly Color4 IconColor = Color4.GhostWhite;
 
@@ -58,19 +66,67 @@ namespace osu.XR.Inspector.Components {
 		}
 	}
 
-	public class HiererchyInspector : FillFlowContainer, IHasName {
+	public enum HierarchyProperty {
+		IsContainer,
+		HidesChildren,
+		SwapsProjection,
+		HasSettings,
+		SavesSettings,
+		HasVisuals,
+		IsExperimental,
+		Is2D,
+		Is3D
+	}
+
+	public static class HierarchyPropertyExtensions {
+		public static IEnumerable<HierarchyProperty> GetHierarchyProperties ( this Drawable drawable ) {
+			if ( drawable is Drawable3D ) {
+				yield return HierarchyProperty.Is3D;
+			}
+			else {
+				yield return HierarchyProperty.Is2D;
+			}
+
+			if ( drawable is CompositeDrawable3D or ( CompositeDrawable and not Drawable3D ) ) {
+				if ( drawable is IChildrenNotInspectable ) {
+					yield return HierarchyProperty.HidesChildren;
+				}
+				else {
+					yield return HierarchyProperty.IsContainer;
+				}
+			}
+			if ( drawable is IConfigurableInspectable config ) {
+				yield return HierarchyProperty.HasSettings;
+				if ( config.AreSettingsPersistent ) {
+					yield return HierarchyProperty.SavesSettings;
+				}
+			}
+			if ( drawable is IHasInspectorVisuals ) {
+				yield return HierarchyProperty.HasVisuals;
+			}
+			if ( drawable is IExperimental ) {
+				yield return HierarchyProperty.IsExperimental;
+			}
+			if ( drawable is Panel or Scene ) {
+				yield return HierarchyProperty.SwapsProjection;
+			}
+		}
+	}
+
+	public class HiererchyInspector : AdvancedSearchContainer<HierarchyProperty>, IHasName {
 		public readonly Bindable<Drawable> SelectedDrawable = new();
 		public System.Action<Drawable> DrawablePrevieved;
 		public System.Action<Drawable> DrawableSelected;
 		FillFlowContainer headers;
 		HierarchyStep top;
+		public Action<string> SearchTermRequested;
 
 		public HiererchyInspector () {
 			RelativeSizeAxes = Axes.X;
 			AutoSizeAxes = Axes.Y;
 			Direction = FillDirection.Vertical;
 
-			Add( headers = new FillFlowContainer {
+			Add( headers = new FilterableFillFlowContainer {
 				RelativeSizeAxes = Axes.X,
 				AutoSizeAxes = Axes.Y,
 				Direction = FillDirection.Vertical
@@ -80,18 +136,20 @@ namespace osu.XR.Inspector.Components {
 				Title = "Legend",
 				Children = new Drawable[] {
 					makeIconText( HierarchyIcons.Selected, " - This is the element you are inspecting." ),
-					makeIconText( HierarchyIcons.Container, " - This element contains children. Use the arrow on the right to see them!" ),
+					makeIconText( HierarchyIcons.Container, " - This element contains children. Use the arrow on the right to see them!", $"(search term: '{HierarchyIcons.ContainerTerm}')", () => SearchTermRequested?.Invoke( HierarchyIcons.ContainerTerm ) ),
 					makeIconText( HierarchyIcons.SwapProjection, " - This element is 3D and contains 2D children or vice versa." ),
 					makeIconText( HierarchyIcons.No( HierarchyIcons.Container ), " - This element has children, but hides them." ),
-					makeIconText( HierarchyIcons.HasSettings, " - This element has settings. When you inspect it, you can edit them here." ),
-					makeIconText( HierarchyIcons.HasSettingsPersistent, " - The settings of this element persist after you close the game." ),
-					makeIconText( HierarchyIcons.HasVisuals, " - This element will display its configuration in 3D space when inspected." ),
-					makeIconText( HierarchyIcons.Experimental, " - This element is experimental and might not work as expected." ),
-					makeIconText( HierarchyIcons.TwoD, " - This element is 2D." ),
-					makeIconText( HierarchyIcons.ThreeD, " - This element is 3D." ),
+					makeIconText( HierarchyIcons.HasSettings, " - This element has settings. When you inspect it, you can edit them here.", $"(search term: '{HierarchyIcons.HasSettingsTerm}')", () => SearchTermRequested?.Invoke( HierarchyIcons.HasSettingsTerm ) ),
+					makeIconText( HierarchyIcons.HasSettingsPersistent, " - The settings of this element persist after you close the game.", $"(search term: '{HierarchyIcons.HasSettingsPersistentTerm}')", () => SearchTermRequested?.Invoke( HierarchyIcons.HasSettingsPersistentTerm ) ),
+					makeIconText( HierarchyIcons.HasVisuals, " - This element will display its configuration in 3D space when inspected.", $"(search term: '{HierarchyIcons.HasVisualsTerm}')", () => SearchTermRequested?.Invoke( HierarchyIcons.HasVisualsTerm ) ),
+					makeIconText( HierarchyIcons.Experimental, " - This element is experimental and might not work as expected.", $"(search term: '{HierarchyIcons.ExperimentalTerm}')", () => SearchTermRequested?.Invoke( HierarchyIcons.ExperimentalTerm ) ),
+					makeIconText( HierarchyIcons.TwoD, " - This element is 2D.", $"(search term: '{HierarchyIcons.TwoDTerm}')", () => SearchTermRequested?.Invoke( HierarchyIcons.TwoDTerm ) ),
+					makeIconText( HierarchyIcons.ThreeD, " - This element is 3D.", $"(search term: '{HierarchyIcons.ThreeDTerm}')", () => SearchTermRequested?.Invoke( HierarchyIcons.ThreeDTerm ) ),
 				},
 				Margin = new MarginPadding { Horizontal = 15, Top = 10 }
 			} );
+
+			RecursionMode = RecursiveFilterMode.ChildrenFirst;
 
 			SelectedDrawable.BindValueChanged( x => {
 				var drawable = x.NewValue;
@@ -150,7 +208,7 @@ namespace osu.XR.Inspector.Components {
 			} );
 		}
 
-		Drawable makeIconText ( IconUsage icon, string message ) {
+		Drawable makeIconText ( IconUsage icon, string message, string hint = null, Action onHintClicked = null ) {
 			var text = new OsuTextFlowContainer {
 				AutoSizeAxes = Axes.Y,
 				Anchor = Anchor.CentreLeft,
@@ -166,6 +224,26 @@ namespace osu.XR.Inspector.Components {
 				f.Colour = HierarchyIcons.IconColor;
 			} );
 			text.AddText( message );
+			if ( hint is not null ) {
+				if ( onHintClicked is null ) {
+					text.AddText( " " + hint, f => f.Alpha = 0.4f );
+				}
+				else {
+					OsuTextFlowContainer hintText = new OsuTextFlowContainer {
+						AutoSizeAxes = Axes.Both,
+						Margin = new MarginPadding { Horizontal = 5 }
+					};
+
+					CalmOsuAnimatedButton button;
+					text.AddArbitraryDrawable( button = new CalmOsuAnimatedButton {
+						AutoSizeAxes = Axes.Both,
+						Action = onHintClicked
+					} );
+					button.Add( hintText );
+
+					hintText.AddText( hint, f => f.Alpha = 0.4f );
+				}
+			}
 
 			return text;
 		}
@@ -190,7 +268,7 @@ namespace osu.XR.Inspector.Components {
 		public string DisplayName => "Hierarchy";
 	}
 
-	public class HierarchyStep : SearchContainer, IFilterable {
+	public class HierarchyStep : FillFlowContainer, IFilterable<HierarchyProperty>, IHasFilterableChildren {
 		public readonly Drawable Current;
 		public readonly Bindable<Drawable> SelectedDrawable = new();
 		public System.Action<Drawable> DrawablePrevieved;
@@ -201,8 +279,10 @@ namespace osu.XR.Inspector.Components {
 		bool contains2DChildren ( Drawable drawable )
 			=> drawable is not IChildrenNotInspectable and ( Panel or ( CompositeDrawable and not Drawable3D ) );
 
+		IEnumerable<HierarchyProperty> props;
 		public HierarchyStep ( Drawable drawable ) {
 			Current = drawable;
+			props = Current.GetHierarchyProperties();
 
 			AutoSizeAxes = Axes.Y;
 			Direction = FillDirection.Vertical;
@@ -328,8 +408,12 @@ namespace osu.XR.Inspector.Components {
 				DrawableSelected = d => DrawableSelected?.Invoke( d )
 			};
 			step.SelectedDrawable.BindTo( SelectedDrawable );
+			step.onChangeHandler = onChangeHandler;
 			map.Add( child, step );
 			Add( step );
+
+			onChangeHandler?.Invoke( step );
+			step.FinishTransforms();
 		}
 		void removeChild ( Drawable child ) {
 			if ( !map.ContainsKey( child ) ) return;
@@ -350,6 +434,7 @@ namespace osu.XR.Inspector.Components {
 			child.SelectedDrawable.BindTo( SelectedDrawable );
 			map.Add( child.Current, child );
 			Add( child );
+			child.onChangeHandler = onChangeHandler;
 		}
 
 		protected override void Update () {
@@ -374,10 +459,32 @@ namespace osu.XR.Inspector.Components {
 		public bool MatchingFilter {
 			set {
 				this.FadeTo( value ? 1 : 0, 200 );
+				this.ScaleTo( new Vector2( 1, value ? 1 : 0 ), 200 );
 			}
 		}
 		public bool FilteringActive { set { } }
-		public IEnumerable<string> FilterTerms => new[] { Current.GetInspectorName() };
+		public IEnumerable<string> FilterTerms => props.Select( x => {
+			return x switch {
+				HierarchyProperty.HasSettings => HierarchyIcons.HasSettingsTerm,
+				HierarchyProperty.HasVisuals => HierarchyIcons.HasVisualsTerm,
+				HierarchyProperty.Is2D => HierarchyIcons.TwoDTerm,
+				HierarchyProperty.Is3D => HierarchyIcons.ThreeDTerm,
+				HierarchyProperty.IsContainer => HierarchyIcons.ContainerTerm,
+				HierarchyProperty.IsExperimental => HierarchyIcons.ExperimentalTerm,
+				HierarchyProperty.SavesSettings => HierarchyIcons.HasSettingsPersistentTerm,
+				_ => ""
+			};
+		} ).Append( Current.GetInspectorName() );
+
+		public bool MatchesCustomTerms ( IEnumerable<HierarchyProperty> terms )
+			=> terms.All( x => props.Contains( x ) );
+
+		public IEnumerable<IFilterable> FilterableChildren => map.Values;
+
+		Action<IFilterable> onChangeHandler;
+		public void SetChangeNotificationTarget ( Action<IFilterable> onChangeHandler ) {
+			this.onChangeHandler = onChangeHandler;
+		}
 	}
 
 	public class HierarchyButton : CalmOsuAnimatedButton {
