@@ -36,23 +36,16 @@ namespace osu.XR.Inspector {
 			Description = "inspect and modify properties\nthese settings are not persistent";
 
 			SelectedElementBindable.BindValueChanged( v => {
-				if ( getSelected() is Drawable3D d3 ) {
+				if ( v.NewValue is Drawable3D d3 ) {
 					helperSelection3d.Select( d3 );
 					helperSelection2d.Select( null );
 				}
 				else {
 					helperSelection3d.Select( null );
-					helperSelection2d.Select( getSelected() );
+					helperSelection2d.Select( v.NewValue );
 				}
 				selectedName.Text = $"Selected: **{v.NewValue?.GetInspectorName() ?? "Nothing"}**";
 			}, true );
-
-			IsSelectingBindable.BindValueChanged( v => {
-				if ( !v.NewValue ) {
-					InspectedElementBindable.Value = getSelected();
-					SelectedElementBindable.Value = null;
-				}
-			} );
 
 			InspectedElementBindable.BindValueChanged( v => {
 				ClearSections();
@@ -104,13 +97,20 @@ namespace osu.XR.Inspector {
 			};
 		}
 
-		Drawable getSelected () {
+		Drawable getSelected ( Drawable drawable ) {
 			if ( GranularSelectionBindable.Value ) {
-				return SelectedElementBindable.Value?.GetValidInspectable();
+				return drawable?.GetValidInspectable();
 			}
 			else {
-				return ( SelectedElementBindable.Value?.GetClosestInspectable() as Drawable ) ?? SelectedElementBindable.Value?.GetValidInspectable();
+				return ( drawable?.GetClosestInspectable() as Drawable ) ?? drawable?.GetValidInspectable();
 			}
+		}
+
+		public void Select ( Drawable drawable ) {
+			SelectedElementBindable.Value = getSelected( drawable );
+		}
+		public void Inspect ( Drawable drawable ) {
+			InspectedElementBindable.Value = getSelected( drawable );
 		}
 	}
 }

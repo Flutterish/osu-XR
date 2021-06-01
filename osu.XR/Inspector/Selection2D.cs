@@ -4,6 +4,7 @@ using osu.Framework.Graphics.Primitives;
 using osu.Framework.Graphics.Shaders;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.XR.Components;
 using osuTK;
 using System;
 using System.Collections.Generic;
@@ -31,12 +32,12 @@ namespace osu.XR.Inspector {
 			( Parent as Container )?.Remove( this );
 			if ( selected is null ) return;
 			Container container = null;
-			while ( drawable.Parent is not null ) {
+			while ( drawable.Parent is not null and not Drawable3D ) {
 				drawable = drawable.Parent;
-				if ( drawable is Container c && c.Dependencies.Get( typeof( ShaderManager ) ) is not null ) container = c;
+				if ( drawable is Container c && ( IsLoaded || c.Dependencies.Get( typeof( ShaderManager ) ) is not null ) ) container = c;
 			}
 
-			container.Add( this );
+			container?.Add( this );
 			this.FlashColour( Colour4.White, 200, Easing.In );
 			this.FadeTo( 0.6f ).FadeTo( 0.3f, 200, Easing.In );
 		}

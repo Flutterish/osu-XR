@@ -55,6 +55,7 @@ namespace osu.XR.Inspector.Components {
 		}
 	}
 
+	// TODO flesh out the logic
 	public class HiererchyInspector : FillFlowContainer, IHasName {
 		public System.Action<Drawable> DrawablePrevieved;
 		public System.Action<Drawable> DrawableSelected;
@@ -175,7 +176,7 @@ namespace osu.XR.Inspector.Components {
 						Origin = Anchor.Centre
 					} );
 				}
-				else if ( current is CompositeDrawable comp and not Drawable3D ) {
+				else if ( current is CompositeDrawable comp and ( not Drawable3D or Panel ) ) {
 					CalmOsuAnimatedButton toggleButton;
 					button.Add( toggleButton = new CalmOsuAnimatedButton {
 						Origin = Anchor.CentreRight,
@@ -219,7 +220,7 @@ namespace osu.XR.Inspector.Components {
 			var composite = this.current as CompositeDrawable;
 
 			var previous = map.Keys;
-			var current = composite.GetProperty<IReadOnlyList<Drawable>>( "InternalChildren" );
+			var current = composite.GetProperty<IReadOnlyList<Drawable>>( "InternalChildren" ).Where( x => x is not ISelfNotInspectable );
 			var @new = current.Except( previous );
 			var removed = previous.Except( current );
 

@@ -142,7 +142,10 @@ namespace osu.XR.Components {
 			};
 			leftButtonBindable.ValueChanged += v => {
 				if ( !EmulatesTouch ) LeftButtonBindable.Value = v.NewValue;
-				if ( v.NewValue && inspector.Panel.IsSelectingBindable.Value ) inspector.Panel.IsSelectingBindable.Value = false;
+				if ( v.NewValue && inspector.Panel.IsSelectingBindable.Value ) {
+					inspector.Panel.Inspect( inspector.Panel.SelectedElementBindable.Value );
+					inspector.Panel.IsSelectingBindable.Value = false;
+				}
 			};
 
 			// to prevent it being stuck at true after swapping
@@ -222,7 +225,7 @@ namespace osu.XR.Components {
 		private void onPointerHit ( RaycastHit hit ) {
 			if ( inspector.Panel.IsSelectingBindable.Value ) {
 				if ( IsMainControllerBindable.Value ) {
-					inspector.Panel.SelectedElementBindable.Value = hit.Collider as Drawable3D;
+					inspector.Panel.Select( hit.Collider as Drawable3D );
 				}
 
 				return;
