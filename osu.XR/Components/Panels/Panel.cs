@@ -24,7 +24,7 @@ namespace osu.XR.Components.Panels {
 	public abstract class Panel : Model, IHasCollider, IFocusable {
 		public bool CanHaveGlobalFocus { get; init; } = true;
 		public PhysicsLayer PhysicsLayer { get; set; } = PhysicsLayer.All;
-		public PanelInputMode RequestedInputMode { get; set; } = PanelInputMode.Regular; // TODO remove this?
+		public PanelInputMode RequestedInputMode { get; set; } = PanelInputMode.Regular;
 		public readonly VirtualInputManager EmulatedInput = new VirtualInputManager { RelativeSizeAxes = Axes.Both };
 		private PlatformActionContainer platformActions = new() { RelativeSizeAxes = Axes.Both };
 		public Container Source => platformActions;

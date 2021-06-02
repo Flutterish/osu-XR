@@ -329,7 +329,7 @@ namespace osu.XR {
 			} );
 			Scene.Add( Camera );
 			Scene.Add( OsuPanel );
-			Scene.Add( new HandheldMenu().With( s => s.Panels.AddRange( new FlatPanel[] { new XrConfigPanel(), Notifications, Inspector, InputBindings } ) ) );
+			Scene.Add( new HandheldMenu().With( s => s.Panels.AddRange( new FlatPanel[] { new XrConfigPanel(), Notifications, Inspector, InputBindings, new XrChangelogPanel() } ) ) );
 			Scene.Add( Keyboard );
 			Keyboard.LoadModel( @".\Resources\keyboard.obj" );
 

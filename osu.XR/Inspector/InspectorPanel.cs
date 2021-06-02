@@ -74,7 +74,7 @@ namespace osu.XR.Inspector {
 						keepSections.Add( hierarchy );
 						InspectedElementBindable.Value = d;
 					}
-				} );
+				}, filterable: false );
 				hierarchy.SelectedDrawable.Value = v.NewValue;
 				hierarchy.Current = SearchTextBox.Current;
 				hierarchy.SearchTermRequested = t => {

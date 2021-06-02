@@ -103,8 +103,8 @@ namespace osu.XR.Drawables {
 		}
 
 		Dictionary<Drawable, Drawable> sections = new();
-		public void AddSection ( Drawable section ) {
-			sections.Add( section, wrap( section ) );
+		public void AddSection ( Drawable section, bool filterable = true, string name = null ) {
+			sections.Add( section, wrap( section, filterable: filterable, name: name ) );
 			content.Add( sections[ section ] );
 		}
 
@@ -173,7 +173,7 @@ namespace osu.XR.Drawables {
 			header.AddParagraph( Description, s => { s.Font = OsuFont.GetFont( Typeface.Torus, 18 ); s.Colour = Colour4.HotPink; } );
 		}
 
-		FilterableContainer wrap ( Drawable other, bool filterable = false ) {
+		FilterableContainer wrap ( Drawable other, bool filterable = true, string name = null ) {
 			Drawable[] final;
 			var wrapper = new Container {
 				Margin = new MarginPadding { Vertical = 6 },
@@ -181,7 +181,11 @@ namespace osu.XR.Drawables {
 				AutoSizeAxes = Axes.Y,
 				Child = other
 			};
-			if ( other is IHasName name ) {
+			if ( other is IHasName hasName ) {
+				name ??= hasName.DisplayName;
+			}
+
+			if ( name is not null ) {
 				final = new Drawable[] {
 					new OsuSpriteText {
 						RelativeSizeAxes = Axes.X,
@@ -189,7 +193,7 @@ namespace osu.XR.Drawables {
 						Margin = new MarginPadding { Left = 15 },
 						Font = OsuFont.GetFont( size: 24 ),
 						Colour = Colour4.Yellow,
-						Text = name.DisplayName
+						Text = name
 					},
 					wrapper
 				};
@@ -219,7 +223,7 @@ namespace osu.XR.Drawables {
 				Masking = true,
 				CornerRadius = 5,
 
-				FilterTerms = ( other is IHasName named ) ? new[] { named.DisplayName } : Array.Empty<string>(),
+				FilterTerms = ( name is not null ) ? new[] { name } : Array.Empty<string>(),
 				CanBeFiltered = filterable
 			};
 		}

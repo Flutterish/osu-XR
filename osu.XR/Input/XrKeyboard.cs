@@ -23,7 +23,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace osu.XR.Input {
+namespace osu.XR.Input { // BUG there is something wrong when inputting text with different pointers. probably sometihing with panels having focus.
 	public class XrKeyboard : CompositeDrawable3D, IInspectable {
 		public readonly Bindable<KeyboardLayout> LayoutBindable = new( KeyboardLayout.Default );
 		private List<XrKey> keys = new();
@@ -348,6 +348,8 @@ namespace osu.XR.Input {
 			protected override bool OnClick ( ClickEvent e ) {
 				if ( KeyBindalbe.Value is not null )
 					Clicked?.Invoke( KeyBindalbe.Value );
+
+				bg.FadeColour( Color4.Transparent ).FlashColour( Color4.White, 200, Easing.In );
 
 				return true;
 			}
