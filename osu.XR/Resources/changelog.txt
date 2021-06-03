@@ -11,6 +11,8 @@ Improved physics performance.
 The inspector panel got a fleshed out look and functionality:
 * A new hierarchy inspector
 * A new reflections inspector
+	* You can edit: int, float, double, string, enum, color4, vector2, vector3
+	* You can also edit all bindables of these types
 * Custom sections for elements with settings
 Added this changelog!
 The keyboard now flashes the pressed key.
