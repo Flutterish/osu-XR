@@ -19,6 +19,7 @@
     <None Remove="knuckles.json" />
     <None Remove="Resources\changelog.txt" />
     <None Remove="Resources\keyboard.obj" />
+    <None Remove="Resources\keyboard_flat.obj" />
     <None Remove="Resources\selection.obj" />
     <None Remove="Resources\shpere.obj" />
     <None Remove="vive_controller.json" />
@@ -35,6 +36,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\keyboard.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\keyboard_flat.obj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\selection.obj">

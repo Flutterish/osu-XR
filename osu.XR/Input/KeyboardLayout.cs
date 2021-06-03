@@ -19,6 +19,16 @@ namespace osu.XR.Input {
 				K.Modifier( Key.ControlLeft ), new( Key.WinLeft ), K.Modifier( Key.AltLeft ), new( Key.Space, " " ), K.Modifier( Key.AltRight ), new( Key.WinRight ), new( Key.Menu ), K.Modifier( Key.ControlRight ), new( Key.Left ), new( Key.Down ), new( Key.Right ), new( Key.Keypad0, "0" ), new( Key.KeypadPeriod, "." )
 			}
 		};
+
+		public static KeyboardLayout Simplified => new() {
+			Keys = new() {
+				K.NoCaps( Key.Tilde, "`", "~" ), new( Key.Number1, "1", "!" ), new( Key.Number2, "2", "@" ), new( Key.Number3, "3", "#" ), new( Key.Number4, "4", "$" ), new( Key.Number5, "5", "%" ), new( Key.Number6, "6", "^" ), new( Key.Number7, "7", "&" ), new( Key.Number8, "8", "*" ), new( Key.Number9, "9", "(" ), new( Key.Number0, "0", ")" ), new( Key.Minus, "-", "_" ), new( Key.Plus, "+", "=" ), new( Key.BackSpace ),
+				new( Key.Tab, "\t" ), new( Key.Q, "q", "Q" ), new( Key.W, "w", "W" ), new( Key.E, "e", "E" ), new( Key.R, "r", "R" ), new( Key.T, "t", "T" ), new( Key.Y, "y", "Y" ), new( Key.U, "u", "U" ), new( Key.I, "i", "I" ), new( Key.O, "o", "O" ), new( Key.P, "p", "P" ), new( Key.BracketLeft, "[", "{" ), new( Key.BracketRight, "]", "}" ), new( Key.Enter, "\n" ),
+				K.Toggle( Key.CapsLock ), new( Key.A, "a", "A" ), new( Key.S, "s", "S" ), new( Key.D, "d", "D" ), new( Key.F, "f", "F" ), new( Key.G, "g", "G" ), new( Key.H, "h", "H" ), new( Key.J, "j", "J" ), new( Key.K, "k", "K" ), new( Key.L, "l", "L" ), new( Key.Semicolon, ";", ":" ), new( Key.Quote, "'", "\"" ), new( Key.BackSlash, "\\", "|" ),
+				K.Modifier( Key.ShiftLeft ), new( Key.Z, "z", "Z" ), new( Key.X, "x", "X" ), new( Key.C, "c", "C" ), new( Key.V, "v", "V" ), new( Key.B, "b", "B" ), new( Key.N, "n", "N" ), new( Key.M, "m", "M" ), new( Key.Comma, ",", "<" ), new( Key.Period, ".", ">" ), new( Key.Slash, "/", "?" ), new( Key.Up ), K.Modifier( Key.ShiftRight ),
+				K.Modifier( Key.ControlLeft ), K.Modifier( Key.AltLeft ), new( Key.Space, " " ), K.Modifier( Key.AltRight ), K.Modifier( Key.ControlRight ), new( Key.Left ), new( Key.Down ), new( Key.Right )
+			}
+		};
 	}
 
 	public class KeyboardKey {
