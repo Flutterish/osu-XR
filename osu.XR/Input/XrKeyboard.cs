@@ -11,6 +11,7 @@ using osu.Framework.XR.GameHosts;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Physics;
 using osu.Game.Graphics;
+using osu.Game.Graphics.Containers;
 using osu.XR.Components;
 using osu.XR.Components.Panels;
 using osu.XR.Inspector;
@@ -20,6 +21,7 @@ using osuTK.Input;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -27,10 +29,12 @@ namespace osu.XR.Input { // BUG there is something wrong when inputting text wit
 	public class XrKeyboard : CompositeDrawable3D, IInspectable {
 		public readonly Bindable<KeyboardLayout> LayoutBindable = new( KeyboardLayout.Default );
 		private List<XrKey> keys = new();
-		[Resolved]
-		private OsuGameXr Game { get; set; }
-		[Resolved]
-		private Bindable<IFocusable> globalFocusBindable { get; set; }
+		Bindable<IFocusable> globalFocusBindable;
+
+		[BackgroundDependencyLoader]
+		private void load ( Bindable<IFocusable> globalFocusBindable ) {
+			this.globalFocusBindable = globalFocusBindable.GetBoundCopy();
+		}
 
 		public XrKeyboard () {
 			LayoutBindable.BindValueChanged( _ => remapKeys(), true );
@@ -235,8 +239,7 @@ namespace osu.XR.Input { // BUG there is something wrong when inputting text wit
 		}
 
 		private class XrKeyDrawable : CompositeDrawable {
-			TextFlowContainer text;
-			SpriteIcon icon = new() { Origin = Anchor.Centre, Anchor = Anchor.Centre, Size = new Vector2( 35 ) };
+			OsuTextFlowContainer text;
 			Box bg;
 			public IBindable<KeyboardKey> KeyBindalbe { get; init; }
 			public Panel Panel { get; init; }
@@ -247,7 +250,7 @@ namespace osu.XR.Input { // BUG there is something wrong when inputting text wit
 				Origin = Anchor.Centre;
 				Anchor = Anchor.Centre;
 
-				text = new TextFlowContainer( x => { x.Font = OsuFont.GetFont( Typeface.Torus, displayText.Length > 6 ? 30 : 35 ); } ) {
+				text = new OsuTextFlowContainer( x => { x.Font = OsuFont.GetFont( Typeface.Torus, displayText.Length > 6 ? 30 : 35 ); } ) {
 					Origin = Anchor.Centre,
 					Anchor = Anchor.Centre,
 					RelativeSizeAxes = Axes.Both,
@@ -269,20 +272,16 @@ namespace osu.XR.Input { // BUG there is something wrong when inputting text wit
 					Anchor = Anchor.Centre
 				} );
 				AddInternal( text );
-				AddInternal( icon );
 			}
 
 			public void MarkActive () {
 				text.FadeColour( Colour4.HotPink, 100 );
-				icon.FadeColour( Colour4.HotPink, 100 );
 			}
 			public void MarkInactive () {
 				text.FadeColour( Colour4.Gray, 100 );
-				icon.FadeColour( Colour4.Gray, 100 );
 			}
 			public void Unmark () {
 				text.FadeColour( Colour4.White, 100 );
-				icon.FadeColour( Colour4.White, 100 );
 			}
 
 			protected override void LoadComplete () {
@@ -297,35 +296,30 @@ namespace osu.XR.Input { // BUG there is something wrong when inputting text wit
 			public void ApplyModifiers ( Key[] modifiers ) {
 				this.modifiers = modifiers;
 
-				var isntincon = false;
-				displayText = KeyBindalbe.Value?.GetDisplayFor( modifiers ) ?? "";
-				text.Text = "";
-				icon.Rotation = 0;
+				var value = KeyBindalbe.Value?.GetDisplayFor( modifiers ) ?? "";
+				displayText = "";
+				text.Clear( true );
 				text.Scale = Vector2.One;
-				text.Rotation = 0;
 
-				if ( displayText == Key.Left.ToString() ) icon.Icon = FontAwesome.Solid.ArrowLeft;
-				else if ( displayText == Key.Right.ToString() ) icon.Icon = FontAwesome.Solid.ArrowRight;
-				else if ( displayText == Key.Up.ToString() ) icon.Icon = FontAwesome.Solid.ArrowUp;
-				else if ( displayText == Key.Down.ToString() ) icon.Icon = FontAwesome.Solid.ArrowDown;
-				else if ( displayText == "Host" ) icon.Icon = OsuIcon.Logo; // TODO either yeet this key or find usage and make the icon a circle with "XR!"
-				else if ( displayText == "BackSpc" ) icon.Icon = FontAwesome.Solid.Backspace;
-				else if ( displayText == "Enter" ) {
-					icon.Icon = FontAwesome.Solid.LevelDownAlt;
-					icon.Rotation = 90;
+				if ( value == Key.Left.ToString() ) text.AddIcon( FontAwesome.Solid.ArrowLeft );
+				else if ( value == Key.Right.ToString() ) text.AddIcon( FontAwesome.Solid.ArrowRight );
+				else if ( value == Key.Up.ToString() ) text.AddIcon( FontAwesome.Solid.ArrowUp );
+				else if ( value == Key.Down.ToString() ) text.AddIcon( FontAwesome.Solid.ArrowDown );
+				else if ( value == "Host" ) text.AddIcon( OsuIcon.Logo ); // TODO either yeet this key or find usage and make the icon a circle with "XR!"
+				else if ( value == "BackSpc" ) text.AddIcon( FontAwesome.Solid.Backspace );
+				else if ( value == "Enter" ) {
+					foreach ( var i in text.AddIcon( FontAwesome.Solid.LevelDownAlt ) )
+						i.Rotation = 90;
 				}
-				else if ( displayText == "␣" ) {
-					text.Text = "[";
-					text.Scale = new Vector2( 2 );
-					text.Rotation = -90;
-					isntincon = true;
+				else if ( value == "␣" ) {
+					foreach ( var i in text.AddText("[" ) ) {
+						i.Scale = new Vector2( 2 );
+						i.Rotation = -90;
+					}
 				}
 				else {
-					text.Text = displayText;
-					isntincon = true;
+					text.Text = displayText = value;
 				}
-
-				icon.Alpha = isntincon ? 0 : 1;
 			}
 
 			protected override bool OnHover ( HoverEvent e ) {

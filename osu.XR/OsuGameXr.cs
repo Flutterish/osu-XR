@@ -68,8 +68,8 @@ namespace osu.XR {
 		public readonly XrNotificationPanel Notifications = new XrNotificationPanel();
 		[Cached]
 		public readonly Bindable<IFocusable> GlobalFocusBindable = new(); // TODO this will be moved to Scene
-		[Cached]
 		public readonly XrKeyboard Keyboard = new() { Scale = new Vector3( 0.04f ) };
+		public readonly XrKeyboard FlatKeyboard = new() { Scale = new Vector3( 0.04f ) };
 		[Cached]
 		public readonly XrInspectorPanel Inspector = new();
 		[Cached]
@@ -332,6 +332,9 @@ namespace osu.XR {
 			Scene.Add( new HandheldMenu().With( s => s.Panels.AddRange( new FlatPanel[] { new XrConfigPanel(), Notifications, Inspector, InputBindings, new XrChangelogPanel() } ) ) );
 			Scene.Add( Keyboard );
 			Keyboard.LoadModel( @".\Resources\keyboard.obj" );
+			//Scene.Add( FlatKeyboard );
+			//FlatKeyboard.LayoutBindable.Value = KeyboardLayout.Simplified_Fix;
+			//FlatKeyboard.LoadModel( @".\Resources\keyboard_flat.obj" );
 
 			Config.BindWith( XrConfigSetting.InputMode, inputModeBindable );
 			Config.BindWith( XrConfigSetting.DominantHand, dominantHandBindable );
