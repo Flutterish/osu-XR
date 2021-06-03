@@ -59,7 +59,7 @@ namespace osu.XR {
 		public readonly PhysicsSystem PhysicsSystem = new();
 		[Cached]
 		public readonly Camera Camera = new() { Position = new Vector3( 0, 0, 0 ) };
-		public readonly CurvedPanel OsuPanel = new CurvedPanel { Y = 1.8f };
+		readonly OsuPanel OsuPanel = new OsuPanel();
 		public XrConfigManager Config { get; private set; }
 		OsuGame OsuGame;
 		[Cached]
@@ -204,10 +204,6 @@ namespace osu.XR {
 		};
 
 		Bindable<InputMode> inputModeBindable = new();
-		Bindable<float> screenHeightBindable = new( 1.8f );
-
-		Bindable<int> screenResX = new( 1920 * 2 );
-		Bindable<int> screenResY = new( 1080 );
 
 		void onControllersMutated () {
 			wasInKeyboardProximity = false;
@@ -314,8 +310,7 @@ namespace osu.XR {
 		void osuLoaded () {
 			stealOsuDI();
 
-			OsuPanel.Source.Add( OsuGame );
-			OsuPanel.AutosizeBoth();
+			OsuPanel.SetSource( OsuGame );
 
 			AddInternal( BeatProvider );
 			AddInternal( Scene );
@@ -344,18 +339,6 @@ namespace osu.XR {
 			dominantHandBindable.BindValueChanged( v => {
 				onControllersMutated();
 			} );
-
-			Config.BindWith( XrConfigSetting.ScreenHeight, screenHeightBindable );
-			screenHeightBindable.BindValueChanged( v => OsuPanel.Y = v.NewValue, true );
-
-			screenResX.BindValueChanged( v => OsuGame.Width = v.NewValue, true );
-			screenResY.BindValueChanged( v => OsuGame.Height = v.NewValue, true );
-
-			Config.BindWith( XrConfigSetting.ScreenRadius, OsuPanel.RadiusBindable );
-			Config.BindWith( XrConfigSetting.ScreenArc, OsuPanel.ArcBindable );
-
-			Config.BindWith( XrConfigSetting.ScreenResolutionX, screenResX );
-			Config.BindWith( XrConfigSetting.ScreenResolutionY, screenResY );
 
 			VR.BindNewControllerAdded( c => {
 				this.ScheduleAfterChildren( () => {

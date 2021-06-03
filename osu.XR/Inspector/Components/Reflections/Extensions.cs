@@ -44,5 +44,18 @@ namespace osu.XR.Inspector.Components.Reflections {
 				type = type.BaseType;
 			}
 		}
+
+		public static Type GetBaseType ( this Type type, Type targetType ) {
+			do {
+				if ( targetType.IsGenericTypeDefinition && type.IsGenericType && targetType == type.GetGenericTypeDefinition() ) {
+					return type;
+				}
+				if ( type == targetType ) return type;
+
+				type = type.BaseType;
+			} while ( type != null );
+
+			return null;
+		}
 	}
 }

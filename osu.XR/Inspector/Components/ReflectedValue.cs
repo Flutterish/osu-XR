@@ -1,6 +1,7 @@
 ﻿using osu.Framework;
 using osu.Framework.Extensions.TypeExtensions;
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -16,6 +17,7 @@ namespace osu.XR.Inspector.Components {
 				}
 
 				DeclaredType = field.FieldType;
+				IsReadonly = isReadonly( field );
 				Getter = createFieldGetter( field, source );
 				Setter = createFieldSetter( field, source );
 			}
@@ -25,15 +27,23 @@ namespace osu.XR.Inspector.Components {
 				}
 
 				DeclaredType = prop.PropertyType;
+				IsReadonly = isReadonly( prop );
 				Getter = createPropertyGetter( prop.GetGetMethod( true ), source );
 				Setter = createPropertySetter( prop.GetSetMethod( true ), source );
 			}
 			else throw new InvalidOperationException( $"No field or property named `{name}` exists in `{source}`" );
 		}
 
+		static readonly Type isExternalInitType = typeof( System.Runtime.CompilerServices.IsExternalInit );
+		static bool isReadonly ( PropertyInfo prop )
+			=> !prop.CanWrite || prop.SetMethod is null || prop.SetMethod.IsPrivate || prop.SetMethod.ReturnParameter.GetRequiredCustomModifiers().Contains( isExternalInitType );
+		static bool isReadonly ( FieldInfo field )
+			=> field.IsInitOnly;
+
 		public ReflectedValue ( object source, FieldInfo field ) {
 			DeclaredName = field.Name;
 			DeclaredType = field.FieldType;
+			isReadonly( field );
 
 			if ( !field.FieldType.IsAssignableTo( typeof( T ) ) ) {
 				throw new InvalidCastException( $"Field `{field.Name}` of `{source}` is of type `{field.FieldType}`, but the expected type was `{typeof( T )}`" );
@@ -46,6 +56,7 @@ namespace osu.XR.Inspector.Components {
 		public ReflectedValue ( object source, PropertyInfo prop ) {
 			DeclaredName = prop.Name;
 			DeclaredType = prop.PropertyType;
+			IsReadonly = isReadonly( prop );
 
 			if ( !prop.PropertyType.IsAssignableTo( typeof( T ) ) ) {
 				throw new InvalidCastException( $"Property `{prop.Name}` of `{source}` is of type `{prop.PropertyType}`, but the expected type was `{typeof( T )}`" );
@@ -54,8 +65,6 @@ namespace osu.XR.Inspector.Components {
 			Getter = createPropertyGetter( prop.GetGetMethod( true ), source );
 			Setter = createPropertySetter( prop.GetSetMethod( true ), source );
 		}
-
-
 
 		private static Func<T> createFieldGetter ( FieldInfo field, object source ) {
 			/*if ( !RuntimeInfo.SupportsJIT )*/ return () => (T)field.GetValue( source );
@@ -91,6 +100,7 @@ namespace osu.XR.Inspector.Components {
 		}
 
 		private static Func<T> createPropertyGetter ( MethodInfo getter, object source ) {
+			if ( getter is null ) return null;
 			/*if ( !RuntimeInfo.SupportsJIT )*/ return () => (T)getter.Invoke( source, Array.Empty<object>() );
 
 			if ( typeof( T ) == getter.ReturnType )
@@ -100,6 +110,7 @@ namespace osu.XR.Inspector.Components {
 		}
 
 		private static Action<T> createPropertySetter ( MethodInfo setter, object source ) {
+			if ( setter is null ) return null;
 			/*if ( !RuntimeInfo.SupportsJIT )*/ return value => setter.Invoke( source, new object[] { value } );
 
 			if ( typeof( T ) == setter.GetParameters()[ 0 ].ParameterType )
@@ -112,6 +123,7 @@ namespace osu.XR.Inspector.Components {
 		public readonly Type DeclaredType;
 		public readonly Func<T> Getter;
 		public readonly Action<T> Setter;
+		public readonly bool IsReadonly;
 
 		public T Value {
 			get => Getter();

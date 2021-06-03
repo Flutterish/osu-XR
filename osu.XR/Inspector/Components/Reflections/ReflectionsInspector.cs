@@ -26,17 +26,20 @@ namespace osu.XR.Inspector.Components.Reflections {
 		public Type TargetType => TypeGetter( TargetValue );
 		public Func<object, string> NameGetter;
 		public string TargetName => NameGetter( TargetValue );
+		public bool IsValueEditable { get; private set; }
 
 		public ReflectionsInspector ( object value = null, string name = null ) {
 			RelativeSizeAxes = Axes.X;
 			AutoSizeAxes = Axes.Y;
 
+			IsValueEditable = false;
 			SetValue( value, name );
 		}
 		public ReflectionsInspector ( ReflectedValue<object> reflectedValue ) {
 			RelativeSizeAxes = Axes.X;
 			AutoSizeAxes = Axes.Y;
 
+			IsValueEditable = !reflectedValue.IsReadonly;
 			SetSource( reflectedValue );
 		}
 
@@ -93,7 +96,7 @@ namespace osu.XR.Inspector.Components.Reflections {
 
 			var type = value.GetType();
 
-			if ( type.IsSimpleType() ) {
+			if ( type.IsSimpleType() || ReflectionsInspectorPrimitive.CanEdit( type ) ) {
 				if ( current is not ReflectionsInspectorPrimitive )
 					current = new ReflectionsInspectorPrimitive( this );
 				else current.UpdateValue();

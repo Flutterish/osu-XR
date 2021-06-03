@@ -15,6 +15,9 @@ namespace osu.XR {
 		public static T GetProperty<T> ( this object self, string name )
 			=> (T)self.GetType().GetProperties( BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public ).First( x => x.Name == name && x.PropertyType.IsAssignableTo( typeof( T ) ) ).GetValue( self );
 
+		public static void SetProperty<T> ( this object self, string name, T value )
+			=> self.GetType().GetProperties( BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public ).First( x => x.Name == name && x.PropertyType.IsAssignableTo( typeof( T ) ) ).SetValue( self, value );
+
 		public static MethodInfo GetMethod ( this object self, string name )
 			=> self.GetType().GetMethod( name, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public );
 	}
