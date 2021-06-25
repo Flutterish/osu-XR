@@ -39,7 +39,7 @@ namespace osu.XR.Drawables {
         private readonly Container content;
         private readonly Box hover;
 
-        public CalmOsuAnimatedButton ( HoverSampleSet sampleSet = HoverSampleSet.Normal ) : base( sampleSet ) {
+        public CalmOsuAnimatedButton ( HoverSampleSet sampleSet = HoverSampleSet.Button ) : base( sampleSet ) {
             base.Content.Add( content = new Container {
                 Origin = Anchor.Centre,
                 Anchor = Anchor.Centre,
