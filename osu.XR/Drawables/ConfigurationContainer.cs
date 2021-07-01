@@ -25,6 +25,7 @@ namespace osu.XR.Drawables {
 		protected readonly SearchTextBox SearchTextBox;
 		Drawable stickyHeader;
 		Drawable stickyHeaderBackground;
+		Drawable titleBackground;
 		OsuScrollContainer scroll;
 
 		public ConfigurationContainer () {
@@ -65,7 +66,8 @@ namespace osu.XR.Drawables {
 				}
 			} );
 
-			content.Add( wrap( new FillFlowContainer {
+			Drawable title;
+			content.Add( title = wrap( new FillFlowContainer {
 				RelativeSizeAxes = Axes.X,
 				AutoSizeAxes = Axes.Y,
 				Direction = FillDirection.Vertical,
@@ -93,6 +95,7 @@ namespace osu.XR.Drawables {
 
 			AddInternal( stickyHeader = wrap( CreateStickyHeader( SearchTextBox ), filterable: false ) );
 			stickyHeaderBackground = ( stickyHeader as Container ).Children[ 0 ];
+			titleBackground = ( title as Container ).Children[ 0 ];
 
 			SearchTextBox.Current.Value = "";
 			SearchTextBox.Current.ValueChanged += v => content.SearchTerm = v.NewValue;
@@ -143,7 +146,8 @@ namespace osu.XR.Drawables {
 		protected override void UpdateAfterChildren () {
 			base.UpdateAfterChildren();
 			stickyHeader.Y = Math.Max( -stickyHeader.Margin.Top - 1, header.LayoutSize.Y - scroll.Current );
-			stickyHeaderBackground.Colour = Interpolation.ValueAt( Math.Clamp( scroll.Current, 0, stickyHeader.LayoutSize.Y ), OsuColour.Gray( 0.05f ), OsuColour.Gray( 0.025f ), 0, stickyHeader.LayoutSize.Y, Easing.In );
+			stickyHeaderBackground.Colour = titleBackground.Colour
+				= Interpolation.ValueAt( Math.Clamp( scroll.Current, 0, stickyHeader.LayoutSize.Y ), OsuColour.Gray( 0.05f ), OsuColour.Gray( 0.025f ), 0, stickyHeader.LayoutSize.Y, Easing.In );
 		}
 
 		protected override void Update () {
