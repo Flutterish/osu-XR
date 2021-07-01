@@ -106,13 +106,13 @@ namespace osu.XR {
 			this.args = args.ToArray();
 
 			OpenVR.NET.Events.OnMessage += msg => {
-				Notifications.Post( new SimpleNotification() { Text = msg } );
+				Schedule( () => Notifications.PostMessage( new SimpleNotification() { Text = msg } ) );
 			};
 			OpenVR.NET.Events.OnError += msg => {
-				Notifications.Post( new SimpleNotification() { Text = msg, Icon = FontAwesome.Solid.Bomb } );
+				Schedule( () => Notifications.PostError( new SimpleNotification() { Text = msg, Icon = FontAwesome.Solid.Bomb } ) );
 			};
 			OpenVR.NET.Events.OnException += (msg,e) => {
-				Notifications.Post( new SimpleNotification() { Text = msg + ": " + e.Message, Icon = FontAwesome.Solid.Bomb } );
+				Schedule( () => Notifications.PostError( new SimpleNotification() { Text = msg + ": " + e.Message, Icon = FontAwesome.Solid.Bomb } ) );
 			};
 			Scene = new SceneWithMirrorWarning { RelativeSizeAxes = Axes.Both, Camera = Camera };
 			PhysicsSystem.Root = Scene.Root;
