@@ -93,9 +93,11 @@ namespace osu.XR.Input {
 			CanAutoRepeat = true;
 			ModifierCombos = new[] {
 				(new Key[]{ }, lowerCase),
+				(new Key[]{ osuTK.Input.Key.CapsLock, osuTK.Input.Key.ShiftLeft }, lowerCase),
+				(new Key[]{ osuTK.Input.Key.CapsLock, osuTK.Input.Key.ShiftRight }, lowerCase),
+				(new Key[]{ osuTK.Input.Key.CapsLock }, upperCase),
 				(new Key[]{ osuTK.Input.Key.ShiftLeft }, upperCase),
-				(new Key[]{ osuTK.Input.Key.ShiftRight }, upperCase),
-				(new Key[]{ osuTK.Input.Key.CapsLock }, upperCase)
+				(new Key[]{ osuTK.Input.Key.ShiftRight }, upperCase)
 			};
 		}
 

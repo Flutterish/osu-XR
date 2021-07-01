@@ -1,5 +1,6 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
@@ -120,9 +121,7 @@ namespace osu.XR.Input { // BUG there is something wrong when inputting text wit
 			}
 
 			// we have the keys sorted top-down left-right so its easy to visually map them in KeyboardLayout. This is going to change.
-			this.keys.Sort( (a,b) =>
-				Math.Sign( b.Mesh.BoundingBox.Max.Z - a.Mesh.BoundingBox.Max.Z ) * 2 + Math.Sign( a.Mesh.BoundingBox.Min.X - b.Mesh.BoundingBox.Min.X )
-			);
+			this.keys = this.keys.OrderByDescending( k => k.Mesh.BoundingBox.Max.Z ).ThenBy( x => x.Mesh.BoundingBox.Min.X ).ToList();
 
 			remapKeys();
 		}
@@ -296,7 +295,11 @@ namespace osu.XR.Input { // BUG there is something wrong when inputting text wit
 			public void ApplyModifiers ( Key[] modifiers ) {
 				this.modifiers = modifiers;
 
-				var value = KeyBindalbe.Value?.GetDisplayFor( modifiers ) ?? "";
+				applyText( text, modifiers );
+			}
+
+			private void applyText ( OsuTextFlowContainer text, IEnumerable<Key> modifiers ) {
+				var value = KeyBindalbe.Value?.GetDisplayFor( modifiers.ToArray() ) ?? "";
 				displayText = "";
 				text.Clear( true );
 				text.Scale = Vector2.One;
@@ -312,7 +315,7 @@ namespace osu.XR.Input { // BUG there is something wrong when inputting text wit
 						i.Rotation = 90;
 				}
 				else if ( value == "␣" ) {
-					foreach ( var i in text.AddText("[" ) ) {
+					foreach ( var i in text.AddText( "[" ) ) {
 						i.Scale = new Vector2( 2 );
 						i.Rotation = -90;
 					}
