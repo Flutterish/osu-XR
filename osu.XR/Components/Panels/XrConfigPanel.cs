@@ -7,7 +7,7 @@ using osu.XR.Drawables;
 
 namespace osu.XR.Components.Panels {
 	public class XrConfigPanel : FlatPanel, IHasName, IHasIcon {
-		public readonly ConfigPanel Config = new( true ) { AutoSizeAxes = Axes.X, RelativeSizeAxes = Axes.None, Height = 500 };
+		public readonly ConfigPanel Config = new() { Height = 500, Width = 400 };
 		public readonly Bindable<bool> IsVisibleBindable = new();
 
 		[Resolved]

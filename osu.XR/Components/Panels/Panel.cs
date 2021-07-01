@@ -159,14 +159,17 @@ namespace osu.XR.Components.Panels {
 
 		public virtual bool IsColliderEnabled => Source.Any( x => x.IsPresent );
 		public override void Show () {
+			this.FadeIn( 300, Easing.Out );
 			foreach ( var i in Source ) {
 				i.Show();
 			}
 		}
 		public override void Hide () {
-			foreach ( var i in Source ) {
-				i.Hide();
-			}
+			this.FadeOut( 300, Easing.Out ).Then().Schedule( () => {
+				foreach ( var i in Source ) {
+					i.Hide();
+				}
+			} );
 		}
 
 		List<XrController> focusedControllers = new();

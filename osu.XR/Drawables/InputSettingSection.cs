@@ -1,16 +1,22 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Platform;
 using osu.Framework.XR.GameHosts;
 using osu.Game.Overlays.Settings;
+using osu.XR.Components.Groups;
 using osu.XR.Settings;
 
 namespace osu.XR.Drawables {
-	public class InputSettingSection : SettingsSection {
-        public override string Header => "Input";
+	public class InputSettingSection : FillFlowContainer, IHasName, IHasIcon {
+        public InputSettingSection () {
+            Direction = FillDirection.Vertical;
+            AutoSizeAxes = Axes.Y;
+            RelativeSizeAxes = Axes.X;
+		}
 
-        public override Drawable CreateIcon () => new SpriteIcon {
+        public Drawable CreateIcon () => new SpriteIcon {
             Icon = FontAwesome.Solid.Keyboard
         };
 
@@ -25,5 +31,7 @@ namespace osu.XR.Drawables {
                 new SettingsEnumDropdown<Hand> { LabelText = "Dominant hand", Current = config.GetBindable<Hand>( XrConfigSetting.DominantHand ) }
             };
         }
+
+		public string DisplayName => "Input";
     }
 }

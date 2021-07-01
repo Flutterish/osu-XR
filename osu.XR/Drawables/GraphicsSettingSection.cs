@@ -1,14 +1,22 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
 using osu.Game.Overlays.Settings;
+using osu.XR.Components.Groups;
 using osu.XR.Settings;
 
 namespace osu.XR.Drawables {
-	public class GraphicsSettingSection : SettingsSection {
-        public override string Header => "Graphics";
+	public class GraphicsSettingSection : FillFlowContainer, IHasName, IHasIcon {
+        public GraphicsSettingSection () {
+            Direction = FillDirection.Vertical;
+            AutoSizeAxes = Axes.Y;
+            RelativeSizeAxes = Axes.X;
+        }
 
-        public override Drawable CreateIcon () => new SpriteIcon {
+        public string DisplayName => "Graphics";
+
+        public Drawable CreateIcon () => new SpriteIcon {
             Icon = FontAwesome.Solid.Laptop
         };
 

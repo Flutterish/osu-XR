@@ -6,21 +6,15 @@ using System;
 using System.Collections.Generic;
 
 namespace osu.XR.Drawables {
-	public class ConfigPanel : SettingsPanel {
-        public string Title => "VR Settings";
-        public string Description => "change the way osu!XR behaves";
-		public ConfigPanel ( bool showSidebar ) : base( showSidebar ) {
+	public class ConfigPanel : ConfigurationContainer {
+		public ConfigPanel () : base() {
+            Title = "VR Settings";
+            Description = "change the way osu!XR behaves";
 
-		}
-
-		protected override IEnumerable<SettingsSection> CreateSections () => new SettingsSection[] {
-            new InputSettingSection(),
-            new GraphicsSettingSection(),
-            new PresetsSection()
-        };
-
-        protected override Drawable CreateHeader () => new SettingsHeader( Title, Description );
-        protected override Drawable CreateFooter () => new SettingsFooter();
+            AddSection( new InputSettingSection() );
+            AddSection( new GraphicsSettingSection() );
+            AddSection( new PresetsSection() );
+        }
     }
 
     public class PxSliderBar : OsuSliderBar<int> {

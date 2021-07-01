@@ -3,7 +3,7 @@ The reflections inspector is now avaiable only in debug builds.
 Inspector selections now have an animation.
 Models' tint now is multiplied with alpha.
 Notification panel now doesnt open on startup.
-Possibly fixed the startup crash.
+Made all panels the same size and look.
 
 [2021.06.03]
 Implemented saving and loading ruleset bindings.
