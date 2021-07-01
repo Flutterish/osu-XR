@@ -1,5 +1,7 @@
 ﻿[Current]
 The reflections inspector is now avaiable only in debug builds.
+Inspector selections now have an animation.
+Models' tint now is multiplied with alpha.
 
 [2021.06.03]
 Implemented saving and loading ruleset bindings.
