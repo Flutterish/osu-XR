@@ -143,9 +143,9 @@ namespace osu.XR.Components {
 			};
 			leftButtonBindable.ValueChanged += v => {
 				if ( !EmulatesTouch ) LeftButtonBindable.Value = v.NewValue;
-				if ( v.NewValue && inspector.Panel.IsSelectingBindable.Value ) {
-					inspector.Panel.Inspect( inspector.Panel.SelectedElementBindable.Value );
-					inspector.Panel.IsSelectingBindable.Value = false;
+				if ( v.NewValue && inspector.Content.IsSelectingBindable.Value ) {
+					inspector.Content.Inspect( inspector.Content.SelectedElementBindable.Value );
+					inspector.Content.IsSelectingBindable.Value = false;
 				}
 			};
 
@@ -216,27 +216,27 @@ namespace osu.XR.Components {
 				SendHapticVibration( 0.05, 20 );
 			}
 
-			if ( inspector.Panel.IsSelectingBindable.Value ) {
+			if ( inspector.Content.IsSelectingBindable.Value ) {
 				if ( IsMainControllerBindable.Value ) {
-					inspector.Panel.SelectedElementBindable.Value = null;
+					inspector.Content.SelectedElementBindable.Value = null;
 				}
 			}
 		}
 
 		private void onPointerHit ( RaycastHit hit ) {
-			if ( inspector.Panel.IsSelectingBindable.Value ) {
+			if ( inspector.Content.IsSelectingBindable.Value ) {
 				if ( IsMainControllerBindable.Value ) {
-					if ( inspector.Panel.Targets2DDrawables.Value ) {
+					if ( inspector.Content.Targets2DDrawables.Value ) {
 						var panel = hit.Collider as Panel;
 						if ( panel is null ) {
-							inspector.Panel.Select( null );
+							inspector.Content.Select( null );
 						}
 						else {
-							inspector.Panel.Select( panel.EmulatedInput.GetFirstDrawableAt( panel.TexturePositionAt( hit.TrisIndex, hit.Point ) ) );
+							inspector.Content.Select( panel.EmulatedInput.GetFirstDrawableAt( panel.TexturePositionAt( hit.TrisIndex, hit.Point ) ) );
 						}
 					}
 					else {
-						inspector.Panel.Select( hit.Collider as Drawable3D );
+						inspector.Content.Select( hit.Collider as Drawable3D );
 					}
 				}
 
@@ -255,7 +255,7 @@ namespace osu.XR.Components {
 
 		IHasCollider myFocus;
 		void onPointerFocusChanged ( ValueChangedEvent<IHasCollider> v ) {
-			if ( inspector.Panel.IsSelectingBindable.Value && v.NewValue is not null ) return;
+			if ( inspector.Content.IsSelectingBindable.Value && v.NewValue is not null ) return;
 
 			if ( myFocus is IFocusable old ) old.OnControllerFocusLost( this );
 			myFocus = v.NewValue;
@@ -290,7 +290,7 @@ namespace osu.XR.Components {
 			Root.Add( touch );
 			Root.Add( raycast );
 
-			inspector.Panel.IsSelectingBindable.BindValueChanged( v => {
+			inspector.Content.IsSelectingBindable.BindValueChanged( v => {
 				if ( v.NewValue ) {
 					onPointerNoHit();
 					if ( myFocus != null ) onPointerFocusChanged( new ValueChangedEvent<IHasCollider>( myFocus, null ) );

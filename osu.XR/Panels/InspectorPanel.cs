@@ -5,33 +5,15 @@ using osu.Framework.Graphics.Sprites;
 using osu.XR.Components.Groups;
 using osu.XR.Drawables;
 using osu.XR.Inspector;
+using osu.XR.Panels;
 
 namespace osu.XR.Components.Panels {
-	public class InspectorPanel : FlatPanel, IHasName, IHasIcon {
-		public readonly InspectorDrawable Panel = new() { Height = 500, Width = 400 };
-		public readonly Bindable<bool> IsVisibleBindable = new();
+	public class InspectorPanel : HandheldPanel<InspectorDrawable> {
+		protected override InspectorDrawable CreateContent ()
+			=> new();
 
-		[Resolved]
-		private OsuGameXr Game { get; set; }
-
-		public InspectorPanel () {
-			PanelAutoScaleAxes = Axes.X;
-			PanelHeight = 0.5;
-			RelativeSizeAxes = Axes.X;
-			Height = 500;
-			AutosizeX();
-			Source.Add( Panel );
-		}
-
-		protected override void Update () {
-			base.Update();
-			IsVisible = Panel.IsPresent;
-			IsVisibleBindable.Value = IsVisible;
-		}
-
-		public string DisplayName => "Inspector";
-
-		public Drawable CreateIcon ()
+		public override string DisplayName => "Inspector";
+		public override Drawable CreateIcon ()
 			=> new SpriteIcon { Icon = FontAwesome.Solid.Search };
 	}
 }

@@ -4,31 +4,21 @@ using osu.Framework.Graphics.Sprites;
 using osu.Game.Overlays.Notifications;
 using osu.XR.Components.Groups;
 using osu.XR.Drawables;
+using osu.XR.Panels;
 
 namespace osu.XR.Components.Panels {
-	public class NotificationsPanel : FlatPanel, IHasName, IHasIcon {
-		[Resolved]
-		private OsuGameXr Game { get; set; }
-		NotificationsDrawable notifications = new() { Height = 500, Width = 400 };
-
-		public NotificationsPanel () {
-			PanelAutoScaleAxes = Axes.X;
-			PanelHeight = 0.5;
-			RelativeSizeAxes = Axes.X;
-			Height = 500;
-			AutosizeX();
-			Source.Add( notifications );
-		}
-
+	public class NotificationsPanel : HandheldPanel<NotificationsDrawable> {
 		public void PostMessage ( Notification notification )
-			=> notifications.PostMessage( notification );
+			=> Content.PostMessage( notification );
 
 		public void PostError ( Notification notification )
-			=> notifications.PostError( notification );
+			=> Content.PostError( notification );
 
-		public string DisplayName => "Notifications";
+		protected override NotificationsDrawable CreateContent ()
+			=> new();
 
-		public Drawable CreateIcon ()
+		public override string DisplayName => "Notifications";
+		public override Drawable CreateIcon ()
 			=> new SpriteIcon { Icon = FontAwesome.Solid.ExclamationCircle };
 	}
 }

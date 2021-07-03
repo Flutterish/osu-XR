@@ -3,6 +3,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
 using osu.XR.Components.Groups;
 using osu.XR.Drawables;
+using osu.XR.Panels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,28 +11,12 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace osu.XR.Components.Panels {
-	public class ChangelogPanel : FlatPanel, IHasName, IHasIcon {
-		public readonly ChangelogDrawable Panel = new() { Height = 500, Width = 400 };
-		public readonly Bindable<bool> IsVisibleBindable = new();
+	public class ChangelogPanel : HandheldPanel<ChangelogDrawable> {
+		protected override ChangelogDrawable CreateContent ()
+			=> new();
 
-		public ChangelogPanel () {
-			PanelAutoScaleAxes = Axes.X;
-			PanelHeight = 0.5;
-			RelativeSizeAxes = Axes.X;
-			Height = 500;
-			AutosizeX();
-			Source.Add( Panel );
-		}
-
-		protected override void Update () {
-			base.Update();
-			IsVisible = Panel.IsPresent;
-			IsVisibleBindable.Value = IsVisible;
-		}
-
-		public string DisplayName => "Changelog";
-
-		public Drawable CreateIcon ()
+		public override string DisplayName => "Changelog";
+		public override Drawable CreateIcon ()
 			=> new SpriteIcon { Icon = FontAwesome.Solid.ClipboardList };
 	}
 }
