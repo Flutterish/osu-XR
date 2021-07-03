@@ -59,7 +59,7 @@ namespace osu.XR.Inspector {
 				}
 				inspectedName.Text = $"Inspected: ||{v.NewValue?.GetInspectorName() ?? "Nothing"}||";
 
-				HiererchyInspector hierarchy = keepSections.OfType<HiererchyInspector>().FirstOrDefault();
+				HierarchyInspector hierarchy = keepSections.OfType<HierarchyInspector>().FirstOrDefault();
 				if ( v.NewValue is null ) {
 					ClearSections();
 				}
@@ -67,24 +67,33 @@ namespace osu.XR.Inspector {
 					ClearSections( x => !keepSections.Contains( x ), true );
 					ClearSections( false );
 				}
-
-				AddSection( hierarchy ??= new HiererchyInspector() {
-					DrawablePrevieved = d => SelectedElementBindable.Value = d,
-					DrawableSelected = d => {
-						keepSections.Add( hierarchy );
-						InspectedElementBindable.Value = d;
-					}
-				}, filterable: false );
-				hierarchy.SelectedDrawable.Value = v.NewValue;
-				hierarchy.Current = SearchTextBox.Current;
-				hierarchy.SearchTermRequested = t => {
-					if ( SearchTextBox.Current.Value.EndsWith( " " ) ) {
-						SearchTextBox.Current.Value += t;
+				if ( v.NewValue is not null ) {
+					if ( hierarchy is null ) {
+						AddSection( hierarchy = new HierarchyInspector( v.NewValue ) );
+						hierarchy.StepHovered += s => {
+							SelectedElementBindable.Value = s.Value;
+						};
+						hierarchy.StepHoverLost += s => {
+							SelectedElementBindable.Value = null;
+						};
+						hierarchy.StepSelected += s => {
+							keepSections.Add( hierarchy );
+							InspectedElementBindable.Value = s.Value;
+						};
+						hierarchy.SearchTermRequested = t => {
+							if ( SearchTextBox.Current.Value.EndsWith( " " ) ) {
+								SearchTextBox.Current.Value += t;
+							}
+							else {
+								SearchTextBox.Current.Value += " " + t;
+							}
+						};
 					}
 					else {
-						SearchTextBox.Current.Value += " " + t;
+						AddSection( hierarchy );
+						hierarchy.FocusOn( v.NewValue );
 					}
-				};
+				}
 
 				if ( v.NewValue is IConfigurableInspectable config ) {
 					foreach ( var i in config.CreateInspectorSubsections() ) {

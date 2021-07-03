@@ -53,7 +53,7 @@ namespace osu.XR.Drawables {
 				Direction = FillDirection.Vertical
 			} );
 
-			setTop( CreateStep( value ) );
+			setTop( CreateTop( value ) );
 			top.IsMultiselect.BindTo( IsMultiselectBindable );
 			top.MultiselectSelection.BindTo( multiselectSelection );
 		}
@@ -62,7 +62,7 @@ namespace osu.XR.Drawables {
 			if ( top == newTop ) return;
 
 			if ( top is not null ) {
-				hierarchy.Remove( top );
+				if ( hierarchy.Contains( top ) ) hierarchy.Remove( top );
 				top.Selected -= childSelected;
 				top.Hovered -= childHovered;
 				top.HoverLost -= childHoverLost;
@@ -79,7 +79,7 @@ namespace osu.XR.Drawables {
 
 			setParent();
 		}
-		void setParent () {
+		void setParent () { // TODO react when the parent changes
 			if ( parent is not null ) hierarchy.Remove( parent );
 
 			parent = CreateParent( top );
@@ -90,6 +90,26 @@ namespace osu.XR.Drawables {
 
 				parent.Selected += parentSelected;
 			}
+		}
+
+		public void FocusOn ( Ttype value ) {
+			var step = top.FindStep( value );
+			if ( step is null ) {
+				setTop( CreateTop( value ) );
+				top.IsMultiselect.BindTo( IsMultiselectBindable );
+				top.MultiselectSelection.BindTo( multiselectSelection );
+			}
+			else {
+				focusOn( (Tstep)step );
+			}
+		}
+		void focusOn ( Tstep step ) {
+			if ( step == top ) return;
+			step.SplitFromParent();
+			setTop( (Tstep)step );
+			top.IsExpanded.Value = true;
+
+			SearchTermsModified?.Invoke();
 		}
 
 		private void onSearchTermsModified () {
@@ -128,7 +148,7 @@ namespace osu.XR.Drawables {
 
 		private Tstep top;
 		private Tstep parent;
-		protected abstract Tstep CreateStep ( Ttype value );
+		protected abstract Tstep CreateTop ( Ttype value );
 		protected abstract Tstep CreateParent ( Tstep top );
 
 		public IEnumerable<IFilterable> FilterableChildren => top.Yield();
@@ -204,6 +224,10 @@ namespace osu.XR.Drawables {
 			} );
 		}
 
+		protected virtual void OnSelected () {
+			Selected?.Invoke( this );
+		}
+
 		protected override void LoadComplete () {
 			base.LoadComplete();
 			Add( header = new FillFlowContainer {
@@ -220,7 +244,7 @@ namespace osu.XR.Drawables {
 				Margin = new MarginPadding { Left = 5 },
 				Hovered = () => Hovered?.Invoke( this ),
 				HoverLost = () => HoverLost?.Invoke( this ),
-				Action = () => Selected?.Invoke( this )
+				Action = OnSelected
 			} );
 			button.Add( toggleButton );
 			button.OnUpdate += d => d.Margin = new MarginPadding { Left = 5, Right = selection.LayoutSize.X };
@@ -478,6 +502,39 @@ namespace osu.XR.Drawables {
 			visible = false;
 			this.ScaleTo( new Vector2( 1, 0 ), 100, Easing.Out );
 		}
+
+		public HierarchyStep<Ttype> FindStep ( Ttype value ) {
+			if ( !typeof( Ttype ).IsValueType ) {
+				return findStepByref( value );
+			}
+			else if ( value is IEquatable<Ttype> equatable ) {
+				return findStepEquatable( value );
+			}
+			else {
+				throw new InvalidOperationException( "The given step type is not equatable and cant be compared by refernece" );
+			}
+		}
+
+		HierarchyStep<Ttype> findStepEquatable ( Ttype value ) {
+			if ( (value as IEquatable<Ttype>).Equals( Value ) ) return this;
+			if ( !IsExpanded.Value ) return null;
+			foreach ( var i in Children.Values ) {
+				var val = i.findStepByref( value );
+				if ( val is not null ) return val;
+			}
+			return null;
+		}
+
+		HierarchyStep<Ttype> findStepByref ( Ttype value ) {
+			if ( object.ReferenceEquals( value, Value ) ) return this;
+			if ( !IsExpanded.Value ) return null;
+			foreach ( var i in Children.Values ) {
+				var val = i.findStepByref( value );
+				if ( val is not null ) return val;
+			}
+			return null;
+		}
+
 		public virtual IEnumerable<string> FilterTerms => Title.Yield();
 	}
 

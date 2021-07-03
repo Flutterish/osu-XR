@@ -38,7 +38,7 @@ namespace osu.XR.Input {
 			if ( parent is CompositeDrawable composite ) {
 				if ( parent is osu.XR.Inspector.IChildrenNotInspectable ) return null;
 
-				foreach ( var i in HierarchyStep.getAliveInternalChildren( composite ).Reverse() ) {
+				foreach ( var i in HierarchyInspectorStep.getAliveInternalChildren( composite ).Reverse() ) {
 					if ( !i.IsPresent || i is Component ) 
 						continue;
 					if ( i.AlwaysPresent && Precision.AlmostEquals( i.Alpha, 0f ) )

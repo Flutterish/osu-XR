@@ -50,7 +50,7 @@ namespace osu.XR.Inspector.Components.Reflections {
 				}
 			} );
 
-			if ( source.IsValueEditable ) {
+			if ( source.IsValueEditable && source.TargetValue is not Exception ) {
 				if ( source.ValueSetter != null && ValueEditor.HasEditorFor( source.TargetType ) ) {
 					makeEditable( ValueEditor.GetEditorFor( source.TargetType, source.TargetValue ), v => source.ValueSetter( v ) );
 				}

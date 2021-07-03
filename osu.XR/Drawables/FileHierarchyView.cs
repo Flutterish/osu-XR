@@ -100,7 +100,7 @@ namespace osu.XR.Drawables {
 	public class FileHierarchyView : HierarchyView<FileHierarchyStep,string> {
 		public FileHierarchyView ( string path = "." ) : base( path == null ? path : Path.GetFullPath( path ) ) { }
 
-		protected override FileHierarchyStep CreateStep ( string value )
+		protected override FileHierarchyStep CreateTop ( string value )
 			=> new FileHierarchyStep( value );
 
 		protected override FileHierarchyStep CreateParent ( FileHierarchyStep top )
