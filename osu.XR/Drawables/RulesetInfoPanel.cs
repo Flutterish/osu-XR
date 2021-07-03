@@ -24,7 +24,6 @@ using System.Linq;
 
 namespace osu.XR.Drawables {
 	public class RulesetInfoPanel : ConfigurationContainer {
-		FillFlowContainer container;
 		public RulesetInfoPanel () {
 			Title = "Ruleset";
 			Description = "adjust how you play the ruleset in XR";

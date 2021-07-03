@@ -10,23 +10,32 @@ using System.Threading.Tasks;
 
 namespace osu.XR.Tests {
 	public class TestSceneFileHierarchy : OsuTestScene {
+		FileHierarchyPanel hierarchy;
+
 		protected override void LoadComplete () {
 			base.LoadComplete();
 
-			Add( new FileHierarchyPanel() {
+			Add( hierarchy = new FileHierarchyPanel() {
 				Size = new Vector2( 400, 500 ),
 				Anchor = Anchor.Centre,
 				Origin = Anchor.Centre
 			} );
+
+			AddToggleStep( "IsMultiselect", v => hierarchy.preview.IsMultiselect = v );
+			AddToggleStep( "SelectionNavigates", v => hierarchy.preview.SelectionNavigates = v );
 		}
 	}
 
 	public class FileHierarchyPanel : ConfigurationContainer {
+		public FileHierarchyViewWithPreview preview;
 		public FileHierarchyPanel () {
 			Title = "Files";
 			Description = "select some files";
 
-			AddSection( new FileHierarchyView(), name: "Files" );
+			AddSection( preview = new FileHierarchyViewWithPreview { IsMultiselect = true, SelectionNavigates = false }, name: "Files" );
+			preview.SearchTermsModified += () => {
+				Content.PerformFilter();
+			};
 		}
 	}
 }

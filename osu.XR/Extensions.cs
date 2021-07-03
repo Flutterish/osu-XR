@@ -1,6 +1,7 @@
 ﻿using osu.Framework.Graphics;
 using osu.Framework.XR.Components;
 using osu.XR.Inspector;
+using System;
 #nullable enable
 
 namespace osu.XR {
@@ -19,5 +20,19 @@ namespace osu.XR {
 
 		public static bool IsInspectable ( this Drawable self )
 			=> self is not ISelfNotInspectable && self.DoParentsAllowInspection();
+
+		static readonly string[] SiUnits = new[] { "B", "kiB", "MiB", "GiB", "TiB" };
+		public static string HumanizeSiBytes ( this int bytes )
+			=> HumanizeSiBytes( (long)bytes );
+		public static string HumanizeSiBytes ( this long bytes ) {
+			if ( bytes == 0 ) return "0B";
+			if ( bytes < 0 ) return '-' + HumanizeSiBytes( -bytes );
+
+			int order = (int)Math.Floor( Math.Log( (double)bytes, 1024 ) );
+			order = Math.Clamp( order, 0, SiUnits.Length - 1 );
+			double display = bytes / Math.Pow( 1024, order );
+
+			return $"{display:0.##}{SiUnits[order]}";
+		}
 	}
 }

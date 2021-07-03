@@ -4,6 +4,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Utils;
+using osu.Framework.XR.Graphics.Containers;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
@@ -21,7 +22,7 @@ namespace osu.XR.Drawables {
 	public class ConfigurationContainer : CompositeDrawable {
 		OsuTextFlowContainer header;
 		Drawable headerOffset;
-		SearchContainer content;
+		protected readonly AdvancedSearchContainer<string> Content;
 		protected readonly SearchTextBox SearchTextBox;
 		Drawable stickyHeader;
 		Drawable stickyHeaderBackground;
@@ -58,16 +59,17 @@ namespace osu.XR.Drawables {
 						Origin = Anchor.BottomCentre,
 						Colour = OsuColour.Gray( 0.05f )
 					},
-					content = new SearchContainer {
+					Content = new AdvancedSearchContainer<string> {
 						Direction = FillDirection.Vertical,
 						RelativeSizeAxes = Axes.X,
-						AutoSizeAxes = Axes.Y
+						AutoSizeAxes = Axes.Y,
+						RecursionMode = RecursiveFilterMode.ChildrenFirst
 					}
 				}
 			} );
 
 			Drawable title;
-			content.Add( title = wrap( new FillFlowContainer {
+			Content.Add( title = wrap( new FillFlowContainer {
 				RelativeSizeAxes = Axes.X,
 				AutoSizeAxes = Axes.Y,
 				Direction = FillDirection.Vertical,
@@ -98,7 +100,7 @@ namespace osu.XR.Drawables {
 			titleBackground = ( title as Container ).Children[ 0 ];
 
 			SearchTextBox.Current.Value = "";
-			SearchTextBox.Current.ValueChanged += v => content.SearchTerm = v.NewValue;
+			SearchTextBox.Current.ValueChanged += v => Content.SearchTerm = v.NewValue;
 		}
 
 		protected virtual Drawable CreateStickyHeader ( SearchTextBox search ) {
@@ -108,7 +110,7 @@ namespace osu.XR.Drawables {
 		Dictionary<Drawable, Drawable> sections = new();
 		public void AddSection ( Drawable section, bool filterable = true, string name = null ) {
 			sections.Add( section, wrap( section, filterable: filterable, name: name ) );
-			content.Add( sections[ section ] );
+			Content.Add( sections[ section ] );
 		}
 
 		public FillFlowContainer CreateSection ( params Drawable[] drawables ) {
@@ -124,7 +126,7 @@ namespace osu.XR.Drawables {
 
 		public void RemoveSection ( Drawable section, bool dispose = false ) {
 			sections.Remove( section, out var drawable );
-			content.Remove( drawable );
+			Content.Remove( drawable );
 			if ( dispose ) drawable.Dispose();
 			else ( section.Parent as Container ).Remove( section );
 		}
@@ -179,11 +181,12 @@ namespace osu.XR.Drawables {
 
 		FilterableContainer wrap ( Drawable other, bool filterable = true, string name = null ) {
 			Drawable[] final;
-			var wrapper = new Container {
+			var wrapper = new FilterableContainer {
 				Margin = new MarginPadding { Vertical = 6 },
 				RelativeSizeAxes = Axes.X,
 				AutoSizeAxes = Axes.Y,
-				Child = other
+				Child = other,
+				CanBeFiltered = filterable
 			};
 			if ( other is IHasName hasName ) {
 				name ??= hasName.DisplayName;
@@ -214,13 +217,14 @@ namespace osu.XR.Drawables {
 						RelativeSizeAxes = Axes.Both,
 						Colour = OsuColour.Gray( 0.05f )
 					},
-					new FillFlowContainer {
+					new FilterableFillFlowContainer {
 						RelativeSizeAxes = Axes.X,
 						AutoSizeAxes = Axes.Y,
 						Direction = FillDirection.Vertical,
 						Margin = new MarginPadding { Vertical = 10 },
 
-						Children = final
+						Children = final,
+						CanBeFiltered = filterable
 					}
 				},
 				Margin = new MarginPadding { Vertical = 1 },

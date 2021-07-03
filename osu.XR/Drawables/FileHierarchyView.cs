@@ -1,7 +1,15 @@
-﻿using osu.Framework.Graphics;
+﻿using osu.Framework.Allocation;
+using osu.Framework.Bindables;
+using osu.Framework.Extensions.IEnumerableExtensions;
+using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
+using osu.Game.Graphics;
+using osu.Game.Graphics.Containers;
+using osu.Game.Graphics.Containers.Markdown;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Overlays;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -12,10 +20,85 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace osu.XR.Drawables {
-	public class FileHierarchyView : HierarchyView<FileHierarchyStep,string> {
-		public FileHierarchyView ( string path = "." ) : base( path == null ? path : Path.GetFullPath( path ) ) {
+	public class FileHierarchyViewWithPreview : FileHierarchyView {
+		Container preview;
+		[Cached]
+		OverlayColourProvider overlayColour; // needed for the markdown container
+		public FileHierarchyViewWithPreview ( string path = "." ) {
+			overlayColour = new OverlayColourProvider( OverlayColourScheme.Purple );
+			Add( preview = new Container {
+				AutoSizeAxes = Axes.Y,
+				Masking = true,
+				Margin = new MarginPadding { Top = 5, Horizontal = 15 },
+				AutoSizeDuration = 500,
+				AutoSizeEasing = Easing.Out,
+				CornerRadius = 7
+			} );
+			preview.OnUpdate += d => d.Width = DrawWidth - 30;
 
+			StepSelected += stepSelected;
 		}
+
+		private void stepSelected ( FileHierarchyStep obj ) {
+			preview.Clear();
+			preview.Add( new Box {
+				RelativeSizeAxes = Axes.Both,
+				Colour = OsuColour.Gray( 0.1f )
+			} );
+			if ( obj.IsFile ) {
+				var fileInfo = new FileInfo( obj.Value );
+				if ( fileInfo.Length > 5120 ) {
+					OsuTextFlowContainer text;
+					preview.Add( text = new OsuTextFlowContainer {
+						AutoSizeAxes = Axes.Both,
+						Margin = new MarginPadding( 5 ),
+					} );
+					text.Colour = Colour4.HotPink;
+					text.Text = $"This file is {fileInfo.Length.HumanizeSiBytes()} which is too big to load a preview!\nThe maximum size to display is {5120.HumanizeSiBytes()}";
+				}
+				else {
+					File.ReadAllTextAsync( obj.Value ).ContinueWith( v => Schedule( () => {
+						var extension = Path.GetExtension( obj.Value );
+						if ( extension == ".md" ) {
+							OsuMarkdownContainer markdown;
+							preview.Add( markdown = new OsuMarkdownContainer {
+								AutoSizeAxes = Axes.Y,
+								RelativeSizeAxes = Axes.X,
+								Margin = new MarginPadding( 5 ),
+								LineSpacing = 5
+							} );
+							markdown.Text = v.Result;
+						}
+						else {
+							OsuTextFlowContainer text;
+							preview.Add( text = new OsuTextFlowContainer {
+								AutoSizeAxes = Axes.Both,
+								Margin = new MarginPadding( 5 )
+							} );
+							text.Text = v.Result;
+						}
+					} ) );
+				}
+			}
+		}
+
+		public static async Task<char[]> ReadCharsAsync ( string filename, int count ) {
+			using ( var stream = File.OpenRead( filename ) )
+			using ( var reader = new StreamReader( stream, Encoding.UTF8 ) ) {
+				char[] buffer = new char[ count ];
+				int n = await reader.ReadBlockAsync( buffer, 0, count );
+
+				char[] result = new char[ n ];
+
+				Array.Copy( buffer, result, n );
+
+				return result;
+			}
+		}
+	}
+
+	public class FileHierarchyView : HierarchyView<FileHierarchyStep,string> {
+		public FileHierarchyView ( string path = "." ) : base( path == null ? path : Path.GetFullPath( path ) ) { }
 
 		protected override FileHierarchyStep CreateStep ( string value )
 			=> new FileHierarchyStep( value );
@@ -42,10 +125,10 @@ namespace osu.XR.Drawables {
 		public FileHierarchyStep ( string path ) : base( path == null ? path : Path.GetFullPath( path ) ) { }
 
 		FileSystemWatcher watcher;
-		bool isFile;
+		public bool IsFile { get; private set; }
 		protected override void LoadComplete () {
 			if ( Value == null ) {
-				isFile = false;
+				IsFile = false;
 
 				foreach ( var drive in DriveInfo.GetDrives() ) {
 					AddChild( drive.Name );
@@ -62,7 +145,7 @@ namespace osu.XR.Drawables {
 				} ) );
 			}
 			else if ( Directory.Exists( Value ) ) {
-				isFile = false;
+				IsFile = false;
 				watcher = new FileSystemWatcher( Value );
 				watcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName | NotifyFilters.LastWrite;
 				watcher.IncludeSubdirectories = false;
@@ -77,12 +160,13 @@ namespace osu.XR.Drawables {
 						AddChild( entry );
 					}
 				}
-				catch ( Exception e ) { }
+				catch ( Exception ) { }
 			}
 			else {
-				isFile = true;
+				IsFile = true;
 			}
 
+			setFilterTerms();
 			base.LoadComplete();
 		}
 
@@ -133,17 +217,28 @@ namespace osu.XR.Drawables {
 			var A = a as FileHierarchyStep;
 			var B = b as FileHierarchyStep;
 
-			if ( A.isFile == B.isFile ) return a.Value.CompareTo( b.Value );
-			return A.isFile ? 1 : -1;
+			if ( A.IsFile == B.IsFile ) return a.Value.CompareTo( b.Value );
+			return A.IsFile ? 1 : -1;
 		}
 
 		protected override void ValueChanged ( string old, string @new ) {
 			Label.Text = Title;
 			Icon = CreateIcon();
+
+			setFilterTerms();
+		}
+
+		void setFilterTerms () {
+			if ( IsFile )
+				filterTerms = new[] { Title, "File", Path.GetExtension( Value ) };
+			else
+				filterTerms = new[] { Title, "Directory", "Folder" };
+
+			InvokeSearchTermsModified();
 		}
 
 		public override Drawable CreateIcon () {
-			if ( isFile ) {
+			if ( IsFile ) {
 				return new FillFlowContainer() {
 					Height = 16,
 					AutoSizeAxes = Axes.X,
@@ -193,10 +288,13 @@ namespace osu.XR.Drawables {
 		public override string Title {
 			get {
 				if ( Value == null ) return "Drives";
-				var val = isFile ? Path.GetFileNameWithoutExtension( Value ) : Path.GetFileName( Value );
-				if ( String.IsNullOrWhiteSpace( val ) ) return Value;
+				var val = IsFile ? Path.GetFileNameWithoutExtension( Value ) : Path.GetFileName( Value );
+				if ( String.IsNullOrWhiteSpace( val ) && ( !IsFile || String.IsNullOrWhiteSpace( Path.GetExtension( Value ) ) ) ) return Value;
 				return val;
 			}
 		}
+
+		private string[] filterTerms = Array.Empty<string>();
+		public override IEnumerable<string> FilterTerms => filterTerms;
 	}
 }

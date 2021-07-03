@@ -1,117 +1,166 @@
-﻿using osu.Framework.Bindables;
+﻿using osu.Framework.Allocation;
+using osu.Framework.Audio;
+using osu.Framework.Audio.Sample;
+using osu.Framework.Bindables;
+using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.Input.Events;
 using osu.Game.Graphics.Containers;
+using osu.Game.Graphics.UserInterface;
+using osu.Game.Overlays;
 using osu.XR.Inspector.Components;
+using osuTK;
 using osuTK.Graphics.ES11;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace osu.XR.Drawables {
-	public abstract class HierarchyView<Tstep,Ttype> : SearchContainer where Tstep : HierarchyStep<Ttype> {
+	public abstract class HierarchyView<Tstep,Ttype> : FillFlowContainer, IHasFilterableChildren where Tstep : HierarchyStep<Ttype> {
 		public event Action<Tstep> StepHovered;
 		public event Action<Tstep> StepHoverLost;
 		public event Action<Tstep> StepSelected;
+		public event Action SearchTermsModified;
+
+		FillFlowContainer hierarchy;
+
+		public IEnumerable<Tstep> MultiselectSelection => multiselectSelection.OfType<Tstep>();
+		readonly BindableList<HierarchyStep<Ttype>> multiselectSelection = new();
+		public readonly BindableBool IsMultiselectBindable = new( false );
+		public bool IsMultiselect {
+			get => IsMultiselectBindable.Value;
+			set => IsMultiselectBindable.Value = value;
+		}
+
+		/// <summary>
+		/// Should clicking a step focus the view on it?
+		/// </summary>
+		public bool SelectionNavigates = true;
 
 		public HierarchyView ( Ttype value ) {
 			RelativeSizeAxes = Axes.X;
 			AutoSizeAxes = Axes.Y;
 			Direction = FillDirection.Vertical;
 
-			top = CreateStep( value );
+			Add( hierarchy = new FillFlowContainer {
+				AutoSizeAxes = Axes.Y,
+				RelativeSizeAxes = Axes.X,
+				Direction = FillDirection.Vertical
+			} );
+
+			setTop( CreateStep( value ) );
+			top.IsMultiselect.BindTo( IsMultiselectBindable );
+			top.MultiselectSelection.BindTo( multiselectSelection );
+		}
+
+		void setTop ( Tstep newTop ) {
+			if ( top == newTop ) return;
+
+			if ( top is not null ) {
+				hierarchy.Remove( top );
+				top.Selected -= childSelected;
+				top.Hovered -= childHovered;
+				top.HoverLost -= childHoverLost;
+				top.SearchTermsModified -= onSearchTermsModified;
+			}
+
+			top = newTop;
+			hierarchy.Insert( 1, top );
+			top.Selected += childSelected;
+			top.Hovered += childHovered;
+			top.HoverLost += childHoverLost;
+			top.SearchTermsModified += onSearchTermsModified;
+			top.Margin = new MarginPadding { Horizontal = 15 };
+
+			setParent();
+		}
+		void setParent () {
+			if ( parent is not null ) hierarchy.Remove( parent );
+
 			parent = CreateParent( top );
 			if ( parent is not null ) {
 				parent.Margin = new MarginPadding { Left = 10, Right = 15 };
 				parent.CanBeExpanded.Value = false;
-				Add( parent );
+				hierarchy.Insert( -1, parent );
 
 				parent.Selected += parentSelected;
 			}
-			Add( top );
-			top.Selected += childSelected;
-			top.Hovered += childHovered;
-			top.HoverLost += childHoverLost;
-			top.Margin = new MarginPadding { Horizontal = 15 };
 		}
 
+		private void onSearchTermsModified () {
+			SearchTermsModified?.Invoke();
+		}
 		private void childHoverLost ( HierarchyStep<Ttype> obj ) {
 			StepHoverLost?.Invoke( (Tstep)obj );
 		}
-
 		private void childHovered ( HierarchyStep<Ttype> obj ) {
 			StepHovered?.Invoke( (Tstep)obj );
 		}
 
 		private void childSelected ( HierarchyStep<Ttype> obj ) {
-			if ( obj == top ) return;
-
-			Remove( parent );
-			Remove( top );
-			top.Selected -= childSelected;
-			top.Hovered -= childHovered;
-			top.HoverLost -= childHoverLost;
-
-			obj.SplitFromParent();
-			top = (Tstep)obj;
-			parent = CreateParent( top );
-			if ( parent is not null ) {
-				parent.Margin = new MarginPadding { Left = 10, Right = 15 };
-				parent.CanBeExpanded.Value = false;
-				Add( parent );
-
-				parent.Selected += parentSelected;
+			if ( !SelectionNavigates ) {
+				StepSelected?.Invoke( (Tstep)obj );
+				return;
 			}
-			Add( top );
-			top.Selected += childSelected;
-			top.Hovered += childHovered;
-			top.HoverLost += childHoverLost;
-			top.Margin = new MarginPadding { Horizontal = 15 };
+			if ( obj == top ) return;
+			obj.SplitFromParent();
+			setTop( (Tstep)obj );
+			top.IsExpanded.Value = true;
+
+			StepSelected?.Invoke( top );
+			SearchTermsModified?.Invoke();
 		}
 
 		private void parentSelected ( HierarchyStep<Ttype> obj ) {
-			Remove( parent );
-			Remove( top );
-			top.Selected -= childSelected;
-			top.Hovered -= childHovered;
-			top.HoverLost -= childHoverLost;
+			if ( !SelectionNavigates ) return;
 
-			top = (Tstep)top.WrapInParent();
-			top.SplitFromParent();
-			parent = CreateParent( top );
-			if ( parent is not null ) {
-				parent.Margin = new MarginPadding { Left = 10, Right = 15 };
-				parent.CanBeExpanded.Value = false;
-				Add( parent );
+			hierarchy.Remove( top );
+			setTop( (Tstep)top.WrapInParent().SplitFromParent() );
 
-				parent.Selected += parentSelected;
-			}
-			Add( top );
-			top.Selected += childSelected;
-			top.Hovered += childHovered;
-			top.HoverLost += childHoverLost;
-			top.Margin = new MarginPadding { Horizontal = 15 };
+			StepSelected?.Invoke( top );
+			SearchTermsModified?.Invoke();
 		}
 
 		private Tstep top;
 		private Tstep parent;
 		protected abstract Tstep CreateStep ( Ttype value );
 		protected abstract Tstep CreateParent ( Tstep top );
+
+		public IEnumerable<IFilterable> FilterableChildren => top.Yield();
+		public bool MatchingFilter { set { } }
+		public bool FilteringActive { set { } }
+		public IEnumerable<string> FilterTerms => Array.Empty<string>();
 	}
 
-	public abstract class HierarchyStep<Ttype> : SearchContainer {
+	public abstract class HierarchyStep<Ttype> : FillFlowContainer, IHasFilterableChildren { // TODO view filters
 		public event Action<HierarchyStep<Ttype>> Hovered;
 		public event Action<HierarchyStep<Ttype>> HoverLost;
 		public event Action<HierarchyStep<Ttype>> Selected;
+		public event Action SearchTermsModified;
+
+		protected void InvokeSearchTermsModified () {
+			SearchTermsModified?.Invoke();
+		}
+
+		public readonly BindableBool IsMultiselect = new( false );
+		public readonly BindableBool IsMultiselected = new( false );
+		public readonly BindableList<HierarchyStep<Ttype>> MultiselectSelection = new();
 
 		public Ttype Value { get; private set; }
 		HierarchyStep<Ttype> parent;
 		AutoScrollContainerSyncGroup parentSyncGroup = new();
 		AutoScrollContainerSyncGroup syncGroup = new();
 
+		FillFlowContainer header;
+		SelectionNub selection;
+		HierarchyButton button;
+		CalmOsuAnimatedButton toggleButton;
+		SpriteIcon dropdownChevron;
 		protected HierarchyStep ( Ttype value ) {
 			Value = value;
 			AutoSizeAxes = Axes.Y;
@@ -126,17 +175,64 @@ namespace osu.XR.Drawables {
 				Alpha = 0
 			};
 			AddInternal( syncGroup );
+
+			bool ignoreListAdd = false;
+			IsMultiselected.BindValueChanged( v => {
+				if ( ignoreListAdd ) return;
+
+				if ( v.NewValue ) {
+					MultiselectSelection.Add( this );
+				}
+				else {
+					MultiselectSelection.Remove( this );
+				}
+			} );
+
+			MultiselectSelection.BindCollectionChanged( (e,o) => {
+				if ( o.Action == NotifyCollectionChangedAction.Add ) {
+					if ( o.NewItems == null ) return;
+					if ( o.NewItems.Contains( this ) ) {
+						ignoreListAdd = true;
+						IsMultiselected.Value = true;
+						ignoreListAdd = false;
+					}
+				}
+				else {
+					if ( o.OldItems == null ) return;
+					if ( o.OldItems.Contains( this ) ) IsMultiselected.Value = false;
+				}
+			} );
 		}
 
 		protected override void LoadComplete () {
 			base.LoadComplete();
-			Add( button = new HierarchyButton( Title, CreateIcon(), parentSyncGroup ) {
+			Add( header = new FillFlowContainer {
+				RelativeSizeAxes = Axes.X,
+				AutoSizeAxes = Axes.Y,
+				Direction = FillDirection.Horizontal
+			} );
+			header.Add( selection = new SelectionNub {
+				Anchor = Anchor.CentreLeft,
+				Origin = Anchor.CentreLeft,
+				Current = IsMultiselected
+			} );
+			header.Add( button = new HierarchyButton( Title, CreateIcon(), parentSyncGroup ) {
 				Margin = new MarginPadding { Left = 5 },
 				Hovered = () => Hovered?.Invoke( this ),
 				HoverLost = () => HoverLost?.Invoke( this ),
 				Action = () => Selected?.Invoke( this )
 			} );
 			button.Add( toggleButton );
+			button.OnUpdate += d => d.Margin = new MarginPadding { Left = 5, Right = selection.LayoutSize.X };
+			IsMultiselect.BindValueChanged( v => {
+				if ( v.NewValue ) {
+					selection.ScaleTo( 1, 100, Easing.Out );
+				}
+				else {
+					selection.ScaleTo( new Vector2( 0, 1 ), 100, Easing.Out );
+				}
+			}, true );
+			FinishTransforms( true );
 
 			toggleButton.Add( new Container {
 				RelativeSizeAxes = Axes.X,
@@ -160,6 +256,7 @@ namespace osu.XR.Drawables {
 							Add( c );
 						}
 						needsSorting = true;
+						InvokeSearchTermsModified();
 					}
 				}
 				else {
@@ -167,6 +264,7 @@ namespace osu.XR.Drawables {
 					foreach ( var (k, c) in children ) {
 						Remove( c );
 					}
+					InvokeSearchTermsModified();
 				}
 			} );
 
@@ -194,8 +292,6 @@ namespace osu.XR.Drawables {
 		}
 
 		public readonly BindableBool CanBeExpanded = new( true );
-		CalmOsuAnimatedButton toggleButton;
-		SpriteIcon dropdownChevron;
 		public readonly BindableBool IsExpanded = new( false );
 		private Dictionary<Ttype, HierarchyStep<Ttype>> children = new();
 		new public IReadOnlyDictionary<Ttype, HierarchyStep<Ttype>> Children => children;
@@ -204,37 +300,67 @@ namespace osu.XR.Drawables {
 				RemoveChild( child.Value );
 			}
 
-			child.Hovered += c => Hovered?.Invoke( c );
-			child.HoverLost += c => HoverLost?.Invoke( c );
-			child.Selected += c => Selected?.Invoke( c );
 			child.parentSyncGroup = syncGroup;
 			child.Margin = new MarginPadding { Left = 5 };
 			children.Add( child.Value, child );
 			if ( IsExpanded.Value ) {
 				Add( child );
 				needsSorting = true;
+				InvokeSearchTermsModified();
 			}
 
 			if ( children.Count == 1 && CanBeExpanded.Value ) {
 				toggleButton.FadeIn( 120, Easing.Out );
 			}
+
+			OnChildAdded( child );
+		}
+		/// <summary>
+		/// Happens when a child is added. This childs bindables should already be bound here.
+		/// You must call the base method.
+		/// </summary>
+		protected virtual void OnChildAdded ( HierarchyStep<Ttype> child ) {
+			
+		}
+		/// <summary>
+		/// Happens when a child is created. This is a good place to bind childs bindables to the parents bindables.
+		/// You must call the base method.
+		/// </summary>
+		protected virtual void OnChildCreated ( HierarchyStep<Ttype> child ) {
+			child.IsMultiselect.BindTo( IsMultiselect );
+			child.MultiselectSelection.BindTo( MultiselectSelection );
+			child.Hovered += c => Hovered?.Invoke( c );
+			child.HoverLost += c => HoverLost?.Invoke( c );
+			child.Selected += c => Selected?.Invoke( c );
+			child.SearchTermsModified += () => SearchTermsModified?.Invoke();
 		}
 		protected void AddChild ( Ttype value ) {
 			if ( children.ContainsKey( value ) ) return;
 
 			var child = CreateChild( value );
 			child.parent = this;
+			OnChildCreated( child );
 			AddChild( child );
 		}
 		protected void RemoveChild ( Ttype value ) {
 			children.Remove( value, out var child );
 			if ( IsExpanded.Value ) {
 				Remove( child );
+				InvokeSearchTermsModified();
 			}
 
 			if ( children.Count == 0 && CanBeExpanded.Value ) {
 				toggleButton.FadeOut( 120, Easing.Out );
 			}
+
+			OnChildRemoved( child );
+		}
+		/// <summary>
+		/// Happens when a child is removed. You should not unbind parent bindables from the child because it might rejoin later.
+		/// You must call the base method.
+		/// </summary>
+		protected virtual void OnChildRemoved ( HierarchyStep<Ttype> child ) {
+			
 		}
 		protected void ChangeChildValue ( Ttype old, Ttype @new ) {
 			children.Remove( old, out var child );
@@ -245,38 +371,47 @@ namespace osu.XR.Drawables {
 				child.ValueChanged( old, @new );
 				needsSorting = true;
 			} );
+
+			SearchTermsModified?.Invoke();
 		}
 		public HierarchyStep<Ttype> WrapInParent () {
 			if ( parent is null ) {
 				parent = CreateParent();
+				OnParentCreated( parent );
 				parent.OnLoadComplete += d => {
 					parent.IsExpanded.Value = true;
 				};
 				parent.syncGroup = parentSyncGroup;
 			}
 
-			if ( Parent != parent ) {
-				if ( Parent != null ) throw new InvalidOperationException( "Cannot wrap in parent if already inside another parent" );
+			if ( Parent != parent && Parent != null )
+				throw new InvalidOperationException( "Cannot wrap in parent if already inside another parent" );
 
-				parent.AddChild( this );
-				return parent;
-			}
-			else {
-				parent.AddChild( this );
-				return parent;
-			}
+			parent.AddChild( this );
+			return parent;
 		}
-		public void SplitFromParent () {
+		/// <summary>
+		/// Happens when a parent is added above this step. This is a good place to bind parents bindables to the childs bindables.
+		/// You must call the base method.
+		/// </summary>
+		protected virtual void OnParentCreated ( HierarchyStep<Ttype> parent ) {
+			parent.IsMultiselect.BindTo( IsMultiselect );
+			parent.MultiselectSelection.BindTo( MultiselectSelection );
+			Hovered += c => parent.Hovered?.Invoke( c );
+			HoverLost += c => parent.HoverLost?.Invoke( c );
+			Selected += c => parent.Selected?.Invoke( c );
+			SearchTermsModified += () => parent.SearchTermsModified?.Invoke();
+		}
+		public HierarchyStep<Ttype> SplitFromParent () {
 			if ( Parent is null ) {
-				return;
+				return this;
 			}
 
-			if ( parent != Parent ) {
+			if ( parent != Parent )
 				throw new InvalidOperationException( "Cannot split from a parent because the parent is not a part of the hierarchy" );
-			}
-			else {
-				parent.RemoveChild( Value );
-			}
+
+			parent.RemoveChild( Value );
+			return this;
 		}
 		protected abstract HierarchyStep<Ttype> CreateChild ( Ttype value );
 		protected abstract HierarchyStep<Ttype> CreateParent ();
@@ -297,14 +432,53 @@ namespace osu.XR.Drawables {
 
 		public abstract string Title { get; }
 		public virtual Drawable CreateIcon () => null;
-
-		private HierarchyButton button;
 		protected OsuTextFlowContainer Label => button.Label;
 		protected Drawable Icon {
 			get => button.Icon;
 			set => button.Icon = value;
 		}
 		protected virtual void ValueChanged ( Ttype old, Ttype @new ) { Label.Text = Title; }
+
+		public IEnumerable<IFilterable> FilterableChildren => IsExpanded.Value ? children.Values : Array.Empty<IFilterable>();
+
+		bool matchingFilter = false;
+		public bool MatchingFilter {
+			set {
+				matchingFilter = value;
+				updateVisibility();
+			}
+		}
+		bool filteringActive = false;
+		public bool FilteringActive {
+			set {
+				filteringActive = value;
+				updateVisibility();
+			}
+		}
+
+		bool visible = true;
+		void updateVisibility () {
+			if ( filteringActive ) {
+				if ( matchingFilter ) {
+					if ( !visible ) show();
+				}
+				else {
+					if ( visible ) hide();
+				}
+			}
+			else {
+				if ( !visible ) show();
+			}
+		}
+		void show () {
+			visible = true;
+			this.ScaleTo( new Vector2( 1, 1 ), 100, Easing.Out );
+		}
+		void hide () {
+			visible = false;
+			this.ScaleTo( new Vector2( 1, 0 ), 100, Easing.Out );
+		}
+		public virtual IEnumerable<string> FilterTerms => Title.Yield();
 	}
 
 	public class HierarchyButton : CalmOsuAnimatedButton {
@@ -358,6 +532,41 @@ namespace osu.XR.Drawables {
 		protected override void Update () {
 			base.Update();
 			Width = Parent.DrawWidth - Margin.Right - Margin.Left;
+		}
+	}
+
+	public class SelectionNub : Nub {
+		public SelectionNub () {
+			AddInternal( new HoverSounds() );
+		}
+
+		protected override bool OnHover ( HoverEvent e ) {
+			Glowing = true;
+			Expanded = true;
+			return base.OnHover( e );
+		}
+
+		protected override void OnHoverLost ( HoverLostEvent e ) {
+			base.OnHoverLost( e );
+			Expanded = false;
+			Glowing = false;
+		}
+
+		protected override bool OnClick ( ClickEvent e ) {
+			Current.Value = !Current.Value;
+			if ( Current.Value )
+				sampleChecked.Play();
+			else
+				sampleUnchecked.Play();
+			return base.OnClick( e );
+		}
+
+		Sample sampleChecked;
+		Sample sampleUnchecked;
+		[BackgroundDependencyLoader]
+		private void load ( AudioManager audio ) {
+			sampleChecked = audio.Samples.Get( @"UI/check-on" );
+			sampleUnchecked = audio.Samples.Get( @"UI/check-off" );
 		}
 	}
 }
