@@ -6,8 +6,8 @@ using System;
 using System.Collections.Generic;
 
 namespace osu.XR.Drawables {
-	public class ConfigPanel : ConfigurationContainer {
-		public ConfigPanel () : base() {
+	public class VRConfigDrawable : ConfigurationContainer {
+		public VRConfigDrawable () : base() {
             Title = "VR Settings";
             Description = "change the way osu!XR behaves";
 

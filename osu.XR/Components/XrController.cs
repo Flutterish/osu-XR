@@ -205,7 +205,7 @@ namespace osu.XR.Components {
 			|| ( Mode == ControllerMode.Touch && ( !TapTouchBindable.Value || anyButtonDown ) );
 
 		[Resolved]
-		private XrInspectorPanel inspector { get; set; }
+		private InspectorPanel inspector { get; set; }
 
 		private void onPointerNoHit () {
 			if ( isTouchPointerDown ) {

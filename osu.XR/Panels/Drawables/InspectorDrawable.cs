@@ -17,7 +17,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace osu.XR.Inspector {
-	public class InspectorPanel : ConfigurationContainer, INotInspectable {
+	public class InspectorDrawable : ConfigurationContainer, INotInspectable {
 		public readonly Bindable<Drawable> SelectedElementBindable = new();
 		public readonly Bindable<Drawable> InspectedElementBindable = new();
 		public readonly BindableBool IsSelectingBindable = new( false );
@@ -32,7 +32,7 @@ namespace osu.XR.Inspector {
 		Selection2D selection2d = new();
 		Selection2D helperSelection2d = new();
 
-		public InspectorPanel () {
+		public InspectorDrawable () {
 			Title = "Inspector";
 			Description = "inspect and modify properties\nthese settings are not persistent";
 

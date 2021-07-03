@@ -23,8 +23,8 @@ using System.IO;
 using System.Linq;
 
 namespace osu.XR.Drawables {
-	public class RulesetInfoPanel : ConfigurationContainer {
-		public RulesetInfoPanel () {
+	public class RulesetInfoDrawable : ConfigurationContainer {
+		public RulesetInfoDrawable () {
 			Title = "Ruleset";
 			Description = "adjust how you play the ruleset in XR";
 		}

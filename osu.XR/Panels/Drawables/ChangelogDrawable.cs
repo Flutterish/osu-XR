@@ -12,8 +12,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace osu.XR.Drawables {
-	public class ChangelogPanel : ConfigurationContainer {
-		public ChangelogPanel () {
+	public class ChangelogDrawable : ConfigurationContainer {
+		public ChangelogDrawable () {
 			Title = "Changelog";
 			Description = "check out what's new";
 		}

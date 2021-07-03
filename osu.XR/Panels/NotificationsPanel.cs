@@ -6,12 +6,12 @@ using osu.XR.Components.Groups;
 using osu.XR.Drawables;
 
 namespace osu.XR.Components.Panels {
-	public class XrNotificationPanel : FlatPanel, IHasName, IHasIcon {
+	public class NotificationsPanel : FlatPanel, IHasName, IHasIcon {
 		[Resolved]
 		private OsuGameXr Game { get; set; }
-		NotificationPanel notifications = new() { Height = 500, Width = 400 };
+		NotificationsDrawable notifications = new() { Height = 500, Width = 400 };
 
-		public XrNotificationPanel () {
+		public NotificationsPanel () {
 			PanelAutoScaleAxes = Axes.X;
 			PanelHeight = 0.5;
 			RelativeSizeAxes = Axes.X;

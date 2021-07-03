@@ -4,17 +4,19 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
 using osu.XR.Components.Groups;
 using osu.XR.Drawables;
-using osu.XR.Inspector;
+using osu.XR.Input.Custom;
 
 namespace osu.XR.Components.Panels {
-	public class XrInspectorPanel : FlatPanel, IHasName, IHasIcon {
-		public readonly InspectorPanel Panel = new() { Height = 500, Width = 400 };
+	public class RulesetInfoPanel : FlatPanel, IHasName, IHasIcon {
+		public readonly RulesetInfoDrawable Panel = new() { Height = 500, Width = 400 };
 		public readonly Bindable<bool> IsVisibleBindable = new();
+		public BindableList<CustomBinding> GetBindingsForVariant ( int variant )
+			=> Panel.GetBindingsForVariant( variant );
 
 		[Resolved]
 		private OsuGameXr Game { get; set; }
 
-		public XrInspectorPanel () {
+		public RulesetInfoPanel () {
 			PanelAutoScaleAxes = Axes.X;
 			PanelHeight = 0.5;
 			RelativeSizeAxes = Axes.X;
@@ -29,9 +31,9 @@ namespace osu.XR.Components.Panels {
 			IsVisibleBindable.Value = IsVisible;
 		}
 
-		public string DisplayName => "Inspector";
+		public string DisplayName => "Ruleset";
 
 		public Drawable CreateIcon ()
-			=> new SpriteIcon { Icon = FontAwesome.Solid.Search };
+			=> new SpriteIcon { Icon = FontAwesome.Solid.Gamepad };
 	}
 }

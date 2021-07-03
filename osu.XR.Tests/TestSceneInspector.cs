@@ -20,12 +20,12 @@ using System.Threading.Tasks;
 
 namespace osu.XR.Tests {
 	public class TestSceneInspector : OsuTestScene3D {
-		InspectorPanel inspector;
+		InspectorDrawable inspector;
 		TestComponent component;
 
 		protected override void LoadComplete () {
 			base.LoadComplete();
-			Add( inspector = new InspectorPanel {
+			Add( inspector = new InspectorDrawable {
 				Size = new Vector2( 400, 500 ),
 				Anchor = Anchor.Centre,
 				Origin = Anchor.Centre

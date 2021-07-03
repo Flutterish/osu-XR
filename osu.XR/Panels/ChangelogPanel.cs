@@ -10,11 +10,11 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace osu.XR.Components.Panels {
-	public class XrChangelogPanel : FlatPanel, IHasName, IHasIcon {
-		public readonly ChangelogPanel Panel = new() { Height = 500, Width = 400 };
+	public class ChangelogPanel : FlatPanel, IHasName, IHasIcon {
+		public readonly ChangelogDrawable Panel = new() { Height = 500, Width = 400 };
 		public readonly Bindable<bool> IsVisibleBindable = new();
 
-		public XrChangelogPanel () {
+		public ChangelogPanel () {
 			PanelAutoScaleAxes = Axes.X;
 			PanelHeight = 0.5;
 			RelativeSizeAxes = Axes.X;

@@ -65,15 +65,15 @@ namespace osu.XR {
 		[Cached]
 		public readonly BeatProvider BeatProvider = new();
 		[Cached]
-		public readonly XrNotificationPanel Notifications = new XrNotificationPanel();
+		public readonly NotificationsPanel Notifications = new NotificationsPanel();
 		[Cached]
 		public readonly Bindable<IFocusable> GlobalFocusBindable = new(); // TODO this will be moved to Scene
 		public readonly XrKeyboard Keyboard = new() { Scale = new Vector3( 0.04f ) };
 		public readonly XrKeyboard FlatKeyboard = new() { Scale = new Vector3( 0.04f ) };
 		[Cached]
-		public readonly XrInspectorPanel Inspector = new();
+		public readonly InspectorPanel Inspector = new();
 		[Cached]
-		public readonly XrRulesetInfoPanel InputBindings = new();
+		public readonly RulesetInfoPanel InputBindings = new();
 
 		public static ETrackedControllerRole RoleForHand ( Hand hand ) => hand switch {
 			Hand.Right => ETrackedControllerRole.RightHand,
@@ -332,7 +332,7 @@ namespace osu.XR {
 			} );
 			Scene.Add( Camera );
 			Scene.Add( OsuPanel );
-			Scene.Add( new HandheldMenu().With( s => s.Panels.AddRange( new FlatPanel[] { new XrConfigPanel(), Notifications, Inspector, InputBindings, new XrChangelogPanel() } ) ) );
+			Scene.Add( new HandheldMenu().With( s => s.Panels.AddRange( new FlatPanel[] { new ConfigPanel(), Notifications, Inspector, InputBindings, new ChangelogPanel() } ) ) );
 			Scene.Add( Keyboard );
 			Keyboard.LoadModel( @".\Resources\keyboard.obj" );
 			//Scene.Add( FlatKeyboard );

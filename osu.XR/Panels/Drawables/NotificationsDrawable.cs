@@ -5,8 +5,8 @@ using osu.Game.Overlays;
 using osu.Game.Overlays.Notifications;
 
 namespace osu.XR.Drawables {
-	public class NotificationPanel : ConfigurationContainer {
-		public NotificationPanel () {
+	public class NotificationsDrawable : ConfigurationContainer {
+		public NotificationsDrawable () {
 			Title = "Notifications";
 			Description = "messages and stuff";
 
