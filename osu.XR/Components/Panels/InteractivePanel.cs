@@ -1,6 +1,7 @@
 ﻿using OpenVR.NET;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.XR.Components;
 using osu.XR.Settings;
 using osuTK;
 using System;

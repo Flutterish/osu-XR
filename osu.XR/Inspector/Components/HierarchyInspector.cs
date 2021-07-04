@@ -7,7 +7,6 @@ using osu.Framework.XR.Components;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.XR.Components.Groups;
-using osu.XR.Components.Panels;
 using osu.XR.Drawables;
 using osuTK;
 using osuTK.Graphics;

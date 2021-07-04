@@ -1,5 +1,6 @@
 ﻿using osu.Framework.Bindables;
 using osu.Framework.Graphics;
+using osu.Framework.XR.Components;
 using osu.Framework.XR.Maths;
 using osuTK;
 using System;
@@ -28,11 +29,6 @@ namespace osu.XR.Components.Panels {
 		}
 
 		protected override void RecalculateMesh () {
-			IsMeshInvalidated = false;
-			Mesh = new() {
-				IsReady = false
-			};
-
 			float width;
 			float height;
 			if ( PanelAutoScaleAxes == Axes.Both ) {
@@ -51,18 +47,8 @@ namespace osu.XR.Components.Panels {
 				height = (float)PanelHeight;
 			}
 
-			Mesh.AddQuad(
-				new Quad(
-					new Vector3( -width / 2, height / 2, 0 ), new Vector3( width / 2, height / 2, 0 ),
-					new Vector3( -width / 2, -height / 2, 0 ), new Vector3( width / 2, -height / 2, 0 )
-				),
-				new Vector2( 0, 1 ),
-				new Vector2( 1, 1 ),
-				new Vector2( 0, 0 ),
-				new Vector2( 1, 0 )
-			);
-
-			Mesh.IsReady = true;
+			Mesh.Clear();
+			Panel.Shapes.MakeFlat( Mesh, width, height );
 		}
 	}
 }
