@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Internal;
-using OpenVR.NET;
+﻿using OpenVR.NET;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -10,21 +9,17 @@ using osu.Framework.XR.Maths;
 using osu.Framework.XR.Physics;
 using osu.Framework.XR.Rendering;
 using osu.XR.Input;
-using osu.XR.Settings;
 using osuTK;
 using System.Collections.Generic;
 using System.Linq;
 using static osu.Framework.XR.Components.Drawable3D.DrawNode3D;
-using static osu.Framework.XR.Physics.Raycast;
 
 namespace osu.XR.Components.Panels {
 	/// <summary>
 	/// A 3D panel that displays an image from a <see cref="BufferedCapture"/>.
 	/// </summary>
-	public abstract class Panel : Model, IHasCollider, IFocusable {
-		public bool CanHaveGlobalFocus { get; init; } = true;
+	public abstract class Panel : Model, IHasCollider {
 		public PhysicsLayer PhysicsLayer { get; set; } = PhysicsLayer.All;
-		public PanelInputMode RequestedInputMode { get; set; } = PanelInputMode.Regular;
 		public readonly VirtualInputManager EmulatedInput = new VirtualInputManager { RelativeSizeAxes = Axes.Both };
 		private PlatformActionContainer platformActions = new() { RelativeSizeAxes = Axes.Both };
 		public Container Source => platformActions;
@@ -35,21 +30,9 @@ namespace osu.XR.Components.Panels {
 		public BufferedCapture SourceCapture { get; } = new BufferedCapture { RelativeSizeAxes = Axes.Both };
 		protected bool IsMeshInvalidated = true;
 
-		private bool hasFocus;
-		new public bool HasFocus {
-			get => hasFocus;
-			set {
-				if ( hasFocus == value ) return;
-				hasFocus = value;
-				if ( !hasFocus ) {
-					EmulatedInput.IsLeftPressed = false;
-					EmulatedInput.IsRightPressed = false;
-					EmulatedInput.ReleaseAllTouch();
-				}
-				EmulatedInput.HasFocus = value;
-			}
-		}
-
+		/// <summary>
+		/// Makes the content use the 2D height of this panel and its own width.
+		/// </summary>
 		public Panel AutosizeX () {
 			EmulatedInput.RelativeSizeAxes = Axes.Y;
 			SourceCapture.RelativeSizeAxes = Axes.Y;
@@ -61,6 +44,9 @@ namespace osu.XR.Components.Panels {
 
 			return this;
 		}
+		/// <summary>
+		/// Makes the content use the 2D width of this panel and its own height.
+		/// </summary>
 		public Panel AutosizeY () {
 			EmulatedInput.RelativeSizeAxes = Axes.X;
 			SourceCapture.RelativeSizeAxes = Axes.X;
@@ -72,6 +58,9 @@ namespace osu.XR.Components.Panels {
 
 			return this;
 		}
+		/// <summary>
+		/// Makes the content use the its own width and height.
+		/// </summary>
 		public Panel AutosizeBoth () {
 			EmulatedInput.RelativeSizeAxes = Axes.None;
 			SourceCapture.RelativeSizeAxes = Axes.None;
@@ -97,30 +86,6 @@ namespace osu.XR.Components.Panels {
 			AddDrawable( SourceCapture );
 
 			ShouldBeDepthSorted = true;
-		}
-
-		[BackgroundDependencyLoader]
-		private void load ( XrConfigManager config ) {
-			config.BindWith( XrConfigSetting.Deadzone, deadzoneBindable );
-		}
-		BindableInt deadzoneBindable = new( 20 );
-
-		bool inDeadzone = false;
-		Vector2 deadzoneCenter;
-		Vector2 pointerPosition;
-
-		void handleButton ( bool isLeft, bool isDown ) {
-			if ( VR.EnabledControllerCount > 1 ) {
-				if ( RequestedInputMode == PanelInputMode.Regular == isLeft ) EmulatedInput.IsLeftPressed = isDown;
-				else if ( RequestedInputMode == PanelInputMode.Inverted == isLeft ) EmulatedInput.IsRightPressed = isDown;
-			}
-			else EmulatedInput.IsLeftPressed = isDown;
-
-			if ( isDown ) {
-				inDeadzone = true;
-				deadzoneCenter = pointerPosition;
-			}
-			else inDeadzone = false;
 		}
 
 		protected abstract void RecalculateMesh ();
@@ -171,78 +136,5 @@ namespace osu.XR.Components.Panels {
 				}
 			} );
 		}
-
-		List<XrController> focusedControllers = new();
-		IEnumerable<Controller> focusedControllerSources => focusedControllers.Select( x => x.Source );
-		Dictionary<XrController, System.Action> eventUnsubs = new();
-		public void OnControllerFocusGained ( IFocusSource focus ) {
-			if ( focus is not XrController controller ) return;
-
-			System.Action<ValueChangedEvent<Vector2>> onScroll = v => { EmulatedInput.Scroll += v.NewValue - v.OldValue; };
-			System.Action<ValueChangedEvent<bool>> onLeft = v => { handleButton( isLeft: true, isDown: v.NewValue ); };
-			System.Action<ValueChangedEvent<bool>> onRight = v => { handleButton( isLeft: false, isDown: v.NewValue ); };
-			System.Action<RaycastHit> onMove = hit => { onPointerMove( controller, hit ); };
-			System.Action<RaycastHit> onDown = hit => { onTouchDown( controller, hit ); };
-			System.Action onUp = () => { onTouchUp( controller ); };
-			controller.PointerMove += onMove;
-			controller.PointerDown += onDown;
-			controller.PointerUp += onUp;
-			controller.ScrollBindable.ValueChanged += onScroll;
-			controller.LeftButtonBindable.ValueChanged += onLeft;
-			controller.RightButtonBindable.ValueChanged += onRight;
-			eventUnsubs.Add( controller, () => {
-				controller.PointerMove -= onMove;
-				controller.PointerDown -= onDown;
-				controller.PointerUp -= onUp;
-				controller.ScrollBindable.ValueChanged -= onScroll;
-				controller.LeftButtonBindable.ValueChanged -= onLeft;
-				controller.RightButtonBindable.ValueChanged -= onRight;
-			} );
-			focusedControllers.Add( controller );
-
-			updateFocus();
-		}
-		public void OnControllerFocusLost ( IFocusSource focus ) {
-			if ( focus is not XrController controller ) return;
-
-			eventUnsubs[ controller ].Invoke();
-			eventUnsubs.Remove( controller );
-			focusedControllers.Remove( controller );
-
-			updateFocus();
-		}
-		void updateFocus () {
-			HasFocus = focusedControllers.Any();
-		}
-
-		private void onPointerMove ( XrController controller, RaycastHit hit ) {
-			if ( hit.Collider != this ) return;
-
-			var position = TexturePositionAt( hit.TrisIndex, hit.Point );
-			if ( controller.EmulatesTouch ) {
-				EmulatedInput.TouchMove( controller, position );
-			}
-			else {
-				pointerPosition = position;
-				if ( ( pointerPosition - deadzoneCenter ).Length > deadzoneBindable.Value ) inDeadzone = false;
-				if ( !inDeadzone ) EmulatedInput.mouseHandler.EmulateMouseMove( position );
-			}
-		}
-
-		private void onTouchDown ( XrController controller, RaycastHit hit ) {
-			if ( hit.Collider != this ) return;
-
-			var position = TexturePositionAt( hit.TrisIndex, hit.Point );
-			EmulatedInput.TouchDown( controller, position );
-		}
-
-		private void onTouchUp ( XrController controller ) {
-			EmulatedInput.TouchUp( controller );
-		}
-	}
-
-	public enum PanelInputMode {
-		Regular,
-		Inverted
 	}
 }

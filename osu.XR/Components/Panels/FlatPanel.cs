@@ -8,7 +8,7 @@ namespace osu.XR.Components.Panels {
 	/// <summary>
 	/// A flat 3D panel that displays an image from a <see cref="BufferedCapture"/>.
 	/// </summary>
-	public class FlatPanel : Panel {
+	public class FlatPanel : InteractivePanel {
 		public readonly BindableDouble PanelWidthBindable = new( 1 );
 		public readonly BindableDouble PanelHeightBindable = new( 1 );
 		public double PanelWidth { get => PanelWidthBindable.Value; set => PanelWidthBindable.Value = value; }

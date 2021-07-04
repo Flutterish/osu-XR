@@ -7,7 +7,7 @@ namespace osu.XR.Components.Panels {
 	/// <summary>
 	/// A curved 3D panel that displays an image from a <see cref="BufferedCapture"/>.
 	/// </summary>
-	public class CurvedPanel : Panel {
+	public class CurvedPanel : InteractivePanel {
 		public float Arc { get => ArcBindable.Value; set => ArcBindable.Value = value; }
 		public float Radius { get => RadiusBindable.Value; set => RadiusBindable.Value = value; }
 		public readonly BindableFloat ArcBindable = new( MathF.PI * 1.2f ) { MinValue = MathF.PI / 18, MaxValue = MathF.PI * 2 };
