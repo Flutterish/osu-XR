@@ -1,5 +1,4 @@
 ﻿using osu.Framework.Graphics;
-using osu.Game.Overlays.Settings;
 using System.Collections.Generic;
 
 namespace osu.XR.Inspector {

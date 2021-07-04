@@ -1,5 +1,4 @@
-﻿using OpenVR.NET.Manifests;
-using osu.Framework.Allocation;
+﻿using osu.Framework.Allocation;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -12,10 +11,10 @@ using osu.Game.Graphics.UserInterface;
 using osuTK.Graphics;
 
 namespace osu.XR.Drawables {
-    /// <summary>
-    /// Highlight on hover, bounce on click.
-    /// </summary>
-    public class CalmOsuAnimatedButton : OsuClickableContainer {
+	/// <summary>
+	/// Highlight on hover, bounce on click.
+	/// </summary>
+	public class CalmOsuAnimatedButton : OsuClickableContainer {
         /// <summary>
         /// The colour that should be flashed when the <see cref="OsuAnimatedButton"/> is clicked.
         /// </summary>

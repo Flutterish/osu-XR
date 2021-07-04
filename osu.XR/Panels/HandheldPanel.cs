@@ -3,11 +3,6 @@ using osu.Framework.Graphics;
 using osu.XR.Components.Groups;
 using osu.XR.Components.Panels;
 using osuTK;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Panels {
 	/// <summary>

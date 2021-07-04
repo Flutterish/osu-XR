@@ -1,6 +1,5 @@
 ﻿using osu.Framework.Bindables;
 using osu.Framework.Graphics;
-using osu.Framework.Utils;
 using osu.Framework.XR.Components;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Projection;

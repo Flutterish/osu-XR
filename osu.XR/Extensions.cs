@@ -1,5 +1,4 @@
 ﻿using osu.Framework.Graphics;
-using osu.Framework.XR.Components;
 using osu.XR.Inspector;
 using System;
 #nullable enable

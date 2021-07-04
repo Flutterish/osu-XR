@@ -2,11 +2,6 @@
 using osu.Framework.XR.Components;
 using osu.Game.Tests.Visual;
 using osuTK;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Tests {
 	public abstract class OsuTestScene3D : OsuTestScene {

@@ -1,8 +1,5 @@
-﻿using osu.Framework.Graphics;
-using osu.Framework.Graphics.Containers;
-using osu.Game.Graphics.UserInterface;
-using osu.Game.Overlays;
-using osu.Game.Overlays.Notifications;
+﻿using osu.Game.Overlays.Notifications;
+using osu.XR.Drawables.Containers;
 
 namespace osu.XR.Drawables {
 	public class NotificationsDrawable : ConfigurationContainer {

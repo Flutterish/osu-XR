@@ -2,7 +2,7 @@
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.XR.Components;
-using osu.XR.Drawables;
+using osu.XR.Drawables.Containers;
 using osuTK;
 using osuTK.Graphics;
 

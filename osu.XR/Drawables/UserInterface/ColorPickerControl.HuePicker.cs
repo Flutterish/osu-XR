@@ -7,7 +7,6 @@ using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.Textures;
 using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Input.Events;
-using osu.XR;
 using osuTK;
 using System;
 

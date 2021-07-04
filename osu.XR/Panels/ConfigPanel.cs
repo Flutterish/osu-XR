@@ -1,8 +1,5 @@
-﻿using osu.Framework.Allocation;
-using osu.Framework.Bindables;
-using osu.Framework.Graphics;
+﻿using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
-using osu.XR.Components.Groups;
 using osu.XR.Drawables;
 using osu.XR.Panels;
 

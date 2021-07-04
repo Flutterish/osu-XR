@@ -11,7 +11,6 @@ using osuTK;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using static osu.Framework.XR.Input.VirtualInputManager;
 
 namespace osu.XR.Input.Custom {
 	public struct PlayerInfo {

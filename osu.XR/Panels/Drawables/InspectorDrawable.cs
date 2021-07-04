@@ -1,20 +1,13 @@
 ﻿using osu.Framework.Bindables;
-using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.XR.Components;
-using osu.Game.Graphics;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays.Settings;
-using osu.XR.Drawables;
-using osu.XR.Inspector.Components;
-using osu.XR.Inspector.Components.Reflections;
+using osu.XR.Drawables.Containers;
 using osuTK.Graphics;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Inspector {
 	public class InspectorDrawable : ConfigurationContainer, INotInspectable {

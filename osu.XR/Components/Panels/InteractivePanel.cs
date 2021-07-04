@@ -2,13 +2,11 @@
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.XR.Components;
+using osu.XR.Input;
 using osu.XR.Settings;
 using osuTK;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static osu.Framework.XR.Physics.Raycast;
 
 namespace osu.XR.Components.Panels {

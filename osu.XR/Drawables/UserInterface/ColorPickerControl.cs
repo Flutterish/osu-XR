@@ -5,10 +5,8 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.UserInterface;
 using osu.Game.Graphics.UserInterface;
-using osu.XR.Drawables.UserInterface;
 using osuTK;
 using osuTK.Graphics;
-using Sentry;
 using System.Linq;
 
 namespace osu.XR.Drawables.UserInterface {

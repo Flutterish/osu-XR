@@ -1,13 +1,7 @@
 ﻿using osu.Framework.Graphics;
-using osu.Game.Tests.Visual;
-using osu.XR.Drawables;
-using osu.XR.Inspector.Components;
+using osu.XR.Drawables.Containers;
+using osu.XR.Inspector;
 using osuTK;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Tests {
 	public class TestSceneHierarchyInspectorV2 : OsuTestScene3D {

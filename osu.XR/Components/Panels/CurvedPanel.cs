@@ -1,7 +1,5 @@
 ﻿using osu.Framework.Bindables;
 using osu.Framework.XR.Components;
-using osu.Framework.XR.Maths;
-using osuTK;
 using System;
 
 namespace osu.XR.Components.Panels {

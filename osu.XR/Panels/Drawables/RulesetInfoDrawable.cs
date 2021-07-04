@@ -13,6 +13,7 @@ using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays.Settings;
 using osu.Game.Rulesets;
+using osu.XR.Drawables.Containers;
 using osu.XR.Input.Custom;
 using osu.XR.Input.Custom.Persistence;
 using osu.XR.Settings;

@@ -1,9 +1,7 @@
-﻿using osu.Framework.Graphics;
-using osu.Game.Graphics.UserInterface;
-using osu.Game.Overlays;
-using osu.Game.Overlays.Settings;
+﻿using osu.Game.Graphics.UserInterface;
+using osu.XR.Drawables.Containers;
+using osu.XR.Settings.Sections;
 using System;
-using System.Collections.Generic;
 
 namespace osu.XR.Drawables {
 	public class VRConfigDrawable : ConfigurationContainer {

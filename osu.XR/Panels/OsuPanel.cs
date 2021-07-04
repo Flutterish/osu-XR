@@ -4,13 +4,10 @@ using osu.Framework.Graphics;
 using osu.Game;
 using osu.Game.Overlays.Settings;
 using osu.XR.Drawables;
+using osu.XR.Drawables.Containers;
 using osu.XR.Inspector;
 using osu.XR.Settings;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Components.Panels {
 	class OsuPanel : CurvedPanel, IConfigurableInspectable {

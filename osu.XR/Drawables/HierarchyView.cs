@@ -9,16 +9,12 @@ using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.UserInterface;
-using osu.Game.Overlays;
-using osu.XR.Inspector.Components;
+using osu.XR.Drawables.Containers;
 using osuTK;
-using osuTK.Graphics.ES11;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Drawables {
 	public abstract class HierarchyView<Tstep,Ttype> : FillFlowContainer, IHasFilterableChildren where Tstep : HierarchyStep<Ttype> {
