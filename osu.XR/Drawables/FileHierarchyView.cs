@@ -292,5 +292,11 @@ namespace osu.XR.Drawables {
 
 		private string[] filterTerms = Array.Empty<string>();
 		public override IEnumerable<string> FilterTerms => filterTerms;
+
+		protected override void Dispose ( bool isDisposing ) {
+			watcher.EnableRaisingEvents = false;
+			watcher.Dispose();
+			base.Dispose( isDisposing );
+		}
 	}
 }
