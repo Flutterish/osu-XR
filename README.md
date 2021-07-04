@@ -12,12 +12,7 @@ Don't limit yourself to one screen resolution - you can adjust that in XR settin
 # Bindings
 Default controller bindings exist for:
 * Valve Index
+* Oculus Quest 2
+* HTC Vive
 
 If you use a different controller and made good bindings, make sure you contribute them to the project!
-
-# TODO
-* Add a virtual keyboard - vivecraft style.
-* Add trigger zones - volumes of space that activate a binding then you touch them.
-* Add ability to import models so you can play games on arcade machines and decorate your enviornment.
-* Make an interface for osu rulesets so they can define the default way they should be played in VR.
-* Fix a bug where sometimes on startup osu crashes.
