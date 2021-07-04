@@ -3,6 +3,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Input;
 using osu.Framework.Input.Bindings;
+using osu.Framework.XR.Input;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.UI;
 using osu.Game.Screens.Play;
@@ -10,7 +11,7 @@ using osuTK;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using static osu.XR.Input.VirtualInputManager;
+using static osu.Framework.XR.Input.VirtualInputManager;
 
 namespace osu.XR.Input.Custom {
 	public struct PlayerInfo {

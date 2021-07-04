@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using static osu.Framework.XR.Physics.Raycast;
 
 namespace osu.XR.Components.Panels {
-	public abstract class InteractivePanel : Panel, IFocusable {
+	public abstract class InteractivePanel : Panel, IFocusable { // TODO bind deadzone
 		public bool CanHaveGlobalFocus { get; init; } = true;
 		public PanelInputMode RequestedInputMode { get; set; } = PanelInputMode.Regular;
 
@@ -107,7 +107,7 @@ namespace osu.XR.Components.Panels {
 			else {
 				pointerPosition = position;
 				if ( ( pointerPosition - deadzoneCenter ).Length > deadzoneBindable.Value ) inDeadzone = false;
-				if ( !inDeadzone ) EmulatedInput.mouseHandler.EmulateMouseMove( position );
+				if ( !inDeadzone ) EmulatedInput.Mouse.EmulateMouseMove( position );
 			}
 		}
 
