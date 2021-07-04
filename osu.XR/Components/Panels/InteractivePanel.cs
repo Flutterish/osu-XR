@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using static osu.Framework.XR.Physics.Raycast;
 
 namespace osu.XR.Components.Panels {
-	public abstract class InteractivePanel : Panel, IFocusable { // TODO bind deadzone
+	public abstract class InteractivePanel : Panel, IFocusable {
 		public bool CanHaveGlobalFocus { get; init; } = true;
 		public PanelInputMode RequestedInputMode { get; set; } = PanelInputMode.Regular;
 
@@ -33,6 +33,7 @@ namespace osu.XR.Components.Panels {
 		[BackgroundDependencyLoader]
 		private void load ( XrConfigManager config ) {
 			config.BindWith( XrConfigSetting.Deadzone, deadzoneBindable );
+			EmulatedInput.Touch.DeadzoneBindable.BindTo( deadzoneBindable );
 		}
 		BindableInt deadzoneBindable = new( 20 );
 
