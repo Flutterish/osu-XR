@@ -32,6 +32,7 @@ using osu.XR.Components.Panels;
 using osu.XR.Drawables;
 using osu.XR.Input;
 using osu.XR.Input.Custom;
+using osu.XR.Panels;
 using osu.XR.Settings;
 using osuTK;
 using System.Collections.Generic;
@@ -217,10 +218,6 @@ namespace osu.XR {
 
 		Bindable<InputMode> inputModeBindable = new();
 		void onControllersMutated () {
-			foreach ( var controller in controllers.Values ) {
-				controller.ModeOverrideBindable.Value = ControllerMode.Disabled;
-			}
-
 			var main = MainController;
 			if ( inputModeBindable.Value == InputMode.SinglePointer ) {
 				foreach ( var controller in controllers.Values ) {
@@ -309,8 +306,6 @@ namespace osu.XR {
 
 			AddInternal( BeatProvider );
 			AddInternal( Scene );
-			Scene.Add( new SkyBox() );
-			Scene.Add( new FloorGrid() );
 			Scene.Add( new BeatingScenery() );
 			Scene.Add( new Collider {
 				Mesh = Mesh.XZPlane( 17, 17 ),
@@ -319,7 +314,7 @@ namespace osu.XR {
 			} );
 			Scene.Add( Camera );
 			Scene.Add( OsuPanel );
-			Scene.Add( new HandheldMenu().With( s => s.Panels.AddRange( new FlatPanel[] { new ConfigPanel(), Notifications, Inspector, InputBindings, new ChangelogPanel() } ) ) );
+			Scene.Add( new HandheldMenu().With( s => s.Elements.AddRange( new HandheldPanel[] { new ConfigPanel(), Notifications, Inspector, InputBindings, new ChangelogPanel(), new SceneManagerPanel() } ) ) );
 			Scene.Add( Keyboard );
 			Keyboard.LoadModel( @".\Resources\keyboard.obj" );
 			//Scene.Add( FlatKeyboard );

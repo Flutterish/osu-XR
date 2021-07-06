@@ -9,14 +9,9 @@ using osu.XR.Components.Groups;
 using osu.XR.Drawables;
 
 namespace osu.XR.Settings.Sections {
-	public class InputSettingSection : FillFlowContainer, IHasName, IHasIcon {
-		public InputSettingSection () {
-			Direction = FillDirection.Vertical;
-			AutoSizeAxes = Axes.Y;
-			RelativeSizeAxes = Axes.X;
-		}
-
-		public Drawable CreateIcon () => new SpriteIcon {
+	public class InputSettingSection : SettingsSection {
+		public override string DisplayName => "Input";
+		public override Drawable CreateIcon () => new SpriteIcon {
 			Icon = FontAwesome.Solid.Keyboard
 		};
 
@@ -32,6 +27,5 @@ namespace osu.XR.Settings.Sections {
 			};
 		}
 
-		public string DisplayName => "Input";
 	}
 }

@@ -2,6 +2,7 @@
 using OpenVR.NET.Manifests;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.XR.Components;
 using osu.XR.Components.Panels;
 using osu.XR.Input;
 using osu.XR.Settings;
@@ -10,7 +11,7 @@ using System;
 using System.Linq;
 
 namespace osu.XR.Components.Groups {
-	public class HandheldMenu : PanelStack {
+	public class HandheldMenu : PopoutPanelStack {
 		Bindable<InputMode> inputModeBindable = new();
 		[Resolved]
 		private OsuGameXr Game { get; set; }
@@ -36,7 +37,7 @@ namespace osu.XR.Components.Groups {
 				var toggleMenu = VR.GetControllerComponent<ControllerButton>( XrAction.ToggleMenu );
 				toggleMenu.BindValueChangedDetailed( v => {
 					if ( v.NewValue ) {
-						if ( Panels.Any( x => x.IsColliderEnabled ) ) {
+						if ( Elements.Any( x => x.IsColliderEnabled ) ) {
 							if ( HoldingController is null || inputModeBindable.Value == InputMode.SinglePointer || HoldingController.Source == v.Source ) {
 								Hide();
 							}
@@ -68,7 +69,7 @@ namespace osu.XR.Components.Groups {
 		}
 
 		private Vector3 retainedPosition;
-		protected override Vector3 TargetPosition {
+		protected Vector3 TargetPosition {
 			get {
 				if ( !IsOpen ) return retainedPosition;
 				if ( HoldingController is null ) {
@@ -81,7 +82,7 @@ namespace osu.XR.Components.Groups {
 		}
 
 		private Quaternion retainedRotation;
-		protected override Quaternion TargetRotation {
+		protected Quaternion TargetRotation {
 			get {
 				if ( !IsOpen ) return retainedRotation;
 				if ( HoldingController is null ) {
@@ -101,14 +102,18 @@ namespace osu.XR.Components.Groups {
 				previousHoldingController = HoldingController;
 				if ( previousHoldingController is not null ) previousHoldingController.HeldObjects.Add( this );
 			}
-			if ( Panels.Any( x => x.IsColliderEnabled ) ) {
+			if ( Elements.Any( x => x.IsColliderEnabled ) ) {
 				if ( VR.EnabledControllerCount == 0 ) {
 					Hide();
 				}
-				foreach ( var i in Panels ) {
+				foreach ( var i in Elements ) {
 					i.RequestedInputMode = HoldingController == Game.MainController ? PanelInputMode.Inverted : PanelInputMode.Regular;
 				}
 			}
+
+			// doing this every frame makes it have an Easing.Out-like curve
+			this.MoveTo( TargetPosition, 100 );
+			this.RotateTo( TargetRotation, 100 );
 		}
 	}
 }

@@ -1,5 +1,8 @@
-﻿using osu.Framework.Graphics;
+﻿using osu.Framework.Extensions.IEnumerableExtensions;
+using osu.Framework.Graphics;
+using osu.XR.Drawables.Containers;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace osu.XR.Inspector {
 	/// <summary>
@@ -35,4 +38,18 @@ namespace osu.XR.Inspector {
 	/// This object is experimental.
 	/// </summary>
 	public interface IExperimental { }
+
+
+	public static class IConfigurableInspectableExtensions {
+		public static IEnumerable<Drawable> CreateInspectorSubsectionsWithWarning ( this IConfigurableInspectable self ) {
+			if ( self.AreSettingsPersistent )
+				return self.CreateInspectorSubsections();
+			else return self.CreateInspectorSubsections().Prepend( new FormatedTextContainer( () => new() { Size = 20 } ) {
+				RelativeSizeAxes = Axes.X,
+				AutoSizeAxes = Axes.Y,
+				Text = "||Warning:|| These settings are **not** persistent\n~~They will not be saved after you close the game~~",
+				TextAnchor = Anchor.Centre
+			} );
+		}
+	}
 }

@@ -9,21 +9,13 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace osu.XR.Settings.Sections {
-	public class PresetsSection : FillFlowContainer, IHasName, IHasIcon {
-		public PresetsSection () {
-			Direction = FillDirection.Vertical;
-			AutoSizeAxes = Axes.Y;
-			RelativeSizeAxes = Axes.X;
-		}
-
-		public string DisplayName => "Presets";
-
-		public Drawable CreateIcon () => new SpriteIcon {
+	public class PresetsSection : SettingsSection {
+		public override string DisplayName => "Presets";
+		public override Drawable CreateIcon () => new SpriteIcon {
 			Icon = FontAwesome.Solid.BoxOpen
 		};
 
 		SettingsPreset<XrConfigSetting> lastPreset;
-
 		private List<(string name, SettingsPreset<XrConfigSetting> preset)> presets = new() {
 			("Default", XrConfigManager.DefaultPreset),
 			("Touchscreen Big", XrConfigManager.PresetTouchscreenBig),

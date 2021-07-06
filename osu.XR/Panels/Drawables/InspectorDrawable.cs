@@ -90,7 +90,7 @@ namespace osu.XR.Inspector {
 				}
 
 				if ( v.NewValue is IConfigurableInspectable config ) {
-					foreach ( var i in config.CreateInspectorSubsections() ) {
+					foreach ( var i in config.CreateInspectorSubsectionsWithWarning() ) {
 						AddSection( i );
 					}
 				}

@@ -21,7 +21,11 @@ namespace osu.XR.Drawables.Containers {
 
 		public Anchor TextAnchor {
 			get => textFlow.TextAnchor;
-			set => textFlow.TextAnchor = value;
+			set {
+				textFlow.TextAnchor = value;
+				textFlow.Origin = value;
+				textFlow.Anchor = value;
+			}
 		}
 		new public Axes AutoSizeAxes {
 			get => base.AutoSizeAxes;

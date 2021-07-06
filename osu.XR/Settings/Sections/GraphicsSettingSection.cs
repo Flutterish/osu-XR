@@ -7,16 +7,9 @@ using osu.XR.Components.Groups;
 using osu.XR.Drawables;
 
 namespace osu.XR.Settings.Sections {
-	public class GraphicsSettingSection : FillFlowContainer, IHasName, IHasIcon {
-		public GraphicsSettingSection () {
-			Direction = FillDirection.Vertical;
-			AutoSizeAxes = Axes.Y;
-			RelativeSizeAxes = Axes.X;
-		}
-
-		public string DisplayName => "Graphics";
-
-		public Drawable CreateIcon () => new SpriteIcon {
+	public class GraphicsSettingSection : SettingsSection {
+		public override string DisplayName => "Graphics";
+		public override Drawable CreateIcon () => new SpriteIcon {
 			Icon = FontAwesome.Solid.Laptop
 		};
 

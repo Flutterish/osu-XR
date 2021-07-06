@@ -10,17 +10,13 @@ using System;
 using System.Reflection;
 
 namespace osu.XR.Components.Groups {
-	public abstract class PanelStack : CompositeDrawable3D {
-		protected abstract Vector3 TargetPosition { get; }
-		protected abstract Quaternion TargetRotation { get; }
-		public readonly BindableList<FlatPanel> Panels = new();
+	public abstract class MenuStack<T> : CompositeDrawable3D where T : Drawable3D {
+		public readonly BindableList<T> Elements = new();
 
-		protected virtual double TransitionDuration => 100;
 		public override bool RemoveCompletedTransforms => true;
-		protected virtual Vector3 PanelOffset => new Vector3( 0.04f, 0, 0.02f );
 		private Sidebar sidebar = new();
 		private FlatPanel sidebarPanel = new();
-		public PanelStack () {
+		public MenuStack () {
 			sidebarPanel.Source.Add( sidebar );
 			sidebarPanel.BypassAutoSizeAxes = Axes3D.All;
 			sidebarPanel.AutoOffsetAnchorX = 0.5f;
@@ -33,10 +29,10 @@ namespace osu.XR.Components.Groups {
 			Add( sidebarPanel );
 			sidebarPanel.Position = new Vector3( 0.02f, 0, 0 );
 
-			Panels.BindCollectionChanged( (_,e) => {
+			Elements.BindCollectionChanged( (_,e) => {
 				if ( ignorePanelListEvents ) return;
 				if ( e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add ) {
-					foreach ( FlatPanel i in e.NewItems ) {
+					foreach ( T i in e.NewItems ) {
 						Add( i );
 						i.AutoOffsetOriginX = 0.5f;
 						i.AutoOffsetAnchorX = 0.5f;
@@ -58,53 +54,46 @@ namespace osu.XR.Components.Groups {
 				else {
 					throw new InvalidOperationException( "This collection does not support this operation yet." );
 				}
+
+				applyTransforms();
 			}, true );
 		}
 
-		protected override void Update () {
-			base.Update();
+		protected abstract void ApplyTransformsTo ( T element, int index, float progress );
 
-			// doing this every frame makes it have an Easing.Out-like curve
-			this.MoveTo( TargetPosition, TransitionDuration );
-			this.RotateTo( TargetRotation, TransitionDuration );
+		private bool ignorePanelListEvents = false;
+		public void Focus ( T panel ) {
+			if ( Elements.Contains( panel ) ) {
+				ignorePanelListEvents = true;
+				Elements.Remove( panel );
+				Elements.Insert( 0, panel );
+				ignorePanelListEvents = false;
 
-			for ( int i = 0; i < Panels.Count; i++ ) {
-				Panels[ i ].MoveTo( PanelOffset * i, TransitionDuration );
+				applyTransforms();
 			}
 		}
 
-		private bool ignorePanelListEvents = false;
-		public void Focus ( FlatPanel panel ) {
-			if ( Panels.Contains( panel ) ) {
-				ignorePanelListEvents = true;
-				Panels.Remove( panel );
-				Panels.Insert( 0, panel );
-				ignorePanelListEvents = false;
+		void applyTransforms () {
+			for ( int i = 0; i < Elements.Count; i++ ) {
+				ApplyTransformsTo( Elements[ i ], i, (float)i / Elements.Count );
 			}
 		}
 
 		public override void Hide () {
-			foreach ( var i in Panels ) {
+			foreach ( var i in Elements ) {
 				i.Hide();
 			}
-			sidebar.Hide();
+			sidebar.FadeOut( 300 );
 			sidebar.State = ExpandedState.Contracted;
 		}
 
 		public override void Show () {
-			foreach ( var i in Panels ) {
+			foreach ( var i in Elements ) {
 				i.Show();
 			}
-			sidebar.Show();
+			sidebar.FadeIn( 300 );
 			sidebar.State = ExpandedState.Expanded;
+			applyTransforms();
 		}
-	}
-
-	public interface IHasName {
-		string DisplayName { get; }
-	}
-
-	public interface IHasIcon {
-		Drawable CreateIcon ();
 	}
 }

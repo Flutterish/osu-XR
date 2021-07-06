@@ -1,16 +1,28 @@
-﻿using osu.Framework.XR.Components;
+﻿using osu.Framework.Bindables;
+using osu.Framework.Graphics;
+using osu.Framework.Graphics.Sprites;
+using osu.Framework.XR.Components;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Projection;
+using osu.Game.Overlays.Settings;
+using osu.XR.Drawables.UserInterface;
+using osu.XR.Inspector;
+using osu.XR.Settings.Sections;
 using osuTK;
 using osuTK.Graphics;
+using System;
+using System.Collections.Generic;
 
 namespace osu.XR.Components {
 	/// <summary>
 	/// A hot pink skybox that fits the osu theme.
 	/// </summary>
-	public class SkyBox : Model, IBehindEverything {
+	public class SkyBox : Model, IBehindEverything, IConfigurableInspectable {
+		public readonly Bindable<Color4> TintBindable = new( new Color4( 253, 35, 115, 255 ) );
+		public readonly BindableFloat OpacityBindable = new( 1 ) { MinValue = 0, MaxValue = 1 };
+
 		public SkyBox () {
-			MainTexture = Textures.VerticalGradient( Color4.Black, Color4.HotPink, 100 ).TextureGL;
+			MainTexture = Textures.VerticalGradient( Color4.Black, Color4.White, 100, x => MathF.Pow( x, 2 ) ).TextureGL;
 			Mesh.Vertices.AddRange( new[] {
 				new Vector3(  1,  1,  1 ) * 300,
 				new Vector3(  1,  1, -1 ) * 300,
@@ -32,14 +44,10 @@ namespace osu.XR.Components {
 				new Vector2( 0, 1 ),
 				new Vector2( 0, 1 ),
 				new Vector2( 1, 1 ),
-				new Vector2( 1, 0 ),
-				new Vector2( 0, 0 )
 			} );
 			Mesh.Tris.AddRange( new IndexedFace[] {
 				new( 4, 7, 5 ),
 				new( 4, 7, 6 ),
-				new( 0, 3, 2 ),
-				new( 0, 3, 1 ),
 				new( 4, 2, 6 ),
 				new( 4, 2, 0 ),
 				new( 5, 3, 7 ),
@@ -47,13 +55,29 @@ namespace osu.XR.Components {
 				new( 6, 3, 7 ),
 				new( 6, 3, 2 ),
 				new( 0, 2, 1 ),
-				new( 0, 2, 3 )
+				new( 1, 2, 3 )
 			} );
+
+			UseGammaCorrection = true;
+			TintBindable.BindValueChanged( v => Tint = v.NewValue, true );
+			OpacityBindable.BindValueChanged( v => Alpha = v.NewValue, true );
 		}
 
 		public override void BeforeDraw ( DrawNode3D.DrawSettings settings ) {
 			base.BeforeDraw( settings );
 			Position = settings.Camera.Position;
 		}
+
+		public IEnumerable<Drawable> CreateInspectorSubsections () {
+			yield return new SettingsSectionContainer {
+				Title = "Skybox",
+				Icon = FontAwesome.Solid.ShoePrints,
+				Children = new Drawable[] {
+					new ColorPicker { LabelText = "Tint", Current = TintBindable },
+					new SettingsSlider<float> { LabelText = "Opacity", Current = OpacityBindable },
+				}
+			};
+		}
+		public bool AreSettingsPersistent => false;
 	}
 }

@@ -2,8 +2,11 @@
 The reflections inspector is now avaiable only in debug builds.
 Inspector selections now have an animation.
 Models' tint now is multiplied with alpha.
-Notification panel now doesnt open on startup.
 Made all panels the same size and look.
+Notification panel now doesnt open on startup.
+Added a scene management panel.
+You can now customize the skybox and the floor grid through the inspector.
+The handheld menu now only shows the top panel and transitions between with a "popout" animation.
 
 [2021.06.03]
 Implemented saving and loading ruleset bindings.
