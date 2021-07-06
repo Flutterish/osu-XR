@@ -11,6 +11,9 @@
 		MouseRight,
 		Scroll,
 
+		Grip,
+		Move,
+
 		// Configuration
 		ToggleMenu,
 

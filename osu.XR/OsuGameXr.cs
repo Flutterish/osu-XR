@@ -156,7 +156,19 @@ namespace osu.XR {
 							Type = ActionType.Vector2,
 							Requirement = Requirement.Suggested,
 							Localizations = new() { [ "en_us" ] = "Scroll" }
-						}
+						},
+						new() {
+							Name = XrAction.Grip,
+							Type = ActionType.Boolean,
+							Requirement = Requirement.Suggested,
+							Localizations = new() { [ "en_us" ] = "Grip" }
+						},
+						new() {
+							Name = XrAction.Move,
+							Type = ActionType.Boolean,
+							Requirement = Requirement.Suggested,
+							Localizations = new() { [ "en_us" ] = "Teleport" }
+						},
 					},
 					Localizations = new() { [ "en_us" ] = "Pointer" },
 				},
