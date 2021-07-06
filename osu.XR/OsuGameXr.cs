@@ -216,9 +216,7 @@ namespace osu.XR {
 		};
 
 		Bindable<InputMode> inputModeBindable = new();
-
 		void onControllersMutated () {
-			wasInKeyboardProximity = false;
 			foreach ( var controller in controllers.Values ) {
 				controller.ModeOverrideBindable.Value = ControllerMode.Disabled;
 			}
@@ -242,29 +240,6 @@ namespace osu.XR {
 
 			foreach ( var controller in controllers.Values ) {
 				controller.IsMainControllerBindable.Value = controller == main;
-			}
-		}
-
-		bool wasInKeyboardProximity = false;
-		protected override void Update () {
-			base.Update();
-			var inKeyboardProximity = controllers.Values.Any( i => {
-				return i.Position.X - Keyboard.Position.X > -Keyboard.Size.X * Keyboard.Scale.X * 2 && i.Position.X - Keyboard.Position.X < Keyboard.Size.X * Keyboard.Scale.X * 2
-					&& i.Position.Z - Keyboard.Position.Z > -Keyboard.Size.Z * Keyboard.Scale.Z * 2 && i.Position.Z - Keyboard.Position.Z < Keyboard.Size.Z * Keyboard.Scale.Z * 2
-					&& i.Position.Y + 0.1 > Keyboard.Position.Y;
-			} );
-			if ( inKeyboardProximity != wasInKeyboardProximity ) {
-				if ( inKeyboardProximity ) {
-					foreach ( var i in controllers ) {
-						i.Value.ModeOverrideBindable.Value = ControllerMode.Touch;
-					}
-				}
-				else {
-					foreach ( var i in controllers ) {
-						i.Value.ModeOverrideBindable.Value = ControllerMode.Disabled;
-					}
-				}
-				wasInKeyboardProximity = inKeyboardProximity;
 			}
 		}
 

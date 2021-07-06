@@ -33,17 +33,10 @@ namespace osu.XR.Input {
 		private Pointer pointer { get => pointerBindable.Value; set => pointerBindable.Value = value; }
 		private Bindable<Pointer> pointerBindable = new();
 		public ControllerMode Mode {
-			get {
-				return ModeOverrideBindable.Value == ControllerMode.Disabled
-					? ModeBindable.Value
-					: ModeOverrideBindable.Value;
-			}
-			set {
-				ModeBindable.Value = value;
-			}
+			get => ModeBindable.Value;
+			set => ModeBindable.Value = value;
 		}
 		public readonly Bindable<ControllerMode> ModeBindable = new( ControllerMode.Disabled );
-		public readonly Bindable<ControllerMode> ModeOverrideBindable = new( ControllerMode.Disabled );
 		public readonly BindableBool IsMainControllerBindable = new BindableBool( false );
 
 		public readonly BindableSet<object> HeldObjects = new();
@@ -82,9 +75,6 @@ namespace osu.XR.Input {
 			}, true );
 
 			ModeBindable.BindValueChanged( v => {
-				updatePointer();
-			}, true );
-			ModeOverrideBindable.BindValueChanged( v => {
 				updatePointer();
 			}, true );
 			pointerBindable.BindValueChanged( v => {
