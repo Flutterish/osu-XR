@@ -8,6 +8,9 @@ Added a scene management panel.
 You can now customize the skybox and the floor grid through the inspector.
 The handheld menu now only shows the top panel and transitions between with a "popout" animation.
 Keyboard is now focused correctly.
+You can now teleport.
+* Added a setting to disable teleporting temporarily.
+* You also have a faint shadow now.
 
 [2021.06.03]
 Implemented saving and loading ruleset bindings.

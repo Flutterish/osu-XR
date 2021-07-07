@@ -28,6 +28,7 @@ namespace osu.XR.Settings {
 			SetDefault( XrConfigSetting.ScreenResolutionY, 1080, 400, 4320 );
 
 			SetDefault( XrConfigSetting.RenderToScreen, false );
+			SetDefault( XrConfigSetting.DisableTeleport, false );
 			SetDefault( XrConfigSetting.DominantHand, Hand.Auto );
 		}
 
@@ -43,7 +44,8 @@ namespace osu.XR.Settings {
 				[ XrConfigSetting.ScreenResolutionX ] = 1920 * 2,
 				[ XrConfigSetting.ScreenResolutionY ] = 1080,
 				[ XrConfigSetting.RenderToScreen ] = false,
-				[ XrConfigSetting.DominantHand ] = Hand.Auto
+				[ XrConfigSetting.DominantHand ] = Hand.Auto,
+				[ XrConfigSetting.DisableTeleport ] = false,
 			}
 		};
 
@@ -70,8 +72,8 @@ namespace osu.XR.Settings {
 				[XrConfigSetting.ScreenArc]				= 1.2f,
 				[XrConfigSetting.ScreenRadius]			= 1.01f,
 				[XrConfigSetting.ScreenHeight]			= 1.47f,
-				[XrConfigSetting.ScreenResolutionX]		= 3840,
-				[XrConfigSetting.ScreenResolutionY]		= 2552
+				[XrConfigSetting.ScreenResolutionX]		= 3840 / 2,
+				[XrConfigSetting.ScreenResolutionY]		= 2552 / 2
 			}
 		};
 
@@ -84,8 +86,8 @@ namespace osu.XR.Settings {
 				[XrConfigSetting.ScreenArc]				= 1.2f,
 				[XrConfigSetting.ScreenRadius]			= 0.69f /*nice*/,
 				[XrConfigSetting.ScreenHeight]			= 1.58f,
-				[XrConfigSetting.ScreenResolutionX]		= 3840,
-				[XrConfigSetting.ScreenResolutionY]		= 2552
+				[XrConfigSetting.ScreenResolutionX]		= 3840 / 2,
+				[XrConfigSetting.ScreenResolutionY]		= 2552 / 2
 			}
 		};
 
@@ -125,7 +127,9 @@ namespace osu.XR.Settings {
 		ScreenResolutionY,
 
 		RenderToScreen,
-		DominantHand
+		DominantHand,
+
+		DisableTeleport
 	}
 
 	public enum InputMode {

@@ -75,6 +75,8 @@ namespace osu.XR {
 		public readonly InspectorPanel Inspector = new();
 		[Cached]
 		public readonly RulesetInfoPanel InputBindings = new();
+		[Cached]
+		public readonly Components.Player Player = new();
 
 		public static ETrackedControllerRole RoleForHand ( Hand hand ) => hand switch {
 			Hand.Right => ETrackedControllerRole.RightHand,
@@ -306,6 +308,7 @@ namespace osu.XR {
 
 			AddInternal( BeatProvider );
 			AddInternal( Scene );
+			Scene.Add( Player );
 			Scene.Add( new BeatingScenery() );
 			Scene.Add( new Collider {
 				Mesh = Mesh.XZPlane( 17, 17 ),
@@ -345,6 +348,7 @@ namespace osu.XR {
 
 					Config.BindWith( XrConfigSetting.SinglePointerTouch, controller.SinglePointerTouchBindable );
 					Config.BindWith( XrConfigSetting.TapOnPress, controller.TapTouchBindable );
+					Config.BindWith( XrConfigSetting.DisableTeleport, controller.DisableTeleportBindable ); // TODO maybe it should do that on its own
 				} );
 			}, true );
 
@@ -360,7 +364,7 @@ namespace osu.XR {
 					onPlayerExit( lastPlayer );
 					lastPlayer = default;
 				}
-				if ( n is Player player ) { // TODO check if some player types should be excluded
+				if ( n is Game.Screens.Play.Player player ) { // TODO check if some player types should be excluded
 					var drawableRuleset = player.GetProperty<DrawableRuleset>();
 					var inputManager = drawableRuleset.GetField<PassThroughInputManager>();
 

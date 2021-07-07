@@ -68,6 +68,7 @@ namespace osu.XR.Components {
 				if ( pos.Y <= 0 && pos.Y < OriginBindable.Value.Y ) {
 					HasHitGround = true;
 					circle.Position = HitPosition = pos - velocity * ( pos.Y / velocity.Y );
+					circle.Y = 0.01f;
 					circle.IsVisible = true;
 					return;
 				}

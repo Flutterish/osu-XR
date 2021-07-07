@@ -23,7 +23,8 @@ namespace osu.XR.Settings.Sections {
 				new SettingsCheckbox { LabelText = "Tap only on press", Current = config.GetBindable<bool>( XrConfigSetting.TapOnPress ), TooltipText = "In touchscreen mode, hold a button to touch the screen" },
 				new SettingsSlider<int, PxSliderBar> { LabelText = "Deadzone", Current = config.GetBindable<int>( XrConfigSetting.Deadzone ), TooltipText = "Pointer deadzone after touching the screen or pressing a button" },
 				new SettingsSlider<float> { LabelText = "Player Height Offset", Current = (host as ExtendedRealityGameHost).PlayerHeightOffset },
-				new SettingsEnumDropdown<Hand> { LabelText = "Dominant hand", Current = config.GetBindable<Hand>( XrConfigSetting.DominantHand ) }
+				new SettingsEnumDropdown<Hand> { LabelText = "Dominant hand", Current = config.GetBindable<Hand>( XrConfigSetting.DominantHand ) },
+				new SettingsCheckbox { LabelText = "Disable teleporting", Current = config.GetBindable<bool>( XrConfigSetting.DisableTeleport ) },
 			};
 		}
 

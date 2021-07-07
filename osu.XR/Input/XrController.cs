@@ -50,6 +50,7 @@ namespace osu.XR.Input {
 		private OsuGameXr Game { get; set; }
 		public readonly Bindable<bool> SinglePointerTouchBindable = new();
 		public readonly Bindable<bool> TapTouchBindable = new();
+		public readonly Bindable<bool> DisableTeleportBindable = new();
 
 		public XrController ( Controller controller ) {
 			Add( ControllerMesh );
@@ -126,11 +127,11 @@ namespace osu.XR.Input {
 				haptic = VR.GetControllerComponent<ControllerHaptic>( XrAction.Feedback, Source );
 				var teleport = VR.GetControllerComponent<ControllerButton>( XrAction.Move, Source );
 				teleport.BindValueChangedDetailed( v => {
-					teleportVisual.IsActive.Value = v.NewValue;
-					if ( v.OldValue && !v.NewValue ) {
+					teleportVisual.IsActive.Value = v.NewValue && !DisableTeleportBindable.Value;
+					if ( !v.NewValue && !DisableTeleportBindable.Value ) {
 						teleportPlayer();
 					}
-				}, true );
+				} );
 			} );
 
 			HeldObjects.BindCollectionChanged( () => {
@@ -160,7 +161,7 @@ namespace osu.XR.Input {
 		}
 
 		private void teleportPlayer () {
-			if ( teleportVisual.HasHitGround ) {
+			if ( teleportVisual.HasHitGround && !DisableTeleportBindable.Value ) {
 				var offset = teleportVisual.HitPosition - ( Game.PlayerPosition.Value - Game.PlayerOrigin.Value );
 				Game.PlayerOrigin.Value = new Vector3( offset.X, 0, offset.Z );
 			}
