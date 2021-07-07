@@ -30,6 +30,7 @@ namespace osu.XR.Input {
 		Model ControllerMesh = new();
 		RaycastPointer raycast = new() { IsVisible = false };
 		TouchPointer touch = new() { IsVisible = false };
+		TeleportVisual teleportVisual = new();
 		private Pointer pointer { get => pointerBindable.Value; set => pointerBindable.Value = value; }
 		private Bindable<Pointer> pointerBindable = new();
 		public ControllerMode Mode {
@@ -52,6 +53,7 @@ namespace osu.XR.Input {
 
 		public XrController ( Controller controller ) {
 			Add( ControllerMesh );
+			Add( teleportVisual );
 			ControllerMesh.MainTexture = Textures.Pixel( controller.IsMainController ? Color4.Orange : Color4.LightBlue ).TextureGL;
 			touch.MainTexture = raycast.MainTexture = Textures.Pixel( ( controller.IsMainController ? Colour4.Orange : Colour4.LightBlue ).MultiplyAlpha( 100f / 255f ) ).TextureGL;
 			raycast.Source = this;
@@ -122,6 +124,13 @@ namespace osu.XR.Input {
 				} );
 
 				haptic = VR.GetControllerComponent<ControllerHaptic>( XrAction.Feedback, Source );
+				var teleport = VR.GetControllerComponent<ControllerButton>( XrAction.Move, Source );
+				teleport.BindValueChangedDetailed( v => {
+					teleportVisual.IsActive.Value = v.NewValue;
+					if ( v.OldValue && !v.NewValue ) {
+						teleportPlayer();
+					}
+				}, true );
 			} );
 
 			HeldObjects.BindCollectionChanged( () => {
@@ -149,6 +158,14 @@ namespace osu.XR.Input {
 			RightButtonBindable.BindValueChanged( v => { if ( v.NewValue ) onAnyInteraction(); } );
 			PointerDown += _ => onAnyInteraction();
 		}
+
+		private void teleportPlayer () {
+			if ( teleportVisual.HasHitGround ) {
+				var offset = teleportVisual.HitPosition - ( Game.PlayerPosition.Value - Game.PlayerOrigin.Value );
+				Game.PlayerOrigin.Value = new Vector3( offset.X, 0, offset.Z );
+			}
+		}
+
 		ControllerHaptic haptic;
 		public void SendHapticVibration ( double duration, double frequency = 40, double amplitude = 1, double delay = 0 ) {
 			haptic?.TriggerVibration( duration, frequency, amplitude, delay );
@@ -296,7 +313,7 @@ namespace osu.XR.Input {
 
 		protected override void Update () {
 			base.Update();
-			Position = new Vector3( Source.Position.X, Source.Position.Y, Source.Position.Z );
+			Position = Game.PlayerOrigin.Value + new Vector3( Source.Position.X, Source.Position.Y, Source.Position.Z );
 			Rotation = new Quaternion( Source.Rotation.X, Source.Rotation.Y, Source.Rotation.Z, Source.Rotation.W );
 
 			if ( isTouchPointerDown && ( !EmulatesTouch || !canTouch ) ) {
@@ -308,6 +325,9 @@ namespace osu.XR.Input {
 				LeftButtonBindable.Value = false;
 				RightButtonBindable.Value = false;
 			}
+
+			teleportVisual.OriginBindable.Value = Position;
+			teleportVisual.DirectionBindable.Value = Forward * 5;
 		}
 
 		void onAnyInteraction () {
