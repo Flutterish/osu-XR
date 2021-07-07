@@ -144,6 +144,10 @@ namespace osu.XR.Input {
 				leftButtonBindable.Value = false;
 				rightButtonBindable.Value = false;
 			} );
+
+			LeftButtonBindable.BindValueChanged( v => { if ( v.NewValue ) onAnyInteraction(); } );
+			RightButtonBindable.BindValueChanged( v => { if ( v.NewValue ) onAnyInteraction(); } );
+			PointerDown += _ => onAnyInteraction();
 		}
 		ControllerHaptic haptic;
 		public void SendHapticVibration ( double duration, double frequency = 40, double amplitude = 1, double delay = 0 ) {
@@ -251,7 +255,6 @@ namespace osu.XR.Input {
 			myFocus = v.NewValue;
 			if ( myFocus is IFocusable @new ) {
 				@new.OnControllerFocusGained( this );
-				if ( @new.CanHaveGlobalFocus ) globalFocusBindable.Value = @new;
 			}
 		}
 
@@ -307,6 +310,11 @@ namespace osu.XR.Input {
 			}
 		}
 
+		void onAnyInteraction () {
+			if ( myFocus is IFocusable focusable ) {
+				if ( focusable.CanHaveGlobalFocus ) globalFocusBindable.Value = focusable;
+			}
+		}
 		/// <summary>
 		/// When the pointer moves.
 		/// </summary>
