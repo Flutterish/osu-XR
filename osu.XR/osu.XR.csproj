@@ -20,7 +20,9 @@
     <None Remove="Resources\changelog.txt" />
     <None Remove="Resources\keyboard.obj" />
     <None Remove="Resources\keyboard_flat.obj" />
+    <None Remove="Resources\paw.obj" />
     <None Remove="Resources\selection.obj" />
+    <None Remove="Resources\shoe.obj" />
     <None Remove="Resources\shpere.obj" />
     <None Remove="vive_controller.json" />
   </ItemGroup>
@@ -41,7 +43,13 @@
     <Content Include="Resources\keyboard_flat.obj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\paw.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\selection.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\shoe.obj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\shpere.obj">

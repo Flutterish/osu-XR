@@ -26,11 +26,7 @@ namespace osu.XR.Input.Pointers {
 			if ( PhysicsSystem.TryHit( Source.Position, Source.Forward, out var hit ) && hit.Distance < HitDistance ) {
 				Position = hit.Point;
 
-				Rotation = hit.Normal.Y == 1
-					? Quaternion.FromEulerAngles( MathF.PI / 2, 0, 0 )
-					: hit.Normal.Y == -1
-					? Quaternion.FromEulerAngles( -MathF.PI / 2, 0, 0 )
-					: Matrix4.LookAt( Vector3.Zero, hit.Normal, Vector3.UnitY ).ExtractRotation().Inverted();
+				Rotation = hit.Normal.LookRotation();
 
 				RaycastHit = hit;
 				CurrentHit = hit.Collider;

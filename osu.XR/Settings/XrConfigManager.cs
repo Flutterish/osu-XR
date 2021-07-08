@@ -1,5 +1,6 @@
 ﻿using osu.Framework.Platform;
 using osu.Game.Configuration;
+using osu.XR.Components;
 using System;
 using System.ComponentModel;
 using System.IO;
@@ -30,6 +31,7 @@ namespace osu.XR.Settings {
 			SetDefault( XrConfigSetting.RenderToScreen, false );
 			SetDefault( XrConfigSetting.DisableTeleport, false );
 			SetDefault( XrConfigSetting.DominantHand, Hand.Auto );
+			SetDefault( XrConfigSetting.ShadowType, FeetSymbols.None );
 		}
 
 		public static readonly SettingsPreset<XrConfigSetting> TypeLookpuPreset = new() {
@@ -46,6 +48,7 @@ namespace osu.XR.Settings {
 				[ XrConfigSetting.RenderToScreen ] = false,
 				[ XrConfigSetting.DominantHand ] = Hand.Auto,
 				[ XrConfigSetting.DisableTeleport ] = false,
+				[ XrConfigSetting.ShadowType ] = FeetSymbols.None,
 			}
 		};
 
@@ -129,7 +132,8 @@ namespace osu.XR.Settings {
 		RenderToScreen,
 		DominantHand,
 
-		DisableTeleport
+		DisableTeleport,
+		ShadowType
 	}
 
 	public enum InputMode {

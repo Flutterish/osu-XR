@@ -3,6 +3,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
 using osu.Game.Overlays.Settings;
+using osu.XR.Components;
 using osu.XR.Components.Groups;
 using osu.XR.Drawables;
 
@@ -22,6 +23,8 @@ namespace osu.XR.Settings.Sections {
 
 				new SettingsSlider<int,PxSliderBar> { Current = config.GetBindable<int>( XrConfigSetting.ScreenResolutionX ), LabelText = "Screen resolution X" },
 				new SettingsSlider<int,PxSliderBar> { Current = config.GetBindable<int>( XrConfigSetting.ScreenResolutionY ), LabelText = "Screen resolution Y" },
+
+				new SettingsEnumDropdown<FeetSymbols> { LabelText = "Shadow type", Current = config.GetBindable<FeetSymbols>( XrConfigSetting.ShadowType ) },
 
 				new SettingsCheckbox { Current = config.GetBindable<bool>( XrConfigSetting.RenderToScreen ), LabelText = "Render to screen" },
 			};
