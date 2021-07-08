@@ -162,8 +162,8 @@ namespace osu.XR.Input {
 
 		private void teleportPlayer () {
 			if ( teleportVisual.HasHitGround && !DisableTeleportBindable.Value ) {
-				var offset = teleportVisual.HitPosition - ( Game.PlayerPosition.Value - Game.PlayerOrigin.Value );
-				Game.PlayerOrigin.Value = new Vector3( offset.X, 0, offset.Z );
+				var offset = teleportVisual.HitPosition - ( Game.Player.Position - Game.Player.PositionOffset );
+				Game.Player.PositionOffset = new Vector3( offset.X, 0, offset.Z );
 			}
 		}
 
@@ -314,7 +314,7 @@ namespace osu.XR.Input {
 
 		protected override void Update () {
 			base.Update();
-			Position = Game.PlayerOrigin.Value + new Vector3( Source.Position.X, Source.Position.Y, Source.Position.Z );
+			Position = Game.Player.PositionOffset + new Vector3( Source.Position.X, Source.Position.Y, Source.Position.Z );
 			Rotation = new Quaternion( Source.Rotation.X, Source.Rotation.Y, Source.Rotation.Z, Source.Rotation.W );
 
 			if ( isTouchPointerDown && ( !EmulatesTouch || !canTouch ) ) {

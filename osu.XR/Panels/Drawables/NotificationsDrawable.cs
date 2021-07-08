@@ -18,11 +18,11 @@ namespace osu.XR.Drawables {
 		NotificationSection errorContainer;
 
 		public void PostMessage ( Notification notification ) {
-			messageContainer.Add( notification, 0 );
+			//messageContainer.Add( notification, 0 );
 		}
 
 		public void PostError ( Notification notification ) {
-			errorContainer.Add( notification, 0 );
+			//errorContainer.Add( notification, 0 );
 		}
 	}
 }

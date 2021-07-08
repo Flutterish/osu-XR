@@ -9,9 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace osu.XR.Components {
-	public class Player : CompositeDrawable3D {
-		[Resolved]
-		private OsuGameXr game { get; set; }
+	public class Player : XrPlayer {
 		private Model footprints;
 
 		public Player () {
@@ -25,8 +23,7 @@ namespace osu.XR.Components {
 		protected override void Update () {
 			base.Update();
 
-			Position = game.PlayerPosition.Value;
-			footprints.Y = -game.PlayerPosition.Value.Y;
+			footprints.Y = -Position.Y;
 		}
 	}
 }

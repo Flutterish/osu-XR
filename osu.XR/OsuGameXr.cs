@@ -40,8 +40,6 @@ using System.Linq;
 using Valve.VR;
 
 namespace osu.XR {
-	// TODO separate out osu.Framework.XR
-
 	// TODO skybox settings:
 	// Rave!
 	// Color squares
@@ -59,7 +57,7 @@ namespace osu.XR {
 		[Cached]
 		public readonly PhysicsSystem PhysicsSystem = new();
 		[Cached]
-		public readonly Camera Camera = new() { Position = new Vector3( 0, 0, 0 ) };
+		public readonly Camera Camera;
 		readonly OsuPanel OsuPanel = new OsuPanel();
 		public XrConfigManager Config { get; private set; }
 		OsuGame OsuGame;
@@ -76,7 +74,7 @@ namespace osu.XR {
 		[Cached]
 		public readonly RulesetInfoPanel InputBindings = new();
 		[Cached]
-		public readonly Components.Player Player = new();
+		new public readonly Components.Player Player = new();
 
 		public static ETrackedControllerRole RoleForHand ( Hand hand ) => hand switch {
 			Hand.Right => ETrackedControllerRole.RightHand,
@@ -117,7 +115,8 @@ namespace osu.XR {
 			OpenVR.NET.Events.OnException += (msg,e) => {
 				Schedule( () => Notifications.PostError( new SimpleNotification() { Text = msg + ": " + e.Message, Icon = FontAwesome.Solid.Bomb } ) );
 			};
-			Scene = new SceneWithMirrorWarning { RelativeSizeAxes = Axes.Both, Camera = Camera };
+			base.Player = Player;
+			Scene = new SceneWithMirrorWarning { RelativeSizeAxes = Axes.Both, Camera = Camera = Player.Camera };
 			PhysicsSystem.Root = Scene.Root;
 
 			VR.BindVrStateChanged( v => {
@@ -315,7 +314,6 @@ namespace osu.XR {
 				IsVisible = false,
 				PhysicsLayer = GamePhysicsLayer.Floor
 			} );
-			Scene.Add( Camera );
 			Scene.Add( OsuPanel );
 			Scene.Add( new HandheldMenu().With( s => s.Elements.AddRange( new HandheldPanel[] { new ConfigPanel(), Notifications, Inspector, InputBindings, new ChangelogPanel(), new SceneManagerPanel() } ) ) );
 			Scene.Add( Keyboard );
