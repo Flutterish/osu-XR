@@ -13,7 +13,7 @@ namespace osu.XR.Panels {
 		public readonly Bindable<bool> IsVisibleBindable = new();
 		public HandheldPanel () {
 			Content = CreateContent();
-			Content.Size = new Vector2( 400, 500 );
+			Content.Size = new Vector2( 400, 500 ) * 1.2f;
 
 			PanelAutoScaleAxes = Axes.X;
 			AutosizeBoth();

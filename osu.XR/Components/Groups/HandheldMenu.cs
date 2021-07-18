@@ -73,7 +73,7 @@ namespace osu.XR.Components.Groups {
 			get {
 				if ( !IsOpen ) return retainedPosition;
 				if ( HoldingController is null ) {
-					return retainedPosition = Game.Camera.Position + Game.Camera.Forward * 0.5f;
+					return retainedPosition = Game.Camera.GlobalPosition + Game.Camera.GlobalForward * 0.5f;
 				}
 				else {
 					return retainedPosition = HoldingController.Position + HoldingController.Forward * 0.2f + HoldingController.Up * 0.05f;
@@ -86,7 +86,7 @@ namespace osu.XR.Components.Groups {
 			get {
 				if ( !IsOpen ) return retainedRotation;
 				if ( HoldingController is null ) {
-					return retainedRotation = Game.Camera.Rotation;
+					return retainedRotation = Game.Camera.GlobalRotation;
 				}
 				else {
 					return retainedRotation = HoldingController.Rotation * Quaternion.FromAxisAngle( Vector3.UnitX, MathF.PI * 0.25f );

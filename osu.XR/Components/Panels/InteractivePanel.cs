@@ -1,7 +1,10 @@
 ﻿using OpenVR.NET;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Graphics;
+using osu.Framework.Graphics.Cursor;
 using osu.Framework.XR.Components;
+using osu.Game.Graphics.Cursor;
 using osu.XR.Input;
 using osu.XR.Settings;
 using osuTK;
@@ -28,6 +31,8 @@ namespace osu.XR.Components.Panels {
 				EmulatedInput.HasFocus = value;
 			}
 		}
+
+		protected override TooltipContainer CreateTooltipContainer () => new OsuTooltipContainer( null );
 
 		[BackgroundDependencyLoader]
 		private void load ( XrConfigManager config ) {

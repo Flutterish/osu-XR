@@ -1,4 +1,5 @@
-﻿using osu.Framework.Extensions.TypeExtensions;
+﻿using osu.Framework;
+using osu.Framework.Extensions.TypeExtensions;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -65,29 +66,27 @@ namespace osu.XR.Inspector {
 			Setter = createPropertySetter( prop.GetSetMethod( true ), source );
 		}
 
-		private static Func<T> createFieldGetter ( FieldInfo field, object source ) {
-			/*if ( !RuntimeInfo.SupportsJIT )*/
-			return () => (T)field.GetValue( source );
+		private static Func<T> createFieldGetter ( FieldInfo field, object source ) { // TODO these functions should accept the target object as a param and this allows us to cache them
+			/*if ( !RuntimeInfo.SupportsJIT )*/ return () => (T)field.GetValue( source );
 
 			string methodName = $"{field.FieldType.ReadableName()}.{field.Name}.get_{Guid.NewGuid():N}";
-			DynamicMethod setterMethod = new DynamicMethod( methodName, field.FieldType, new Type[] { }, true );
-			ILGenerator gen = setterMethod.GetILGenerator();
+			DynamicMethod getterMethod = new DynamicMethod( methodName, field.FieldType, new Type[] {}, true );
+			ILGenerator gen = getterMethod.GetILGenerator();
 			gen.Emit( OpCodes.Ldarg_0 );
 			gen.Emit( OpCodes.Ldfld, field );
 			gen.Emit( OpCodes.Ret );
 
 			if ( typeof( T ) == field.FieldType )
-				return setterMethod.CreateDelegate<Func<T>>();
+				return getterMethod.CreateDelegate<Func<T>>();
 			else
-				return setterMethod.CreateDelegate( typeof( Func<> ).MakeGenericType( field.FieldType ) ) as Func<T>;
+				return getterMethod.CreateDelegate( typeof( Func<> ).MakeGenericType( field.FieldType ) ) as Func<T>;
 		}
 
 		private static Action<T> createFieldSetter ( FieldInfo field, object source ) {
-			/*if ( !RuntimeInfo.SupportsJIT )*/
-			return value => field.SetValue( source, value );
+			/*if ( !RuntimeInfo.SupportsJIT )*/ return value => field.SetValue( source, value );
 
 			string methodName = $"{field.FieldType.ReadableName()}.{field.Name}.set_{Guid.NewGuid():N}";
-			DynamicMethod setterMethod = new DynamicMethod( methodName, null, new Type[] { field.FieldType }, true );
+			DynamicMethod setterMethod = new DynamicMethod( methodName, null, new Type[] { field.DeclaringType, field.FieldType }, true );
 			ILGenerator gen = setterMethod.GetILGenerator();
 			gen.Emit( OpCodes.Ldarg_0 );
 			gen.Emit( OpCodes.Ldarg_1 );
@@ -102,8 +101,8 @@ namespace osu.XR.Inspector {
 
 		private static Func<T> createPropertyGetter ( MethodInfo getter, object source ) {
 			if ( getter is null ) return null;
-			/*if ( !RuntimeInfo.SupportsJIT )*/
-			return () => (T)getter.Invoke( source, Array.Empty<object>() );
+
+			/*if ( !RuntimeInfo.SupportsJIT )*/ return () => (T)getter.Invoke( source, Array.Empty<object>() );
 
 			if ( typeof( T ) == getter.ReturnType )
 				return getter.CreateDelegate<Func<T>>();
@@ -113,8 +112,8 @@ namespace osu.XR.Inspector {
 
 		private static Action<T> createPropertySetter ( MethodInfo setter, object source ) {
 			if ( setter is null ) return null;
-			/*if ( !RuntimeInfo.SupportsJIT )*/
-			return value => setter.Invoke( source, new object[] { value } );
+
+			/*if ( !RuntimeInfo.SupportsJIT )*/ return value => setter.Invoke( source, new object[] { value } );
 
 			if ( typeof( T ) == setter.GetParameters()[ 0 ].ParameterType )
 				return setter.CreateDelegate<Action<T>>();

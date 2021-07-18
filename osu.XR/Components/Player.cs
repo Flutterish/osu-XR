@@ -12,7 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace osu.XR.Components {
-	public class Player : XrPlayer {
+	public class Player : XrPlayer { // TODO move controllers here too
 		private Container3D invariantContainer = new();
 		private Model shadow;
 		private Foot footLeft;
