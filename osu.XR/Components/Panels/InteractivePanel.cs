@@ -5,6 +5,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Cursor;
 using osu.Framework.XR.Components;
 using osu.Game.Graphics.Cursor;
+using osu.XR.Drawables.Containers;
 using osu.XR.Input;
 using osu.XR.Settings;
 using osuTK;
@@ -32,7 +33,7 @@ namespace osu.XR.Components.Panels {
 			}
 		}
 
-		protected override TooltipContainer CreateTooltipContainer () => new OsuTooltipContainer( null );
+		protected override TooltipContainer CreateTooltipContainer () => new OsuXrTooltipContainer();
 
 		[BackgroundDependencyLoader]
 		private void load ( XrConfigManager config ) {

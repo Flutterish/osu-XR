@@ -81,6 +81,9 @@ namespace osu.XR.Components {
 			shadow.Y = -Y;
 			footLeft.TargetPosition.Value = new Vector3( X, 0, Z ) + Left * 0.1f;
 			footRight.TargetPosition.Value = new Vector3( X, 0, Z ) + Right * 0.1f;
+
+			footLeft.TargetRotation.Value = Quaternion.FromAxisAngle( Vector3.UnitY, (-10 / 180f + 1) * MathF.PI ) * Rotation;
+			footRight.TargetRotation.Value = Quaternion.FromAxisAngle( Vector3.UnitY, (14 / 180f + 1) * MathF.PI ) * Rotation;
 		}
 	}
 

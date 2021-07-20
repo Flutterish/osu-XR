@@ -1,5 +1,6 @@
 ﻿using osu.Framework.Bindables;
 using osu.Framework.Caching;
+using osu.Framework.XR;
 using osu.Framework.XR.Components;
 using osuTK;
 using System;
@@ -38,11 +39,7 @@ namespace osu.XR.Components {
 				}
 			}, true );
 
-			GravityBindable.BindValueChanged( _ => isPathValid.Invalidate() );
-			OriginBindable.BindValueChanged( _ => isPathValid.Invalidate() );
-			DirectionBindable.BindValueChanged( _ => isPathValid.Invalidate() );
-
-			isPathValid.Invalidate();
+			(GravityBindable, OriginBindable, DirectionBindable).BindValuesChanged( () => isPathValid.Invalidate(), true );
 		}
 
 		protected override void Update () {

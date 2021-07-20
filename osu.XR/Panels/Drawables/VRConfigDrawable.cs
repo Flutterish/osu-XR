@@ -26,4 +26,8 @@ namespace osu.XR.Drawables {
     public class MetersSliderBar : OsuSliderBar<float> {
         public override string TooltipText => $"{Current.Value:N2}m";
     }
+
+    public class PercentSliderBar : OsuSliderBar<float> {
+        public override string TooltipText => $"{Current.Value:0%}";
+    }
 }

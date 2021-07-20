@@ -5,6 +5,7 @@ using osu.Framework.XR.Components;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Projection;
 using osu.Game.Overlays.Settings;
+using osu.XR.Drawables;
 using osu.XR.Drawables.UserInterface;
 using osu.XR.Inspector;
 using osu.XR.Settings.Sections;
@@ -74,7 +75,7 @@ namespace osu.XR.Components {
 				Icon = FontAwesome.Solid.ShoePrints,
 				Children = new Drawable[] {
 					new ColorPicker { LabelText = "Tint", Current = TintBindable },
-					new SettingsSlider<float> { LabelText = "Opacity", Current = OpacityBindable },
+					new SettingsSlider<float,PercentSliderBar> { LabelText = "Opacity", Current = OpacityBindable },
 				}
 			};
 		}

@@ -1,11 +1,13 @@
 ﻿using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.XR;
 using osu.Framework.XR.Components;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Maths;
 using osu.Framework.XR.Projection;
 using osu.Game.Overlays.Settings;
+using osu.XR.Drawables;
 using osu.XR.Drawables.UserInterface;
 using osu.XR.Inspector;
 using osu.XR.Settings.Sections;
@@ -32,13 +34,7 @@ namespace osu.XR.Components {
             TintBindable.BindValueChanged( v => Tint = v.NewValue, true );
             OpacityBindable.BindValueChanged( v => Alpha = v.NewValue, true );
 
-            XSegmentsBindable.BindValueChanged( v => recalcualteMesh() );
-            ZSegmentsBindable.BindValueChanged( v => recalcualteMesh() );
-            SegmentWidthBindable.BindValueChanged( v => recalcualteMesh() );
-            SegmentSpreadBindable.BindValueChanged( v => recalcualteMesh() );
-            SegmentLengthBindable.BindValueChanged( v => recalcualteMesh() );
-
-            recalcualteMesh();
+            (XSegmentsBindable, ZSegmentsBindable, SegmentWidthBindable, SegmentSpreadBindable, SegmentLengthBindable).BindValuesChanged( recalcualteMesh, true );
         }
 
         void recalcualteMesh () {
@@ -87,12 +83,12 @@ namespace osu.XR.Components {
                 Icon = FontAwesome.Solid.ShoePrints,
                 Children = new Drawable[] {
                     new ColorPicker { LabelText = "Tint", Current = TintBindable },
-                    new SettingsSlider<float> { LabelText = "Opacity", Current = OpacityBindable },
+                    new SettingsSlider<float,PercentSliderBar> { LabelText = "Opacity", Current = OpacityBindable },
                     new SettingsSlider<int> { LabelText = "X Segments", Current = XSegmentsBindable },
                     new SettingsSlider<int> { LabelText = "Z Segments", Current = ZSegmentsBindable },
-                    new SettingsSlider<float> { LabelText = "Segment Spread", Current = SegmentSpreadBindable },
-                    new SettingsSlider<float> { LabelText = "Segment Width", Current = SegmentWidthBindable },
-                    new SettingsSlider<float> { LabelText = "Segment Length", Current = SegmentLengthBindable }
+                    new SettingsSlider<float,MetersSliderBar> { LabelText = "Segment Spread", Current = SegmentSpreadBindable },
+                    new SettingsSlider<float,MetersSliderBar> { LabelText = "Segment Width", Current = SegmentWidthBindable },
+                    new SettingsSlider<float,MetersSliderBar> { LabelText = "Segment Length", Current = SegmentLengthBindable }
                 }
             };
         }

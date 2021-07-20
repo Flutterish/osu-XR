@@ -1,5 +1,6 @@
 ﻿using osu.Framework.Bindables;
 using osu.Framework.Graphics;
+using osu.Framework.XR;
 using osu.Framework.XR.Components;
 using osu.Framework.XR.Maths;
 using osuTK;
@@ -12,15 +13,29 @@ using System.Threading.Tasks;
 namespace osu.XR.Components {
 	public class Foot : Model {
 		public readonly Bindable<Vector3> TargetPosition = new Bindable<Vector3>();
-		Vector3 goalPosition;
+		public readonly Bindable<Quaternion> TargetRotation = new Bindable<Quaternion>();
+		public readonly Bindable<float> PositionToleranceBindable = new Bindable<float>( 0.22f );
+		public readonly Bindable<float> RotationToleranceBindable = new Bindable<float>( 0.6f );
+
+		Vector3 goalPosition = Vector3.Zero;
+		Quaternion goalRotation = Quaternion.Identity;
 
 		public Foot () {
-			TargetPosition.BindValueChanged( v => {
-				if ( ( goalPosition - v.NewValue ).Length > 0.22f ) {
-					this.MoveTo( v.NewValue, 200, Easing.Out );
-					this.RotateTo( ( v.NewValue - goalPosition ).Normalized().LookRotation(), 100 );
+			(TargetPosition, PositionToleranceBindable).BindValuesChanged( (pos, tol) => {
+				if ( ( goalPosition - pos ).Length > tol ) {
+					this.MoveTo( pos, 200, Easing.Out );
 
-					goalPosition = v.NewValue;
+					goalPosition = pos;
+				}
+			}, true );
+
+			(TargetRotation, RotationToleranceBindable).BindValuesChanged( (rot, tol) => {
+				var current = ( goalRotation * new Vector4( 0, 0, 1, 1 ) ).Xyz;
+				var goal = ( rot * new Vector4( 0, 0, 1, 1 ) ).Xyz;
+				if ( ( goal - current ).Length > tol ) {
+					this.RotateTo( rot, 100 );
+
+					goalRotation = rot;
 				}
 			}, true );
 		}

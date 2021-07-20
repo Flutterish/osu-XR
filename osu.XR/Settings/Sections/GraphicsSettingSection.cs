@@ -26,7 +26,7 @@ namespace osu.XR.Settings.Sections {
 
 				new SettingsEnumDropdown<FeetSymbols> { LabelText = "Shadow type", Current = config.GetBindable<FeetSymbols>( XrConfigSetting.ShadowType ) },
 
-				new SettingsCheckbox { Current = config.GetBindable<bool>( XrConfigSetting.RenderToScreen ), LabelText = "Render to screen" },
+				new SettingsCheckbox { Current = config.GetBindable<bool>( XrConfigSetting.RenderToScreen ), LabelText = "Render to screen", TooltipText = "If checked, renders to your computer screen" },
 			};
 		}
 	}
