@@ -32,6 +32,7 @@ namespace osu.XR.Settings {
 			SetDefault( XrConfigSetting.DisableTeleport, false );
 			SetDefault( XrConfigSetting.DominantHand, Hand.Auto );
 			SetDefault( XrConfigSetting.ShadowType, FeetSymbols.None );
+			SetDefault( XrConfigSetting.ShowDust, true );
 		}
 
 		public static readonly SettingsPreset<XrConfigSetting> TypeLookpuPreset = new() {
@@ -49,6 +50,7 @@ namespace osu.XR.Settings {
 				[ XrConfigSetting.DominantHand ] = Hand.Auto,
 				[ XrConfigSetting.DisableTeleport ] = false,
 				[ XrConfigSetting.ShadowType ] = FeetSymbols.None,
+				[ XrConfigSetting.ShowDust ] = true
 			}
 		};
 
@@ -133,7 +135,9 @@ namespace osu.XR.Settings {
 		DominantHand,
 
 		DisableTeleport,
-		ShadowType
+		ShadowType,
+
+		ShowDust
 	}
 
 	public enum InputMode {

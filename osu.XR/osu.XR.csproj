@@ -57,6 +57,10 @@
     </Content>
   </ItemGroup>
 
+    <ItemGroup>
+	    <EmbeddedResource Include="Textures\*" />
+    </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\..\OpenVR.NET\OpenVR.NET\OpenVR.NET\OpenVR.NET.csproj" />
     <ProjectReference Include="..\..\..\osu.Framework.XR\osu.Framework.XR\osu.Framework.XR\osu.Framework.XR.csproj" />

@@ -28,12 +28,15 @@ namespace osu.XR.Panels.Drawables {
 
 				var skybox = new SkyBox();
 				var floorgrid = new FloorGrid();
+				var dust = new DustEmitter();
 
 				SceneContainer.Add( skybox );
 				SceneContainer.Add( floorgrid );
+				SceneContainer.Add( dust );
 
 				addSubsections( skybox );
 				addSubsections( floorgrid );
+				addSubsections( dust );
 			} );
 		}
 
