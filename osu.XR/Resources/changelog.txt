@@ -13,6 +13,7 @@ You can now teleport.
 * You also have a faint shadow now.
 Panels now have tooltips.
 Added dust particles.
+You can now grip certain objects.
 
 [2021.06.03]
 Implemented saving and loading ruleset bindings.

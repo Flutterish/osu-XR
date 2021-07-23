@@ -30,6 +30,7 @@ using osu.XR.Components;
 using osu.XR.Components.Groups;
 using osu.XR.Components.Panels;
 using osu.XR.Drawables;
+using osu.XR.Editor;
 using osu.XR.Input;
 using osu.XR.Input.Custom;
 using osu.XR.Panels;
@@ -75,6 +76,8 @@ namespace osu.XR {
 		public readonly RulesetInfoPanel InputBindings = new();
 		[Cached]
 		new public readonly Components.Player Player = new();
+		[Cached]
+		public readonly GripManager GripManager = new();
 
 		public static ETrackedControllerRole RoleForHand ( Hand hand ) => hand switch {
 			Hand.Right => ETrackedControllerRole.RightHand,
@@ -351,6 +354,12 @@ namespace osu.XR {
 			}, true );
 
 			Config.BindWith( XrConfigSetting.RenderToScreen, Scene.RenderToScreenBindable );
+		}
+
+		protected override void Update () {
+			base.Update();
+
+			GripManager.Update();
 		}
 
 		PlayerInfo lastPlayer;

@@ -1,6 +1,7 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.XR.Components;
+using osu.Framework.XR.Graphics;
 using osu.Game.Rulesets;
 using osu.XR.Components;
 using osu.XR.Drawables.Containers;
@@ -33,6 +34,7 @@ namespace osu.XR.Panels.Drawables {
 				SceneContainer.Add( skybox );
 				SceneContainer.Add( floorgrid );
 				SceneContainer.Add( dust );
+				//SceneContainer.Add( new BeatingScenery.GripableCollider { Mesh = Mesh.UnitCube, Scale = new osuTK.Vector3( 0.3f ), Y = 1 } );
 
 				addSubsections( skybox );
 				addSubsections( floorgrid );

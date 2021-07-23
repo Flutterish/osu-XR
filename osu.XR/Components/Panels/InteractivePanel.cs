@@ -6,6 +6,7 @@ using osu.Framework.Graphics.Cursor;
 using osu.Framework.XR.Components;
 using osu.Game.Graphics.Cursor;
 using osu.XR.Drawables.Containers;
+using osu.XR.Editor;
 using osu.XR.Input;
 using osu.XR.Settings;
 using osuTK;
@@ -14,7 +15,7 @@ using System.Linq;
 using static osu.Framework.XR.Physics.Raycast;
 
 namespace osu.XR.Components.Panels {
-	public abstract class InteractivePanel : Panel, IFocusable {
+	public abstract class InteractivePanel : Panel, IFocusable, IGripable {
 		public bool CanHaveGlobalFocus { get; init; } = true;
 		public PanelInputMode RequestedInputMode { get; set; } = PanelInputMode.Regular;
 
@@ -127,6 +128,15 @@ namespace osu.XR.Components.Panels {
 		private void onTouchUp ( XrController controller ) {
 			EmulatedInput.TouchUp( controller );
 		}
+
+		public bool CanBeGripped => true;
+		public bool AllowsGripMovement => true;
+		public bool AllowsGripScaling => true;
+		public bool AllowsGripRotation => true;
+
+		public void OnGripped ( object source, GripGroup group ) { }
+
+		public void OnGripReleased ( object source, GripGroup group ) { }
 	}
 
 	public enum PanelInputMode {

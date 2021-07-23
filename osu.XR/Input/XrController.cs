@@ -124,6 +124,16 @@ namespace osu.XR.Input {
 					}
 				} );
 
+				var grip = VR.GetControllerComponent<ControllerButton>( XrAction.Grip, Source );
+				grip.BindValueChanged( v => {
+					if ( v ) {
+						Game.GripManager.TryGrip( pointer?.CurrentHit as Drawable3D, this );
+					}
+					else {
+						Game.GripManager.Release( this );
+					}
+				} );
+
 				haptic = VR.GetControllerComponent<ControllerHaptic>( XrAction.Feedback, Source );
 				var teleport = VR.GetControllerComponent<ControllerButton>( XrAction.Move, Source );
 				teleport.BindValueChangedDetailed( v => {

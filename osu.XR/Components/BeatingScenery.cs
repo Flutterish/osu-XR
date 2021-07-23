@@ -2,6 +2,7 @@
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Maths;
 using osu.XR.Components.Groups;
+using osu.XR.Editor;
 using osuTK;
 using System;
 
@@ -17,7 +18,7 @@ namespace osu.XR.Components {
 					double x = Math.Cos( theta ) * radius;
 					double y = Math.Sin( theta ) * radius;
 
-					Add( new BeatingGroup { Position = new Vector3( (float)x, 0, (float)y ), Child = new Collider { 
+					Add( new BeatingGroup { Position = new Vector3( (float)x, 0, (float)y ), Child = new GripableCollider { 
 						Mesh = Mesh.UnitCube,
 						AutoOffsetOriginY = -0.5f,
 						Scale = new Vector3( (float)(random.NextDouble(0.05,0.2) * radius) ),
@@ -25,6 +26,17 @@ namespace osu.XR.Components {
 					} } );
 				}
 			}
+		}
+
+		public class GripableCollider : Collider, IGripable {
+			public bool CanBeGripped => true;
+			public bool AllowsGripMovement => true;
+			public bool AllowsGripScaling => true;
+			public bool AllowsGripRotation => true;
+
+			public void OnGripped ( object source, GripGroup group ) { }
+
+			public void OnGripReleased ( object source, GripGroup group ) { }
 		}
 	}
 }
