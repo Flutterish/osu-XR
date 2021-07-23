@@ -28,9 +28,9 @@ namespace osu.XR.Components {
 			invariantContainer.Add( footLeft = new Foot { Scale = new Vector3( 0.1f, 0.1f, 0.1f ), X = -0.1f, EulerRotY = -10 / 180f * MathF.PI } );
 
 			shadow.Mesh.AddCircle( Vector3.Zero, Vector3.UnitY, Vector3.UnitZ, 32 );
-			shadow.Scale = new Vector3( 0.2f );
-			shadow.Tint = footRight.Tint = footLeft.Tint = Color4.Black;
-			shadow.Alpha = footRight.Alpha = footLeft.Alpha = 0.1f;
+			shadow.Scale = new Vector3( 0.012f );
+			shadow.Alpha = 0.8f;
+			shadow.Tint = Color4.White;
 		}
 
 		[BackgroundDependencyLoader]
@@ -44,15 +44,12 @@ namespace osu.XR.Components {
 			Root.Add( invariantContainer );
 
 			FeetSymbols.BindValueChanged( v => {
-				footLeft.IsVisible = true;
-				footRight.IsVisible = true;
-				shadow.Scale = new Vector3( 0.012f );
-				shadow.Alpha = 0.8f;
-				shadow.Tint = Color4.White;
 				if ( v.NewValue == Components.FeetSymbols.Shoes ) {
 					if ( shoe is null ) shoe = Mesh.FromOBJFile( @".\Resources\shoe.obj" );
 					footLeft.Mesh = shoe;
 					footRight.Mesh = shoe;
+					footLeft.IsVisible = true;
+					footRight.IsVisible = true;
 
 					footLeft.Scale = new Vector3( 0.1f, 0.1f, 0.1f ) * 1.7f;
 					footRight.Scale = new Vector3( -0.1f, 0.1f, 0.1f ) * 1.7f;
@@ -61,6 +58,8 @@ namespace osu.XR.Components {
 					if ( paw is null ) paw = Mesh.FromOBJFile( @".\Resources\paw.obj" );
 					footLeft.Mesh = paw;
 					footRight.Mesh = paw;
+					footLeft.IsVisible = true;
+					footRight.IsVisible = true;
 
 					footLeft.Scale = new Vector3( -0.1f, 0.1f, 0.1f );
 					footRight.Scale = new Vector3( 0.1f, 0.1f, 0.1f );
@@ -68,9 +67,6 @@ namespace osu.XR.Components {
 				else {
 					footLeft.IsVisible = false;
 					footRight.IsVisible = false;
-					shadow.Scale = new Vector3( 0.2f );
-					shadow.Alpha = 0.1f;
-					shadow.Tint = Color4.Black;
 				}
 			}, true );
 		}
