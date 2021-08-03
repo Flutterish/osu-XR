@@ -3,6 +3,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.XR.Components;
 using osu.Framework.XR.Graphics;
+using osu.Framework.XR.Maths;
 using osu.Framework.XR.Projection;
 using osu.Game.Overlays.Settings;
 using osu.XR.Drawables;
@@ -64,15 +65,10 @@ namespace osu.XR.Components {
 			OpacityBindable.BindValueChanged( v => Alpha = v.NewValue, true );
 		}
 
-		public override void BeforeDraw ( DrawNode3D.DrawSettings settings ) {
-			base.BeforeDraw( settings );
-			Position = settings.Camera.Position;
-		}
-
 		public IEnumerable<Drawable> CreateInspectorSubsections () {
 			yield return new SettingsSectionContainer {
 				Title = "Skybox",
-				Icon = FontAwesome.Solid.ShoePrints,
+				Icon = FontAwesome.Solid.Image,
 				Children = new Drawable[] {
 					new ColorPicker { LabelText = "Tint", Current = TintBindable },
 					new SettingsSlider<float,PercentSliderBar> { LabelText = "Opacity", Current = OpacityBindable },
@@ -80,5 +76,21 @@ namespace osu.XR.Components {
 			};
 		}
 		public bool AreSettingsPersistent => false;
+
+		protected override DrawNode3D CreateDrawNode ()
+			=> new SkyboxDrawNode( this );
+
+		class SkyboxDrawNode : ModelDrawNode<SkyBox> {
+			public SkyboxDrawNode ( SkyBox source ) : base( source ) {
+			}
+
+			private Transform cameraTrackingTransform = new();
+			protected override Transform Transform => cameraTrackingTransform;
+
+			public override void Draw ( DrawSettings settings ) {
+				cameraTrackingTransform.Position = settings.GlobalCameraPos;
+				base.Draw( settings );
+			}
+		}
 	}
 }
