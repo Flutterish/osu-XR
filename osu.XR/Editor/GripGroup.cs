@@ -32,20 +32,20 @@ namespace osu.XR.Editor {
 			/// The current global rotation of the grip event
 			/// </summary>
 			public Quaternion Rotation;
-
-			/// <summary>
-			/// The global start position of the target
-			/// </summary>
-			public Vector3 TargetStartPosition;
-			/// <summary>
-			/// The global start rotation of the target
-			/// </summary>
-			public Quaternion TargetStartRotation;
-			/// <summary>
-			/// The start scale of the target
-			/// </summary>
-			public Vector3 TargetStartScale;
 		}
+
+		/// <summary>
+		/// The global start position of the target
+		/// </summary>
+		Vector3 targetStartPosition;
+		/// <summary>
+		/// The global start rotation of the target
+		/// </summary>
+		Quaternion targetStartRotation;
+		/// <summary>
+		/// The start scale of the target
+		/// </summary>
+		Vector3 targetStartScale;
 
 		public bool TryGrip ( Drawable3D target, Drawable3D source ) {
 			if ( this.Target is not null && target != this.Target ) return false;
@@ -58,10 +58,7 @@ namespace osu.XR.Editor {
 						StartPosition = source.GlobalPosition,
 						StartRotation = source.GlobalRotation,
 						Position = source.GlobalPosition,
-						Rotation = source.GlobalRotation,
-						TargetStartPosition = target.GlobalPosition,
-						TargetStartRotation = target.GlobalRotation,
-						TargetStartScale = target.Scale
+						Rotation = source.GlobalRotation
 					} );
 
 					gripable.OnGripped( source, this );
@@ -82,14 +79,14 @@ namespace osu.XR.Editor {
 
 		void updateInitialValues () {
 			if ( Target is not Drawable3D drawable ) return;
+			targetStartPosition = drawable.GlobalPosition;
+			targetStartRotation = drawable.GlobalRotation;
+			targetStartScale = drawable.Scale;
 			foreach ( var (src, @event) in gripSources ) {
 				gripSources[ src ] = @event with
 				{
 					StartPosition = @event.Position,
-					StartRotation = @event.Rotation,
-					TargetStartPosition = drawable.GlobalPosition,
-					TargetStartRotation = drawable.GlobalRotation,
-					TargetStartScale = drawable.Scale
+					StartRotation = @event.Rotation
 				};
 			}
 		}
@@ -111,21 +108,21 @@ namespace osu.XR.Editor {
 				var grip = gripSources.Values.Single();
 
 				if ( Target.AllowsGripMovement && Target.AllowsGripRotation ) { // here we kind of hold it on a "stick"
-					var offset = grip.TargetStartPosition - grip.StartPosition;
+					var offset = targetStartPosition - grip.StartPosition;
 					var rot = grip.Rotation * grip.StartRotation.Inverted();
 
 					drawable.GlobalPosition = grip.Position + (rot * new Vector4( offset, 1 )).Xyz;
 
-					drawable.GlobalRotation = rot * grip.TargetStartRotation;
+					drawable.GlobalRotation = rot * targetStartRotation;
 				}
 				else if ( Target.AllowsGripMovement ) { // just move with the pointer
-					drawable.GlobalPosition = grip.TargetStartPosition + ( grip.Position - grip.StartPosition );
+					drawable.GlobalPosition = targetStartPosition + ( grip.Position - grip.StartPosition );
 				}
 				else if ( Target.AllowsGripRotation ) { // rotate about the centre
-					var initialDirection = ( grip.StartPosition - grip.TargetStartPosition ).Normalized();
-					var currentDirection = ( grip.Position - grip.TargetStartPosition ).Normalized();
+					var initialDirection = ( grip.StartPosition - targetStartPosition ).Normalized();
+					var currentDirection = ( grip.Position - targetStartPosition ).Normalized();
 
-					drawable.GlobalRotation = initialDirection.ShortestRotationTo( currentDirection ) * grip.TargetStartRotation;
+					drawable.GlobalRotation = initialDirection.ShortestRotationTo( currentDirection ) * targetStartRotation;
 				}
 			}
 			else if ( gripSources.Count == 2 ) {
@@ -133,51 +130,45 @@ namespace osu.XR.Editor {
 				var b = gripSources.Values.ElementAt( 1 );
 
 				if ( Target.AllowsGripRotation && Target.AllowsGripScaling && Target.AllowsGripMovement ) { // A grips and then rotate about A so you match B's direction, then scale about A to match B
-					var offset = a.TargetStartPosition - a.StartPosition;
+					var offset = targetStartPosition - a.StartPosition;
 					var rot = ( b.StartPosition - a.StartPosition ).Normalized().ShortestRotationTo( ( b.Position - a.Position ).Normalized() );
 
-					drawable.GlobalRotation = rot * a.TargetStartRotation;
+					drawable.GlobalRotation = rot * targetStartRotation;
 
-					var agvStartScale = gripSources.Values.Average( a => a.TargetStartScale );
-
-					drawable.Scale = agvStartScale * computeScaleMultiplier();
+					drawable.Scale = targetStartScale * computeScaleMultiplier();
 
 					drawable.GlobalPosition = a.Position + ( rot * new Vector4( offset, 1 ) ).Xyz * computeScaleMultiplier();
 				}
 				else if ( Target.AllowsGripRotation && Target.AllowsGripMovement ) { // A grips and then rotate about A so you match B's direction
-					var offset = a.TargetStartPosition - a.StartPosition;
+					var offset = targetStartPosition - a.StartPosition;
 					var rot = ( b.StartPosition - a.StartPosition ).Normalized().ShortestRotationTo( ( b.Position - a.Position ).Normalized() );
 
-					drawable.GlobalRotation = rot * a.TargetStartRotation;
-					drawable.GlobalPosition = a.Position + ( rot * new Vector4( offset, 1 ) ).Xyz;
+					drawable.GlobalRotation = rot * targetStartRotation;
+					drawable.GlobalPosition = a.Position + ( rot * new Vector4( offset, 1 ) ).Xyz * computeScaleMultiplier(); // move to the middle of both pointers too
 				}
 				else {
 					if ( Target.AllowsGripRotation ) { // rotate as if A was the centre of rotation. We cant move the target so we just pretend A is the target
 						var rot = ( b.StartPosition - a.StartPosition ).Normalized().ShortestRotationTo( ( b.Position - a.Position ).Normalized() );
 
-						drawable.GlobalRotation = rot * a.TargetStartRotation;
+						drawable.GlobalRotation = rot * targetStartRotation;
 					}
 
 					if ( Target.AllowsGripScaling ) { // scale as pointers move to/away from the baricentre
-						var agvStartScale = gripSources.Values.Average( a => a.TargetStartScale );
-
-						drawable.Scale = agvStartScale * computeScaleMultiplier();
+						drawable.Scale = targetStartScale * computeScaleMultiplier();
 					}
 
 					if ( Target.AllowsGripMovement ) { // follow the average delta
-						drawable.GlobalPosition = gripSources.Values.Average( x => x.TargetStartPosition + x.Position - x.StartPosition );
+						drawable.GlobalPosition = targetStartPosition + gripSources.Values.Average( x => x.Position - x.StartPosition );
 					}
 				}
 			}
 			else {
 				if ( Target.AllowsGripScaling ) { // scale as pointers move to/away from the baricentre
-					var agvStartScale = gripSources.Values.Average( a => a.TargetStartScale );
-
-					drawable.Scale = agvStartScale * computeScaleMultiplier();
+					drawable.Scale = targetStartScale * computeScaleMultiplier();
 				}
 				
 				if ( Target.AllowsGripMovement ) { // follow the average delta
-					drawable.GlobalPosition = gripSources.Values.Average( x => x.TargetStartPosition + x.Position - x.StartPosition );
+					drawable.GlobalPosition = targetStartPosition + gripSources.Values.Average( x => x.Position - x.StartPosition );
 				}
 			}
 		}
