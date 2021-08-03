@@ -89,7 +89,7 @@ namespace osu.XR.Drawables {
 				file.Rulesets.Add( manager.CreateSaveData() );
 			}
 
-			return file.MergeWith( saveFile );
+			return file.MergeMissingFrom( saveFile );
 		}
 
 		double time;

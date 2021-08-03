@@ -20,7 +20,7 @@ namespace osu.XR.Input.Custom.Persistence {
 		/// <summary>
 		/// Performs a shallow merge where only the missing rulesets are added.
 		/// </summary>
-		public RulesetBindingsFile MergeWith ( RulesetBindingsFile other ) {
+		public RulesetBindingsFile MergeMissingFrom ( RulesetBindingsFile other ) {
 			foreach ( var i in other.Rulesets.Where( x => !Rulesets.Any( y => y.Name == x.Name ) ) ) {
 				Rulesets.Add( i );
 			}
