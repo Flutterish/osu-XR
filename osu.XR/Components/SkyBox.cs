@@ -5,6 +5,7 @@ using osu.Framework.XR.Components;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Maths;
 using osu.Framework.XR.Projection;
+using osu.Framework.XR.Rendering;
 using osu.Game.Overlays.Settings;
 using osu.XR.Drawables;
 using osu.XR.Drawables.UserInterface;
@@ -78,19 +79,6 @@ namespace osu.XR.Components {
 		public bool AreSettingsPersistent => false;
 
 		protected override DrawNode3D CreateDrawNode ()
-			=> new SkyboxDrawNode( this );
-
-		class SkyboxDrawNode : ModelDrawNode<SkyBox> {
-			public SkyboxDrawNode ( SkyBox source ) : base( source ) {
-			}
-
-			private Transform cameraTrackingTransform = new();
-			protected override Transform Transform => cameraTrackingTransform;
-
-			public override void Draw ( DrawSettings settings ) {
-				cameraTrackingTransform.Position = settings.GlobalCameraPos;
-				base.Draw( settings );
-			}
-		}
+			=> new CameraPositionTrackingDrawNode( this );
 	}
 }
