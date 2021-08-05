@@ -7,6 +7,7 @@ using osu.Framework.Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Localisation;
 using osu.Framework.Platform;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
@@ -127,7 +128,7 @@ namespace osu.XR.Drawables {
 	}
 
 	public class RulesetXrBindingSection : SettingsSubsection {
-		protected override string Header => "Bindings";
+		protected override LocalisableString Header => "Bindings";
 
 		public BindableList<CustomBinding> GetBindingForVariant ( int variant )
 			=> getVariant( variant ).ActiveInputs;
@@ -219,7 +220,7 @@ namespace osu.XR.Drawables {
 	}
 
 	public class RulesetVariantXrBindingsSubsection : SettingsSubsection {
-		protected override string Header => ruleset.GetVariantName( Variant );
+		protected override LocalisableString Header => ruleset.GetVariantName( Variant );
 
 		public readonly int Variant;
 		Ruleset ruleset;

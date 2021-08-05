@@ -1,4 +1,5 @@
-﻿using osu.Game.Graphics.UserInterface;
+﻿using osu.Framework.Localisation;
+using osu.Game.Graphics.UserInterface;
 using osu.XR.Drawables.Containers;
 using osu.XR.Settings.Sections;
 using System;
@@ -16,18 +17,18 @@ namespace osu.XR.Drawables {
     }
 
     public class PxSliderBar : OsuSliderBar<int> {
-        public override string TooltipText => $"{Current.Value}px";
+        public override LocalisableString TooltipText => $"{Current.Value}px";
     }
 
     public class RadToDegreeSliderBar : OsuSliderBar<float> {
-        public override string TooltipText => $"{Current.Value / Math.PI * 180:N0}°";
+        public override LocalisableString TooltipText => $"{Current.Value / Math.PI * 180:N0}°";
     }
 
     public class MetersSliderBar : OsuSliderBar<float> {
-        public override string TooltipText => $"{Current.Value:N2}m";
+        public override LocalisableString TooltipText => $"{Current.Value:N2}m";
     }
 
     public class PercentSliderBar : OsuSliderBar<float> {
-        public override string TooltipText => $"{Current.Value:0%}";
+        public override LocalisableString TooltipText => $"{Current.Value:0%}";
     }
 }

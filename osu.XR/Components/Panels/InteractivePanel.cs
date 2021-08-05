@@ -34,7 +34,7 @@ namespace osu.XR.Components.Panels {
 			}
 		}
 
-		protected override TooltipContainer CreateTooltipContainer () => new OsuXrTooltipContainer();
+		protected override TooltipContainer CreateTooltipContainer () => new OsuXrTooltipContainer( null );
 
 		[BackgroundDependencyLoader]
 		private void load ( XrConfigManager config ) {

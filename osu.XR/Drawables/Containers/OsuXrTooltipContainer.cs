@@ -4,6 +4,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Cursor;
 using osu.Framework.Graphics.Effects;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Localisation;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Cursor;
@@ -17,24 +18,29 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace osu.XR.Drawables.Containers {
-	public class OsuXrTooltipContainer : OsuTooltipContainer {
-		public OsuXrTooltipContainer ( CursorContainer cursor = null ) : base( cursor ) { }
+	public class OsuXrTooltipContainer : TooltipContainer {
+        protected override ITooltip CreateTooltip () => new OsuXrTooltip();
 
-		protected override ITooltip CreateTooltip () => new OsuXrTooltip();
+        public OsuXrTooltipContainer ( CursorContainer cursor )
+            : base( cursor ) {
+        }
 
-        public class OsuXrTooltip : Tooltip { // fork of the OsuTooltip that uses multiline spritetext
+        protected override double AppearDelay => ( 1 - CurrentTooltip.Alpha ) * base.AppearDelay; // reduce appear delay if the tooltip is already partly visible.
+
+        public class OsuXrTooltip : Tooltip {
             private readonly Box background;
             private readonly OsuTextFlowContainer text;
-            private string current = string.Empty;
+            LocalisableString current;
             private bool instantMovement = true;
 
             public override bool SetContent ( object content ) {
-                if ( content is not string contentString )
+                if ( !( content is LocalisableString contentString ) )
                     return false;
 
                 if ( contentString == current ) return true;
 
-                text.Text = current = contentString;
+                current = contentString;
+                text.Text = current.ToString();
 
                 if ( IsPresent ) {
                     AutoSizeDuration = 250;
@@ -47,8 +53,8 @@ namespace osu.XR.Drawables.Containers {
             }
 
             public OsuXrTooltip () {
-                BypassAutoSizeAxes = Axes.Both;
                 AutoSizeEasing = Easing.OutQuint;
+                BypassAutoSizeAxes = Axes.Both;
 
                 CornerRadius = 5;
                 Masking = true;
