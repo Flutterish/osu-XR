@@ -29,6 +29,8 @@ namespace osu.XR.Components {
 
 			shadow.Mesh.AddCircle( Vector3.Zero, Vector3.UnitY, Vector3.UnitZ, 32 );
 			shadow.Scale = new Vector3( 0.012f );
+			footRight.Alpha = footLeft.Alpha = 0.1f;
+			footRight.Tint = footLeft.Tint = Color4.Black;
 			shadow.Alpha = 0.8f;
 			shadow.Tint = Color4.White;
 		}

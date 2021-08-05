@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace osu.XR.Editor {
 	public class GripGroup {
 		Dictionary<Drawable3D, GripEvent> gripSources = new();
-		public IGripable? Target { get; private set; }
+		public IGripable? Target { get; private set; } // TODO simplify logic by making this not nullable
 
 		public record GripEvent {
 			/// <summary>
@@ -144,7 +144,7 @@ namespace osu.XR.Editor {
 					var rot = ( b.StartPosition - a.StartPosition ).Normalized().ShortestRotationTo( ( b.Position - a.Position ).Normalized() );
 
 					drawable.GlobalRotation = rot * targetStartRotation;
-					drawable.GlobalPosition = a.Position + ( rot * new Vector4( offset, 1 ) ).Xyz * computeScaleMultiplier(); // move to the middle of both pointers too
+					drawable.GlobalPosition = a.Position + ( rot * new Vector4( offset, 1 ) ).Xyz;
 				}
 				else {
 					if ( Target.AllowsGripRotation ) { // rotate as if A was the centre of rotation. We cant move the target so we just pretend A is the target

@@ -15,7 +15,7 @@ using System.Linq;
 using static osu.Framework.XR.Physics.Raycast;
 
 namespace osu.XR.Components.Panels {
-	public abstract class InteractivePanel : Panel, IFocusable, IGripable {
+	public abstract class InteractivePanel : Panel, IFocusable {
 		public bool CanHaveGlobalFocus { get; init; } = true;
 		public PanelInputMode RequestedInputMode { get; set; } = PanelInputMode.Regular;
 
