@@ -30,10 +30,10 @@ namespace osu.XR.Components.Skyboxes {
 			activeSkybox.BindValueChanged( v => {
 				v.OldValue?.Hide();
 				if ( v.NewValue is null ) {
-					Clear();
+					ClearInternal();
 				}
 				else {
-					Child = v.NewValue;
+					InternalChild = v.NewValue;
 					v.NewValue.Show();
 				}
 				_activeSkybox.Value = v.NewValue;

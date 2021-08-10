@@ -260,8 +260,9 @@ namespace osu.XR {
 		}
 
 		void stealOsuDI () {
-			// TODO somehow just cache everything osugame caches ( either set our dep container to osu's + ours or somehow retreive all of its cache )
-			// or maybe we can put the scene root as osus child and proxy it but i dont think it is possible
+			// TODO we need to put our resource store + osu resource store here. Additionally we need to make the scene cache all osugame dependencies.
+			// which means that this dependency steal step and loading of osugame should be handled by the scene.
+			// currenttly the cached values and resources are handpicked
 			Resources.AddStore( new DllResourceStore( typeof( OsuGameXr ).Assembly ) );
 			Resources.AddStore( new DllResourceStore( typeof( OsuGame ).Assembly ) );
 			Resources.AddStore( new DllResourceStore( OsuResources.ResourceAssembly ) );

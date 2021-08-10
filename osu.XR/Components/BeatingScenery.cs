@@ -18,7 +18,7 @@ namespace osu.XR.Components {
 					double x = Math.Cos( theta ) * radius;
 					double y = Math.Sin( theta ) * radius;
 
-					Add( new BeatingGroup { Position = new Vector3( (float)x, 0, (float)y ), Child = new Collider { 
+					AddInternal( new BeatingGroup { Position = new Vector3( (float)x, 0, (float)y ), Child = new Collider { 
 						Mesh = Mesh.UnitCube,
 						AutoOffsetOriginY = -0.5f,
 						Scale = new Vector3( (float)(random.NextDouble(0.05,0.2) * radius) ),

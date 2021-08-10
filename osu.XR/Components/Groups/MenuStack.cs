@@ -26,14 +26,14 @@ namespace osu.XR.Components.Groups {
 			sidebarPanel.RelativeSizeAxes = Framework.Graphics.Axes.X;
 			sidebarPanel.AutosizeX();
 			sidebarPanel.PanelAutoScaleAxes = Framework.Graphics.Axes.X;
-			Add( sidebarPanel );
+			AddInternal( sidebarPanel );
 			sidebarPanel.Position = new Vector3( 0.02f, 0, 0 );
 
 			Elements.BindCollectionChanged( (_,e) => {
 				if ( ignorePanelListEvents ) return;
 				if ( e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add ) {
 					foreach ( T i in e.NewItems ) {
-						Add( i );
+						AddInternal( i );
 						i.AutoOffsetOriginX = 0.5f;
 						i.AutoOffsetAnchorX = 0.5f;
 						// HACK we should make our own sidebar

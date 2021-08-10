@@ -23,7 +23,7 @@ namespace osu.XR.Components {
 
 		public readonly Bindable<FeetSymbols> FeetSymbols = new( Components.FeetSymbols.None );
 		public Player () {
-			Add( shadow = new Model() );
+			AddInternal( shadow = new Model() );
 			invariantContainer.Add( footRight = new Foot { Scale = new Vector3( -0.1f, 0.1f, 0.1f ), X = 0.1f, Z = 0.03f, EulerRotY = 14 / 180f * MathF.PI } );
 			invariantContainer.Add( footLeft = new Foot { Scale = new Vector3( 0.1f, 0.1f, 0.1f ), X = -0.1f, EulerRotY = -10 / 180f * MathF.PI } );
 

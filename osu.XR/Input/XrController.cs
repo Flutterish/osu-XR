@@ -53,8 +53,8 @@ namespace osu.XR.Input {
 		public readonly Bindable<bool> DisableTeleportBindable = new();
 
 		public XrController ( Controller controller ) {
-			Add( ControllerMesh );
-			Add( teleportVisual );
+			AddInternal( ControllerMesh );
+			AddInternal( teleportVisual );
 			ControllerMesh.MainTexture = Textures.Pixel( controller.IsMainController ? Color4.Orange : Color4.LightBlue ).TextureGL;
 			touch.MainTexture = raycast.MainTexture = Textures.Pixel( ( controller.IsMainController ? Colour4.Orange : Colour4.LightBlue ).MultiplyAlpha( 100f / 255f ) ).TextureGL;
 			raycast.Source = this;

@@ -114,7 +114,7 @@ namespace osu.XR.Input { // BUG there is something wrong when inputting text wit
 				key.Clicked += onKeyPressed;
 				key.Held += OnKeyHeld;
 				key.Released += OnKeyReleased;
-				Add( key );
+				AddInternal( key );
 				this.keys.Add( key );
 			}
 
@@ -186,8 +186,8 @@ namespace osu.XR.Input { // BUG there is something wrong when inputting text wit
 
 			public XrKey () {
 				KeyMesh.MainTexture = Textures.Pixel( Color4.Gray ).TextureGL;
-				Add( KeyMesh );
-				Add( panel );
+				AddInternal( KeyMesh );
+				AddInternal( panel );
 				panel.AutosizeBoth();
 
 				drawable = new XrKeyDrawable { 
