@@ -1,9 +1,11 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Graphics;
 using osu.Framework.XR.Components;
 using osu.Framework.XR.Graphics;
 using osu.Game.Rulesets;
 using osu.XR.Components;
+using osu.XR.Components.Skyboxes;
 using osu.XR.Drawables.Containers;
 using osu.XR.Editor;
 using osu.XR.Inspector;
@@ -45,9 +47,10 @@ namespace osu.XR.Panels.Drawables {
 		// TODO later on scenery components will be able to selectively appear besed on ruleset
 
 		void addSubsections ( IConfigurableInspectable configurable ) {
-			foreach ( var i in configurable.CreateInspectorSubsectionsWithWarning() ) {
-				AddSection( i );
+			if ( configurable.CreateWarnings() is Drawable warning ) {
+				AddSection( warning );
 			}
+			AddSection( configurable.CreateInspectorSubsection() );
 		}
 	}
 }

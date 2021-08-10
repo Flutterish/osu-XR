@@ -3,7 +3,6 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.XR.Components;
 using osu.Framework.XR.Graphics;
-using osu.Framework.XR.Maths;
 using osu.Framework.XR.Projection;
 using osu.Framework.XR.Rendering;
 using osu.Game.Overlays.Settings;
@@ -15,16 +14,19 @@ using osuTK;
 using osuTK.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace osu.XR.Components {
+namespace osu.XR.Components.Skyboxes {
 	/// <summary>
 	/// A hot pink skybox that fits the osu theme.
 	/// </summary>
-	public class SkyBox : Model, IBehindEverything, IConfigurableInspectable {
+	public class SolidSkyBox : Model, IBehindEverything, IConfigurableInspectable {
 		public readonly Bindable<Color4> TintBindable = new( new Color4( 253, 35, 115, 255 ) );
 		public readonly BindableFloat OpacityBindable = new( 1 ) { MinValue = 0, MaxValue = 1 };
 
-		public SkyBox () {
+		public SolidSkyBox () {
 			MainTexture = Textures.VerticalGradient( Color4.Black, Color4.White, 100, x => MathF.Pow( x, 2 ) ).TextureGL;
 			Mesh.Vertices.AddRange( new[] {
 				new Vector3(  1,  1,  1 ) * 300,
@@ -66,8 +68,8 @@ namespace osu.XR.Components {
 			OpacityBindable.BindValueChanged( v => Alpha = v.NewValue, true );
 		}
 
-		public IEnumerable<Drawable> CreateInspectorSubsections () {
-			yield return new SettingsSectionContainer {
+		public Drawable CreateInspectorSubsection () {
+			return new SettingsSectionContainer {
 				Title = "Skybox",
 				Icon = FontAwesome.Solid.Image,
 				Children = new Drawable[] {

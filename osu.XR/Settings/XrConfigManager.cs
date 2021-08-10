@@ -1,8 +1,8 @@
 ﻿using osu.Framework.Platform;
 using osu.Game.Configuration;
 using osu.XR.Components;
+using osu.XR.Components.Skyboxes;
 using System;
-using System.ComponentModel;
 using System.IO;
 
 namespace osu.XR.Settings {
@@ -33,6 +33,7 @@ namespace osu.XR.Settings {
 			SetDefault( XrConfigSetting.DominantHand, Hand.Auto );
 			SetDefault( XrConfigSetting.ShadowType, FeetSymbols.None );
 			SetDefault( XrConfigSetting.ShowDust, true );
+			SetDefault( XrConfigSetting.SkyboxType, SkyBoxType.Solid );
 		}
 
 		public static readonly SettingsPreset<XrConfigSetting> TypeLookpuPreset = new() {
@@ -44,13 +45,14 @@ namespace osu.XR.Settings {
 				[ XrConfigSetting.ScreenArc ] = MathF.PI * 1.2f,
 				[ XrConfigSetting.ScreenRadius ] = 1.6f,
 				[ XrConfigSetting.ScreenHeight ] = 1.8f,
-				[ XrConfigSetting.ScreenResolutionX ] = 1920 * 2,
+				[ XrConfigSetting.ScreenResolutionX ] = 2512,
 				[ XrConfigSetting.ScreenResolutionY ] = 1080,
 				[ XrConfigSetting.RenderToScreen ] = false,
 				[ XrConfigSetting.DominantHand ] = Hand.Auto,
 				[ XrConfigSetting.DisableTeleport ] = false,
 				[ XrConfigSetting.ShadowType ] = FeetSymbols.None,
-				[ XrConfigSetting.ShowDust ] = true
+				[ XrConfigSetting.ShowDust ] = true,
+				[ XrConfigSetting.SkyboxType ] = SkyBoxType.Solid
 			}
 		};
 
@@ -71,9 +73,6 @@ namespace osu.XR.Settings {
 		public static readonly SettingsPreset<XrConfigSetting> PresetTouchscreenBig = new() {
 			values = new() {
 				[XrConfigSetting.InputMode]				= InputMode.TouchScreen,
-				[XrConfigSetting.SinglePointerTouch]	= false,
-				[XrConfigSetting.TapOnPress]			= false,
-				[XrConfigSetting.Deadzone]				= 20,
 				[XrConfigSetting.ScreenArc]				= 1.2f,
 				[XrConfigSetting.ScreenRadius]			= 1.01f,
 				[XrConfigSetting.ScreenHeight]			= 1.47f,
@@ -85,9 +84,6 @@ namespace osu.XR.Settings {
 		public static readonly SettingsPreset<XrConfigSetting> PresetTouchscreenSmall = new() {
 			values = new() {
 				[XrConfigSetting.InputMode]				= InputMode.TouchScreen,
-				[XrConfigSetting.SinglePointerTouch]	= false,
-				[XrConfigSetting.TapOnPress]			= false,
-				[XrConfigSetting.Deadzone]				= 20,
 				[XrConfigSetting.ScreenArc]				= 1.2f,
 				[XrConfigSetting.ScreenRadius]			= 0.69f /*nice*/,
 				[XrConfigSetting.ScreenHeight]			= 1.58f,
@@ -116,42 +112,5 @@ namespace osu.XR.Settings {
 			writer.Flush();
 			return true;
 		}
-	}
-
-	public enum XrConfigSetting {
-		InputMode,
-		SinglePointerTouch,
-		TapOnPress,
-		Deadzone,
-
-		ScreenArc,
-		ScreenRadius,
-		ScreenHeight,
-
-		ScreenResolutionX,
-		ScreenResolutionY,
-
-		RenderToScreen,
-		DominantHand,
-
-		DisableTeleport,
-		ShadowType,
-
-		ShowDust
-	}
-
-	public enum InputMode {
-		[Description( "Single Pointer" )]
-		SinglePointer,
-		[Description( "Two Pointers" )]
-		DoublePointer,
-		[Description( "Touchscreen" )]
-		TouchScreen
-	}
-
-	public enum Hand {
-		Auto,
-		Left,
-		Right
 	}
 }

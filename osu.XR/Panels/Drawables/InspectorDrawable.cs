@@ -90,9 +90,10 @@ namespace osu.XR.Inspector {
 				}
 
 				if ( v.NewValue is IConfigurableInspectable config ) {
-					foreach ( var i in config.CreateInspectorSubsectionsWithWarning() ) {
-						AddSection( i );
+					if ( config.CreateWarnings() is Drawable warning ) {
+						AddSection( warning );
 					}
+					AddSection( config.CreateInspectorSubsection() );
 				}
 #if DEBUG
 				AddSection( new ReflectionsInspector( v.NewValue, "Inspected" ) );

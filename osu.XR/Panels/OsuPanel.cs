@@ -44,8 +44,8 @@ namespace osu.XR.Components.Panels {
 			Config.BindWith( XrConfigSetting.ScreenResolutionY, screenResY );
 		}
 
-		public IEnumerable<Drawable> CreateInspectorSubsections () {
-			yield return new NamedContainer {
+		public Drawable CreateInspectorSubsection () {
+			return new NamedContainer {
 				DisplayName = "Panel Properties",
 				Children = new Drawable[] {
 					new SettingsSlider<float,RadToDegreeSliderBar> { Current = Config.GetBindable<float>( XrConfigSetting.ScreenArc ), LabelText = "Screen arc" },

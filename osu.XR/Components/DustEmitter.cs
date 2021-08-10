@@ -47,8 +47,8 @@ namespace osu.XR.Components {
 			config.BindWith( XrConfigSetting.ShowDust, showDust );
 		}
 
-		public IEnumerable<Drawable> CreateInspectorSubsections () {
-			yield return new SettingsSectionContainer {
+		public Drawable CreateInspectorSubsection () {
+			return new SettingsSectionContainer {
 				Title = "Dust Particles",
 				Icon = FontAwesome.Solid.Star,
 				Children = new Drawable[] {

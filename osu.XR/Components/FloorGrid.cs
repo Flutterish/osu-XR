@@ -77,8 +77,8 @@ namespace osu.XR.Components {
             Mesh.IsReady = true;
 		}
 
-		public IEnumerable<Drawable> CreateInspectorSubsections () {
-            yield return new SettingsSectionContainer {
+		public Drawable CreateInspectorSubsection () {
+            return new SettingsSectionContainer {
                 Title = "Floor Grid",
                 Icon = FontAwesome.Solid.ShoePrints,
                 Children = new Drawable[] {
