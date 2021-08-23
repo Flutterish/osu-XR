@@ -3,21 +3,9 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.XR.Components;
-using osu.Framework.XR.Graphics;
-using osu.Framework.XR.Maths;
-using osu.Framework.XR.Projection;
-using osu.Framework.XR.Rendering;
-using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays.Settings;
-using osu.XR.Drawables;
-using osu.XR.Drawables.UserInterface;
 using osu.XR.Inspector;
 using osu.XR.Settings;
-using osu.XR.Settings.Sections;
-using osuTK;
-using osuTK.Graphics;
-using System;
-using System.Collections.Generic;
 
 namespace osu.XR.Components.Skyboxes {
 	public class SkyBox : CompositeDrawable3D, IConfigurableInspectable {

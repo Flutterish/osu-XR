@@ -3,7 +3,6 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.Textures;
-using osu.Framework.Logging;
 using osu.Framework.Utils;
 using osu.Framework.XR.Components;
 using osu.Framework.XR.Maths;
@@ -12,11 +11,6 @@ using osu.XR.Inspector;
 using osu.XR.Settings;
 using osu.XR.Settings.Sections;
 using osuTK;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Components {
 	public class DustEmitter : ParticleEmitter<DustParticle>, IConfigurableInspectable {

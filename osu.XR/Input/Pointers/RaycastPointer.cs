@@ -2,7 +2,6 @@
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Maths;
 using osuTK;
-using System;
 
 namespace osu.XR.Input.Pointers {
 	/// <summary>

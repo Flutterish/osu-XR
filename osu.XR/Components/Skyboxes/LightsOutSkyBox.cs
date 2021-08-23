@@ -1,23 +1,16 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Bindables;
-using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Utils;
 using osu.Framework.XR.Components;
 using osu.Framework.XR.Extensions;
-using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Maths;
-using osu.Framework.XR.Projection;
-using osu.Framework.XR.Rendering;
 using osu.XR.Drawables;
 using osu.XR.Graphics;
 using osuTK;
 using osuTK.Graphics;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Components.Skyboxes {
 	/// <summary>

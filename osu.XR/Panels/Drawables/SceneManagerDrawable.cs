@@ -1,19 +1,10 @@
-﻿using osu.Framework.Allocation;
-using osu.Framework.Bindables;
+﻿using osu.Framework.Bindables;
 using osu.Framework.Graphics;
-using osu.Framework.XR.Components;
-using osu.Framework.XR.Graphics;
-using osu.Game.Rulesets;
 using osu.XR.Components;
 using osu.XR.Components.Skyboxes;
 using osu.XR.Drawables.Containers;
 using osu.XR.Editor;
 using osu.XR.Inspector;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Panels.Drawables {
 	public class SceneManagerDrawable : ConfigurationContainer {

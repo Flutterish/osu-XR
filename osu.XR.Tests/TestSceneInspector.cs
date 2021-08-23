@@ -6,7 +6,6 @@ using osu.Game.Overlays.Settings;
 using osu.XR.Drawables.Containers;
 using osu.XR.Inspector;
 using osuTK;
-using System.Collections.Generic;
 
 namespace osu.XR.Tests {
 	public class TestSceneInspector : OsuTestScene3D {

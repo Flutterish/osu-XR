@@ -1,11 +1,9 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Graphics;
-using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Platform;
 using osu.Framework.XR.GameHosts;
 using osu.Game.Overlays.Settings;
-using osu.XR.Components.Groups;
 using osu.XR.Drawables;
 
 namespace osu.XR.Settings.Sections {

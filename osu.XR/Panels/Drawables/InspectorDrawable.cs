@@ -5,7 +5,6 @@ using osu.Framework.XR.Components;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays.Settings;
 using osu.XR.Drawables.Containers;
-using osu.XR.Inspector.Reflections;
 using osuTK.Graphics;
 using System.Collections.Generic;
 using System.Linq;

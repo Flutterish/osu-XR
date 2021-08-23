@@ -1,12 +1,8 @@
 ﻿using osu.Framework.XR.Components;
 using osu.Framework.XR.Maths;
 using osuTK;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 #nullable enable
 

@@ -7,15 +7,8 @@ using osu.Framework.Graphics.Shapes;
 using osu.Framework.Localisation;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
-using osu.Game.Graphics.Cursor;
-using osu.Game.Graphics.Sprites;
 using osuTK;
 using osuTK.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Drawables.Containers {
 	public class OsuXrTooltipContainer : TooltipContainer {

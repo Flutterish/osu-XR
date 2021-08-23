@@ -5,7 +5,6 @@ using osu.Framework.XR.Components;
 using osu.Framework.XR.Extensions;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Maths;
-using osu.Framework.XR.Projection;
 using osu.Game.Overlays.Settings;
 using osu.XR.Drawables;
 using osu.XR.Drawables.UserInterface;
@@ -13,7 +12,6 @@ using osu.XR.Inspector;
 using osu.XR.Settings.Sections;
 using osuTK;
 using osuTK.Graphics;
-using System.Collections.Generic;
 
 namespace osu.XR.Components {
 	/// <summary>

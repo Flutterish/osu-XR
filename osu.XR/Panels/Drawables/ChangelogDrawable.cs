@@ -1,14 +1,11 @@
 ﻿using osu.Framework.Graphics;
-using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
 using osu.Game.Graphics;
-using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Containers.Markdown;
 using osu.Game.Graphics.Sprites;
 using osu.XR.Drawables.Containers;
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace osu.XR.Drawables {

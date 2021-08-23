@@ -2,11 +2,6 @@
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
 using osu.XR.Components.Groups;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Settings.Sections {
 	public abstract class SettingsSection : FillFlowContainer, IHasName, IHasIcon {

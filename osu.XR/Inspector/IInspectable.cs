@@ -1,12 +1,9 @@
 ﻿using osu.Framework.Bindables;
-using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.XR.Drawables.Containers;
 using osu.XR.Settings.Sections;
 using osuTK;
-using System.Collections.Generic;
-using System.Linq;
 
 #nullable enable
 

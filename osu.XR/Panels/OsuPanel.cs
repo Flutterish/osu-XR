@@ -7,7 +7,6 @@ using osu.XR.Drawables;
 using osu.XR.Drawables.Containers;
 using osu.XR.Inspector;
 using osu.XR.Settings;
-using System.Collections.Generic;
 
 namespace osu.XR.Components.Panels {
 	class OsuPanel : CurvedPanel, IConfigurableInspectable {

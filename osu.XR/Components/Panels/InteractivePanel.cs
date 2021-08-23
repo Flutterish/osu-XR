@@ -1,10 +1,8 @@
 ﻿using OpenVR.NET;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
-using osu.Framework.Graphics;
 using osu.Framework.Graphics.Cursor;
 using osu.Framework.XR.Components;
-using osu.Game.Graphics.Cursor;
 using osu.XR.Drawables.Containers;
 using osu.XR.Editor;
 using osu.XR.Input;

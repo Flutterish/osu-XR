@@ -2,13 +2,7 @@
 using osu.Framework.Graphics;
 using osu.Framework.XR.Components;
 using osu.Framework.XR.Extensions;
-using osu.Framework.XR.Maths;
 using osuTK;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Components {
 	public class Foot : Model {

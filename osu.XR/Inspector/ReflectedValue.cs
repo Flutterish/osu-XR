@@ -1,5 +1,4 @@
-﻿using osu.Framework;
-using osu.Framework.Extensions.TypeExtensions;
+﻿using osu.Framework.Extensions.TypeExtensions;
 using System;
 using System.Linq;
 using System.Reflection;
