@@ -23,7 +23,7 @@ namespace osu.XR.Components {
 		protected override void LoadComplete () {
 			base.LoadComplete();
 
-			Root.Add( path = new() );
+			Root.Add( path = new DashedPath3D() );
 			Root.Add( circle = new() );
 			circle.Scale = new Vector3( 0.1f );
 			circle.Alpha = 0.3f;
