@@ -1,48 +1,72 @@
 ﻿[Current]
-The reflections inspector is now avaiable only in debug builds.
-Inspector selections now have an animation.
-Models' tint now is multiplied with alpha.
-Made all panels the same size and look.
-Notification panel now doesnt open on startup.
+## New Features
 Added a scene management panel.
 You can now customize the skybox and the floor grid through the inspector.
-The handheld menu now only shows the top panel and transitions between with a "popout" animation.
-Keyboard is now focused correctly.
 You can now teleport.
-* Added a setting to disable teleporting temporarily.
-* You also have a faint shadow now.
-Panels now have tooltips.
+Added a setting to disable teleporting temporarily.
+Added a shadow which can be toggled between none, footprints and paws.
 Added dust particles.
-You can now grip certain objects.
-Fixed a bug where some drawables would render twice (the issue was that they would get loaded before being added to the 3d hierarchy and anything that worked on the hierarchy in the load method would cause this).
+You can now grip certain objects in edit mode (which is not yet implemented).
 Added a new skybox type - "Rave".
-Minor UX changes.
+
+## User Experience
+Inspector selections now have an animation.
+Made all panels the same size and look.
+The handheld menu now only shows the top panel and transitions between with a "popout" animation.
+Panels now have tooltips.
+Updated the look of this changelog!
+Other minor UX changes.
+
+## Bugfixes
+Fixed a bug where some drawables would render twice (the issue was that they would get loaded before being added to the 3d hierarchy and anything that worked on the hierarchy in the load method would cause this).
+Notification panel now doesnt open on startup.
+Keyboard is now focused correctly.
+
+## Framework
+Models' tint now is multiplied with alpha.
+
+## Debugging
+The reflections inspector is now avaiable only in debug builds.
+
 
 [2021.06.03]
+## New Features
 Implemented saving and loading ruleset bindings.
 Ruleset bindings now support rulesets with variants like osu!mania.
-The inspector selection box now correctly selects objects with an offset.
-There is also a secondary selection box for previewed elements.
-You can now inspect 2D drawables.
-Improved transparency rendering. The keyboard will no longer have jank visuals when pressing a key and the pointers will not make panels see-through.
-Fixed collisions not working on flat Y-planes. There is a floor collider now!
-The default preset has a better screen size now.
-Improved physics performance.
-The inspector panel got a fleshed out look and functionality:
-* A new hierarchy inspector
-* A new reflections inspector
-	* You can edit: int, float, double, string, enum, color4, vector2, vector3
-	* You can also edit all bindables of these types
-* Custom sections for elements with settings
 Added this changelog!
+
+## User Expreience
+Improved transparency rendering. The keyboard will no longer have jank visuals when pressing a key and the pointers will not make panels see-through.
+The default preset has a better screen size now.
+The inspector panel got a fleshed out look and functionality:
+A new hierarchy inspector
+A new reflections inspector
+	You can edit: int, float, double, string, enum, color4, vector2, vector3
+	You can also edit all bindables of these types
+Custom sections for elements with settings
 The keyboard now flashes the pressed key.
 
+## Bugfixes
+The inspector selection box now correctly selects objects with an offset.
+Fixed collisions not working on flat Y-planes. There is a floor collider now!
+
+## Framework
+Improved physics performance.
+
+## Debugging
+You can now inspect 2D drawables.
+There is also a secondary selection box for previewed elements.
+
+
 [2021.05.19]
+## New features
+Added ruleset bindings:
+Clap - based on how close your primary and secondary controllers are
+Buttons - primary and secondary buttons on each controller
+Joystick:
+	Zone - an arc with a deadzone
+	Movement - you can move the cursor with the joystick
+
+## User Expreience
 When in 2 pointer mode and one hand is occupied (for example, holding a menu), the other pointer will act as if it was in 1 pointer mode.
 The menu now sticks to your offhand even in 1 pointer mode, as long as you have a secondary controller.
-Added ruleset bindings:
-* Clap - based on how close your primary and secondary controllers are
-* Buttons - primary and secondary buttons on each controller
-* Joystick:
-	* Zone - an arc with a deadzone
-	* Movement - you can move the cursor with the joystick

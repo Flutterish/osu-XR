@@ -1,7 +1,10 @@
 ﻿using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
+using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
+using osu.Game.Graphics.Containers.Markdown;
+using osu.Game.Graphics.Sprites;
 using osu.XR.Drawables.Containers;
 using System;
 using System.IO;
@@ -26,48 +29,49 @@ namespace osu.XR.Drawables {
 
 		void loadChangelog ( string raw ) {
 			ClearSections();
-			FillFlowContainer createContainer () {
-				return new FillFlowContainer {
+			OsuMarkdownContainer createContainer () {
+				return new BiggerOsuMarkdownContainer {
 					RelativeSizeAxes = Axes.X,
-					AutoSizeAxes = Axes.Y,
-					Direction = FillDirection.Vertical
+					AutoSizeAxes = Axes.Y
 				};
 			}
-			string sectionName = "";
-			FillFlowContainer container = null;
+			OsuMarkdownContainer container = null;
+			string text = "";
+
+			void finalizeSection () {
+				if ( container is null ) return;
+
+				container.Text = text;
+
+				text = "";
+			}
 			
 			foreach ( var line in raw.Replace( "\r", "" ).Split( "\n", StringSplitOptions.RemoveEmptyEntries ) ) {
 				var trimmed = line.Trim();
 				if ( trimmed.StartsWith( "[" ) && trimmed.EndsWith( "]" ) ) {
-					sectionName = trimmed.Substring( 1, trimmed.Length - 2 );
+					finalizeSection();
+
 					container = createContainer();
 
-					AddSection( container, name: sectionName );
+					AddSection( container, name: trimmed.Substring( 1, trimmed.Length - 2 ) );
 				}
 				else {
-					if ( trimmed.StartsWith( "*" ) ) {
-						OsuTextFlowContainer text;
-						var whitespace = line.Substring( 0, line.Length - line.TrimStart().Length );
-						var margin = ( whitespace.Count( x => x == ' ' ) + 4 * whitespace.Count( x => x == '\t' ) ) * 3;
-						container.Add( text = new OsuTextFlowContainer {
-							AutoSizeAxes = Axes.Y,
-							Margin = new MarginPadding { Left = margin + 15, Right = 15, Bottom = 4 }
-						} );
-						text.OnUpdate += d => d.Width = container.DrawWidth - margin - 30;
-						text.AddIcon( FontAwesome.Solid.ChevronRight );
-						text.AddText( " " + trimmed.Substring( 1 ).TrimStart() );
+					if ( container is null ) {
+						container = createContainer();
+
+						AddSection( container, name: "Untitled Section" );
 					}
-					else {
-						OsuTextFlowContainer text;
-						container.Add( text = new OsuTextFlowContainer {
-							AutoSizeAxes = Axes.Y,
-							Text = line,
-							Margin = new MarginPadding { Horizontal = 15, Bottom = 4 }
-						} );
-						text.OnUpdate += d => d.Width = container.DrawWidth - 30;
-					}
+
+					text += line + "\n";
 				}
 			}
+			finalizeSection();
+		}
+
+		private class BiggerOsuMarkdownContainer : OsuMarkdownContainer {
+			public override SpriteText CreateSpriteText () => new OsuSpriteText {
+				Font = OsuFont.GetFont( Typeface.Inter, size: 18, weight: FontWeight.Regular ),
+			};
 		}
 	}
 }
