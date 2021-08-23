@@ -63,7 +63,7 @@ namespace osu.XR.Drawables.UserInterface {
 			Sample notchSample;
 			[BackgroundDependencyLoader]
 			private void load ( ISampleStore samples ) {
-				notchSample = samples.Get( "UI/sliderbar-notch" );
+				notchSample = samples.Get( "UI/notch-tick" );
 			}
 
 			protected override bool OnDragStart ( DragStartEvent e ) {

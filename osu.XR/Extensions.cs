@@ -33,5 +33,8 @@ namespace osu.XR {
 
 			return $"{display:0.##}{SiUnits[order]}";
 		}
+
+		public static float CopySign ( this float value, float sign )
+			=> Math.Abs( value ) * Math.Sign( sign );
 	}
 }

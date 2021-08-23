@@ -24,13 +24,13 @@ namespace osu.XR.Components {
 		public readonly Bindable<FeetSymbols> FeetSymbols = new( Components.FeetSymbols.None );
 		public Player () {
 			AddInternal( shadow = new Model() );
-			invariantContainer.Add( footRight = new Foot { Scale = new Vector3( -0.1f, 0.1f, 0.1f ), X = 0.1f, Z = 0.03f, EulerRotY = 14 / 180f * MathF.PI } );
-			invariantContainer.Add( footLeft = new Foot { Scale = new Vector3( 0.1f, 0.1f, 0.1f ), X = -0.1f, EulerRotY = -10 / 180f * MathF.PI } );
+			invariantContainer.Add( footRight = new Foot { Scale = new Vector3( -0.1f, 0.1f, 0.1f ), X = 0.1f, Z = 0.03f, Y = -0.001f, EulerRotY = 14 / 180f * MathF.PI } );
+			invariantContainer.Add( footLeft = new Foot { Scale = new Vector3( 0.1f, 0.1f, 0.1f ), X = -0.1f, Y = -0.001f, EulerRotY = -10 / 180f * MathF.PI } );
 
 			shadow.Mesh.AddCircle( Vector3.Zero, Vector3.UnitY, Vector3.UnitZ, 32 );
 			shadow.Scale = new Vector3( 0.012f );
-			footRight.Alpha = footLeft.Alpha = 0.1f;
-			footRight.Tint = footLeft.Tint = Color4.Black;
+			footRight.Alpha = footLeft.Alpha = 0.2f;
+			footRight.Tint = footLeft.Tint = Color4.AliceBlue;
 			shadow.Alpha = 0.8f;
 			shadow.Tint = Color4.White;
 		}
@@ -77,8 +77,8 @@ namespace osu.XR.Components {
 			base.Update();
 
 			shadow.Y = -Y;
-			footLeft.TargetPosition.Value = new Vector3( X, 0, Z ) + Left * 0.1f;
-			footRight.TargetPosition.Value = new Vector3( X, 0, Z ) + Right * 0.1f;
+			footLeft.TargetPosition.Value = new Vector3( X, -0.001f, Z ) + Left * 0.1f;
+			footRight.TargetPosition.Value = new Vector3( X, -0.001f, Z ) + Right * 0.1f;
 
 			footLeft.TargetRotation.Value = Quaternion.FromAxisAngle( Vector3.UnitY, (-10 / 180f + 1) * MathF.PI ) * Rotation;
 			footRight.TargetRotation.Value = Quaternion.FromAxisAngle( Vector3.UnitY, (14 / 180f + 1) * MathF.PI ) * Rotation;

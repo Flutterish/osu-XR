@@ -9,7 +9,7 @@ namespace osu.XR.Tests {
 		public OsuTestScene3D () {
 			Scene = new Scene {
 				RelativeSizeAxes = Axes.Both,
-				Camera = new() { Position = new Vector3( 1, 1, -2 ) }
+				Camera = new() { Position = new Vector3( 1, 1, -3 ) }
 			};
 			Scene.Add( Scene.Camera );
 			Add( Scene );

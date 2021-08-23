@@ -1,6 +1,7 @@
 ﻿using osu.Framework.Bindables;
 using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
 using osu.XR.Drawables.Containers;
 using osu.XR.Settings.Sections;
 using osuTK;
@@ -61,7 +62,7 @@ namespace osu.XR.Inspector {
 
 	public class InspectorSubsectionWithCurrent : SettingsSectionContainer {
 		BindableWithCurrent<Drawable> current = new();
-		public readonly BindableBool ShowWarningsBindable = new( false );
+		public readonly BindableBool ShowWarningsBindable = new( true );
 		public Bindable<Drawable> Current {
 			get => current;
 			set => current.Current = value;
@@ -71,31 +72,37 @@ namespace osu.XR.Inspector {
 			set => ShowWarningsBindable.Value = value;
 		}
 
+		private FillFlowContainer content;
+		protected override Container<Drawable> Content => content;
 		private Drawable? subsection;
 		private Drawable? warning;
 		public InspectorSubsectionWithCurrent () {
-
+			AddInternal( content = new FillFlowContainer {
+				RelativeSizeAxes = Axes.X,
+				AutoSizeAxes = Axes.Y,
+				Direction = FillDirection.Vertical
+			} );
 		}
 
 		protected override void LoadComplete () {
 			base.LoadComplete();
 
 			current.BindValueChanged( v => {
-				Remove( subsection );
-				Remove( warning );
+				if ( subsection is not null ) RemoveInternal( subsection );
+				if ( warning is not null ) RemoveInternal( warning );
 				subsection = null;
 				this.warning = null;
 				if ( v.NewValue is IConfigurableInspectable config ) {
 					if ( config.CreateWarnings() is Drawable warning ) {
-						Add( this.warning = warning );
+						AddInternal( this.warning = warning );
 						if ( !ShowWarnings ) warning.Scale = Vector2.UnitX;
 					}
-					Add( subsection = config.CreateInspectorSubsection() );
+					AddInternal( subsection = config.CreateInspectorSubsection() );
 				}
-			} );
+			}, true );
 
 			ShowWarningsBindable.BindValueChanged( v => {
-				if ( warning is not null ) warning.ScaleTo( v.NewValue ? Vector2.One : Vector2.UnitX, 100 );
+				warning?.ScaleTo( v.NewValue ? Vector2.One : Vector2.UnitX, 100 );
 			} );
 		}
 	}

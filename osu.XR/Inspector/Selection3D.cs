@@ -33,7 +33,8 @@ namespace osu.XR.Inspector {
 				over = selected;
 				animationProgress.Value = 0;
 				this.TransformBindableTo( animationProgress, 1, 140, Easing.Out );
-				Parent = selected.Root;
+				( Parent as Container3D )?.Remove( this );
+				selected.Root.Add( this );
 				Transform.SetParent( selected.Transform, transformKey );
 			}
 		}

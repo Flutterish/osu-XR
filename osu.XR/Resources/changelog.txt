@@ -14,6 +14,9 @@ You can now teleport.
 Panels now have tooltips.
 Added dust particles.
 You can now grip certain objects.
+Fixed a bug where some drawables would render twice (the issue was that they would get loaded before being added to the 3d hierarchy and anything that worked on the hierarchy in the load method would cause this).
+Added a new skybox type - "Rave".
+Minor UX changes.
 
 [2021.06.03]
 Implemented saving and loading ruleset bindings.

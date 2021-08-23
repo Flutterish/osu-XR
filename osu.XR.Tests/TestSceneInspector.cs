@@ -29,10 +29,11 @@ namespace osu.XR.Tests {
 	class TestComponent : Container3D, IConfigurableInspectable, IHasInspectorVisuals, IChildrenNotInspectable, IExperimental {
 		public TestComponent () {
 			Add( new Model { Mesh = Mesh.UnitCube } );
+			X = -2;
 		}
 
-		public IEnumerable<Drawable> CreateInspectorSubsections () {
-			yield return new NamedContainer {
+		public Drawable CreateInspectorSubsection () {
+			return new NamedContainer {
 				DisplayName = "Sample settings",
 				Children = new Drawable[] {
 					new SettingsSlider<double> {

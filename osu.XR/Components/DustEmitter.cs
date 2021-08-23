@@ -77,7 +77,7 @@ namespace osu.XR.Components {
 			base.OnApply( emmiter );
 
 			this.FadeInFromZero( 400, Easing.Out ).Then().FadeOut( 800, Easing.In ).Then().Schedule( () => Release() );
-			this.MoveTo( new Vector3( RNG.NextSingle( -5, 5 ), RNG.NextSingle( 0, 6 ), RNG.NextSingle( -5, 5 ) ) + player.GlobalPosition.With( y: 0 ) )
+			this.MoveTo( new Vector3( RNG.NextSingle( 0.5f, 5 ).CopySign( RNG.NextSingle(-1,1) ), RNG.NextSingle( 0, 6 ), RNG.NextSingle( 0.5f, 5 ).CopySign( RNG.NextSingle( -1, 1 ) ) ) + player.GlobalPosition.With( y: 0 ) )
 				.MoveToOffset( new Vector3( RNG.NextSingle( -1, 1 ), RNG.NextSingle( -1, 1 ), RNG.NextSingle( -1, 1 ) ) * 0.1f, 1200 );
 		}
 	}

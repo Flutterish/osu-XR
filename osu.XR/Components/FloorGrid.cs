@@ -1,8 +1,8 @@
 ﻿using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
-using osu.Framework.XR;
 using osu.Framework.XR.Components;
+using osu.Framework.XR.Extensions;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Maths;
 using osu.Framework.XR.Projection;
@@ -19,7 +19,7 @@ namespace osu.XR.Components {
 	/// <summary>
 	/// White line grid on the floor with a fade.
 	/// </summary>
-	public class FloorGrid : Model, IBehindEverything, IConfigurableInspectable {
+	public class FloorGrid : Model, IConfigurableInspectable {
         public readonly Bindable<Color4> TintBindable = new( Color4.White );
         public readonly BindableFloat OpacityBindable = new( 1 ) { MinValue = 0, MaxValue = 1 };
         public readonly BindableInt XSegmentsBindable = new( 7 ) { MinValue = 0, MaxValue = 20, Precision = 1 };

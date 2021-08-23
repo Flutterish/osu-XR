@@ -28,7 +28,7 @@ namespace osu.XR.Inspector {
 
 		public InspectorDrawable () {
 			Title = "Inspector";
-			Description = "inspect and modify properties\nthese settings are not persistent";
+			Description = "inspect and modify properties";
 
 			SelectedElementBindable.BindValueChanged( v => {
 				if ( v.NewValue is Drawable3D d3 ) {

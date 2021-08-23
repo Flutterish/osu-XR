@@ -1,7 +1,7 @@
 ﻿using osu.Framework.Bindables;
 using osu.Framework.Caching;
-using osu.Framework.XR;
 using osu.Framework.XR.Components;
+using osu.Framework.XR.Extensions;
 using osuTK;
 using System;
 using System.Collections.Generic;
