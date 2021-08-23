@@ -7,7 +7,7 @@ Added a setting to disable teleporting temporarily.
 Added a shadow which can be toggled between none, footprints and paws.
 Added dust particles.
 You can now grip certain objects in edit mode (which is not yet implemented).
-Added a new skybox type - "Rave".
+Added a new skybox type - "Lights Out".
 
 ## User Experience
 Inspector selections now have an animation.

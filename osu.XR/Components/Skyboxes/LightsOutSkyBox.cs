@@ -1,6 +1,8 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
+using osu.Framework.Utils;
 using osu.Framework.XR.Components;
 using osu.Framework.XR.Extensions;
 using osu.Framework.XR.Graphics;
@@ -10,6 +12,7 @@ using osu.Framework.XR.Rendering;
 using osu.XR.Drawables;
 using osu.XR.Graphics;
 using osuTK;
+using osuTK.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,18 +23,21 @@ namespace osu.XR.Components.Skyboxes {
 	/// <summary>
 	/// A solid black skybox with neon rectangles orbitting the camera to the beat
 	/// </summary>
-	public class RaveSkyBox : CompositeDrawable3D {
+	public class LightsOutSkyBox : CompositeDrawable3D {
 		private Bindable<float> velocity = new( 0 );
 		private Container3D clockwise;
 		private Container3D counterClockwise;
 
-		public RaveSkyBox () {
+		public LightsOutSkyBox () {
 			AddInternal( clockwise = new Container3D() );
 			AddInternal( counterClockwise = new Container3D() );
 
 			recalculateChildren();
 			BindableBeat.ValueChanged += v => {
 				this.TransformBindableTo( velocity, (float)v.NewValue.AverageAmplitude * (float)v.NewValue.TimingPoint.BPM / 30, 100 );
+				foreach ( Model child in clockwise.Concat( counterClockwise ) ) {
+					child.FlashColour( Interpolation.ValueAt( 0.4f, child.Tint, Color4.White, 0, 1 ), v.NewValue.TimingPoint.BeatLength * 2 / 3, Easing.Out );
+				}
 			};
 		}
 

@@ -22,7 +22,7 @@ using System.Collections.Generic;
 namespace osu.XR.Components.Skyboxes {
 	public class SkyBox : CompositeDrawable3D, IConfigurableInspectable {
 		SolidSkyBox solid = new SolidSkyBox();
-		RaveSkyBox rave = new RaveSkyBox();
+		LightsOutSkyBox lightsOut = new LightsOutSkyBox();
 
 		private Bindable<SkyBoxType> typeBindable = new();
 		private Bindable<Drawable3D> activeSkybox = new();
@@ -43,7 +43,7 @@ namespace osu.XR.Components.Skyboxes {
 			typeBindable.BindValueChanged( v => {
 				activeSkybox.Value = v.NewValue switch {
 					SkyBoxType.Solid => solid,
-					SkyBoxType.Rave => rave,
+					SkyBoxType.LightsOut => lightsOut,
 					_ => null
 				};
 			}, true );
