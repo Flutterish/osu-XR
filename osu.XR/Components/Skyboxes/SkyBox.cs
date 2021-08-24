@@ -55,6 +55,6 @@ namespace osu.XR.Components.Skyboxes {
 			return section;
 		}
 
-		public bool AreSettingsPersistent => false;
+		public bool AreSettingsPersistent => true;
 	}
 }

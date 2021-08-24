@@ -29,7 +29,7 @@ namespace osu.XR.Components.Panels {
 		protected override void RecalculateMesh () {
 			float width;
 			float height;
-			if ( PanelAutoScaleAxes == Axes.Both ) {
+			if ( PanelAutoScaleAxes == Axes.Both ) { // TODO with both, use fit fill mode
 				throw new InvalidOperationException( $"{nameof( FlatPanel )} {nameof( PanelAutoScaleAxes )} can not be {Axes.Both}. There is no reference size." );
 			}
 			else if ( PanelAutoScaleAxes == Axes.X ) {

@@ -14,7 +14,7 @@ namespace osu.XR.Drawables {
 	/// <summary>
 	/// Highlight on hover, bounce on click.
 	/// </summary>
-	public class CalmOsuAnimatedButton : OsuClickableContainer {
+	public class CalmOsuAnimatedButton : OsuClickableContainer { // TODO this is jank. Get rid of this.
         /// <summary>
         /// The colour that should be flashed when the <see cref="OsuAnimatedButton"/> is clicked.
         /// </summary>

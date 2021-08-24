@@ -8,6 +8,7 @@ Added a shadow which can be toggled between none, footprints and paws.
 Added dust particles.
 You can now grip certain objects in edit mode (which is not yet implemented).
 Added a new skybox type - "Lights Out".
+Added ability to import props in the scene management panel. You can currently import .obj files and .mtl materials for them.
 
 ## User Experience
 Inspector selections now have an animation.
@@ -24,6 +25,7 @@ Keyboard is now focused correctly.
 
 ## Framework
 Models' tint now is multiplied with alpha.
+Added ability to fully parse OBJ and MTL files, however they cannot be rendered properly yet.
 
 ## Debugging
 The reflections inspector is now avaiable only in debug builds.

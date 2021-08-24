@@ -36,5 +36,9 @@ namespace osu.XR {
 
 		public static float CopySign ( this float value, float sign )
 			=> Math.Abs( value ) * Math.Sign( sign );
+
+		public static string Pluralize ( this int number, string name, string? plural = null ) {
+			return number + " " + ( ( number == 1 ) ? name : ( plural ?? ( name + "s" ) ) );
+		}
 	}
 }

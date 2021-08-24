@@ -25,8 +25,7 @@ namespace osu.XR.Drawables {
 
 		FillFlowContainer hierarchy;
 
-		public IEnumerable<Tstep> MultiselectSelection => multiselectSelection.OfType<Tstep>();
-		readonly BindableList<HierarchyStep<Ttype>> multiselectSelection = new();
+		public readonly BindableList<HierarchyStep<Ttype>> MultiselectSelection = new();
 		public readonly BindableBool IsMultiselectBindable = new( false );
 		public bool IsMultiselect {
 			get => IsMultiselectBindable.Value;
@@ -51,7 +50,7 @@ namespace osu.XR.Drawables {
 
 			setTop( CreateTop( value ) );
 			top.IsMultiselect.BindTo( IsMultiselectBindable );
-			top.MultiselectSelection.BindTo( multiselectSelection );
+			top.MultiselectSelection.BindTo( MultiselectSelection );
 		}
 
 		void setTop ( Tstep newTop ) {
@@ -93,7 +92,7 @@ namespace osu.XR.Drawables {
 			if ( step is null ) {
 				setTop( CreateTop( value ) );
 				top.IsMultiselect.BindTo( IsMultiselectBindable );
-				top.MultiselectSelection.BindTo( multiselectSelection );
+				top.MultiselectSelection.BindTo( MultiselectSelection );
 			}
 			else {
 				focusOn( (Tstep)step );
