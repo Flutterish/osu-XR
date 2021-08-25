@@ -3,11 +3,13 @@ using osu.Framework.Bindables;
 using osu.Framework.Extensions.EnumExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.XR;
 using osu.Framework.XR.Components;
 using osu.Framework.XR.Parsing;
 using osu.Framework.XR.Parsing.Blender;
 using osu.Framework.XR.Parsing.WaveFront;
 using osu.Game.Graphics.Containers;
+using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays.Settings;
 using osu.XR.Drawables.Containers;
 using osu.XR.Editor;
@@ -18,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using static osu.XR.Components.BeatingScenery;
 
 namespace osu.XR.Panels.Drawables {
 	public class SceneManagerDrawable : ConfigurationContainer {
@@ -42,11 +45,22 @@ namespace osu.XR.Panels.Drawables {
 			}
 
 			if ( severity.HasFlagFast( ParsingErrorSeverity.NotImplemented ) ) {
-				raport.AddParagraph( $"{message} Some things might not display properly.", s => s.Colour = color );
+				Schedule( () => raport.AddParagraph( $"{message} Some things might not display properly.", s => s.Colour = color ) );
 			}
 			else {
-				raport.AddParagraph( message, s => s.Colour = color );
+				Schedule( () => raport.AddParagraph( message, s => s.Colour = color ) );
 			}
+		}
+
+		SerialTaskScheduler importTasks = new();
+		LoadingSpinner loadingSpinner;
+		/// <summary>
+		/// Schedules importing props to run in the background
+		/// </summary>
+		public void ScheduleImport ( IEnumerable<string> files ) {
+			importTasks.Schedule( () => {
+				importProps( files );
+			} );
 		}
 
 		public SceneManagerDrawable () { // TODO save the scenery
@@ -61,9 +75,16 @@ namespace osu.XR.Panels.Drawables {
 					new SettingsButton {
 						Text = "Browse",
 						Action = () => {
-							overlays.RequestOverlay<FileSelectionOverlay>().Confirmed += ImportProps;
+							overlays.RequestOverlay<FileSelectionOverlay>().Confirmed += files => {
+								ScheduleImport( files );
+							};
 						},
 						TooltipText = "Import .obj and .blend files"
+					},
+					loadingSpinner = new LoadingSpinner( true ) {
+						Origin = Anchor.TopCentre,
+						Anchor = Anchor.TopCentre,
+						Margin = new MarginPadding { Top = 8 }
 					},
 					new ExpandableSection {
 						Margin = new MarginPadding { Horizontal = 15, Top = 10 },
@@ -96,14 +117,22 @@ namespace osu.XR.Panels.Drawables {
 
 				v.NewValue.BindLocalHierarchyChange( childAdded, childRemoved, true );
 			} );
+
+			importTasks.TaskSequenceStarted += () => {
+				Schedule( () => raport.Clear() );
+				Schedule( () => loadingSpinner.Show() );
+			};
+
+			importTasks.TaskSequenceFinished += () => {
+				Schedule( () => loadingSpinner.Hide() );
+			};
 		}
 
 		public static readonly IReadOnlyList<string> SupportedFileFormats = new List<string> {
 			".obj", ".blend"
 		}.AsReadOnly();
 
-		public void ImportProps ( IEnumerable<string> files ) {
-			raport.Clear();
+		private void importProps ( IEnumerable<string> files ) {
 			List<IModelFile> importedFiles = new(); // TODO pooled lists
 			foreach ( var i in files ) {
 				bool ok = true;
@@ -111,13 +140,13 @@ namespace osu.XR.Panels.Drawables {
 				try {
 					if ( Directory.Exists( i ) ) {
 						addRaportMessage( "This is a directory, not a model file.", ParsingErrorSeverity.Error );
-						raport.AddParagraph( "" );
+						addRaportMessage( "" );
 						continue;
 					}
 					var type = Path.GetExtension( i );
 					if ( !SupportedFileFormats.Contains( type ) ) {
 						addRaportMessage( $"This a {type} file, which is not supported. Supported file formats: {string.Join(", ", SupportedFileFormats)}", ParsingErrorSeverity.Error );
-						raport.AddParagraph( "" );
+						addRaportMessage( "" );
 						continue;
 					}
 					if ( type == ".obj" ) {
@@ -152,9 +181,10 @@ namespace osu.XR.Panels.Drawables {
 					ok = false;
 				}
 				addRaportMessage( $"Finished parsing {Path.GetFileName( i )}: {( ok ? "Success" : "Error" )}", ok ? ParsingErrorSeverity.Success : ParsingErrorSeverity.Error );
-				raport.AddParagraph( "" );
+				addRaportMessage( "" );
 			}
 			addRaportMessage( $"Finished parsing files. Loaded {importedFiles.Count.Pluralize( "file" )}." );
+			addRaportMessage( "" );
 
 			foreach ( var i in importedFiles ) {
 				var group = i.CreateModelGroup();
@@ -169,7 +199,7 @@ namespace osu.XR.Panels.Drawables {
 
 					foreach ( var k in top.Models ) {
 						foreach ( var (mesh,mat) in k.Elements ) {
-							SceneContainer.Add( new PropContainer( new Model { Mesh = mesh }, k.Name ) );
+							Schedule( () => SceneContainer.Add( new PropContainer( new GripableCollider { Mesh = mesh }, k.Name ) ) );
 						}
 					}
 				}

@@ -46,7 +46,7 @@ namespace osu.XR.Panels.Overlays {
 						Width = 100,
 						Height = 20,
 						Action = () => {
-							Confirmed?.Invoke( selectedSteps.Select( x => x.Value ) );
+							Confirmed?.Invoke( selectedSteps.Select( x => x.Value ).ToArray() );
 							Confirmed = null;
 							Cancelled = null;
 							Hide();
