@@ -200,7 +200,14 @@ namespace osu.XR.Panels.Drawables {
 
 					foreach ( var k in top.Models ) {
 						foreach ( var (mesh,mat) in k.Elements ) {
-							Schedule( () => SceneContainer.Add( new PropContainer( new GripableCollider { Mesh = mesh }, k.Name ) ) );
+							Schedule( () => SceneContainer.Add( new PropContainer( 
+								new GripableCollider { 
+									Mesh = mesh,
+									Tint = mat.Albedo,
+									MainTexture = mat.Texture?.TextureGL ?? Model.WhitePixelTexture
+								}, 
+								k.Name 
+							) ) );
 						}
 					}
 				}
