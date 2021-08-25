@@ -2,6 +2,7 @@
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.XR.Allocation;
 using osu.Game.Graphics;
 using osuTK.Graphics;
 using System;
@@ -57,7 +58,7 @@ namespace osu.XR.Drawables.Containers {
 		}
 
 		protected void RegenerateText ( string text ) {
-			List<string> splices = new();
+			using var splices = ListPool<string>.Shared.Rent();
 
 			string collected = "";
 
@@ -93,7 +94,7 @@ namespace osu.XR.Drawables.Containers {
 			}
 			if ( collected != "" ) splices.Add( collected );
 
-			List<string> activeSettings = new();
+			using var activeSettings = ListPool<string>.Shared.Rent();
 
 			textFlow.Clear();
 			foreach ( var i in splices ) {

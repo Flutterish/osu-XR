@@ -16,7 +16,7 @@ namespace osu.XR.Drawables.Containers {
 	public class ConfigurationContainer : CompositeDrawable {
 		OsuTextFlowContainer header;
 		Drawable headerOffset;
-		protected readonly AdvancedSearchContainer<string> Content;
+		protected readonly AdvancedSearchContainer<string> Content; // TODO remove this. this was a meh idea at best ( it was used to also filter the hierarchy tree, it should use its own searchbar )
 		protected readonly SearchTextBox SearchTextBox;
 		Drawable stickyHeader;
 		Drawable stickyHeaderBackground;

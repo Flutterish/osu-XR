@@ -4,6 +4,7 @@ using osu.Framework.Extensions.EnumExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.XR;
+using osu.Framework.XR.Allocation;
 using osu.Framework.XR.Components;
 using osu.Framework.XR.Parsing;
 using osu.Framework.XR.Parsing.Blender;
@@ -133,7 +134,7 @@ namespace osu.XR.Panels.Drawables {
 		}.AsReadOnly();
 
 		private void importProps ( IEnumerable<string> files ) {
-			List<IModelFile> importedFiles = new(); // TODO pooled lists
+			using var importedFiles = ListPool<IModelFile>.Shared.Rent();
 			foreach ( var i in files ) {
 				bool ok = true;
 				addRaportMessage( $"Parsing: {Path.GetFileName( i )}" );
@@ -188,7 +189,7 @@ namespace osu.XR.Panels.Drawables {
 
 			foreach ( var i in importedFiles ) {
 				var group = i.CreateModelGroup();
-				Stack<ImportedModelGroup> groups = new();
+				using var groups = StackPool<ImportedModelGroup>.Shared.Rent();
 				groups.Push( group );
 
 				while ( groups.Count != 0 ) {
