@@ -38,7 +38,20 @@ namespace osu.XR {
 			=> Math.Abs( value ) * Math.Sign( sign );
 
 		public static string Pluralize ( this int number, string name, string? plural = null ) {
-			return number + " " + ( ( number == 1 ) ? name : ( plural ?? ( name + "s" ) ) );
+			if ( number == 1 ) {
+				return $"{number} {name}";
+			}
+			else {
+				if ( plural == null ) {
+					if ( name.ToLower().EndsWith( "sh" ) ) {
+						plural = name + "es";
+					}
+					else {
+						plural = name + "s";
+					}
+				}
+				return $"{number} {plural}";
+			}
 		}
 	}
 }

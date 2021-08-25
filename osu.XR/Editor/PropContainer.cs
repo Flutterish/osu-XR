@@ -11,11 +11,17 @@ using osu.XR.Settings.Sections;
 namespace osu.XR.Editor {
 	public class PropContainer : CompositeDrawable3D, IConfigurableInspectable {
 		public readonly Drawable3D Prop;
+		new public string Name {
+			get => NameBindable.Value;
+			set => NameBindable.Value = value;
+		}
+		public readonly Bindable<string> NameBindable;
 
-		public PropContainer ( Drawable3D prop ) {
+		public PropContainer ( Drawable3D prop, string name = "New Prop" ) {
 			Prop = prop;
 			InternalChild = prop;
 			AutoSizeAxes = Axes3D.All;
+			NameBindable = new Bindable<string>( name );
 		}
 
 		public Drawable CreateInspectorSubsection () {
@@ -26,7 +32,7 @@ namespace osu.XR.Editor {
 				Children = new Drawable[] {
 					new SettingsTextBox {
 						LabelText = "Name",
-						Current = new Bindable<string>( "New Prop" ),
+						Current = NameBindable,
 						Margin = new MarginPadding { Bottom = 5 }
 					},
 					new DangerousSettingsButton {

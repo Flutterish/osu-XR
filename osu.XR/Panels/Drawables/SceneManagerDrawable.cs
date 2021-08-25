@@ -144,8 +144,7 @@ namespace osu.XR.Panels.Drawables {
 					else if ( type == ".blend" ) {
 						var blend = BlendFile.FromFile( i );
 						importedFiles.Add( blend );
-						addRaportMessage( $"Stats: {blend.Blocks.Count.Pluralize("Data block")}" );
-						addRaportMessage( $"This file type can not be parsed into models yet.", ParsingErrorSeverity.Error );
+						addRaportMessage( $"Stats: {blend.Blocks.Count.Pluralize("Data block")}, {blend.GetAllOfType("Mesh").Count().Pluralize("Mesh")}" );
 					}
 				}
 				catch ( Exception e ) {
@@ -170,7 +169,7 @@ namespace osu.XR.Panels.Drawables {
 
 					foreach ( var k in top.Models ) {
 						foreach ( var (mesh,mat) in k.Elements ) {
-							SceneContainer.Add( new PropContainer( new Model { Mesh = mesh } ) );
+							SceneContainer.Add( new PropContainer( new Model { Mesh = mesh }, k.Name ) );
 						}
 					}
 				}
