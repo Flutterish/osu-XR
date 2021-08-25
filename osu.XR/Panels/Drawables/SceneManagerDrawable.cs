@@ -5,11 +5,10 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.XR.Components;
 using osu.Framework.XR.Parsing;
+using osu.Framework.XR.Parsing.Blender;
 using osu.Framework.XR.Parsing.WaveFront;
 using osu.Game.Graphics.Containers;
 using osu.Game.Overlays.Settings;
-using osu.XR.Components;
-using osu.XR.Components.Skyboxes;
 using osu.XR.Drawables.Containers;
 using osu.XR.Editor;
 using osu.XR.Inspector;
@@ -64,7 +63,7 @@ namespace osu.XR.Panels.Drawables {
 						Action = () => {
 							overlays.RequestOverlay<FileSelectionOverlay>().Confirmed += ImportProps;
 						},
-						TooltipText = "Import .obj files"
+						TooltipText = "Import .obj and .blend files"
 					},
 					new ExpandableSection {
 						Margin = new MarginPadding { Horizontal = 15, Top = 10 },
@@ -96,25 +95,16 @@ namespace osu.XR.Panels.Drawables {
 				if ( v.NewValue is null ) return;
 
 				v.NewValue.BindLocalHierarchyChange( childAdded, childRemoved, true );
-
-				// TODO these will not be instantiated here
-				var skybox = new SkyBox();
-				var floorgrid = new FloorGrid();
-				var dust = new DustEmitter();
-
-				v.NewValue.Add( skybox );
-				v.NewValue.Add( floorgrid );
-				v.NewValue.Add( dust );
-				//SceneContainer.Add( new BeatingScenery.GripableCollider { Mesh = Mesh.UnitCube, Scale = new osuTK.Vector3( 0.3f ), Y = 1 } );
 			} );
 		}
 
 		public static readonly IReadOnlyList<string> SupportedFileFormats = new List<string> {
-			".obj"
+			".obj", ".blend"
 		}.AsReadOnly();
+
 		public void ImportProps ( IEnumerable<string> files ) {
 			raport.Clear();
-			List<OBJFile> importedFiles = new(); // TODO pooled lists
+			List<IModelFile> importedFiles = new(); // TODO pooled lists
 			foreach ( var i in files ) {
 				bool ok = true;
 				addRaportMessage( $"Parsing: {Path.GetFileName( i )}" );
@@ -151,6 +141,12 @@ namespace osu.XR.Panels.Drawables {
 							}
 						}
 					}
+					else if ( type == ".blend" ) {
+						var blend = BlendFile.FromFile( i );
+						importedFiles.Add( blend );
+						addRaportMessage( $"Stats: {blend.Blocks.Count.Pluralize("Data block")}" );
+						addRaportMessage( $"This file type can not be parsed into models yet.", ParsingErrorSeverity.Error );
+					}
 				}
 				catch ( Exception e ) {
 					addRaportMessage( $"Unhandled exception while parsing file {Path.GetFileName( i )}: {e.Message}", ParsingErrorSeverity.Error );
@@ -160,7 +156,25 @@ namespace osu.XR.Panels.Drawables {
 				raport.AddParagraph( "" );
 			}
 			addRaportMessage( $"Finished parsing files. Loaded {importedFiles.Count.Pluralize( "file" )}." );
-			// TODO actually import them
+
+			foreach ( var i in importedFiles ) {
+				var group = i.CreateModelGroup();
+				Stack<ImportedModelGroup> groups = new();
+				groups.Push( group );
+
+				while ( groups.Count != 0 ) {
+					var top = groups.Pop();
+
+					foreach ( var k in top.SubGroups ) 
+						groups.Push( k );
+
+					foreach ( var k in top.Models ) {
+						foreach ( var (mesh,mat) in k.Elements ) {
+							SceneContainer.Add( new PropContainer( new Model { Mesh = mesh } ) );
+						}
+					}
+				}
+			}
 		}
 
 		Dictionary<IConfigurableInspectable, Drawable[]> sections = new();

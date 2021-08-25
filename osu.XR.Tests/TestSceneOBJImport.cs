@@ -21,6 +21,7 @@ namespace osu.XR.Tests {
 			} );
 
 			scenePanel.SceneContainer = new Editor.SceneContainer();
+			Scene.Add( scenePanel.SceneContainer );
 		}
 	}
 }
