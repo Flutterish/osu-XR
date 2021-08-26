@@ -125,7 +125,7 @@ namespace osu.XR.Editor {
 			targetStartScale = drawable.Scale;
 		}
 
-		public void Update () {
+		public void Update () { // TODO rotation related transforms can be improved if we take into consideration the forward vector of the grip sources
 			if ( Target is not Drawable3D drawable ) return;
 			
 			foreach ( var (source,@event) in gripSources ) {

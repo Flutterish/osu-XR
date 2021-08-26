@@ -4,5 +4,6 @@ namespace osu.XR {
 	public static class GamePhysicsLayer {
 		public static readonly PhysicsLayer All = PhysicsLayer.All;
 		public static readonly PhysicsLayer Floor = PhysicsLayer.Layer0;
+		public static readonly PhysicsLayer Prop = PhysicsLayer.Layer1;
 	}
 }

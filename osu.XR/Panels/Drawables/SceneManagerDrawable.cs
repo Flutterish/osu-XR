@@ -206,7 +206,8 @@ namespace osu.XR.Panels.Drawables {
 									new GripableCollider {
 										Mesh = mesh,
 										Tint = mat.Albedo,
-										MainTexture = mat.Texture?.TextureGL ?? Model.WhitePixelTexture
+										MainTexture = mat.Texture?.TextureGL ?? Model.WhitePixelTexture,
+										PhysicsLayer = GamePhysicsLayer.Prop
 									},
 									k.Name
 								) {

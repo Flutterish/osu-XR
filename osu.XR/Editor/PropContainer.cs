@@ -2,6 +2,7 @@
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.XR.Components;
+using osu.Framework.XR.Physics;
 using osu.Game.Overlays.Settings;
 using osu.XR.Inspector;
 using osu.XR.Settings.Sections;
@@ -37,6 +38,19 @@ namespace osu.XR.Editor {
 					}
 				}
 			};
+
+			if ( Prop is Collider co ) {
+				Bindable<bool> colliderEnabled = new( false );
+				section.Add( new SettingsCheckbox {
+					LabelText = "Enable blocking touch pointers",
+					TooltipText = "Touch pointers can easily get stuck inside props while gripping them.\nThis setting should be disable while doing so.",
+					Current = colliderEnabled
+				} );
+
+				colliderEnabled.BindValueChanged( v => {
+					co.PhysicsLayer = v.NewValue ? GamePhysicsLayer.All : GamePhysicsLayer.Prop;
+				}, true );
+			}
 
 			if ( Prop is IGripable gr ) {
 				section.AddRange( new Drawable[] {

@@ -19,7 +19,7 @@ namespace osu.XR.Input.Pointers {
 			var targetPos = Source.Position; // ISSUE this can get stuck behind the screen
 
 			var direction = ( targetPos - Position ).Normalized();
-			if ( PhysicsSystem.TryHit( Position, direction, out var rayHit, layer: GamePhysicsLayer.All.Except( GamePhysicsLayer.Floor ) ) && rayHit.Distance - Radius / 2 < ( Position - targetPos ).Length ) {
+			if ( PhysicsSystem.TryHit( Position, direction, out var rayHit, layer: GamePhysicsLayer.All.Except( GamePhysicsLayer.Floor | GamePhysicsLayer.Prop ) ) && rayHit.Distance - Radius / 2 < ( Position - targetPos ).Length ) {
 				Position = rayHit.Point + rayHit.Normal * (float)Radius / 2;
 			}
 			else {
