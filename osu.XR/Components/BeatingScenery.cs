@@ -1,4 +1,5 @@
-﻿using osu.Framework.XR.Components;
+﻿using osu.Framework.Bindables;
+using osu.Framework.XR.Components;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Maths;
 using osu.XR.Components.Groups;
@@ -29,13 +30,12 @@ namespace osu.XR.Components {
 		}
 
 		public class GripableCollider : Collider, IGripable {
-			public bool CanBeGripped => true;
-			public bool AllowsGripMovement => true;
-			public bool AllowsGripScaling => true;
-			public bool AllowsGripRotation => true;
+			public Bindable<bool> CanBeGripped { get; } = new( true );
+			public Bindable<bool> AllowsGripMovement { get; } = new( true );
+			public Bindable<bool> AllowsGripScaling { get; } = new( true );
+			public Bindable<bool> AllowsGripRotation { get; } = new( true );
 
 			public void OnGripped ( object source, GripGroup group ) { }
-
 			public void OnGripReleased ( object source, GripGroup group ) { }
 		}
 	}

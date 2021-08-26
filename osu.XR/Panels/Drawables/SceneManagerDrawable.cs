@@ -209,7 +209,11 @@ namespace osu.XR.Panels.Drawables {
 										MainTexture = mat.Texture?.TextureGL ?? Model.WhitePixelTexture
 									},
 									k.Name
-								) ) );
+								) {
+									Position = k.Position,
+									Rotation = k.Rotation,
+									Scale = k.Scale
+								} ) );
 							}
 						}
 					}

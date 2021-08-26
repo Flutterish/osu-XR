@@ -25,7 +25,7 @@ namespace osu.XR.Editor {
 		}
 
 		public Drawable CreateInspectorSubsection () {
-			return new SettingsSectionContainer {
+			var section = new SettingsSectionContainer {
 				Title = "Imported Prop",
 				Icon = FontAwesome.Solid.Cube,
 
@@ -34,15 +34,40 @@ namespace osu.XR.Editor {
 						LabelText = "Name",
 						Current = NameBindable,
 						Margin = new MarginPadding { Bottom = 5 }
-					},
-					new DangerousSettingsButton {
-						Text = "Delete",
-						Action = () => {
-							Destroy();
-						}
 					}
 				}
 			};
+
+			if ( Prop is IGripable gr ) {
+				section.AddRange( new Drawable[] {
+					new SettingsCheckbox {
+						LabelText = "Allow Gripping",
+						Current = gr.CanBeGripped
+					},
+					new SettingsCheckbox {
+						LabelText = "Allow Grip Movement",
+						Current = gr.AllowsGripMovement
+					},
+					new SettingsCheckbox {
+						LabelText = "Allow Grip Rotation",
+						Current = gr.AllowsGripRotation
+					},
+					new SettingsCheckbox {
+						LabelText = "Allow Grip Scaling",
+						Current = gr.AllowsGripScaling
+					},
+				} );
+			}
+
+			section.Add( new DangerousSettingsButton {
+				Text = "Delete",
+				Action = () => {
+					Destroy();
+				},
+				Margin = new MarginPadding { Top = 6 }
+			} );
+
+			return section;
 		}
 
 		public bool AreSettingsPersistent => false;
