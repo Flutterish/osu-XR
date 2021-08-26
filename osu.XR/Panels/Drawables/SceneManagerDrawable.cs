@@ -134,7 +134,7 @@ namespace osu.XR.Panels.Drawables {
 		}.AsReadOnly();
 
 		private void importProps ( IEnumerable<string> files ) {
-			using var importedFiles = ListPool<IModelFile>.Shared.Rent();
+			using var importedFiles = ListPool<(IModelFile file, string name)>.Shared.Rent();
 			foreach ( var i in files ) {
 				bool ok = true;
 				addRaportMessage( $"Parsing: {Path.GetFileName( i )}" );
@@ -152,7 +152,7 @@ namespace osu.XR.Panels.Drawables {
 					}
 					if ( type == ".obj" ) {
 						var obj = OBJFile.FromFile( i );
-						importedFiles.Add( obj );
+						importedFiles.Add( (obj, Path.GetFileName( i )) );
 						foreach ( var n in obj.ParsingErrors ) {
 							addRaportMessage( n.Message, n.Severity );
 						}
@@ -173,7 +173,7 @@ namespace osu.XR.Panels.Drawables {
 					}
 					else if ( type == ".blend" ) {
 						var blend = BlendFile.FromFile( i );
-						importedFiles.Add( blend );
+						importedFiles.Add( (blend, Path.GetFileName( i )) );
 						addRaportMessage( $"Stats: {blend.Blocks.Count.Pluralize("Data block")}, {blend.GetAllOfType("Mesh").Count().Pluralize("Mesh")}" );
 					}
 				}
@@ -187,31 +187,40 @@ namespace osu.XR.Panels.Drawables {
 			addRaportMessage( $"Finished parsing files. Loaded {importedFiles.Count.Pluralize( "file" )}." );
 			addRaportMessage( "" );
 
-			foreach ( var i in importedFiles ) {
-				var group = i.CreateModelGroup();
-				using var groups = StackPool<ImportedModelGroup>.Shared.Rent();
-				groups.Push( group );
+			foreach ( var (file, name) in importedFiles ) {
+				addRaportMessage( $"Importing models from {name}" );
+				try {
+					var group = file.CreateModelGroup();
+					using var groups = StackPool<ImportedModelGroup>.Shared.Rent();
+					groups.Push( group );
 
-				while ( groups.Count != 0 ) {
-					var top = groups.Pop();
+					while ( groups.Count != 0 ) {
+						var top = groups.Pop();
 
-					foreach ( var k in top.SubGroups ) 
-						groups.Push( k );
+						foreach ( var k in top.SubGroups )
+							groups.Push( k );
 
-					foreach ( var k in top.Models ) {
-						foreach ( var (mesh,mat) in k.Elements ) {
-							Schedule( () => SceneContainer.Add( new PropContainer( 
-								new GripableCollider { 
-									Mesh = mesh,
-									Tint = mat.Albedo,
-									MainTexture = mat.Texture?.TextureGL ?? Model.WhitePixelTexture
-								}, 
-								k.Name 
-							) ) );
+						foreach ( var k in top.Models ) {
+							foreach ( var (mesh, mat) in k.Elements ) {
+								Schedule( () => SceneContainer.Add( new PropContainer(
+									new GripableCollider {
+										Mesh = mesh,
+										Tint = mat.Albedo,
+										MainTexture = mat.Texture?.TextureGL ?? Model.WhitePixelTexture
+									},
+									k.Name
+								) ) );
+							}
 						}
 					}
 				}
+				catch ( Exception e ) {
+					addRaportMessage( $"Unhandled exception while importing models: {e.Message}", ParsingErrorSeverity.Error );
+				}
 			}
+
+			addRaportMessage( "Finished importing files." );
+			addRaportMessage( "" );
 		}
 
 		Dictionary<IConfigurableInspectable, Drawable[]> sections = new();
