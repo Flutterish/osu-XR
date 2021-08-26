@@ -3,6 +3,7 @@ using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Maths;
 using osu.Framework.XR.Physics;
 using osuTK;
+using System.Threading.Tasks;
 
 namespace osu.XR.Input.Pointers {
 	public class TouchPointer : Pointer {
@@ -11,7 +12,10 @@ namespace osu.XR.Input.Pointers {
 		public readonly BindableDouble RadiusBindable = new( 0.023 );
 
 		public TouchPointer () {
-			Mesh = Mesh.FromOBJFile( "./Resources/shpere.obj" );
+			Task.Run( () => {
+				var mesh = Mesh.FromOBJFile( "./Resources/shpere.obj" );
+				Schedule( () => Mesh = mesh );
+			} );
 			ShouldBeDepthSorted = true;
 		}
 

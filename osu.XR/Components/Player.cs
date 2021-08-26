@@ -6,6 +6,7 @@ using osu.XR.Settings;
 using osuTK;
 using osuTK.Graphics;
 using System;
+using System.Threading.Tasks;
 
 namespace osu.XR.Components {
 	public class Player : XrPlayer { // TODO move controllers here too
@@ -43,9 +44,21 @@ namespace osu.XR.Components {
 
 			FeetSymbols.BindValueChanged( v => {
 				if ( v.NewValue == Components.FeetSymbols.Shoes ) {
-					if ( shoe is null ) shoe = Mesh.FromOBJFile( @".\Resources\shoe.obj" );
-					footLeft.Mesh = shoe;
-					footRight.Mesh = shoe;
+					if ( shoe is null ) {
+						Task.Run( () => {
+							shoe = Mesh.FromOBJFile( @".\Resources\shoe.obj" );
+
+							Schedule( () => {
+								footLeft.Mesh = shoe;
+								footRight.Mesh = shoe;
+							} );
+						} );
+					}
+					else {
+						footLeft.Mesh = shoe;
+						footRight.Mesh = shoe;
+					}
+
 					footLeft.IsVisible = true;
 					footRight.IsVisible = true;
 
@@ -53,9 +66,21 @@ namespace osu.XR.Components {
 					footRight.Scale = new Vector3( -0.1f, 0.1f, 0.1f ) * 1.7f;
 				}
 				else if ( v.NewValue == Components.FeetSymbols.Paws ) {
-					if ( paw is null ) paw = Mesh.FromOBJFile( @".\Resources\paw.obj" );
-					footLeft.Mesh = paw;
-					footRight.Mesh = paw;
+					if ( paw is null ) {
+						Task.Run( () => {
+							paw = Mesh.FromOBJFile( @".\Resources\paw.obj" );
+
+							Schedule( () => {
+								footLeft.Mesh = paw;
+								footRight.Mesh = paw;
+							} );
+						} );
+					}
+					else {
+						footLeft.Mesh = paw;
+						footRight.Mesh = paw;
+					}
+
 					footLeft.IsVisible = true;
 					footRight.IsVisible = true;
 

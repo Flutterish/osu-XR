@@ -15,6 +15,7 @@ using osuTK;
 using osuTK.Graphics;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Valve.VR;
 using static osu.Framework.XR.Physics.Raycast;
 
@@ -55,8 +56,9 @@ namespace osu.XR.Input {
 		public XrController ( Controller controller ) {
 			AddInternal( ControllerMesh );
 			AddInternal( teleportVisual );
-			ControllerMesh.MainTexture = Textures.Pixel( controller.IsMainController ? Color4.Orange : Color4.LightBlue ).TextureGL;
-			touch.MainTexture = raycast.MainTexture = Textures.Pixel( ( controller.IsMainController ? Colour4.Orange : Colour4.LightBlue ).MultiplyAlpha( 100f / 255f ) ).TextureGL;
+			ControllerMesh.Tint = controller.IsMainController ? Color4.Orange : Color4.LightBlue;
+			touch.Tint = controller.IsMainController ? Colour4.Orange : Colour4.LightBlue;
+			touch.Alpha = 100f / 255f;
 			raycast.Source = this;
 			touch.Source = this;
 
