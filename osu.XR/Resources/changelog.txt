@@ -8,7 +8,7 @@ Added a shadow which can be toggled between none, footprints and paws.
 Added dust particles.
 You can now grip certain objects in edit mode (which is not yet implemented).
 Added a new skybox type - "Lights Out".
-Added ability to import props in the scene management panel. You can currently import .obj files and .mtl materials for them.
+Added ability to import props in the scene management panel. You are able to transform, rename and delete them. They do not support ruleset bindings yet. Imported props will not be saved yet.
 
 ## User Experience
 Inspector selections now have an animation.
@@ -17,15 +17,18 @@ The handheld menu now only shows the top panel and transitions between with a "p
 Panels now have tooltips.
 Updated the look of this changelog!
 Other minor UX changes.
+Model loading ( such as controllers ) is now done in the background which reduces load-lag.
 
 ## Bugfixes
 Fixed a bug where some drawables would render twice (the issue was that they would get loaded before being added to the 3d hierarchy and anything that worked on the hierarchy in the load method would cause this).
 Notification panel now doesnt open on startup.
 Keyboard is now focused correctly.
+Fixed a bug where touch pointers would register collisions where there were none.
 
 ## Framework
 Models' tint now is multiplied with alpha.
-Added ability to fully parse OBJ and MTL files, however they cannot be rendered properly yet.
+Added ability to fully parse OBJ and MTL files, however not all shader properties are supported.
+Added ability to fully parse BLEND files and extract meshes, however no material information can be extracted yet.
 
 ## Debugging
 The reflections inspector is now avaiable only in debug builds.
