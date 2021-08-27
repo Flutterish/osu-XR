@@ -95,9 +95,11 @@ namespace osu.XR.Inspector {
 					}
 					AddSection( config.CreateInspectorSubsection() );
 				}
-#if DEBUG
-				AddSection( new ReflectionsInspector( v.NewValue, "Inspected" ) );
-#endif
+
+				if ( System.Diagnostics.Debugger.IsAttached ) {
+					AddSection( new ReflectionsInspector( v.NewValue, "Inspected" ) );
+				}
+
 				keepSections.Clear();
 			}, true );
 		}

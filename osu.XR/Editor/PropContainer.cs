@@ -2,7 +2,6 @@
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.XR.Components;
-using osu.Framework.XR.Physics;
 using osu.Game.Overlays.Settings;
 using osu.XR.Inspector;
 using osu.XR.Settings.Sections;

@@ -1,11 +1,6 @@
 ﻿using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Input.Events;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Tests {
 	public class DragableDrawable : CompositeDrawable {

@@ -15,7 +15,6 @@ using osuTK;
 using osuTK.Graphics;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
 using Valve.VR;
 using static osu.Framework.XR.Physics.Raycast;
 
