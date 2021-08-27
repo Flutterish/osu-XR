@@ -8,11 +8,11 @@ namespace osu.XR.Tests {
 		protected override void LoadComplete () {
 			base.LoadComplete();
 
-			Add( new ChangelogDrawable {
+			Add( new DragableDrawable( new ChangelogDrawable {
 				Size = new Vector2( 400, 500 ),
 				Anchor = Anchor.Centre,
 				Origin = Anchor.Centre
-			} );
+			} ) );
 		}
 	}
 }

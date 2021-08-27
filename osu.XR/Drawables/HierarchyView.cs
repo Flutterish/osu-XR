@@ -363,6 +363,9 @@ namespace osu.XR.Drawables {
 		}
 		protected void RemoveChild ( Ttype value ) {
 			children.Remove( value, out var child );
+
+			if ( child is null ) return;
+
 			if ( IsExpanded.Value ) {
 				Remove( child );
 				InvokeSearchTermsModified();

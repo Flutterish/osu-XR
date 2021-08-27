@@ -9,7 +9,7 @@ namespace osu.XR.Tests {
 
 		protected override void LoadComplete () {
 			base.LoadComplete();
-			Add( new PanelOverlayContainer {
+			Add( new DragableDrawable( new PanelOverlayContainer {
 				Size = new Vector2( 400, 500 ) * 1.2f,
 				Child = scenePanel = new SceneManagerDrawable {
 					RelativeSizeAxes = Axes.Both,
@@ -18,7 +18,7 @@ namespace osu.XR.Tests {
 				},
 				Anchor = Anchor.Centre,
 				Origin = Anchor.Centre
-			} );
+			} ) );
 
 			scenePanel.SceneContainer = new Editor.SceneContainer();
 			Scene.Add( scenePanel.SceneContainer );

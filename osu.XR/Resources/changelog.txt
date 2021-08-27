@@ -1,4 +1,8 @@
-﻿[2021.08.26]
+﻿[Current]
+¯\_(ツ)_/¯
+
+
+[2021.08.26]
 ## New Features
 Added a scene management panel.
 You can now customize the skybox and the floor grid through the inspector.

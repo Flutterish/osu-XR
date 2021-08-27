@@ -14,11 +14,11 @@ namespace osu.XR.Tests {
 
 		protected override void LoadComplete () {
 			base.LoadComplete();
-			Add( inspector = new InspectorDrawable {
+			Add( new DragableDrawable( inspector = new InspectorDrawable {
 				Size = new Vector2( 400, 500 ),
 				Anchor = Anchor.Centre,
 				Origin = Anchor.Centre
-			} );
+			} ) );
 
 			Scene.Add( component = new TestComponent() );
 			AddStep( "Inspect element", () => inspector.InspectedElementBindable.Value = component );

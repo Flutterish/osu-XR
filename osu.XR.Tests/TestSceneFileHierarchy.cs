@@ -11,11 +11,11 @@ namespace osu.XR.Tests {
 		protected override void LoadComplete () {
 			base.LoadComplete();
 
-			Add( hierarchy = new FileHierarchyPanel() {
+			Add( new DragableDrawable( hierarchy = new FileHierarchyPanel() {
 				Size = new Vector2( 400, 500 ),
 				Anchor = Anchor.Centre,
 				Origin = Anchor.Centre
-			} );
+			} ) );
 
 			AddToggleStep( "IsMultiselect", v => hierarchy.preview.IsMultiselect = v );
 			AddToggleStep( "SelectionNavigates", v => hierarchy.preview.SelectionNavigates = v );

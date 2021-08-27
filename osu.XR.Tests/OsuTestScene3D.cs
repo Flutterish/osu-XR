@@ -1,23 +1,21 @@
 ﻿using osu.Framework.Graphics;
 using osu.Framework.XR.Components;
+using osu.Framework.XR.Testing;
 using osu.Game.Tests.Visual;
-using osuTK;
 
 namespace osu.XR.Tests {
 	public abstract class OsuTestScene3D : OsuTestScene {
-		protected Scene Scene;
+		protected readonly Scene Scene;
+
 		public OsuTestScene3D () {
-			Scene = new Scene {
-				RelativeSizeAxes = Axes.Both,
-				Camera = new() { Position = new Vector3( 1, 1, -3 ) }
-			};
-			Scene.Add( Scene.Camera );
-			Add( Scene );
+			Add( Scene = new TestingScene() );
 		}
 
-		protected override void LoadComplete () {
-			base.LoadComplete();
-			Scene.RenderToScreen = true;
+		public override void Add ( Drawable drawable ) {
+			if ( drawable is Drawable3D d3 )
+				Scene.Add( d3 );
+			else
+				base.Add( drawable );
 		}
 	}
 }

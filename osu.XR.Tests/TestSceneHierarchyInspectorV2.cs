@@ -12,11 +12,11 @@ namespace osu.XR.Tests {
 			base.LoadComplete();
 
 			Scene.Add( component = new TestComponent() );
-			Add( inspector = new HierarchyInspectorPanel( component ) {
+			Add( new DragableDrawable( inspector = new HierarchyInspectorPanel( component ) {
 				Size = new Vector2( 400, 500 ),
 				Anchor = Anchor.Centre,
 				Origin = Anchor.Centre
-			} );
+			} ) );
 
 			AddToggleStep( "IsMultiselect", v => inspector.preview.IsMultiselect = v );
 			AddToggleStep( "SelectionNavigates", v => inspector.preview.SelectionNavigates = v );
