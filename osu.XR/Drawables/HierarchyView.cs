@@ -23,7 +23,13 @@ namespace osu.XR.Drawables {
 		public event Action<Tstep> StepSelected;
 		public event Action SearchTermsModified;
 
-		FillFlowContainer hierarchy;
+		protected virtual FlowContainer<Drawable> CreateContentContainer () => new FillFlowContainer {
+			AutoSizeAxes = Axes.Y,
+			RelativeSizeAxes = Axes.X,
+			Direction = FillDirection.Vertical
+		};
+
+		FlowContainer<Drawable> hierarchy;
 
 		public readonly BindableList<HierarchyStep<Ttype>> MultiselectSelection = new();
 		public readonly BindableBool IsMultiselectBindable = new( false );
@@ -42,11 +48,7 @@ namespace osu.XR.Drawables {
 			AutoSizeAxes = Axes.Y;
 			Direction = FillDirection.Vertical;
 
-			Add( hierarchy = new FillFlowContainer {
-				AutoSizeAxes = Axes.Y,
-				RelativeSizeAxes = Axes.X,
-				Direction = FillDirection.Vertical
-			} );
+			Add( hierarchy = CreateContentContainer() );
 
 			setTop( CreateTop( value ) );
 			top.IsMultiselect.BindTo( IsMultiselectBindable );

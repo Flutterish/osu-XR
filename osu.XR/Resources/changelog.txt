@@ -1,5 +1,9 @@
 ﻿[Current]
-¯\_(ツ)_/¯
+## User Experience
+Inspector hierarchy now has its own searchbox.
+
+## Framework
+Improved physics performance.
 
 
 [2021.08.26]

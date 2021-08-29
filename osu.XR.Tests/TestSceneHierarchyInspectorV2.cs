@@ -30,9 +30,6 @@ namespace osu.XR.Tests {
 			Description = "browse drawables";
 
 			AddSection( preview = new HierarchyInspector( drawable ), name: "Hierarchy" );
-			preview.SearchTermsModified += () => {
-				Content.PerformFilter();
-			};
 		}
 	}
 }

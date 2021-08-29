@@ -2,7 +2,6 @@
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Utils;
-using osu.Framework.XR.Graphics.Containers;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
@@ -16,7 +15,7 @@ namespace osu.XR.Drawables.Containers {
 	public class ConfigurationContainer : CompositeDrawable {
 		OsuTextFlowContainer header;
 		Drawable headerOffset;
-		protected readonly AdvancedSearchContainer<string> Content; // TODO remove this. this was a meh idea at best ( it was used to also filter the hierarchy tree, it should use its own searchbar )
+		protected readonly SearchContainer Content;
 		protected readonly SearchTextBox SearchTextBox;
 		Drawable stickyHeader;
 		Drawable stickyHeaderBackground;
@@ -53,11 +52,10 @@ namespace osu.XR.Drawables.Containers {
 						Origin = Anchor.BottomCentre,
 						Colour = OsuColour.Gray( 0.05f )
 					},
-					Content = new AdvancedSearchContainer<string> {
+					Content = new SearchContainer {
 						Direction = FillDirection.Vertical,
 						RelativeSizeAxes = Axes.X,
-						AutoSizeAxes = Axes.Y,
-						RecursionMode = RecursiveFilterMode.ChildrenFirst
+						AutoSizeAxes = Axes.Y
 					}
 				}
 			} );

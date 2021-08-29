@@ -74,14 +74,6 @@ namespace osu.XR.Inspector {
 							keepSections.Add( hierarchy );
 							InspectedElementBindable.Value = s.Value;
 						};
-						hierarchy.SearchTermRequested = t => {
-							if ( SearchTextBox.Current.Value.EndsWith( " " ) ) {
-								SearchTextBox.Current.Value += t;
-							}
-							else {
-								SearchTextBox.Current.Value += " " + t;
-							}
-						};
 					}
 					else {
 						AddSection( hierarchy );

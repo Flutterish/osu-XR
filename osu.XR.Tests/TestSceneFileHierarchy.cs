@@ -29,9 +29,6 @@ namespace osu.XR.Tests {
 			Description = "select some files";
 
 			AddSection( preview = new FileHierarchyViewWithPreview { IsMultiselect = true, SelectionNavigates = false }, name: "Files" );
-			preview.SearchTermsModified += () => {
-				Content.PerformFilter();
-			};
 		}
 	}
 }

@@ -4,8 +4,10 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.XR.Components;
+using osu.Framework.XR.Graphics.Containers;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
+using osu.Game.Graphics.UserInterface;
 using osu.XR.Components.Groups;
 using osu.XR.Drawables;
 using osu.XR.Drawables.Containers;
@@ -107,7 +109,15 @@ namespace osu.XR.Inspector {
 	}
 
 	public class HierarchyInspector : HierarchyView<HierarchyInspectorStep, Drawable>, IHasName {
-		public Action<string> SearchTermRequested;
+		public SearchTextBox SearchTextBox;
+		private AdvancedSearchContainer<string> searchContainer;
+
+		protected override FlowContainer<Drawable> CreateContentContainer () => searchContainer = new AdvancedSearchContainer<string> {
+			AutoSizeAxes = Axes.Y,
+			RelativeSizeAxes = Axes.X,
+			Direction = FillDirection.Vertical,
+			RecursionMode = RecursiveFilterMode.ChildrenFirst
+		};
 
 		public HierarchyInspector ( Drawable value ) : base( value ) {
 			SelectedDrawable.Value = value;
@@ -117,18 +127,38 @@ namespace osu.XR.Inspector {
 				Title = "Legend",
 				Children = new Drawable[] {
 					makeIconText( HierarchyIcons.Selected, " - This is the element you are inspecting." ),
-					makeIconText( HierarchyIcons.Container, " - This element contains children. Use the arrow on the right to see them!", $"(search term: '{HierarchyIcons.ContainerTerm}')", () => SearchTermRequested?.Invoke( HierarchyIcons.ContainerTerm ) ),
+					makeIconText( HierarchyIcons.Container, " - This element contains children. Use the arrow on the right to see them!", $"(search term: '{HierarchyIcons.ContainerTerm}')", () => addSearchTerm( HierarchyIcons.ContainerTerm ) ),
 					makeIconText( HierarchyIcons.SwapProjection, " - This element is 3D and contains 2D children or vice versa." ),
 					makeIconText( HierarchyIcons.No( HierarchyIcons.Container ), " - This element has children, but hides them." ),
-					makeIconText( HierarchyIcons.HasSettings, " - This element has settings. When you inspect it, you can edit them here.", $"(search term: '{HierarchyIcons.HasSettingsTerm}')", () => SearchTermRequested?.Invoke( HierarchyIcons.HasSettingsTerm ) ),
-					makeIconText( HierarchyIcons.HasSettingsPersistent, " - The settings of this element persist after you close the game.", $"(search term: '{HierarchyIcons.HasSettingsPersistentTerm}')", () => SearchTermRequested?.Invoke( HierarchyIcons.HasSettingsPersistentTerm ) ),
-					makeIconText( HierarchyIcons.HasVisuals, " - This element will display its configuration in 3D space when inspected.", $"(search term: '{HierarchyIcons.HasVisualsTerm}')", () => SearchTermRequested?.Invoke( HierarchyIcons.HasVisualsTerm ) ),
-					makeIconText( HierarchyIcons.Experimental, " - This element is experimental and might not work as expected.", $"(search term: '{HierarchyIcons.ExperimentalTerm}')", () => SearchTermRequested?.Invoke( HierarchyIcons.ExperimentalTerm ) ),
-					makeIconText( HierarchyIcons.TwoD, " - This element is 2D.", $"(search term: '{HierarchyIcons.TwoDTerm}')", () => SearchTermRequested?.Invoke( HierarchyIcons.TwoDTerm ) ),
-					makeIconText( HierarchyIcons.ThreeD, " - This element is 3D.", $"(search term: '{HierarchyIcons.ThreeDTerm}')", () => SearchTermRequested?.Invoke( HierarchyIcons.ThreeDTerm ) ),
+					makeIconText( HierarchyIcons.HasSettings, " - This element has settings. When you inspect it, you can edit them here.", $"(search term: '{HierarchyIcons.HasSettingsTerm}')", () => addSearchTerm( HierarchyIcons.HasSettingsTerm ) ),
+					makeIconText( HierarchyIcons.HasSettingsPersistent, " - The settings of this element persist after you close the game.", $"(search term: '{HierarchyIcons.HasSettingsPersistentTerm}')", () => addSearchTerm( HierarchyIcons.HasSettingsPersistentTerm ) ),
+					makeIconText( HierarchyIcons.HasVisuals, " - This element will display its configuration in 3D space when inspected.", $"(search term: '{HierarchyIcons.HasVisualsTerm}')", () => addSearchTerm( HierarchyIcons.HasVisualsTerm ) ),
+					makeIconText( HierarchyIcons.Experimental, " - This element is experimental and might not work as expected.", $"(search term: '{HierarchyIcons.ExperimentalTerm}')", () => addSearchTerm( HierarchyIcons.ExperimentalTerm ) ),
+					makeIconText( HierarchyIcons.TwoD, " - This element is 2D.", $"(search term: '{HierarchyIcons.TwoDTerm}')", () => addSearchTerm( HierarchyIcons.TwoDTerm ) ),
+					makeIconText( HierarchyIcons.ThreeD, " - This element is 3D.", $"(search term: '{HierarchyIcons.ThreeDTerm}')", () => addSearchTerm( HierarchyIcons.ThreeDTerm ) ),
 				},
 				Margin = new MarginPadding { Horizontal = 15, Top = 10 }
 			} );
+
+			Insert( -1, SearchTextBox = new SearchTextBox {
+				RelativeSizeAxes = Axes.X,
+				Width = 0.95f,
+				Anchor = Anchor.TopCentre,
+				Origin = Anchor.TopCentre,
+				Margin = new MarginPadding { Vertical = 4 }
+			} );
+			SearchTextBox.Current.BindValueChanged( v => {
+				searchContainer.SearchTerm = v.NewValue ?? "";
+			}, true );
+		}
+
+		private void addSearchTerm ( string term ) {
+			if ( SearchTextBox.Current.Value.EndsWith( " " ) ) {
+				SearchTextBox.Current.Value += term;
+			}
+			else {
+				SearchTextBox.Current.Value += " " + term;
+			}
 		}
 
 		public readonly Bindable<Drawable> SelectedDrawable = new();
