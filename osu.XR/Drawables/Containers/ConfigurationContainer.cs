@@ -21,6 +21,7 @@ namespace osu.XR.Drawables.Containers {
 		Drawable stickyHeaderBackground;
 		Drawable titleBackground;
 		OsuScrollContainer scroll;
+		FormatedTextContainer thankyous;
 
 		public ConfigurationContainer () {
 			Masking = true;
@@ -90,6 +91,16 @@ namespace osu.XR.Drawables.Containers {
 			AddInternal( stickyHeader = wrap( CreateStickyHeader( SearchTextBox ), filterable: false ) );
 			stickyHeaderBackground = ( stickyHeader as Container ).Children[ 0 ];
 			titleBackground = ( title as Container ).Children[ 0 ];
+
+			Content.Insert( 99999999, wrap( thankyous = new FormatedTextContainer {
+				Origin = Anchor.Centre,
+				Anchor = Anchor.Centre,
+				TextAnchor = Anchor.TopCentre,
+				AutoSizeAxes = Axes.Both
+			}, filterable: false ) );
+
+			var supporter = supporters[ RNG.Next( supporters.Count ) ];
+			thankyous.Text = $"Osu!XR is mode with support of ||{supporter.name} <3||\n~~{supporter.message}~~\nAnd all ||Ko-fi|| supporters!";
 
 			SearchTextBox.Current.Value = "";
 			SearchTextBox.Current.ValueChanged += v => Content.SearchTerm = v.NewValue;
@@ -227,5 +238,12 @@ namespace osu.XR.Drawables.Containers {
 				CanBeFiltered = filterable
 			};
 		}
+
+		private static readonly List<(string name, string message)> supporters = new() {
+			( "Peri", "Lead developer" ),
+			( "Bloom", "A wonderful friend" ),
+			( "Mae", "The best girlfriend on the planet" ),
+			( "You", "Thanks for playing my game!" )
+		};
 	}
 }

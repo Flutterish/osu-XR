@@ -4,6 +4,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.XR.Allocation;
 using osu.Game.Graphics;
+using osuTK;
 using osuTK.Graphics;
 using System;
 using System.Collections.Generic;
@@ -16,9 +17,11 @@ namespace osu.XR.Drawables.Containers {
 	/// <typeparam name="Tsettings">The type used to keep track of effects to apply to the resulting text</typeparam>
 	public class FormatedTextContainer<Tsettings> : CompositeDrawable {
 		protected Dictionary<string, Action<Tsettings>> Formattings = new();
+		protected Dictionary<string, Func<Drawable>> Replacements = new();
 
 		protected Func<Tsettings> DefaultSettings;
-		protected Action<Tsettings, SpriteText> ApplySettings;
+		protected Action<Tsettings, SpriteText> ApplySettingsToText;
+		protected Action<Tsettings, Drawable> ApplySettingsToDrawable;
 
 		public Anchor TextAnchor {
 			get => textFlow.TextAnchor;
@@ -32,12 +35,16 @@ namespace osu.XR.Drawables.Containers {
 			get => base.AutoSizeAxes;
 			set => base.AutoSizeAxes = value;
 		}
-		TextFlowContainer textFlow;
-		protected FormatedTextContainer ( Func<Tsettings> defaultSettings, Action<Tsettings, SpriteText> applySettingsFunc ) {
+		ArbitraryTextFlowContainer textFlow;
+		private class ArbitraryTextFlowContainer : TextFlowContainer {
+			public void AddArbitraryDrawable ( Drawable d ) => AddInternal( d );
+		}
+		protected FormatedTextContainer ( Func<Tsettings> defaultSettings, Action<Tsettings, SpriteText> applySettingsToText, Action<Tsettings, Drawable> applySettingsToDrawable ) {
 			DefaultSettings = defaultSettings;
-			ApplySettings = applySettingsFunc;
+			ApplySettingsToText = applySettingsToText;
+			ApplySettingsToDrawable = applySettingsToDrawable;
 
-			AddInternal( textFlow = new TextFlowContainer {
+			AddInternal( textFlow = new ArbitraryTextFlowContainer {
 				AutoSizeAxes = Axes.Both
 			} );
 
@@ -63,10 +70,10 @@ namespace osu.XR.Drawables.Containers {
 			string collected = "";
 
 			bool canBeContinued ( string str ) {
-				return Formattings.Keys.Any( x => x != str && x.StartsWith( str ) );
+				return ( Formattings.Keys.Concat( Replacements.Keys ) ).Any( x => x != str && x.StartsWith( str ) );
 			}
 			bool hasMatch ( string str ) {
-				return Formattings.Keys.Contains( str );
+				return (Formattings.Keys.Concat( Replacements.Keys ) ).Contains( str );
 			}
 			string seek ( int from ) {
 				string match = "";
@@ -97,14 +104,18 @@ namespace osu.XR.Drawables.Containers {
 			using var activeSettings = ListPool<string>.Shared.Rent();
 
 			textFlow.Clear();
+			Tsettings currentSettings () {
+				Tsettings settings = DefaultSettings();
+				foreach ( var i in activeSettings ) {
+					Formattings[ i ]( settings );
+				}
+				return settings;
+			}
+
 			foreach ( var i in splices ) {
 				void render () {
 					textFlow.AddText( i, s => {
-						Tsettings settings = DefaultSettings();
-						foreach ( var i in activeSettings ) {
-							Formattings[ i ]( settings );
-						}
-						ApplySettings( settings, s );
+						ApplySettingsToText( currentSettings(), s );
 					} );
 				}
 
@@ -114,8 +125,21 @@ namespace osu.XR.Drawables.Containers {
 						activeSettings.Remove( i );
 					}
 					else {
-						activeSettings.Add( i );
-						if ( DisplayFormattingCharacters ) render();
+						if ( Replacements.TryGetValue( i, out var func ) ) {
+							var d = func();
+							if ( d is SpriteText t ) {
+								ApplySettingsToText( currentSettings(), t );
+								textFlow.AddArbitraryDrawable( t );
+							}
+							else {
+								ApplySettingsToDrawable( currentSettings(), d );
+								textFlow.AddArbitraryDrawable( d );
+							}
+						}
+						else {
+							activeSettings.Add( i );
+							if ( DisplayFormattingCharacters ) render();
+						}
 					}
 				}
 				else {
@@ -153,18 +177,39 @@ namespace osu.XR.Drawables.Containers {
 			);
 			t.Colour = s.Color;
 			t.Alpha = s.Alpha;
+		}, ( s, d ) => {
+			if ( d is not CompositeDrawable c || c.AutoSizeAxes == Axes.None ) d.Size = new Vector2( s.Size );
+			d.Colour = s.Color;
+			d.Alpha = s.Alpha;
 		} ) {
 			Formattings = new() {
 				[ "^^" ] = s => s.Size *= 4f / 3,
 				[ "*" ] = s => s.UseItalics = true,
 				[ "**" ] = s => s.Weight = FontWeight.Bold,
 				[ "~~" ] = s => {
-					s.Size *= 2f / 3;
+					s.Size *= 3f / 4;
 					s.Alpha /= 2;
 				},
 				[ "||" ] = s => {
 					s.Weight = FontWeight.Bold;
 					s.Color = Color4.HotPink;
+				}
+			};
+
+			Replacements = new() {
+				[ "<3" ] = () => {
+					return new BeatSyncedFlashingDrawable {
+						Child = new SpriteIcon {
+							Icon = FontAwesome.Solid.Heart,
+							Origin = Anchor.CentreLeft,
+							Anchor = Anchor.CentreLeft,
+							RelativeSizeAxes = Axes.Both,
+							Size = new Vector2( 0.8f )
+						}
+					};
+				},
+				[ "Ko-fi" ] = () => {
+					return new SpriteText { Text = "Ko-fi" };//return new MarkdownLinkText( "Ko-fi", "https://ko-fi.com/perigee" ) { };
 				}
 			};
 		}
