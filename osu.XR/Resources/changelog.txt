@@ -2,6 +2,7 @@
 ## User Experience
 Inspector hierarchy now has its own searchbox.
 Thanks to jjbeaniguess for providing new default bindings for oculus touch controllers <3
+Can no longer accidentally adjust volume while playing with scroll bindings.
 
 ## Bugfixes
 Pointers have the correct tint again.

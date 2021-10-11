@@ -126,15 +126,6 @@ namespace osu.XR.Components.Panels {
 		private void onTouchUp ( XrController controller ) {
 			EmulatedInput.TouchUp( controller );
 		}
-
-		public bool CanBeGripped => true;
-		public bool AllowsGripMovement => true;
-		public bool AllowsGripScaling => true;
-		public bool AllowsGripRotation => true;
-
-		public void OnGripped ( object source, GripGroup group ) { }
-
-		public void OnGripReleased ( object source, GripGroup group ) { }
 	}
 
 	public enum PanelInputMode {

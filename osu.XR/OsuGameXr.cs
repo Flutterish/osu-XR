@@ -408,10 +408,14 @@ namespace osu.XR {
 		void onPlayerEntered ( PlayerInfo info ) {
 			if ( info.Mods.Value.Any( x => x is ModAutoplay ) ) return;
 
+			OsuPanel.EmulatedInput.AllowScroll = false;
 			info.InputManager.Add( injectedInput = new InjectedInput( InputBindings.GetBindingsForVariant( info.Variant ), info ) );
 		}
 
 		void onPlayerExit ( PlayerInfo info ) {
+			if ( info.Mods.Value.Any( x => x is ModAutoplay ) ) return;
+
+			OsuPanel.EmulatedInput.AllowScroll = true;
 			injectedInput = null;
 		}
 	}
