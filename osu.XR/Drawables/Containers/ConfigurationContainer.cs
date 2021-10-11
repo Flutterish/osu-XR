@@ -21,7 +21,7 @@ namespace osu.XR.Drawables.Containers {
 		Drawable stickyHeaderBackground;
 		Drawable titleBackground;
 		OsuScrollContainer scroll;
-		FormatedTextContainer thankyous;
+		FormatedText thankyous;
 
 		public ConfigurationContainer () {
 			Masking = true;
@@ -92,15 +92,14 @@ namespace osu.XR.Drawables.Containers {
 			stickyHeaderBackground = ( stickyHeader as Container ).Children[ 0 ];
 			titleBackground = ( title as Container ).Children[ 0 ];
 
-			Content.Insert( 99999999, wrap( thankyous = new FormatedTextContainer {
-				Origin = Anchor.Centre,
-				Anchor = Anchor.Centre,
-				TextAnchor = Anchor.TopCentre,
-				AutoSizeAxes = Axes.Both
+			Content.Insert( 99999999, wrap( thankyous = new BasicFormatedText {
+				AutoSizeAxes = Axes.Y,
+				RelativeSizeAxes = Axes.X,
+				TextAnchor = Anchor.TopCentre
 			}, filterable: false ) );
 
 			var supporter = supporters[ RNG.Next( supporters.Count ) ];
-			thankyous.Text = $"Osu!XR is mode with support of ||{supporter.name} <3||\n~~{supporter.message}~~\nAnd all ||Ko-fi|| supporters!";
+			thankyous.Text = $"{supporter.Leadin} ||{supporter.Name} {supporter.Icon}||\n~~{supporter.Message}~~\nAnd all [Ko-fi](https://ko-fi.com/perigee) supporters!";
 
 			SearchTextBox.Current.Value = "";
 			SearchTextBox.Current.ValueChanged += v => Content.SearchTerm = v.NewValue;
@@ -239,11 +238,19 @@ namespace osu.XR.Drawables.Containers {
 			};
 		}
 
-		private static readonly List<(string name, string message)> supporters = new() {
-			( "Peri", "Lead developer" ),
-			( "Bloom", "A wonderful friend" ),
-			( "Mae", "The best girlfriend on the planet" ),
-			( "You", "Thanks for playing my game!" )
+		private record FooterMessage( string Name, string Message ) {
+			public string Leadin { get; init; } = "Osu!XR is made with support of";
+			public string Icon { get; init; } = "<3";
+		}
+		private static readonly List<FooterMessage> supporters = new() {
+			new FooterMessage( "Peri", "That's me!" ) { Icon = ":solid-terminal:", Leadin = "Osu!XR would not exist without" },
+			new FooterMessage( "Bloom", "A wonderful friend" ) { Icon = ":solid-terminal:" },
+			new FooterMessage( "Nooraldeen", "A great friend and an even greater mental support" ),
+			new FooterMessage( "Mae", "The best girlfriend on the planet" ),
+			new FooterMessage( "Ifnis", "The best boyfriend on the planet" ),
+			new FooterMessage( "You", "Thanks for playing my game!" ) { Icon = ":solid-star:", Leadin = "Osu!XR would not be the same without" },
+			new FooterMessage( "Peppy", "He made osu! Thank you for inspiring me <3" ) { Icon = ":osu-rulesetosu:", Leadin = "Osu!XR would not exist if not for" },
+			new FooterMessage( "jjbeaniguess", "They made controller bindings for oculus touch" )
 		};
 	}
 }

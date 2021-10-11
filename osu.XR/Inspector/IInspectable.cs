@@ -46,7 +46,7 @@ namespace osu.XR.Inspector {
 	public static class IConfigurableInspectableExtensions {
 		public static Drawable? CreateWarnings ( this IConfigurableInspectable self ) {
 			if ( !self.AreSettingsPersistent ) {
-				return new FormatedTextContainer( () => new() { Size = 20 } ) {
+				return new BasicFormatedText {
 					RelativeSizeAxes = Axes.X,
 					AutoSizeAxes = Axes.Y,
 					Text = "||Warning:|| Some or all of these settings are **not** persistent\n~~They will not be saved after you close the game~~",

@@ -8,22 +8,23 @@ using osuTK.Graphics;
 
 namespace osu.XR {
 	public class SceneWithMirrorWarning : Scene {
-		FormatedTextContainer text;
+		BasicFormatedText text;
 		SpriteIcon iconA;
 		SpriteIcon iconB;
 
 		public SceneWithMirrorWarning () {
 			Add( new Container {
 				Children = new Drawable[] {
-					text = new FormatedTextContainer( () => new FontSetings { Size = 30 } ) {
+					text = new BasicFormatedText {
 						Origin = Anchor.Centre,
 						Anchor = Anchor.Centre,
-						TextAnchor = Anchor.Centre,
+						TextAnchor = Anchor.TopCentre,
 						AutoSizeAxes = Axes.Both,
 						Text = "^^**Warning**^^\n" +
 						"Screen mirroring is turned ||off||\n" +
 						"You can enable it in XrSettings\n" +
-						"~~If the screen jitters, alt-enter a few times~~"
+						"~~If the screen jitters, alt-enter a few times~~",
+						Scale = new Vector2( 1.5f )
 					},
 
 					iconA = new SpriteIcon {

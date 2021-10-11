@@ -56,7 +56,7 @@ namespace osu.XR.Input {
 			AddInternal( ControllerMesh );
 			AddInternal( teleportVisual );
 			ControllerMesh.Tint = controller.IsMainController ? Color4.Orange : Color4.LightBlue;
-			touch.Tint = controller.IsMainController ? Colour4.Orange : Colour4.LightBlue;
+			raycast.Tint = touch.Tint = controller.IsMainController ? Colour4.Orange : Colour4.LightBlue;
 			touch.Alpha = 100f / 255f;
 			raycast.Source = this;
 			touch.Source = this;
