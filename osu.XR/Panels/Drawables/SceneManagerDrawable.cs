@@ -6,6 +6,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.XR;
 using osu.Framework.XR.Allocation;
 using osu.Framework.XR.Components;
+using osu.Framework.XR.Materials;
 using osu.Framework.XR.Parsing;
 using osu.Framework.XR.Parsing.Blender;
 using osu.Framework.XR.Parsing.WaveFront;
@@ -206,7 +207,7 @@ namespace osu.XR.Panels.Drawables {
 									new GripableCollider {
 										Mesh = mesh,
 										Tint = mat.Albedo,
-										MainTexture = mat.Texture?.TextureGL ?? Model.WhitePixelTexture,
+										MainTexture = mat.Texture?.TextureGL ?? Material.WhitePixelTexture,
 										PhysicsLayer = GamePhysicsLayer.Prop
 									},
 									k.Name

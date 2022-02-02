@@ -4,7 +4,6 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics.Cursor;
 using osu.Framework.XR.Components;
 using osu.XR.Drawables.Containers;
-using osu.XR.Editor;
 using osu.XR.Input;
 using osu.XR.Settings;
 using osuTK;

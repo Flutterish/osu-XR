@@ -9,10 +9,7 @@ namespace osu.XR.Tests {
 		[STAThread]
 		public static int Main ( string[] args ) {
 			using ( DesktopGameHost host = Host.GetSuitableHost( @"osu", true ) ) {
-				var browser = new OsuTestBrowser();
-				browser.OnLoadComplete += _ => {
-					browser.Resources.AddStore( new DllResourceStore( osu.Framework.XR.Resources.ResourceAssembly ) );
-				};
+				var browser = new OsuTestBrowser3D();
 				host.Run( browser );
 				return 0;
 			}

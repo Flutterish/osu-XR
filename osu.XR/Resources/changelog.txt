@@ -10,6 +10,8 @@ Fixed "Screen mirroring" formatting after updating farmatting function last upda
 
 ## Framework
 Improved physics performance.
+You can now open files and URLs externally.
+Materials can now be created.
 
 
 [2021.08.26]
