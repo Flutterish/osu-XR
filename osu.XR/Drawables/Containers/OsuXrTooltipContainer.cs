@@ -26,11 +26,8 @@ namespace osu.XR.Drawables.Containers {
             LocalisableString current;
             private bool instantMovement = true;
 
-            public override bool SetContent ( object content ) {
-                if ( !( content is LocalisableString contentString ) )
-                    return false;
-
-                if ( contentString == current ) return true;
+			public override void SetContent ( LocalisableString contentString ) {
+                if ( contentString == current ) return;
 
                 current = contentString;
                 text.Text = current.ToString();
@@ -42,7 +39,7 @@ namespace osu.XR.Drawables.Containers {
                 else
                     AutoSizeDuration = 0;
 
-                return true;
+                return;
             }
 
             public OsuXrTooltip () {

@@ -255,7 +255,7 @@ namespace osu.XR.Inspector {
 		public static readonly Func<CompositeDrawable, IReadOnlyList<Drawable>> getInternalChildren = x => getInternalChildrenMethod.Invoke( x, Array.Empty<object>() ) as IReadOnlyList<Drawable>;
 		public static readonly MethodInfo getAliveInternalChildrenMethod = typeof( CompositeDrawable ).GetProperty( nameof( AliveInternalChildren ), BindingFlags.NonPublic | BindingFlags.Instance ).GetGetMethod( nonPublic: true );
 		public static readonly Func<CompositeDrawable, IReadOnlyList<Drawable>> getAliveInternalChildren = x => getAliveInternalChildrenMethod.Invoke( x, Array.Empty<object>() ) as IReadOnlyList<Drawable>;
-		IEnumerable<Drawable> selectedIcon;
+		IEnumerable<ITextPart> selectedIcon;
 		protected override void LoadComplete () {
 			base.LoadComplete();
 
@@ -280,13 +280,16 @@ namespace osu.XR.Inspector {
 				};
 			}
 
-			selectedIcon = Label.AddText( " " ).Concat( Label.AddIcon( HierarchyIcons.Selected, f => {
-				f.Font = OsuFont.GetFont( size: 12 );
-				f.Colour = HierarchyIcons.IconColor;
-			} ) );
+			selectedIcon = new[] {
+				Label.AddText( " " ),
+				Label.AddIcon( HierarchyIcons.Selected, f => {
+					f.Font = OsuFont.GetFont( size: 12 );
+					f.Colour = HierarchyIcons.IconColor;
+				} )
+			};
 
 			SelectedDrawable.BindValueChanged( v => {
-				foreach ( var i in selectedIcon ) {
+				foreach ( var i in selectedIcon.SelectMany( x => x.Drawables ) ) {
 					i.FadeTo( v.NewValue == Value ? 1 : 0, 300 );
 					i.ScaleTo( new Vector2( v.NewValue == Value ? 1 : 0, 1 ), 300, Easing.Out );
 				}

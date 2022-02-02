@@ -185,7 +185,7 @@ namespace osu.XR.Input { // BUG there is something wrong when inputting text wit
 			public event Action<KeyboardKey> Released;
 
 			public XrKey () {
-				KeyMesh.MainTexture = Textures.Pixel( Color4.Gray ).TextureGL;
+				KeyMesh.Tint = OsuColour.Gray( 0.2f );
 				AddInternal( KeyMesh );
 				AddInternal( panel );
 				panel.AutosizeBoth();
@@ -309,11 +309,11 @@ namespace osu.XR.Input { // BUG there is something wrong when inputting text wit
 				else if ( value == "Host" ) text.AddIcon( OsuIcon.Logo ); // TODO either yeet this key or find usage and make the icon a circle with "XR!"
 				else if ( value == "BackSpc" ) text.AddIcon( FontAwesome.Solid.Backspace );
 				else if ( value == "Enter" ) {
-					foreach ( var i in text.AddIcon( FontAwesome.Solid.LevelDownAlt ) )
+					foreach ( var i in text.AddIcon( FontAwesome.Solid.LevelDownAlt ).Drawables )
 						i.Rotation = 90;
 				}
 				else if ( value == "␣" ) {
-					foreach ( var i in text.AddText( "[" ) ) {
+					foreach ( var i in text.AddText( "[" ).Drawables ) {
 						i.Scale = new Vector2( 2 );
 						i.Rotation = -90;
 					}

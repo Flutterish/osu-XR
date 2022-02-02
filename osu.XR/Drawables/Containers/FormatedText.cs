@@ -90,8 +90,10 @@ namespace osu.XR.Drawables.Containers {
 					AddRange( drawables );
 				}
 				else {
-					var t = new TextFlowContainer { Text = substr };
-					var c = t.Children.ToArray();
+					var t = new TextFlowContainer();
+					var part = t.AddText( substr );
+					part.RecreateDrawablesFor( t );
+					var c = part.Drawables.ToArray();
 					t.Clear( disposeChildren: false );
 					AddRange( c );
 				}
@@ -210,8 +212,11 @@ namespace osu.XR.Drawables.Containers {
 		public virtual IEnumerable<Drawable> Format ( Match beginMatch, string text, Match endMatch )
 			=> Format( text );
 		public virtual IEnumerable<Drawable> Format ( string text ) {
-			var t = new TextFlowContainer { Text = text };
-			foreach ( SpriteText i in t.Children ) {
+			var t = new TextFlowContainer();
+			var p = t.AddText( text );
+			p.RecreateDrawablesFor( t );
+			t.Clear( false );
+			foreach ( SpriteText i in p.Drawables ) {
 				yield return new OsuSpriteText { 
 					Text = i.Text, 
 					Font = OsuFont.GetFont( size: i.Font.Size )

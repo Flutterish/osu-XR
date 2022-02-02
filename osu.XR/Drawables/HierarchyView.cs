@@ -599,13 +599,11 @@ namespace osu.XR.Drawables {
 
 		protected override bool OnHover ( HoverEvent e ) {
 			Glowing = true;
-			Expanded = true;
 			return base.OnHover( e );
 		}
 
 		protected override void OnHoverLost ( HoverLostEvent e ) {
 			base.OnHoverLost( e );
-			Expanded = false;
 			Glowing = false;
 		}
 
