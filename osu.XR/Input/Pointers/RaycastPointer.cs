@@ -18,7 +18,6 @@ namespace osu.XR.Input.Pointers {
 			Mesh.AddCircle( new Vector3( 0, 0, -0.01f ), Vector3.UnitZ, Vector3.UnitX * 0.04f, 30 );
 			Mesh.AddCircle( new Vector3( 0, 0, -0.02f ), Vector3.UnitZ, Vector3.UnitX * 0.014f, 30 );
 
-			MainTexture = Textures.Pixel( new osuTK.Graphics.Color4( 255, 255, 255, 100 ) ).TextureGL;
 			ShouldBeDepthSorted = true;
 		}
 		protected override void UpdatePointer () {
