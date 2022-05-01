@@ -33,8 +33,8 @@ namespace osu.XR.Components.Panels {
 			Config.BindWith( XrConfigSetting.ScreenHeight, screenHeightBindable );
 			screenHeightBindable.BindValueChanged( v => Y = v.NewValue, true );
 
-			screenResX.BindValueChanged( v => osuGame.Width = v.NewValue, true );
-			screenResY.BindValueChanged( v => osuGame.Height = v.NewValue, true );
+			screenResX.BindValueChanged( v => Width = osuGame.Width = v.NewValue, true );
+			screenResY.BindValueChanged( v => Height = osuGame.Height = v.NewValue, true );
 
 			Config.BindWith( XrConfigSetting.ScreenRadius, RadiusBindable );
 			Config.BindWith( XrConfigSetting.ScreenArc, ArcBindable );

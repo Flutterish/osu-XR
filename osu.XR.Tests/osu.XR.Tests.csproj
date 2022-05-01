@@ -3,7 +3,7 @@
 	<StartupObject>osu.XR.Tests.VisualTestRunner</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
 	<LangVersion>preview</LangVersion>
     <IsPackable>false</IsPackable>
     <OutputType>WinExe</OutputType>

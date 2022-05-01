@@ -48,7 +48,7 @@ namespace osu.XR.Components.Groups {
 						( typeof( SidebarIconButton ).GetField( "headerText", BindingFlags.NonPublic | BindingFlags.Instance ).GetValue( button ) as SpriteText ).Text = (i as IHasName)?.DisplayName ?? "Unnamed Panel";
 						button.Action = () => {
 							Focus( i );
-							sidebar.State = ExpandedState.Contracted;
+							sidebar.Expanded.Value = false;
 						};
 						sidebar.Add( button );
 					}
@@ -90,7 +90,7 @@ namespace osu.XR.Components.Groups {
 				i.Hide();
 			}
 			sidebar.FadeOut( 300 );
-			sidebar.State = ExpandedState.Contracted;
+			sidebar.Expanded.Value = false;
 		}
 
 		public override void Show () {
@@ -98,7 +98,7 @@ namespace osu.XR.Components.Groups {
 				i.Show();
 			}
 			sidebar.FadeIn( 300 );
-			sidebar.State = ExpandedState.Expanded;
+			sidebar.Expanded.Value = true;
 			applyTransforms();
 		}
 	}

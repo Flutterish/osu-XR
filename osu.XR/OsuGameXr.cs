@@ -3,6 +3,7 @@ using OpenVR.NET.Manifests;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input;
 using osu.Framework.Input.Bindings;
@@ -248,6 +249,7 @@ namespace osu.XR {
 			base.LoadComplete();
 
 			OsuGame = new OsuGame( args ) { RelativeSizeAxes = Axes.None, Size = new Vector2( 1920 * 2, 1080 ) };
+			dependency.CacheAs<ISafeArea>( OsuPanel );
 			OsuGame.SetHost( Host );
 			AddInternal( OsuGame );
 
