@@ -21,3 +21,5 @@ If you use a different controller and made good bindings, make sure you contribu
 
 # ⚠️ WARNING ⚠️
 oxr is currently not in best shape. There are bugs, naming inconsistencies and awkward limitations. This codebase will undergo an overhaul, which means na major updates for a while.
+
+The project is also currently linked to local copies of osu!lazer (as its needed to embed the 4 standard game modes) and o!f-xr (because I didn't make a nuget yet). If you wish to contribute, you will need to clone them too for the time being.
