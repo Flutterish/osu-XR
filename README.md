@@ -16,3 +16,6 @@ Default controller bindings exist for:
 * HTC Vive
 
 If you use a different controller and made good bindings, make sure you contribute them to the project!
+
+# ⚠️ WARNING ⚠️
+oxr is currently not in best shape. There are bugs, naming inconsistencies and awkward limitations. This codebase will undergo an overhaul, which means na major updates for a while.
