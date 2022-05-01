@@ -69,6 +69,9 @@ namespace osu.XR.Drawables {
 					writer.Write( reader.ReadToEnd() );
 					writer.Flush();
 				}
+				else {
+					saveFile = new();
+				}
 			}
 			catch ( Exception e ) {
 				saveFile = new();

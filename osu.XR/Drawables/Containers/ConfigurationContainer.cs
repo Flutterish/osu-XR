@@ -250,7 +250,9 @@ namespace osu.XR.Drawables.Containers {
 			new FooterMessage( "Ifnis", "The best boyfriend on the planet" ),
 			new FooterMessage( "You", "Thanks for playing my game!" ) { Icon = ":solid-star:", Leadin = "Osu!XR would not be the same without" },
 			new FooterMessage( "Peppy", "He made osu! Thank you for inspiring me <3" ) { Icon = ":osu-rulesetosu:", Leadin = "Osu!XR would not exist if not for" },
-			new FooterMessage( "jjbeaniguess", "They made controller bindings for oculus touch" )
+			new FooterMessage( "jjbeaniguess", "They made controller bindings for oculus touch" ),
+			new FooterMessage( "Nek0ffee", "A Ko-fi supporter" ),
+			new FooterMessage( "Valent1", "A Ko-fi supporter who helped squash some bugs" )
 		};
 	}
 }

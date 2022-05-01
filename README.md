@@ -2,6 +2,8 @@
 Rhythmic immersion on another level.
 
 osu!XR is a VR port of osu!lazer.
+
+If you would like to receive notifications when a new o!xr release is published and/or join the discussion about it, [join our osu ruleset discord server](discord.gg/QGqD3eBx7b) and ask for an osu-xr role which is pinged when a new release is published.
 # Features
 osu!XR allows you to play all the official and custom rulesets osu!lazer does.
 
