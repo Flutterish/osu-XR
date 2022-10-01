@@ -1,5 +1,4 @@
 ﻿using osu.Framework.XR.Graphics.Panels;
-using osu.Framework.XR.Maths;
 
 namespace osu.XR.Graphics.Panels;
 
