@@ -6,7 +6,7 @@ namespace osu.XR {
 	public static class Program {
 		[STAThread]
 		public static int Main () {
-			using var host = Host.GetSuitableDesktopHost( "osu!XR", new HostOptions { BindIPC = true } );
+			using var host = Host.GetSuitableDesktopHost( "osu", new HostOptions { BindIPC = true } );
 			host.ExceptionThrown += handleException;
 			host.Run( new OsuXrGame() );
 			return 0;
