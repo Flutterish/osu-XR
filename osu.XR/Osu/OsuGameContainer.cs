@@ -16,6 +16,7 @@ public class OsuGameContainer : CompositeDrawable {
 		OsuDependencies.OsuGame.Value = osu;
 
 		osu.SetHost( host );
+		AddInternal( new Box { RelativeSizeAxes = Axes.Both, Colour = Colour4.Black } );
 		AddInternal( osu );
 	}
 }
