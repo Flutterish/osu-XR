@@ -1,2 +1,2 @@
 ﻿global using osu.Framework.XR.Graphics;
-global using osuTK;
+global using osu.Framework.Graphics;

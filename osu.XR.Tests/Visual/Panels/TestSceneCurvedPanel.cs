@@ -10,7 +10,7 @@ public class TestSceneCurvedPanel : Basic3DTestScene {
 		Scene.Add( panel = new CurvedPanel {
 			ContentSize = new( 500 )
 		} );
-		panel.Content.Add( new Box { RelativeSizeAxes = Framework.Graphics.Axes.Both, Colour = Color4.Gray } );
+		panel.Content.Add( new Box { RelativeSizeAxes = Axes.Both, Colour = Color4.Gray } );
 		panel.Content.Add( new SpriteText { Text = "Hello, World!" } );
 	}
 }

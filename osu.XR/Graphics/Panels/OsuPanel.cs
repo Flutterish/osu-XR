@@ -1,18 +1,14 @@
-﻿using osu.Framework.XR.Graphics.Materials;
-using osu.XR.Graphics.Materials;
+﻿using osu.Framework.XR.Graphics.Panels;
+using osu.XR.Allocation;
 using osu.XR.Osu;
 
 namespace osu.XR.Graphics.Panels;
 
-public class OsuPanel : CurvedPanel {
-	public readonly OsuGameContainer GameContainer;
-
-	public OsuPanel () {
-		RenderStage = RenderingStage.Transparent;
-		Content.Add( GameContainer = new() );
-	}
-
-	protected override Material GetDefaultMaterial ( MaterialStore materials ) {
-		return materials.GetNew( MaterialNames.PanelTransparent );
+/// <summary>
+/// A panel whose content can resolve osu dependencies
+/// </summary>
+public class OsuPanel : Panel {
+	protected override IReadOnlyDependencyContainer CreateChildDependencies ( IReadOnlyDependencyContainer parent ) {
+		return base.CreateChildDependencies( new MergedDepencencyContainer( parent.Get<OsuDependencies>(), parent ) );
 	}
 }
