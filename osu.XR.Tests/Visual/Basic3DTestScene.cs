@@ -1,13 +1,20 @@
-﻿using osu.Framework.XR.Graphics.Meshes;
+﻿using osu.Framework.XR.Components;
+using osu.Framework.XR.Graphics.Meshes;
 using osu.Framework.XR.Graphics.Rendering;
+using osu.Framework.XR.Physics;
 using osu.Framework.XR.Testing;
 using osu.XR.Graphics;
 using osuTK.Graphics;
 
 namespace osu.XR.Tests.Visual;
 
-public class Basic3DTestScene : TestScene3D {
+public abstract class Basic3DTestScene : TestScene3D {
+	public readonly PhysicsSystem Physics = new();
+	public readonly PanelInteractionSystem InteractionSystem;
+
 	public Basic3DTestScene () {
+		Physics.AddSubtree( Scene.Root );
+		Add( InteractionSystem = new( Scene, Physics ) { RelativeSizeAxes = Axes.Both } );
 		Scene.Camera.Z = -10;
 
 		Scene.Add( new BasicModel() {
