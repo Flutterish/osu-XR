@@ -1,4 +1,5 @@
 ﻿using osu.Framework.Platform;
+using osu.Framework.XR.Graphics.Panels;
 using osu.Game;
 
 namespace osu.XR.Osu;
@@ -8,14 +9,22 @@ namespace osu.XR.Osu;
 /// </summary>
 public class OsuGameContainer : CompositeDrawable {
 	public readonly OsuDependencies OsuDependencies = new();
+	public VirtualGameHost VirtualGameHost { get; private set; } = null!;
+
+	protected override IReadOnlyDependencyContainer CreateChildDependencies ( IReadOnlyDependencyContainer parent ) {
+		var deps = new DependencyContainer( parent );
+		VirtualGameHost = new( parent.Get<GameHost>() );
+		deps.CacheAs<GameHost>( VirtualGameHost );
+		return base.CreateChildDependencies( deps );
+	}
 
 	[BackgroundDependencyLoader]
-	private void load ( GameHost host ) {
+	private void load () {
 		RelativeSizeAxes = Axes.Both;
 		var osu = new OsuGame();
 		OsuDependencies.OsuGame.Value = osu;
 
-		osu.SetHost( host );
+		osu.SetHost( VirtualGameHost );
 		AddInternal( new Box { RelativeSizeAxes = Axes.Both, Colour = Colour4.Black } );
 		AddInternal( osu );
 	}

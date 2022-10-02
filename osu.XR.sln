@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "osu.XR", "osu.XR\osu.XR.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "osu.XR.Tests", "osu.XR.Tests\osu.XR.Tests.csproj", "{C2B2991F-73CE-43DC-A1DE-9BED194B19A9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "osu.XR.Desktop", "osu.XR.Desktop\osu.XR.Desktop.csproj", "{A84C2AEA-EE91-4A43-9F95-B704E4E7E44F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "osu.XR.Desktop", "osu.XR.Desktop\osu.XR.Desktop.csproj", "{A84C2AEA-EE91-4A43-9F95-B704E4E7E44F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
