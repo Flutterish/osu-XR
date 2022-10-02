@@ -1,31 +1,30 @@
 ﻿using osu.Framework.Input.Events;
-using osu.Framework.XR.Graphics.Rendering;
 using osu.Framework.XR.Physics;
 using osu.Framework.XR.Testing;
+using osu.XR.Graphics;
 using osu.XR.Graphics.Panels;
-using osu.XR.Osu;
+using osu.XR.Graphics.Scenes;
 
 namespace osu.XR;
 
 public class OsuXrGame : OsuXrGameBase {
-	Scene Scene;
-	CurvedPanel osuPanel;
-	OsuGameContainer gameContainer;
+	OsuXrScene scene;
+	OsuPanel osuPanel;
 
 	public OsuXrGame () {
-		Scene = new() {
+		scene = new() {
 			RelativeSizeAxes = Axes.Both
 		};
-		Scene.Camera.Z = -5;
-		Scene.Add( osuPanel = new() {
+		scene.Camera.Z = -5;
+		scene.Add( osuPanel = new() {
 			ContentSize = new( 1920, 1080 )
 		} );
-		osuPanel.Content.Add( gameContainer = new() );
 	}
 
 	protected override void LoadComplete () {
 		base.LoadComplete();
-		Add( Scene );
+		Add( scene );
+		scene.Add( new GridScene() );
 	}
 
 	#region NonVr Interaction
@@ -34,7 +33,7 @@ public class OsuXrGame : OsuXrGameBase {
 	Vector3 CameraOrigin;
 
 	protected override bool OnMouseMove ( MouseMoveEvent e ) {
-		e.Target = Scene;
+		e.Target = scene;
 		osuPanel.Content.HasFocus = true;
 		if ( tryHit( e.MousePosition, out var pos ) ) {
 			if ( useTouch && touchDown )
@@ -45,12 +44,12 @@ public class OsuXrGame : OsuXrGameBase {
 			return true;
 		}
 		else if ( ControlType is ControlType.Fly ) {
-			e.Target = Scene;
+			e.Target = scene;
 
 			var eulerX = Math.Clamp( e.MousePosition.Y / DrawHeight * 180 - 90, -89, 89 );
 			var eulerY = e.MousePosition.X / DrawWidth * 720 + 360;
 
-			Scene.Camera.Rotation = Quaternion.FromAxisAngle( Vector3.UnitY, eulerY * MathF.PI / 180 )
+			scene.Camera.Rotation = Quaternion.FromAxisAngle( Vector3.UnitY, eulerY * MathF.PI / 180 )
 				* Quaternion.FromAxisAngle( Vector3.UnitX, eulerX * MathF.PI / 180 );
 		}
 
@@ -58,7 +57,7 @@ public class OsuXrGame : OsuXrGameBase {
 	}
 
 	protected override bool OnDragStart ( DragStartEvent e ) {
-		e.Target = Scene;
+		e.Target = scene;
 		if ( tryHit( e.MouseDownPosition, out _ ) ) {
 			return false;
 		}
@@ -71,34 +70,34 @@ public class OsuXrGame : OsuXrGameBase {
 			var dy = e.Delta.Y / DrawHeight;
 
 			if ( e.ShiftPressed ) {
-				var m = ( Scene.Camera.Position - CameraOrigin ).Length * 2;
-				Scene.Camera.Position -= m * dx * Scene.Camera.Right;
-				Scene.Camera.Position += m * dy * Scene.Camera.Up;
-				CameraOrigin -= m * dx * Scene.Camera.Right;
-				CameraOrigin += m * dy * Scene.Camera.Up;
+				var m = ( scene.Camera.Position - CameraOrigin ).Length * 2;
+				scene.Camera.Position -= m * dx * scene.Camera.Right;
+				scene.Camera.Position += m * dy * scene.Camera.Up;
+				CameraOrigin -= m * dx * scene.Camera.Right;
+				CameraOrigin += m * dy * scene.Camera.Up;
 			}
 			else {
 				var eulerX = dy * 2 * MathF.PI;
 				var eulerY = dx * 4 * MathF.PI;
 
 				var quat = Quaternion.FromAxisAngle( Vector3.UnitY, -eulerY );
-				Scene.Camera.Position = CameraOrigin + quat.Inverted().Apply( Scene.Camera.Position - CameraOrigin );
-				quat = Quaternion.FromAxisAngle( Scene.Camera.Right, -eulerX );
-				Scene.Camera.Position = CameraOrigin + quat.Inverted().Apply( Scene.Camera.Position - CameraOrigin );
+				scene.Camera.Position = CameraOrigin + quat.Inverted().Apply( scene.Camera.Position - CameraOrigin );
+				quat = Quaternion.FromAxisAngle( scene.Camera.Right, -eulerX );
+				scene.Camera.Position = CameraOrigin + quat.Inverted().Apply( scene.Camera.Position - CameraOrigin );
 
-				Scene.Camera.Rotation = ( CameraOrigin - Scene.Camera.Position ).LookRotation();
+				scene.Camera.Rotation = ( CameraOrigin - scene.Camera.Position ).LookRotation();
 			}
 		}
 	}
 
 	protected override bool OnScroll ( ScrollEvent e ) {
-		e.Target = Scene;
+		e.Target = scene;
 		if ( tryHit( e.MousePosition, out _ ) ) {
 			osuPanel.Content.Scroll += e.ScrollDelta;
 			return true;
 		}
 		else if ( ControlType is ControlType.Orbit ) {
-			Scene.Camera.Position = CameraOrigin + ( Scene.Camera.Position - CameraOrigin ) * ( 1 + e.ScrollDelta.Y / 10 );
+			scene.Camera.Position = CameraOrigin + ( scene.Camera.Position - CameraOrigin ) * ( 1 + e.ScrollDelta.Y / 10 );
 		}
 
 		return base.OnScroll( e );
@@ -108,7 +107,7 @@ public class OsuXrGame : OsuXrGameBase {
 		base.Update();
 
 		if ( ControlType is ControlType.Fly ) {
-			var camera = Scene.Camera;
+			var camera = scene.Camera;
 			var state = GetContainingInputManager().CurrentState;
 			var keyboard = state.Keyboard;
 
@@ -133,7 +132,7 @@ public class OsuXrGame : OsuXrGameBase {
 
 	bool useTouch;
 	bool tryHit ( Vector2 e, out Vector2 pos ) {
-		if ( Raycast.TryHit( Scene.Camera.Position, Scene.Camera.DirectionOf( e, Scene.DrawWidth, Scene.DrawHeight ), osuPanel, out var hit ) ) {
+		if ( Raycast.TryHit( scene.Camera.Position, scene.Camera.DirectionOf( e, scene.DrawWidth, scene.DrawHeight ), osuPanel, out var hit ) ) {
 			pos = osuPanel.ContentPositionAt( hit.TrisIndex, hit.Point );
 
 			return true;
@@ -144,7 +143,7 @@ public class OsuXrGame : OsuXrGameBase {
 
 	bool touchDown = false;
 	protected override bool OnMouseDown ( MouseDownEvent e ) {
-		e.Target = Scene;
+		e.Target = scene;
 		if ( tryHit( e.MouseDownPosition, out var pos ) ) {
 			if ( useTouch ) {
 				touchDown = true;
@@ -178,7 +177,7 @@ public class OsuXrGame : OsuXrGameBase {
 	}
 
 	protected override bool OnKeyDown ( KeyDownEvent e ) {
-		e.Target = Scene;
+		e.Target = scene;
 		if ( tryHit( e.MousePosition, out _ ) ) {
 			osuPanel.Content.Press( e.Key );
 			return true;
@@ -188,7 +187,7 @@ public class OsuXrGame : OsuXrGameBase {
 	}
 
 	protected override void OnKeyUp ( KeyUpEvent e ) {
-		e.Target = Scene;
+		e.Target = scene;
 		if ( tryHit( e.MousePosition, out _ ) ) {
 			osuPanel.Content.Release( e.Key );
 			return;
