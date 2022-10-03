@@ -1,28 +1,17 @@
 ﻿using osu.Game.Graphics.Cursor;
 using osu.Game.Overlays.Settings;
 using osu.XR.Allocation;
+using osu.XR.Graphics.Panels.Menu;
 
 namespace osu.XR.Graphics.Panels.Settings;
 
-public abstract class SettingsPanel : OsuPanel {
+public abstract class SettingsPanel : MenuPanel {
 	SectionsContainer sections;
 	public SettingsPanel () {
-		ContentSize = new Vector2( Game.Overlays.SettingsPanel.PANEL_WIDTH, Game.Overlays.SettingsPanel.PANEL_WIDTH / 4 * 5 );
+		ContentSize = new Vector2( Game.Overlays.SettingsPanel.PANEL_WIDTH, Game.Overlays.SettingsPanel.PANEL_WIDTH / ASPECT_RATIO );
 		Content.Add( new OsuTooltipContainer(null) {
 			RelativeSizeAxes = Axes.Both,
 			Child = sections = new SectionsContainer( false, this )
-		} );
-	}
-
-	protected override void RegenrateMesh () {
-		var w = 0.4f / 2;
-		var h = 0.5f / 2;
-
-		Mesh.AddQuad( new Quad3 {
-			TL = new Vector3( -w, h, 0 ),
-			TR = new Vector3( w, h, 0 ),
-			BL = new Vector3( -w, -h, 0 ),
-			BR = new Vector3( w, -h, 0 )
 		} );
 	}
 

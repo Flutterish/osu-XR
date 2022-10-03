@@ -2,6 +2,7 @@
 using osu.Framework.XR.Physics;
 using osu.XR.Graphics;
 using osu.XR.Graphics.Panels;
+using osu.XR.Graphics.Panels.Menu;
 using osu.XR.Graphics.Panels.Settings;
 using osu.XR.Graphics.Scenes;
 
@@ -13,6 +14,9 @@ public class OsuXrGame : OsuXrGameBase {
 	PhysicsSystem physics = new();
 	SceneMovementSystem movementSystem;
 	PanelInteractionSystem panelInteraction;
+
+	VrSettingsPanel settings;
+	VrNotificationsPanel notifications;
 
 	public OsuXrGame () {
 		scene = new() {
@@ -27,7 +31,9 @@ public class OsuXrGame : OsuXrGameBase {
 		Add( movementSystem = new( scene ) { RelativeSizeAxes = Axes.Both } );
 		Add( panelInteraction = new( scene, physics ) { RelativeSizeAxes = Axes.Both } );
 
-		scene.Add( new VrSettingsPanel() );
+		// new ConfigPanel(), Notifications, Inspector, InputBindings, new ChangelogPanel(), new SceneManagerPanel()
+		scene.Add( settings = new VrSettingsPanel() );
+		scene.Add( notifications = new VrNotificationsPanel() { X = 0.1f, Z = 0.2f } );
 	}
 
 	protected override IReadOnlyDependencyContainer CreateChildDependencies ( IReadOnlyDependencyContainer parent ) {
