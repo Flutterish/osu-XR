@@ -1,8 +1,8 @@
-﻿using osu.Framework.Input.Events;
-using osu.Framework.XR.Components;
+﻿using osu.Framework.XR.Components;
 using osu.Framework.XR.Physics;
 using osu.XR.Graphics;
 using osu.XR.Graphics.Panels;
+using osu.XR.Graphics.Panels.Settings;
 using osu.XR.Graphics.Scenes;
 
 namespace osu.XR;
@@ -26,6 +26,8 @@ public class OsuXrGame : OsuXrGameBase {
 		physics.AddSubtree( scene.Root );
 		Add( movementSystem = new( scene ) { RelativeSizeAxes = Axes.Both } );
 		Add( panelInteraction = new( scene, physics ) { RelativeSizeAxes = Axes.Both } );
+
+		scene.Add( new VrSettingsPanel() );
 	}
 
 	protected override IReadOnlyDependencyContainer CreateChildDependencies ( IReadOnlyDependencyContainer parent ) {
