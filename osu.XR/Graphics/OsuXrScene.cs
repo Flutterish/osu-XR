@@ -2,7 +2,7 @@
 using osu.Framework.IO.Stores;
 using osu.Framework.XR.Graphics.Materials;
 using osu.Framework.XR.Graphics.Rendering;
-using osu.XR.Graphics.Materials;
+using MaterialNames = osu.XR.Graphics.Materials.MaterialNames;
 
 namespace osu.XR.Graphics;
 

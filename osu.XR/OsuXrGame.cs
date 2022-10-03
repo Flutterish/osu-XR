@@ -1,4 +1,5 @@
-﻿using osu.Framework.XR.Components;
+﻿using osu.Framework.Graphics.Sprites;
+using osu.Framework.XR.Components;
 using osu.Framework.XR.Physics;
 using osu.XR.Graphics;
 using osu.XR.Graphics.Panels;
@@ -17,6 +18,8 @@ public class OsuXrGame : OsuXrGameBase {
 
 	VrSettingsPanel settings;
 	VrNotificationsPanel notifications;
+	PanelStack<MenuPanel> handheldMenu;
+	SidebarMenuPanel handheldMenuSidebar;
 
 	public OsuXrGame () {
 		scene = new() {
@@ -32,8 +35,15 @@ public class OsuXrGame : OsuXrGameBase {
 		Add( panelInteraction = new( scene, physics ) { RelativeSizeAxes = Axes.Both } );
 
 		// new ConfigPanel(), Notifications, Inspector, InputBindings, new ChangelogPanel(), new SceneManagerPanel()
-		scene.Add( settings = new VrSettingsPanel() );
-		scene.Add( notifications = new VrNotificationsPanel() { X = 0.1f, Z = 0.2f } );
+		scene.Add( handheldMenu = new PopoutPanelStack<MenuPanel> {
+			Children = new MenuPanel[] {
+				settings = new VrSettingsPanel(),
+				notifications = new VrNotificationsPanel()
+			}
+		} );
+		scene.Add( handheldMenuSidebar = new SidebarMenuPanel() { X = MenuPanel.PANEL_WIDTH / 2 + 0.01f, EulerY = 0.5f } );
+		handheldMenuSidebar.AddButton( FontAwesome.Solid.Cog, "Settings", () => handheldMenu.FocusPanel( settings ) );
+		handheldMenuSidebar.AddButton( FontAwesome.Solid.ExclamationCircle, "Notifications", () => handheldMenu.FocusPanel( notifications ) );
 	}
 
 	protected override IReadOnlyDependencyContainer CreateChildDependencies ( IReadOnlyDependencyContainer parent ) {

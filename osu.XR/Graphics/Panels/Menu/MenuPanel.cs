@@ -10,13 +10,16 @@ public class MenuPanel : OsuPanel {
 	protected const float PREFFERED_CONTENT_WIDTH = 400;
 	protected const float PREFFERED_CONTENT_HEIGHT = PREFFERED_CONTENT_WIDTH / ASPECT_RATIO;
 
+	public const float PANEL_WIDTH = 0.4f;
+	public const float PANEL_HEIGHT = PANEL_WIDTH / ASPECT_RATIO;
+
 	public MenuPanel () {
 		ContentSize = new( PREFFERED_CONTENT_WIDTH, PREFFERED_CONTENT_HEIGHT );
 	}
 
 	protected override void RegenrateMesh () {
-		var w = 0.4f / 2;
-		var h = w / ASPECT_RATIO;
+		var w = PANEL_WIDTH / 2;
+		var h = PANEL_HEIGHT / 2;
 
 		Mesh.AddQuad( new Quad3 {
 			TL = new Vector3( -w, h, 0 ),

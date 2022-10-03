@@ -1,6 +1,6 @@
 ﻿using osu.Framework.XR.Graphics.Materials;
-using osu.XR.Graphics.Materials;
 using osu.XR.Osu;
+using MaterialNames = osu.XR.Graphics.Materials.MaterialNames;
 
 namespace osu.XR.Graphics.Panels;
 
