@@ -1,14 +1,8 @@
 ﻿using osu.Framework.Caching;
-using osu.Framework.Graphics.Primitives;
 using osu.Framework.Graphics.Rendering;
 using osu.Framework.XR;
 using osu.Framework.XR.Graphics;
 using osuTK.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Graphics.Scenes.Components;
 
