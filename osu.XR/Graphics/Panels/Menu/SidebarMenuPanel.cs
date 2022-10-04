@@ -1,5 +1,4 @@
-﻿using osu.Framework.Graphics.Shapes;
-using osu.Framework.Graphics.Sprites;
+﻿using osu.Framework.Graphics.Sprites;
 using osu.Framework.Localisation;
 using osu.Game.Overlays.Settings;
 
