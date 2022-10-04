@@ -13,7 +13,7 @@ public class TestSceneOsuGame : Basic3DTestScene {
 		} );
 
 		AddToggleStep( "Use Touch", v => {
-			InteractionSystem.UseTouch = v;
+			MouseInteractionSource.UseTouch = v;
 		} );
 	}
 }

@@ -1,12 +1,13 @@
 ﻿using OpenVR.NET;
 using OpenVR.NET.Devices;
-using osu.Framework.XR.Components;
+using osu.Framework.XR.Input;
 using osu.Framework.XR.Physics;
 using osu.Framework.XR.VirtualReality;
 using osu.XR.Graphics;
 using osu.XR.Graphics.Panels;
-using osu.XR.Graphics.Panels.Menu;
 using osu.XR.Graphics.Scenes;
+using osu.XR.Graphics.VirtualReality;
+using osu.XR.VirtualReality;
 
 namespace osu.XR;
 
@@ -20,11 +21,16 @@ public class OsuXrGame : OsuXrGameBase {
 	[Cached]
 	VrResourceStore vrResourceStore = new();
 
+	[Cached]
+	PhysicsSystem physics = new();
+
+	BasicSceneMovementSystem movementSystem;
+
+	[Cached]
+	PanelInteractionSystem panelInteraction = new();
+
 	OsuXrScene scene;
 	OsuGamePanel osuPanel;
-	PhysicsSystem physics = new();
-	SceneMovementSystem movementSystem;
-	PanelInteractionSystem panelInteraction;
 
 	public OsuXrGame () {
 		Add( compositor );
@@ -40,21 +46,33 @@ public class OsuXrGame : OsuXrGameBase {
 
 		physics.AddSubtree( scene.Root );
 		Add( movementSystem = new( scene ) { RelativeSizeAxes = Axes.Both } );
-		Add( panelInteraction = new( scene, physics ) { RelativeSizeAxes = Axes.Both } );
+		Add( new BasicPanelInteractionSource( scene, physics, panelInteraction ) { RelativeSizeAxes = Axes.Both } );
 
-		scene.Add( new HandheldMenu() { Y = 1 } );
+		//scene.Add( new HandheldMenu() { Y = 1 } );
 		scene.Add( new VrPlayer() );
 
 		compositor.Initialized += vr => {
+			vr.SetActionManifest( new OsuXrActionManifest() );
+
 			foreach ( var i in vr.TrackedDevices )
 				addVrDevice( i );
 			vr.DeviceDetected += addVrDevice;
 		};
 	}
 
+	[Cached(typeof(IBindableList<VrController>))]
+	BindableList<VrController> vrControllers = new();
+
 	void addVrDevice ( VrDevice device ) {
 		if ( device is Headset )
 			return;
+
+		if ( device is Controller controller ) {
+			VrController vrController;
+			scene.Add( vrController = new VrController( controller, scene ) );
+			vrControllers.Add( vrController );
+			return;
+		}
 
 		scene.Add( new BasicVrDevice( device ) );
 	}
