@@ -1,4 +1,5 @@
-﻿using osuTK.Graphics;
+﻿using osu.XR.Graphics.Scenes.Components;
+using osuTK.Graphics;
 
 namespace osu.XR.Graphics.Scenes;
 
@@ -9,6 +10,7 @@ public class GridScene : Scene {
 	public GridScene () {
 		VerticalGradientSkyBox skybox;
 		AddInternal( skybox = new VerticalGradientSkyBox() );
+		AddInternal( new FloorGrid() );
 
 		TintBindable.BindTo( skybox.TintBindable );
 		OpacityBindable.BindTo( skybox.OpacityBindable );

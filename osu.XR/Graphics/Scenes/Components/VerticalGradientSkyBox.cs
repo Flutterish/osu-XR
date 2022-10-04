@@ -5,7 +5,7 @@ using osu.Framework.XR.Graphics.Meshes;
 using osu.Framework.XR.Graphics.Vertices;
 using osuTK.Graphics;
 
-namespace osu.XR.Graphics.Scenes;
+namespace osu.XR.Graphics.Scenes.Components;
 
 public class VerticalGradientSkyBox : BasicModel {
 	public readonly Bindable<Color4> TintBindable = new( new Color4( 253, 35, 115, 255 ) );
@@ -55,8 +55,7 @@ public class VerticalGradientSkyBox : BasicModel {
 		public DrawNode ( Model<BasicMesh> source, int index ) : base( source, index ) { }
 
 		public override void Draw ( IRenderer renderer, object? ctx = null ) {
-			var camera = new Matrix3( renderer.ProjectionMatrix ) * -renderer.ProjectionMatrix.Row3.Xyz;
-			Matrix = Matrix4.CreateTranslation( camera );
+			Matrix = Matrix4.CreateTranslation( renderer.ProjectionMatrix.ExtractCameraPosition() );
 			base.Draw( renderer, ctx );
 		}
 	}
