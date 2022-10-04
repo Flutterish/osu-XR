@@ -5,6 +5,7 @@ using osu.Framework.XR.Physics;
 using osu.Framework.XR.VirtualReality;
 using osu.XR.Graphics;
 using osu.XR.Graphics.Panels;
+using osu.XR.Graphics.Panels.Menu;
 using osu.XR.Graphics.Scenes;
 using osu.XR.Graphics.VirtualReality;
 using osu.XR.VirtualReality;
@@ -39,16 +40,13 @@ public class OsuXrGame : OsuXrGameBase {
 		};
 		scene.Camera.Z = -5;
 		scene.Camera.Y = 1;
-		scene.Add( osuPanel = new() {
-			ContentSize = new( 1920, 1080 ),
-			Y = 1.8f
-		} );
+		scene.Add( osuPanel = new() );
 
 		physics.AddSubtree( scene.Root );
 		Add( movementSystem = new( scene ) { RelativeSizeAxes = Axes.Both } );
 		Add( new BasicPanelInteractionSource( scene, physics, panelInteraction ) { RelativeSizeAxes = Axes.Both } );
 
-		//scene.Add( new HandheldMenu() { Y = 1 } );
+		scene.Add( new HandheldMenu() { Y = 1 } );
 		scene.Add( new VrPlayer() );
 
 		compositor.Initialized += vr => {

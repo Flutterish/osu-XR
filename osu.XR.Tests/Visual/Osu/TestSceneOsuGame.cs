@@ -8,9 +8,7 @@ public class TestSceneOsuGame : Basic3DTestScene {
 
 	public TestSceneOsuGame () {
 		Scene.Camera.Z = -5;
-		Scene.Add( osuPanel = new() {
-			ContentSize = new( 1920, 1080 )
-		} );
+		Scene.Add( osuPanel = new() );
 
 		AddToggleStep( "Use Touch", v => {
 			MouseInteractionSource.UseTouch = v;
