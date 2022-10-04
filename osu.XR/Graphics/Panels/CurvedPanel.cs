@@ -21,6 +21,7 @@ public class CurvedPanel : Panel {
 
 	protected override void UpdateAfterChildren () {
 		aspectRatioBindable.Value = ContentDrawSize.X / ContentDrawSize.Y;
+		base.UpdateAfterChildren();
 	}
 
 	protected override void RegenrateMesh () {

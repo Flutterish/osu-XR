@@ -5,7 +5,7 @@ namespace osu.XR.Graphics.Panels;
 
 public class PopoutPanelStack<T> : PanelStack<T> where T : Panel {
 	public double TransitionDuration = 300;
-	public Vector3 PopoutPosition = new Vector3( 0, 0, 0.02f );
+	public Vector3 PopoutPosition = new( 0, 0, 0.02f );
 	public float PopoutScale = 0.8f;
 
 	protected override void PerformLayout ( ReadOnlySpan<T> children ) {

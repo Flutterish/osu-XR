@@ -22,18 +22,18 @@ public class SidebarMenuPanel : MenuPanel {
 	}
 
 	float contentWidth = 0;
-	protected override void Update () {
+	protected override void UpdateAfterChildren () {
 		if ( contentWidth != Content.DrawWidth ) {
 			contentWidth = Content.DrawWidth;
 			MeshCache.Invalidate();
 		}
 
-		base.Update();
+		base.UpdateAfterChildren();
 	}
 
 	protected override void RegenrateMesh () {
 		var h = PANEL_HEIGHT / 2;
-		var w = PANEL_HEIGHT / PREFFERED_CONTENT_HEIGHT * Content.DrawWidth;
+		var w = PANEL_HEIGHT / PREFFERED_CONTENT_HEIGHT * (int)Content.DrawWidth;
 
 		Mesh.AddQuad( new Quad3 {
 			TL = new Vector3( 0, h, 0 ),
