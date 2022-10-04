@@ -1,5 +1,8 @@
-﻿using osu.Framework.XR.Components;
+﻿using OpenVR.NET;
+using OpenVR.NET.Devices;
+using osu.Framework.XR.Components;
 using osu.Framework.XR.Physics;
+using osu.Framework.XR.VirtualReality;
 using osu.XR.Graphics;
 using osu.XR.Graphics.Panels;
 using osu.XR.Graphics.Panels.Menu;
@@ -8,6 +11,15 @@ using osu.XR.Graphics.Scenes;
 namespace osu.XR;
 
 public class OsuXrGame : OsuXrGameBase {
+	[Cached]
+	VR vr = new();
+
+	[Cached]
+	VrCompositor compositor = new();
+
+	[Cached]
+	VrResourceStore vrResourceStore = new();
+
 	OsuXrScene scene;
 	OsuGamePanel osuPanel;
 	PhysicsSystem physics = new();
@@ -15,6 +27,7 @@ public class OsuXrGame : OsuXrGameBase {
 	PanelInteractionSystem panelInteraction;
 
 	public OsuXrGame () {
+		Add( compositor );
 		scene = new() {
 			RelativeSizeAxes = Axes.Both
 		};
@@ -30,6 +43,20 @@ public class OsuXrGame : OsuXrGameBase {
 		Add( panelInteraction = new( scene, physics ) { RelativeSizeAxes = Axes.Both } );
 
 		scene.Add( new HandheldMenu() { Y = 1 } );
+		scene.Add( new VrPlayer() );
+
+		compositor.Initialized += vr => {
+			foreach ( var i in vr.TrackedDevices )
+				addVrDevice( i );
+			vr.DeviceDetected += addVrDevice;
+		};
+	}
+
+	void addVrDevice ( VrDevice device ) {
+		if ( device is Headset )
+			return;
+
+		scene.Add( new BasicVrDevice( device ) );
 	}
 
 	protected override IReadOnlyDependencyContainer CreateChildDependencies ( IReadOnlyDependencyContainer parent ) {
@@ -44,5 +71,17 @@ public class OsuXrGame : OsuXrGameBase {
 		base.LoadComplete();
 		Add( scene );
 		scene.Add( new GridScene() );
+	}
+
+	protected override void Dispose ( bool isDisposing ) {
+		if ( !IsDisposed ) {
+			Task.Run( async () => {
+				await Task.Delay( 1000 );
+				vr.Exit();
+				vrResourceStore.Dispose();
+			} );
+		}
+
+		base.Dispose( isDisposing );
 	}
 }
