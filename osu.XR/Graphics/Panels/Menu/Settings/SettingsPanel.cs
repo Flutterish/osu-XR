@@ -11,9 +11,12 @@ public abstract class SettingsPanel : MenuPanel {
 		ContentSize = new Vector2( Game.Overlays.SettingsPanel.PANEL_WIDTH, Game.Overlays.SettingsPanel.PANEL_WIDTH / ASPECT_RATIO );
 		Content.Add( new OsuTooltipContainer(null) {
 			RelativeSizeAxes = Axes.Both,
-			Child = sections = new SectionsContainer( false, this )
+			Child = sections = CreateSectionsContainer()
 		} );
 	}
+
+	protected virtual SectionsContainer CreateSectionsContainer ()
+		=> new( false, this );
 
 	protected abstract IEnumerable<SettingsSection> CreateSections ();
 	protected virtual Drawable CreateHeader () => new Container();
@@ -23,7 +26,7 @@ public abstract class SettingsPanel : MenuPanel {
 		return new ExcludingDependencyContainer( base.CreateChildDependencies( parent ), t => t.Name != "IOverlayManager" );
 	}
 
-	class SectionsContainer : Game.Overlays.SettingsPanel {
+	public class SectionsContainer : Game.Overlays.SettingsPanel {
 		SettingsPanel source;
 		public SectionsContainer ( bool showSidebar, SettingsPanel source ) : base( showSidebar ) {
 			AutoSizeAxes = Axes.None;
