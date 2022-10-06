@@ -136,19 +136,23 @@ public class PresetsSettingSection : SettingsSection {
 
 			Add( buttonsContainer = new Container {
 				RelativeSizeAxes = Axes.X,
+				Padding = new() { Horizontal = 20 },
 				AutoSizeAxes = Axes.Y,
 				Children = new[] {
 					main = new SettingsButton {
 						Text = preset.Name,
 						RelativeSizeAxes = Axes.None,
+						Padding = default,
 						Action = () => config.LoadPreset( preset ),
 					},
 					edit = new SettingsButton {
 						RelativeSizeAxes = Axes.None,
+						Padding = default,
 						Action = () => { }
 					},
 					delete = new DangerousSettingsButton {
 						RelativeSizeAxes = Axes.None,
+						Padding = default,
 						Action = () => { }
 					}
 				}
@@ -172,9 +176,9 @@ public class PresetsSettingSection : SettingsSection {
 
 			buttonsContainer.OnUpdate += _ => {
 				var gap = 10;
-				edit.Width = delete.Width = main.DrawHeight + edit.Padding.TotalHorizontal;
-				main.Width = DrawWidth - delete.Width - edit.Width + edit.Padding.TotalHorizontal * 2 - gap * 2;
-				edit.X = main.Width - edit.Padding.TotalHorizontal + gap;
+				edit.Width = delete.Width = main.DrawHeight;
+				main.Width = DrawWidth - buttonsContainer.Padding.TotalHorizontal - delete.Width - edit.Width - gap * 2;
+				edit.X = main.Width + gap;
 				delete.X = edit.X + edit.Width - edit.Padding.TotalHorizontal + gap;
 			};
 		}
@@ -191,6 +195,7 @@ public class PresetsSettingSection : SettingsSection {
 			SettingsButton createButton;
 			Add( createButton = new SettingsButton {
 				Text = "Create new preset",
+				TooltipText = "Slide out the settings to add them to the preset",
 				Action = () => presetContainer.IsEditingBindable.Toggle()
 			} );
 
