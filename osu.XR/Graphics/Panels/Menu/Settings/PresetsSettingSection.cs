@@ -1,5 +1,6 @@
 ﻿using osu.Framework.Graphics.Sprites;
 using osu.Framework.Localisation;
+using osu.Framework.XR;
 using osu.Game.Overlays.Settings;
 using osu.XR.Configuration;
 using osu.XR.Graphics.Settings;
@@ -67,7 +68,10 @@ public class PresetsSettingSection : SettingsSection {
 						Text = preset.Name,
 						RelativeSizeAxes = Axes.None,
 						Padding = default,
-						Action = () => config.LoadPreset( preset ),
+						Action = () => {
+							if ( !presetContainer.IsEditingBindable.Value )
+								config.LoadPreset( preset );
+						}
 					},
 					edit = new SettingsButton {
 						RelativeSizeAxes = Axes.None,
@@ -82,8 +86,9 @@ public class PresetsSettingSection : SettingsSection {
 				}
 			} );
 
-			buttonsContainer.IsEditingBindable.BindValueChanged( v => main.Enabled.Value = !v.NewValue );
 			buttonsContainer.IsEditingBindable.BindTo( presetContainer.IsEditingBindable );
+			buttonsContainer.PresetBindable.BindTo( presetContainer.SelectedPresetBindable );
+			(buttonsContainer.PresetBindable, buttonsContainer.IsEditingBindable).BindValuesChanged( (p, e) => main.Enabled.Value = (p is null && !e) || p == preset, true );
 			buttonsContainer.NameBindable.BindValueChanged( v => main.Text = v.NewValue );
 			buttonsContainer.NameBindable.BindTo( preset.NameBindable );
 
@@ -110,7 +115,8 @@ public class PresetsSettingSection : SettingsSection {
 
 		class PresetButtonContainer : Container {
 			public Bindable<string> NameBindable = new();
-			public BindableBool IsEditingBindable = new( false );
+			public Bindable<ConfigurationPreset<OsuXrSetting>?> PresetBindable = new();
+			public BindableBool IsEditingBindable = new();
 		}
 	}
 

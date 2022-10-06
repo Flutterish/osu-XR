@@ -73,7 +73,7 @@ public class PresetPreview : SettingsPanel.SectionsContainer {
 					Current = preset.NameBindable
 				} );
 				Add( new SettingsButton {
-					Text = "Toggle editing",
+					Text = "Toggle adding/removing items",
 					Action = () => {
 						if ( isEditingBindable.Value )
 							StopEditingPresetRequested?.Invoke();
@@ -95,6 +95,7 @@ public class PresetPreview : SettingsPanel.SectionsContainer {
 						RequestPresetRemoval?.Invoke( preset );
 					}
 				} );
+				// TODO clone
 			} );
 		}
 
