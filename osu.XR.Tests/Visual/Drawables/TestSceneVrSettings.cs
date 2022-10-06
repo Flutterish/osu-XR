@@ -36,7 +36,6 @@ public class TestSceneVrSettings : OsuTestScene {
 			presets.PresetContainer.IsEditingBindable.Value = true;
 		}
 
-		sections.Presets.RequestPresetRemoval += deleted;
 		presets.RequestPresetRemoval += deleted;
 		void deleted ( ConfigurationPreset<OsuXrSetting> preset ) {
 			if ( sections.PresetContainer.SelectedPresetBindable.Value == preset ) {

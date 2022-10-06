@@ -19,14 +19,12 @@ public class PresetsSettingSection : SettingsSection {
 		Add( Management = new ManagementSubsection() );
 
 		List.EditPresetRequested += p => EditPresetRequested?.Invoke( p );
-		List.RequestPresetRemoval += p => RequestPresetRemoval?.Invoke( p );
 		List.StopEditingPresetRequested += () => StopEditingPresetRequested?.Invoke();
 		Management.CreatePresetRequested += () => CreatePresetRequested?.Invoke();
 	}
 
 	public event Action? StopEditingPresetRequested;
 	public event Action<ConfigurationPreset<OsuXrSetting>>? EditPresetRequested;
-	public event Action<ConfigurationPreset<OsuXrSetting>>? RequestPresetRemoval;
 	public event Action? CreatePresetRequested;
 
 	public class ListSubsection : SettingsSubsection {
@@ -58,7 +56,6 @@ public class PresetsSettingSection : SettingsSection {
 
 			SettingsButton main;
 			SettingsButton edit;
-			SettingsButton delete;
 			PresetButtonContainer buttonsContainer;
 
 			Add( buttonsContainer = new PresetButtonContainer {
@@ -81,11 +78,6 @@ public class PresetsSettingSection : SettingsSection {
 							else
 								EditPresetRequested?.Invoke( preset );
 						}
-					},
-					delete = new DangerousSettingsButton {
-						RelativeSizeAxes = Axes.None,
-						Padding = default,
-						Action = () => RequestPresetRemoval?.Invoke( preset )
 					}
 				}
 			} );
@@ -103,21 +95,11 @@ public class PresetsSettingSection : SettingsSection {
 				Anchor = Anchor.Centre
 			} );
 
-			delete.Add( new SpriteIcon {
-				RelativeSizeAxes = Axes.Both,
-				Size = new( 0.5f ),
-				Icon = FontAwesome.Solid.Trash,
-				Origin = Anchor.Centre,
-				Anchor = Anchor.Centre
-			} );
-			// TODO I want the delete button to be "hold to confirm"
-
 			buttonsContainer.OnUpdate += _ => {
 				var gap = 10;
-				edit.Width = delete.Width = main.DrawHeight;
-				main.Width = DrawWidth - buttonsContainer.Padding.TotalHorizontal - delete.Width - edit.Width - gap * 2;
+				edit.Width = main.DrawHeight;
+				main.Width = DrawWidth - buttonsContainer.Padding.TotalHorizontal - edit.Width - gap;
 				edit.X = main.Width + gap;
-				delete.X = edit.X + edit.Width - edit.Padding.TotalHorizontal + gap;
 			};
 
 			buttonsByPreset.Add( preset, buttonsContainer );
@@ -125,7 +107,6 @@ public class PresetsSettingSection : SettingsSection {
 
 		public event Action? StopEditingPresetRequested;
 		public event Action<ConfigurationPreset<OsuXrSetting>>? EditPresetRequested;
-		public event Action<ConfigurationPreset<OsuXrSetting>>? RequestPresetRemoval;
 
 		class PresetButtonContainer : Container {
 			public Bindable<string> NameBindable = new();
