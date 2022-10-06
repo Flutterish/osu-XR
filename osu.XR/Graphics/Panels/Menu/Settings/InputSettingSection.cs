@@ -1,5 +1,4 @@
-﻿using osu.Framework.Configuration;
-using osu.Framework.Graphics.Sprites;
+﻿using osu.Framework.Graphics.Sprites;
 using osu.Framework.Localisation;
 using osu.Game.Overlays.Settings;
 using osu.XR.Configuration;
@@ -14,14 +13,16 @@ public class InputSettingSection : SettingsSection {
 	};
 
 	[BackgroundDependencyLoader]
-	private void load ( ConfigManager<OsuXrSetting> config ) {
+	private void load ( OsuXrConfigManager config ) {
+		SettingsEnumDropdown<InputMode> inputMode;
+
 		Children = new Drawable[] {
-			new SettingsEnumDropdown<InputMode> { 
+			(inputMode = new SettingsEnumDropdown<InputMode> { 
 				LabelText = "Input mode", 
 				TooltipText = "How your controllers interact with the panels" 
-			}.PresetComponent( config, OsuXrSetting.InputMode ),
+			}).PresetComponent( config, OsuXrSetting.InputMode ),
 			new ConditionalSettingsContainer<InputMode> {
-				Current = config.GetBindable<InputMode>( OsuXrSetting.InputMode ),
+				Current = inputMode.Current,
 				[InputMode.SinglePointer] = new Drawable[] {
 					new SettingsCheckbox { 
 						LabelText = "[Single pointer] Emulate touch", 

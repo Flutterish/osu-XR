@@ -1,4 +1,5 @@
-﻿using osu.Framework.Graphics.Shapes;
+﻿using osu.Framework.Configuration;
+using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Input.Events;
@@ -28,11 +29,43 @@ public class SettingPresetComponent<Tlookup, Tvalue> : CompositeDrawable, ISetti
 	Bindable<ConfigurationPreset<Tlookup>?> selectedPresetBindable = new();
 	BindableList<Tlookup> presetKeys = new();
 
-	public SettingPresetComponent ( Tlookup lookup, IHasCurrentValue<Tvalue> source ) {
+	ConfigManager<Tlookup> config;
+	readonly BindableWithCurrent<Tvalue> current = new();
+
+	public SettingPresetComponent ( Tlookup lookup, IHasCurrentValue<Tvalue> source, ConfigManager<Tlookup> config ) {
+		this.config = config;
 		Source = source;
 		Lookup = lookup;
 		sourceDrawable = (Drawable)source;
 		RelativeSizeAxes = Axes.X;
+
+		var configBindable = config.GetBindable<Tvalue>( lookup );
+		configBindable.UnbindAll();
+		source.Current = configBindable;
+
+		source.Current.BindValueChanged( v => current.Value = v.NewValue );
+		current.BindValueChanged( v => {
+			// let updates happen, just not by the user
+			var disabled = source.Current.Disabled;
+			source.Current.Disabled = false;
+			source.Current.Value = v.NewValue;
+			source.Current.Disabled = disabled;
+		} );
+		current.DefaultChanged += d => {
+			// let updates happen, just not by the user
+			var disabled = source.Current.Disabled;
+			source.Current.Disabled = false;
+			source.Current.Default = d.NewValue;
+			source.Current.Disabled = disabled;
+		};
+	}
+
+	void updateSource () {
+		// let updates happen, just not by the user
+		var disabled = current.Disabled;
+		current.Disabled = false;
+		current.Current = selectedPresetBindable.Value?.GetBindable<Tvalue>( Lookup ) ?? config.GetBindable<Tvalue>( Lookup );
+		current.Disabled = disabled;
 	}
 
 	Container gripArea = null!;
@@ -78,15 +111,47 @@ public class SettingPresetComponent<Tlookup, Tvalue> : CompositeDrawable, ISetti
 
 		AddInternal( interactionArea = new( this ) { Y = -5 } );
 
+		isEditingBindable.BindValueChanged( v => {
+			if ( v.NewValue ) {
+				slideOutButton.ResizeWidthTo( 20, 200, Easing.Out )
+					.MoveToX( -4, 200, Easing.Out );
+				sourceDrawable.ResizeWidthTo( 0.95f, 200, Easing.Out );
+			}
+			else {
+				slideOutButton.ResizeWidthTo( 16, 200, Easing.Out )
+					.MoveToX( 6, 200, Easing.Out );
+				sourceDrawable.ResizeWidthTo( 1, 200, Easing.Out );
+			}
+
+			Source.Current.Disabled = v.NewValue;
+			interactionArea.Alpha = v.NewValue ? 1 : 0;
+			gripArea.FadeTo( interactionArea.Alpha, 200, Easing.Out );
+		}, true );
+
+		isVisibleBindable.BindValueChanged( v => {
+			if ( v.NewValue ) {
+				all.MoveToX( -200 ).MoveToX( 0, 200, Easing.Out );
+				this.FadeIn( 200, Easing.Out );
+			}
+			else {
+				all.MoveToX( 1000, 400 );
+				this.FadeOut( 200, Easing.Out );
+			}
+		}, true );
+
 		isEditingBindable.BindTo( presetContainer.IsEditingBindable );
 		isPreviewBindable.BindTo( presetContainer.IsPreviewBindable );
 		selectedPresetBindable.BindTo( presetContainer.SelectedPresetBindable );
 
 		presetKeys.BindCollectionChanged( (_, e) => {
-			if ( e.OldItems?.Contains( Lookup ) == true || e.NewItems?.Contains( Lookup ) == true )
+			if ( e.OldItems?.Contains( Lookup ) == true || e.NewItems?.Contains( Lookup ) == true ) {
+				updateSource();
 				updateVisibility();
+			}
 		} );
 		selectedPresetBindable.BindValueChanged( v => {
+			updateSource();
+
 			if ( v.OldValue?.Keys is BindableList<Tlookup> old )
 				presetKeys.UnbindFrom( old );
 
@@ -100,33 +165,9 @@ public class SettingPresetComponent<Tlookup, Tvalue> : CompositeDrawable, ISetti
 		FinishTransforms( true );
 	}
 
+	BindableBool isVisibleBindable = new( true );
 	void updateVisibility () {
-		FinishTransforms( true );
-		var editing = isEditingBindable.Value;
-
-		interactionArea.Alpha = editing ? 1 : 0;
-		gripArea.FadeTo( interactionArea.Alpha, 200, Easing.Out );
-
-		if ( presetContainer.IsVisible( this ) ) {
-			all.X = -200;
-			all.MoveToX( 0, 200, Easing.Out );
-			this.FadeIn( 200, Easing.Out );
-		}
-		else {
-			all.MoveToX( 1000, 400 );
-			this.FadeOut( 200, Easing.Out );
-		}
-
-		if ( editing ) {
-			slideOutButton.ResizeWidthTo( 20, 200, Easing.Out )
-				.MoveToX( -4, 200, Easing.Out );
-			sourceDrawable.ResizeWidthTo( 0.95f, 200, Easing.Out );
-		}
-		else {
-			slideOutButton.ResizeWidthTo( 16, 200, Easing.Out )
-				.MoveToX( 6, 200, Easing.Out );
-			sourceDrawable.ResizeWidthTo( 1, 200, Easing.Out );
-		}
+		isVisibleBindable.Value = presetContainer.IsVisible( this );
 	}
 
 	protected override void Update () {

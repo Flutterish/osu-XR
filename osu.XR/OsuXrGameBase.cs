@@ -1,5 +1,4 @@
-﻿using osu.Framework.Configuration;
-using osu.Framework.Platform;
+﻿using osu.Framework.Platform;
 using osu.XR.Configuration;
 
 namespace osu.XR;
@@ -18,6 +17,5 @@ public class OsuXrGameBase : Framework.Game {
 		dependencies.CacheAs( storage );
 		config = new();
 		dependencies.CacheAs( config );
-		dependencies.CacheAs<ConfigManager<OsuXrSetting>>( config );
 	}
 }

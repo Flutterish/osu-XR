@@ -1,4 +1,5 @@
 ﻿using osu.Framework.Graphics.Containers;
+using osu.XR.Configuration;
 using osu.XR.Graphics.Panels.Menu.Settings;
 using osu.XR.Graphics.Panels.Settings;
 
@@ -24,15 +25,20 @@ public class TestSceneVrSettings : OsuTestScene {
 			Child = presets = new PresetPreview( false )
 		} );
 
-		presets.PresetContainer.IsEditingBindable.Value = true;
-
-		sections.Presets.PresetEdited += preset => {
+		// TODO bindable list add/delete operations instead
+		sections.Presets.EditPresetRequested += edit;
+		presets.EditPresetRequested += edit;
+		void edit ( ConfigurationPreset<OsuXrSetting> preset ) {
 			sections.PresetContainer.SelectedPresetBindable.Value = preset;
 			presets.Preset = preset;
-			
+
 			sections.PresetContainer.IsEditingBindable.Value = true;
-		};
-		sections.Presets.PresetDeleted += preset => {
+			presets.PresetContainer.IsEditingBindable.Value = true;
+		}
+
+		sections.Presets.RequestPresetRemoval += deleted;
+		presets.RequestPresetRemoval += deleted;
+		void deleted ( ConfigurationPreset<OsuXrSetting> preset ) {
 			if ( sections.PresetContainer.SelectedPresetBindable.Value == preset ) {
 				sections.PresetContainer.IsEditingBindable.Value = false;
 				sections.PresetContainer.SelectedPresetBindable.Value = null;
@@ -40,6 +46,23 @@ public class TestSceneVrSettings : OsuTestScene {
 
 			if ( presets.Preset == preset )
 				presets.Preset = null;
+
+			if ( preset != null )
+				sections.Presets.List.RemovePreset( preset );
+		}
+		
+		presets.StopEditingPresetRequested += stopEditing;
+		sections.Presets.StopEditingPresetRequested += stopEditing;
+		void stopEditing () {
+			sections.PresetContainer.IsEditingBindable.Value = false;
+			presets.PresetContainer.IsEditingBindable.Value = false;
+			sections.PresetContainer.SelectedPresetBindable.Value = null;
+		}
+
+		sections.Presets.CreatePresetRequested += () => {
+			var preset = new ConfigurationPreset<OsuXrSetting>();
+			sections.Presets.List.AddPreset( preset );
+			edit( preset );
 		};
 	}
 }

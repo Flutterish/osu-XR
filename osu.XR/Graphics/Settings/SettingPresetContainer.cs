@@ -21,7 +21,7 @@ public class SettingPresetContainer<Tlookup> where Tlookup : struct, Enum {
 
 	public void Remove ( ISettingPresetComponent<Tlookup> component ) {
 		if ( SelectedPresetBindable.Value is ConfigurationPreset<Tlookup> preset )
-			preset.Keys.Remove( component.Lookup );
+			preset.Remove( component.Lookup );
 	}
 
 	public bool IsInPreset ( ISettingPresetComponent<Tlookup> component )
