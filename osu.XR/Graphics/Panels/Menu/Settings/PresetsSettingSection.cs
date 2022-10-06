@@ -13,9 +13,16 @@ public class PresetsSettingSection : SettingsSection {
 	};
 
 	public PresetsSettingSection () {
-		Add( new ListSubsection() );
+		ListSubsection list;
+		Add( list = new ListSubsection() );
 		Add( new ManagementSubsection() );
+
+		list.PresetEdited += p => PresetEdited?.Invoke( p );
+		list.PresetDeleted += p => PresetDeleted?.Invoke( p );
 	}
+
+	public event Action<ConfigurationPreset<OsuXrSetting>>? PresetEdited;
+	public event Action<ConfigurationPreset<OsuXrSetting>>? PresetDeleted;
 
 	public class ListSubsection : SettingsSubsection {
 		protected override LocalisableString Header => "Load";
@@ -49,12 +56,12 @@ public class PresetsSettingSection : SettingsSection {
 					edit = new SettingsButton {
 						RelativeSizeAxes = Axes.None,
 						Padding = default,
-						Action = () => { }
+						Action = () => PresetEdited?.Invoke( preset )
 					},
 					delete = new DangerousSettingsButton {
 						RelativeSizeAxes = Axes.None,
 						Padding = default,
-						Action = () => { }
+						Action = () => PresetDeleted?.Invoke( preset )
 					}
 				}
 			} );
@@ -83,6 +90,9 @@ public class PresetsSettingSection : SettingsSection {
 				delete.X = edit.X + edit.Width - edit.Padding.TotalHorizontal + gap;
 			};
 		}
+
+		public event Action<ConfigurationPreset<OsuXrSetting>>? PresetEdited;
+		public event Action<ConfigurationPreset<OsuXrSetting>>? PresetDeleted;
 	}
 
 	public class ManagementSubsection : SettingsSubsection {

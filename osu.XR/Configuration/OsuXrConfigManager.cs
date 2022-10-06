@@ -1,4 +1,5 @@
-﻿using osu.Framework.Graphics.UserInterface;
+﻿using osu.Framework.Configuration;
+using osu.Framework.Graphics.UserInterface;
 using osu.Game.Configuration;
 using osu.XR.Graphics.Settings;
 
@@ -87,7 +88,7 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 }
 
 public static class PresetExtensions {
-	public static SettingPresetComponent<OsuXrSetting, Tvalue> PresetComponent<Tvalue> ( this IHasCurrentValue<Tvalue> self, OsuXrConfigManager config, OsuXrSetting lookup ) {
+	public static SettingPresetComponent<OsuXrSetting, Tvalue> PresetComponent<Tvalue> ( this IHasCurrentValue<Tvalue> self, ConfigManager<OsuXrSetting> config, OsuXrSetting lookup ) {
 		self.Current = config.GetBindable<Tvalue>( lookup );
 		return new( lookup, self );
 	}

@@ -10,14 +10,16 @@ public class VrSettingsPanel : SettingsPanel {
 
 	public class Sections : SectionsContainer {
 		[Cached]
-		SettingPresetContainer<OsuXrSetting> presetContainer = new();
+		public readonly SettingPresetContainer<OsuXrSetting> PresetContainer = new();
 
 		public Sections ( bool showSidebar ) : base( showSidebar ) { }
+
+		public readonly PresetsSettingSection Presets = new();
 
 		protected override IEnumerable<SettingsSection> CreateSections () {
 			yield return new InputSettingSection();
 			yield return new GraphicsSettingSection();
-			yield return new PresetsSettingSection();
+			yield return Presets;
 		}
 
 		protected override Drawable CreateHeader ()

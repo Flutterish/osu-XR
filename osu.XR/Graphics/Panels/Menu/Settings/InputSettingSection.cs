@@ -1,4 +1,5 @@
-﻿using osu.Framework.Graphics.Sprites;
+﻿using osu.Framework.Configuration;
+using osu.Framework.Graphics.Sprites;
 using osu.Framework.Localisation;
 using osu.Game.Overlays.Settings;
 using osu.XR.Configuration;
@@ -13,7 +14,7 @@ public class InputSettingSection : SettingsSection {
 	};
 
 	[BackgroundDependencyLoader]
-	private void load ( OsuXrConfigManager config ) {
+	private void load ( ConfigManager<OsuXrSetting> config ) {
 		Children = new Drawable[] {
 			new SettingsEnumDropdown<InputMode> { 
 				LabelText = "Input mode", 

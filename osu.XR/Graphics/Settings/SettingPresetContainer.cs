@@ -1,12 +1,36 @@
-﻿namespace osu.XR.Graphics.Settings;
+﻿using osu.XR.Configuration;
 
-public class SettingPresetContainer<T> where T : struct, Enum {
+namespace osu.XR.Graphics.Settings;
+
+public class SettingPresetContainer<Tlookup> where Tlookup : struct, Enum {
+	/// <summary>
+	/// Whether this preset can be edited
+	/// </summary>
 	public readonly BindableBool IsEditingBindable = new( false );
-	HashSet<ISettingPresetComponent<T>> selectedComponents = new();
+	/// <summary>
+	/// Whether only the components which are part of this preset should be visible
+	/// </summary>
+	public readonly BindableBool IsPreviewBindable = new( false );
 
-	public void Add ( ISettingPresetComponent<T> component )
-		=> selectedComponents.Add( component );
+	public readonly Bindable<ConfigurationPreset<Tlookup>?> SelectedPresetBindable = new();
 
-	public bool IsComponentSelected ( ISettingPresetComponent<T> component )
-		=> selectedComponents.Contains( component );
+	public void Set<Tvalue> ( ISettingPresetComponent<Tlookup> component, Tvalue value ) {
+		if ( SelectedPresetBindable.Value is ConfigurationPreset<Tlookup> preset )
+			preset[component.Lookup] = value;
+	}
+
+	public void Remove ( ISettingPresetComponent<Tlookup> component ) {
+		if ( SelectedPresetBindable.Value is ConfigurationPreset<Tlookup> preset )
+			preset.Keys.Remove( component.Lookup );
+	}
+
+	public bool IsInPreset ( ISettingPresetComponent<Tlookup> component )
+		=> SelectedPresetBindable.Value is ConfigurationPreset<Tlookup> preset && preset.Keys.Contains( component.Lookup );
+
+	public bool IsVisible ( ISettingPresetComponent<Tlookup> component )
+		=> IsPreviewBindable.Value
+		? IsInPreset( component )
+		: IsEditingBindable.Value
+		? !IsInPreset( component )
+		: true;
 }
