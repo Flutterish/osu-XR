@@ -111,21 +111,92 @@ public class PresetsSettingSection : SettingsSection {
 		Icon = FontAwesome.Solid.BoxOpen
 	};
 
-	[Resolved]
-	SettingPresetContainer<OsuXrSetting> presetContainer { get; set; } = null!;
+	public PresetsSettingSection () {
+		Add( new ListSubsection() );
+		Add( new ManagementSubsection() );
+	}
 
-	[BackgroundDependencyLoader]
-	private void load ( OsuXrConfigManager config ) {
-		//Add( new SettingsButton {
-		//	Text = "Toggle Preset creation",
-		//	Action = () => presetContainer.IsEditingBindable.Toggle()
-		//} );
+	public class ListSubsection : SettingsSubsection {
+		protected override LocalisableString Header => "Load";
 
-		foreach ( var i in new[] { config.DefaultPreset, config.PresetTouchscreenSmall, config.PresetTouchscreenBig } ) {
-			Add( new SettingsButton {
-				Text = i.Name,
-				Action = () => config.LoadPreset( i )
+		[Resolved]
+		OsuXrConfigManager config { get; set; } = null!;
+
+		protected override void LoadComplete () {
+			foreach ( var i in new[] { config.DefaultPreset, config.PresetTouchscreenSmall, config.PresetTouchscreenBig } ) {
+				AddPreset( i );
+			}
+		}
+
+		public void AddPreset ( ConfigurationPreset<OsuXrSetting> preset ) {
+			SettingsButton main;
+			SettingsButton edit;
+			SettingsButton delete;
+			Container buttonsContainer;
+
+			Add( buttonsContainer = new Container {
+				RelativeSizeAxes = Axes.X,
+				AutoSizeAxes = Axes.Y,
+				Children = new[] {
+					main = new SettingsButton {
+						Text = preset.Name,
+						RelativeSizeAxes = Axes.None,
+						Action = () => config.LoadPreset( preset ),
+					},
+					edit = new SettingsButton {
+						RelativeSizeAxes = Axes.None,
+						Action = () => { }
+					},
+					delete = new DangerousSettingsButton {
+						RelativeSizeAxes = Axes.None,
+						Action = () => { }
+					}
+				}
 			} );
+
+			edit.Add( new SpriteIcon {
+				RelativeSizeAxes = Axes.Both,
+				Size = new( 0.5f ),
+				Icon = FontAwesome.Solid.PaintBrush,
+				Origin = Anchor.Centre,
+				Anchor = Anchor.Centre
+			} );
+
+			delete.Add( new SpriteIcon {
+				RelativeSizeAxes = Axes.Both,
+				Size = new( 0.5f ),
+				Icon = FontAwesome.Solid.Trash,
+				Origin = Anchor.Centre,
+				Anchor = Anchor.Centre
+			} );
+
+			buttonsContainer.OnUpdate += _ => {
+				var gap = 10;
+				edit.Width = delete.Width = main.DrawHeight + edit.Padding.TotalHorizontal;
+				main.Width = DrawWidth - delete.Width - edit.Width + edit.Padding.TotalHorizontal * 2 - gap * 2;
+				edit.X = main.Width - edit.Padding.TotalHorizontal + gap;
+				delete.X = edit.X + edit.Width - edit.Padding.TotalHorizontal + gap;
+			};
+		}
+	}
+
+	public class ManagementSubsection : SettingsSubsection {
+		protected override LocalisableString Header => "Manage";
+
+		[Resolved]
+		SettingPresetContainer<OsuXrSetting> presetContainer { get; set; } = null!;
+
+		[BackgroundDependencyLoader]
+		private void load ( OsuXrConfigManager config ) {
+			SettingsButton createButton;
+			Add( createButton = new SettingsButton {
+				Text = "Create new preset",
+				Action = () => presetContainer.IsEditingBindable.Toggle()
+			} );
+
+			presetContainer.IsEditingBindable.BindValueChanged( v => {
+				createButton.Enabled.Value = !v.NewValue;
+			}, true );
 		}
 	}
 }

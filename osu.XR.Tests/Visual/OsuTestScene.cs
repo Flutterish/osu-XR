@@ -4,6 +4,7 @@ using osu.Framework.Platform;
 using osu.Framework.Testing;
 using osu.Framework.XR.Graphics.Panels;
 using osu.Game;
+using osu.Game.Graphics.Cursor;
 using osu.XR.Osu;
 
 namespace osu.XR.Tests.Visual;
@@ -20,13 +21,6 @@ public abstract class OsuTestScene : TestScene {
 		base.Content.Add( deps = new( dependencies, this ) { RelativeSizeAxes = Axes.Both } );
 	}
 
-	//public override void Add ( Drawable drawable ) {
-	//	if ( IsLoaded )
-	//		base.Add( drawable );
-	//	else
-	//		Schedule( () => base.Add( drawable ) );
-	//}
-
 	protected override IReadOnlyDependencyContainer CreateChildDependencies ( IReadOnlyDependencyContainer parent ) {
 		virtualGameHost = new( parent.Get<GameHost>() );
 		osu.SetHost( virtualGameHost );
@@ -37,9 +31,15 @@ public abstract class OsuTestScene : TestScene {
 		OsuDependencies dependencies;
 		OsuTestScene scene;
 
+		OsuTooltipContainer tooltips = new(null) { RelativeSizeAxes = Axes.Both };
+		OsuContextMenuContainer contextMenu = new() { RelativeSizeAxes = Axes.Both };
+		protected override Container<Drawable> Content => contextMenu;
+
 		public OsuDepsContainer ( OsuDependencies dependencies, OsuTestScene scene ) {
 			this.dependencies = dependencies;
 			this.scene = scene;
+			AddInternal( tooltips );
+			tooltips.Add( contextMenu );
 		}
 
 		protected override IReadOnlyDependencyContainer CreateChildDependencies ( IReadOnlyDependencyContainer parent ) {
