@@ -32,17 +32,17 @@ public class SettingPresetComponent<Tlookup, Tvalue> : CompositeDrawable, ISetti
 	Container gripArea = null!;
 	InteractionArea interactionArea = null!;
 	Container all = null!;
+	OsuAnimatedButton slideOutButton = null!;
 	protected override void LoadComplete () {
 		AddInternal( all = new() {
 			RelativeSizeAxes = Axes.Both
 		} );
 		all.Add( sourceDrawable );
-		OsuAnimatedButton btn;
 		all.Add( gripArea = new Container {
 			RelativeSizeAxes = Axes.X,
 			Y = -5,
 			Children = new Drawable[] {
-				btn = new OsuAnimatedButton {
+				slideOutButton = new OsuAnimatedButton {
 					Width = 16,
 					RelativeSizeAxes = Axes.Y,
 					X = -2,
@@ -53,7 +53,7 @@ public class SettingPresetComponent<Tlookup, Tvalue> : CompositeDrawable, ISetti
 			}
 		} );
 
-		btn.AddRange( new Drawable[] {
+		slideOutButton.AddRange( new Drawable[] {
 			new Box {
 				Colour = colours.Background3,
 				RelativeSizeAxes = Axes.Both,
@@ -61,8 +61,8 @@ public class SettingPresetComponent<Tlookup, Tvalue> : CompositeDrawable, ISetti
 			},
 			new SpriteIcon {
 				Colour = colours.Foreground1,
-				RelativeSizeAxes = Axes.Both,
-				Size = new( 0.6f ),
+				RelativeSizeAxes = Axes.Y,
+				Size = new( 16 * 0.6f, 0.6f ),
 				Origin = Anchor.Centre,
 				Anchor = Anchor.Centre,
 				Icon = FontAwesome.Solid.ChevronRight,
@@ -85,7 +85,19 @@ public class SettingPresetComponent<Tlookup, Tvalue> : CompositeDrawable, ISetti
 				Alpha = 1;
 				all.X = 0;
 			}
+
+			if ( v.NewValue ) {
+				slideOutButton.ResizeWidthTo( 20, 200, Easing.Out )
+					.MoveToX( -4, 200, Easing.Out );
+				sourceDrawable.ResizeWidthTo( 0.95f, 200, Easing.Out );
+			}
+			else {
+				slideOutButton.ResizeWidthTo( 16, 200, Easing.Out )
+					.MoveToX( 6, 200, Easing.Out );
+				sourceDrawable.ResizeWidthTo( 1, 200, Easing.Out );
+			}
 		}, true );
+		FinishTransforms( true );
 	}
 
 	protected override void Update () {
