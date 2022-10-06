@@ -29,24 +29,61 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 	public IReadOnlyDictionary<OsuXrSetting, Type> SettingTypes => settingTypes;
 	Dictionary<OsuXrSetting, Type> settingTypes = new();
 	Dictionary<OsuXrSetting, Func<object>> getters = new();
-
-	public object Get ( OsuXrSetting lookup )
-		=> getters[lookup]();
+	Dictionary<OsuXrSetting, Action<string>> setters = new();
 
 	protected override void AddBindable<TBindable> ( OsuXrSetting lookup, Bindable<TBindable> bindable ) {
 		settingTypes.Add( lookup, typeof(TBindable) );
 		getters.Add( lookup, () => bindable.Value );
+		setters.Add( lookup, s => bindable.Parse(s) );
 		base.AddBindable( lookup, bindable );
 	}
 
 	public ConfigurationPreset<OsuXrSetting> CreateFullPreset () {
 		var preset = new ConfigurationPreset<OsuXrSetting>();
-		foreach ( var (key, type) in SettingTypes ) {
-			preset.Add( key, (Get(key), type) );
+		foreach ( var (key, get) in getters ) {
+			preset[key] = get();
 		}
-
 		return preset;
 	}
+
+	public void LoadPreset ( ConfigurationPreset<OsuXrSetting> preset ) {
+		foreach ( var (lookup, value) in preset.ConfigStore ) {
+			if ( setters.TryGetValue( lookup, out var set ) ) {
+				set( value.ToString()! );
+			}
+		}
+	}
+
+	public readonly ConfigurationPreset<OsuXrSetting> DefaultPreset = new() {
+		Name = "Default",
+		[OsuXrSetting.InputMode] = InputMode.SinglePointer,
+		[OsuXrSetting.SinglePointerTouch] = false,
+		[OsuXrSetting.ScreenArc] = MathF.PI * 0.7f,
+		[OsuXrSetting.ScreenRadius] = 1.6f,
+		[OsuXrSetting.ScreenHeight] = 1.8f,
+		[OsuXrSetting.ScreenResolutionX] = 1920,
+		[OsuXrSetting.ScreenResolutionY] = 1080
+	};
+
+	public readonly ConfigurationPreset<OsuXrSetting> PresetTouchscreenBig = new() {
+		Name = "Touchscreen Big",
+		[OsuXrSetting.InputMode] = InputMode.TouchScreen,
+		[OsuXrSetting.ScreenArc] = 1.2f,
+		[OsuXrSetting.ScreenRadius] = 1.01f,
+		[OsuXrSetting.ScreenHeight] = 1.47f,
+		[OsuXrSetting.ScreenResolutionX] = 3840 / 2,
+		[OsuXrSetting.ScreenResolutionY] = 2552 / 2
+	};
+
+	public readonly ConfigurationPreset<OsuXrSetting> PresetTouchscreenSmall = new() {
+		Name = "Touchscreen Small",
+		[OsuXrSetting.InputMode] = InputMode.TouchScreen,
+		[OsuXrSetting.ScreenArc] = 1.2f,
+		[OsuXrSetting.ScreenRadius] = 0.69f,
+		[OsuXrSetting.ScreenHeight] = 1.58f,
+		[OsuXrSetting.ScreenResolutionX] = 3840 / 2,
+		[OsuXrSetting.ScreenResolutionY] = 2552 / 2
+	};
 }
 
 public static class PresetExtensions {

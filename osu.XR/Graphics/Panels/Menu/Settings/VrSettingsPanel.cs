@@ -116,9 +116,16 @@ public class PresetsSettingSection : SettingsSection {
 
 	[BackgroundDependencyLoader]
 	private void load ( OsuXrConfigManager config ) {
-		Add( new SettingsButton {
-			Text = "Toggle Preset creation",
-			Action = () => presetContainer.IsEditingBindable.Toggle()
-		} );
+		//Add( new SettingsButton {
+		//	Text = "Toggle Preset creation",
+		//	Action = () => presetContainer.IsEditingBindable.Toggle()
+		//} );
+
+		foreach ( var i in new[] { config.DefaultPreset, config.PresetTouchscreenSmall, config.PresetTouchscreenBig } ) {
+			Add( new SettingsButton {
+				Text = i.Name,
+				Action = () => config.LoadPreset( i )
+			} );
+		}
 	}
 }
