@@ -20,7 +20,7 @@ public class VrController : BasicVrDevice {
 
 	public VrController ( Controller source, Scene scene ) : base( source ) {
 		this.source = source;
-		scene.Add( pointer = new() );
+		scene.Add( pointer = new( scene ) );
 	}
 
 	[Resolved]
@@ -36,26 +36,15 @@ public class VrController : BasicVrDevice {
 	private void load ( PanelInteractionSystem system ) {
 		inputSource = system.GetSource( this );
 
-		useTouchBindable.BindValueChanged( v => {
-			if ( v.NewValue )
-				inputSource.ReleaseMouse();
-			else
-				inputSource.TouchUp();
-
-			isTouchDown = false;
-		} );
-
 		pointer.ColliderHovered += hit => {
 			HoveredCollider = hit.Collider;
 			if ( hit.Collider is Panel panel ) {
+				updateTouchSetting();
 				currentPosition = panel.GlobalSpaceContentPositionAt( hit.TrisIndex, hit.Point );
-
-				if ( useTouch && !isTouchDown )
-					return;
 
 				if ( isTouchDown )
 					inputSource.TouchMove( currentPosition );
-				else
+				else if ( !useTouch )
 					panel.Content.MoveMouse( currentPosition );
 			}
 			ColliderHovered?.Invoke( hit );
@@ -84,7 +73,7 @@ public class VrController : BasicVrDevice {
 						}
 					}
 					else {
-						if ( useTouch ) {
+						if ( isTouchDown ) {
 							isTouchDown = false;
 							inputSource.TouchUp();
 						}
@@ -97,10 +86,13 @@ public class VrController : BasicVrDevice {
 		} );
 	}
 
+	void updateTouchSetting () {
+		useTouchBindable.Value = controllers.Count( x => x.HoveredCollider == HoveredCollider ) >= 2;
+	}
+
 	protected override void Update () {
 		base.Update();
-
-		useTouchBindable.Value = controllers.Count( x => x.HoveredCollider == HoveredCollider ) >= 2;
+		updateTouchSetting();
 
 		if ( aim?.FetchDataForNextFrame() is PoseInput pose ) {
 			pointer.Position = pose.Position.ToOsuTk();
