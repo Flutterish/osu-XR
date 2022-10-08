@@ -18,15 +18,7 @@ public class PresetsSettingSection : SettingsSection {
 	public PresetsSettingSection () {
 		Add( List = new ListSubsection() );
 		Add( Management = new ManagementSubsection() );
-
-		List.EditPresetRequested += p => EditPresetRequested?.Invoke( p );
-		List.StopEditingPresetRequested += () => StopEditingPresetRequested?.Invoke();
-		Management.CreatePresetRequested += () => CreatePresetRequested?.Invoke();
 	}
-
-	public event Action? StopEditingPresetRequested;
-	public event Action<ConfigurationPreset<OsuXrSetting>>? EditPresetRequested;
-	public event Action? CreatePresetRequested;
 
 	public class ListSubsection : SettingsSubsection {
 		protected override LocalisableString Header => "Load";
@@ -38,20 +30,31 @@ public class PresetsSettingSection : SettingsSection {
 		OsuXrConfigManager config { get; set; } = null!;
 
 		protected override void LoadComplete () {
-			foreach ( var i in new[] { config.DefaultPreset, config.PresetTouchscreenSmall, config.PresetTouchscreenBig } ) {
-				AddPreset( i );
-			}
+			presets.BindTo( presetContainer.Presets );
+			presets.BindCollectionChanged( (_, e) => {
+				if ( e.OldItems != null ) {
+					foreach ( ConfigurationPreset<OsuXrSetting> i in e.OldItems ) {
+						removePreset( i );
+					}
+				}
+				if ( e.NewItems != null ) {
+					foreach ( ConfigurationPreset<OsuXrSetting> i in e.NewItems ) {
+						addPreset( i );
+					}
+				}
+			}, true );
 		}
 
+		BindableList<ConfigurationPreset<OsuXrSetting>> presets = new();
 		Dictionary<ConfigurationPreset<OsuXrSetting>, Drawable> buttonsByPreset = new();
-		public void RemovePreset ( ConfigurationPreset<OsuXrSetting> preset ) {
+		void removePreset ( ConfigurationPreset<OsuXrSetting> preset ) {
 			if ( !buttonsByPreset.Remove( preset, out var button ) )
 				return;
 
 			Remove( button, true );
 		}
 
-		public void AddPreset ( ConfigurationPreset<OsuXrSetting> preset ) {
+		void addPreset ( ConfigurationPreset<OsuXrSetting> preset ) {
 			if ( buttonsByPreset.ContainsKey( preset ) )
 				return;
 
@@ -77,10 +80,12 @@ public class PresetsSettingSection : SettingsSection {
 						RelativeSizeAxes = Axes.None,
 						Padding = default,
 						Action = () => {
-							if ( presetContainer.SelectedPresetBindable.Value == preset )
-								StopEditingPresetRequested?.Invoke();
+							if ( presetContainer.SelectedPresetBindable.Value == preset ) {
+								presetContainer.SelectedPresetBindable.Value = null;
+								presetContainer.IsEditingBindable.Value = false;
+							}
 							else
-								EditPresetRequested?.Invoke( preset );
+								presetContainer.SelectedPresetBindable.Value = preset;
 						}
 					}
 				}
@@ -110,9 +115,6 @@ public class PresetsSettingSection : SettingsSection {
 			buttonsByPreset.Add( preset, buttonsContainer );
 		}
 
-		public event Action? StopEditingPresetRequested;
-		public event Action<ConfigurationPreset<OsuXrSetting>>? EditPresetRequested;
-
 		class PresetButtonContainer : Container {
 			public Bindable<string> NameBindable = new();
 			public Bindable<ConfigurationPreset<OsuXrSetting>?> PresetBindable = new();
@@ -131,15 +133,19 @@ public class PresetsSettingSection : SettingsSection {
 			SettingsButton createButton;
 			Add( createButton = new SettingsButton {
 				Text = "Create new preset",
-				TooltipText = "Slide out the settings to add them to the preset",
-				Action = () => CreatePresetRequested?.Invoke()
+				TooltipText = "Creates a new preset with current settings",
+				Action = () => {
+					var preset = config.CreateFullPreset();
+					preset.Name = "New Preset";
+					presetContainer.Presets.Add( preset );
+					presetContainer.IsEditingBindable.Value = false;
+					presetContainer.SelectedPresetBindable.Value = preset;
+				}
 			} );
 
 			presetContainer.IsEditingBindable.BindValueChanged( v => {
 				createButton.Enabled.Value = !v.NewValue;
 			}, true );
 		}
-
-		public event Action? CreatePresetRequested;
 	}
 }

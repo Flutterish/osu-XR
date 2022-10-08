@@ -21,9 +21,6 @@ public class PresetPreview : SettingsPanel.SectionsContainer {
 		PresetContainer.SelectedPresetBindable.BindTo( PresetBindable );
 		PresetContainer.IsPreviewBindable.Value = true;
 		settings = new();
-		settings.StopEditingPresetRequested += () => StopEditingPresetRequested?.Invoke();
-		settings.RequestPresetRemoval += p => RequestPresetRemoval?.Invoke( p );
-		settings.EditPresetRequested += p => EditPresetRequested?.Invoke( p );
 	}
 
 
@@ -37,10 +34,6 @@ public class PresetPreview : SettingsPanel.SectionsContainer {
 	protected override Drawable CreateHeader ()
 		=> new SettingsHeader( "Preset Preview", "" );
 
-	public event Action? StopEditingPresetRequested;
-	public event Action<ConfigurationPreset<OsuXrSetting>>? EditPresetRequested;
-	public event Action<ConfigurationPreset<OsuXrSetting>>? RequestPresetRemoval;
-
 	class PresetSettingsSection : SettingsSection {
 		[Resolved]
 		SettingPresetContainer<OsuXrSetting> presetContainer { get; set; } = null!;
@@ -53,9 +46,8 @@ public class PresetPreview : SettingsPanel.SectionsContainer {
 		Bindable<ConfigurationPreset<OsuXrSetting>?> presetBindable = new();
 		readonly BindableWithCurrent<bool> isEditingBindable = new();
 
-		protected override void LoadComplete () {
-			base.LoadComplete();
-
+		[BackgroundDependencyLoader]
+		private void load () {
 			presetBindable.BindTo( presetContainer.SelectedPresetBindable );
 			isEditingBindable.BindTo( presetContainer.IsEditingBindable );
 
@@ -75,15 +67,22 @@ public class PresetPreview : SettingsPanel.SectionsContainer {
 				Add( new SettingsButton {
 					Text = "Toggle adding/removing items",
 					Action = () => {
-						if ( isEditingBindable.Value )
-							StopEditingPresetRequested?.Invoke();
-						else
-							EditPresetRequested?.Invoke( preset );
+						isEditingBindable.Value = !isEditingBindable.Value;
 					}
 				} );
 				Add( new SettingsButton {
 					Text = "Save",
 					Action = preset.SaveDefaults
+				} );
+				Add( new SettingsButton {
+					Text = "Clone",
+					Action = () => {
+						var clone = preset.Clone();
+						clone.Name = $"{preset.Name} (Copy)";
+						presetContainer.Presets.Add( clone );
+						presetContainer.IsEditingBindable.Value = false;
+						presetContainer.SelectedPresetBindable.Value = clone;
+					}
 				} );
 				Add( new SettingsButton {
 					Text = "Revert defauls",
@@ -92,15 +91,12 @@ public class PresetPreview : SettingsPanel.SectionsContainer {
 				Add( new DangerousSettingsButton {
 					Text = "Delete",
 					Action = () => {
-						RequestPresetRemoval?.Invoke( preset );
+						presetContainer.Presets.Remove( preset );
+						presetBindable.Value = null;
+						isEditingBindable.Value = false;
 					}
 				} );
-				// TODO clone
 			} );
 		}
-
-		public event Action? StopEditingPresetRequested;
-		public event Action<ConfigurationPreset<OsuXrSetting>>? EditPresetRequested;
-		public event Action<ConfigurationPreset<OsuXrSetting>>? RequestPresetRemoval;
 	}
 }

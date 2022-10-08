@@ -24,19 +24,28 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 		SetDefault( OsuXrSetting.ShowDust, true );
 		SetDefault( OsuXrSetting.SkyboxType, SkyBoxType.Solid );
 		base.InitialiseDefaults();
+
+		PerformLoad();
 	}
 
-	public IReadOnlyDictionary<OsuXrSetting, Type> SettingTypes => settingTypes;
-	Dictionary<OsuXrSetting, Type> settingTypes = new();
+	protected override void PerformLoad () {
+		base.PerformLoad();
+
+		Presets.Add( DefaultPreset );
+		Presets.Add( PresetTouchscreenBig );
+		Presets.Add( PresetTouchscreenSmall );
+	}
+
 	Dictionary<OsuXrSetting, Func<object>> getters = new();
 	Dictionary<OsuXrSetting, Action<string>> setters = new();
 
 	protected override void AddBindable<TBindable> ( OsuXrSetting lookup, Bindable<TBindable> bindable ) {
-		settingTypes.Add( lookup, typeof(TBindable) );
 		getters.Add( lookup, () => bindable.Value );
 		setters.Add( lookup, s => bindable.Parse(s) );
 		base.AddBindable( lookup, bindable );
 	}
+
+	public readonly BindableList<ConfigurationPreset<OsuXrSetting>> Presets = new();
 
 	public ConfigurationPreset<OsuXrSetting> CreateFullPreset () {
 		var preset = new ConfigurationPreset<OsuXrSetting>();

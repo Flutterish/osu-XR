@@ -13,6 +13,7 @@ public class SettingPresetContainer<Tlookup> where Tlookup : struct, Enum {
 	public readonly BindableBool IsPreviewBindable = new( false );
 
 	public readonly Bindable<ConfigurationPreset<Tlookup>?> SelectedPresetBindable = new();
+	public readonly BindableList<ConfigurationPreset<OsuXrSetting>> Presets = new();
 
 	public void Set<Tvalue> ( ISettingPresetComponent<Tlookup> component, Tvalue value ) {
 		if ( SelectedPresetBindable.Value is ConfigurationPreset<Tlookup> preset )

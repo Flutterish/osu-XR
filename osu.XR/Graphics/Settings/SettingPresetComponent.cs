@@ -43,7 +43,12 @@ public class SettingPresetComponent<Tlookup, Tvalue> : CompositeDrawable, ISetti
 		configBindable.UnbindAll();
 		source.Current = configBindable;
 
-		source.Current.BindValueChanged( v => current.Value = v.NewValue );
+		source.Current.BindValueChanged( v => {
+			current.Value = v.NewValue;
+			if ( selectedPresetBindable.Value != null && !presetKeys.Contains( Lookup ) ) {
+				presetKeys.Add( Lookup );
+			}
+		} );
 		current.BindValueChanged( v => {
 			// let updates happen, just not by the user
 			var disabled = source.Current.Disabled;
