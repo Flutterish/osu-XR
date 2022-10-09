@@ -3,8 +3,7 @@
 namespace osu.XR.Graphics.VirtualReality;
 
 public interface IPointer {
-	void SetTarget ( Vector3 position, Quaternion rotation );
-	event Action<PointerHit?>? ColliderHovered;
+	PointerHit? UpdatePointer ( Vector3 position, Quaternion rotation );
 	/// <summary>
 	/// Whether this pointer should emulate touch input
 	/// </summary>

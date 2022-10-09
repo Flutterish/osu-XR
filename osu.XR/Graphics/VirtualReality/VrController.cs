@@ -13,10 +13,10 @@ namespace osu.XR.Graphics.VirtualReality;
 
 public class VrController : BasicVrDevice {
 	Controller source;
-	RayPointer? rayPointer;
-	TouchPointer? touchPointer;
+	RayPointer rayPointer = new();
+	TouchPointer touchPointer = new();
 
-	IPointer pointer;
+	IPointer? pointer;
 
 	public IHasCollider? HoveredCollider { get; private set; }
 	PoseAction? aim;
@@ -25,21 +25,17 @@ public class VrController : BasicVrDevice {
 	public VrController ( Controller source, Scene scene ) : base( source ) {
 		this.scene = scene;
 		this.source = source;
-		pointer = touchPointer ??= new();
-		setPointer( pointer );
 	}
 
-	void setPointer ( IPointer pointer ) {
-		Schedule( () => {
-			scene.Remove( (Drawable3D)this.pointer, disposeImmediately: false );
-			scene.Add( (Drawable3D)pointer );
+	void setPointer ( IPointer? pointer ) {
+		if ( this.pointer is Drawable3D old )
+			scene.Remove( old, disposeImmediately: false );
+		if ( pointer is Drawable3D @new )
+			scene.Add( @new );
 
-			this.pointer.ColliderHovered -= onPointerHover;
-			pointer.ColliderHovered += onPointerHover;
-			this.pointer = pointer;
+		this.pointer = pointer;
 
-			updateTouchSetting();
-		} );
+		updateTouchSetting();
 	}
 
 	[Resolved]
@@ -54,6 +50,7 @@ public class VrController : BasicVrDevice {
 	[BackgroundDependencyLoader]
 	private void load ( PanelInteractionSystem system ) {
 		inputSource = system.GetSource( this );
+		setPointer( touchPointer );
 
 		source.VR.BindActionsLoaded( () => {
 			var left = source.GetAction<BooleanAction>( VrAction.LeftButton )!;
@@ -62,7 +59,7 @@ public class VrController : BasicVrDevice {
 
 			foreach ( var (button, action) in new[] { (left, VrAction.LeftButton), (right, VrAction.RightButton) } ) {
 				button.ValueChanged += ( old, @new ) => {
-					if ( pointer.IsTouchSource )
+					if ( pointer?.IsTouchSource == true )
 						return;
 
 					onButtonStateChanged( @new, action );
@@ -102,41 +99,44 @@ public class VrController : BasicVrDevice {
 		}
 	}
 
-	void onPointerHover ( PointerHit? maybeHit ) {
-		if ( maybeHit is PointerHit hit ) {
-			HoveredCollider = hit.Collider;
-			if ( hit.Collider is Panel panel ) {
-				updateTouchSetting();
-				currentPosition = panel.GlobalSpaceContentPositionAt( hit.TrisIndex, hit.Point );
-
-				if ( pointer.IsTouchSource && !isTouchDown )
-					onButtonStateChanged( true, VrAction.LeftButton );
-
-				if ( isTouchDown )
-					inputSource.TouchMove( currentPosition );
-				else if ( !useTouch )
-					panel.Content.MoveMouse( currentPosition );
-			}
-		}
-		else {
-			if ( pointer.IsTouchSource && isTouchDown )
-				onButtonStateChanged( false, VrAction.LeftButton );
-
-			HoveredCollider = null;
-		}
-	}
-
 	void updateTouchSetting () {
-		useTouchBindable.Value = pointer.IsTouchSource
+		useTouchBindable.Value = pointer?.IsTouchSource == true
 			|| controllers.Count( x => x.HoveredCollider == HoveredCollider ) >= 2;
+
+		IsVisible = pointer?.IsTouchSource != true;
 	}
 
 	protected override void Update () {
 		base.Update();
 		updateTouchSetting();
 
+		if ( pointer is null )
+			return;
+
 		if ( aim?.FetchDataForNextFrame() is PoseInput pose ) {
-			pointer.SetTarget( pose.Position.ToOsuTk(), pose.Rotation.ToOsuTk() );
+			var maybeHit = pointer.UpdatePointer( pose.Position.ToOsuTk(), pose.Rotation.ToOsuTk() );
+
+			if ( maybeHit is PointerHit hit ) {
+				HoveredCollider = hit.Collider;
+				if ( hit.Collider is Panel panel ) {
+					updateTouchSetting();
+					currentPosition = panel.GlobalSpaceContentPositionAt( hit.TrisIndex, hit.Point );
+
+					if ( pointer.IsTouchSource && !isTouchDown )
+						onButtonStateChanged( true, VrAction.LeftButton );
+
+					if ( isTouchDown )
+						inputSource.TouchMove( currentPosition );
+					else if ( !useTouch )
+						panel.Content.MoveMouse( currentPosition );
+				}
+			}
+			else {
+				if ( pointer.IsTouchSource && isTouchDown )
+					onButtonStateChanged( false, VrAction.LeftButton );
+
+				HoveredCollider = null;
+			}
 		}
 	}
 }

@@ -1,9 +1,10 @@
 ﻿using osu.Framework.XR.Graphics;
+using osu.Framework.XR.Parsing.Wavefront;
 using osu.Framework.XR.Physics;
 
 namespace osu.XR.Graphics.VirtualReality;
 
-public class TouchPointer : BasicModel, IPointer {
+public class TouchPointer : Model, IPointer {
 	[Resolved]
 	PhysicsSystem physics { get; set; } = null!;
 
@@ -11,23 +12,21 @@ public class TouchPointer : BasicModel, IPointer {
 	public readonly BindableFloat RadiusBindable = new( 0.023f );
 
 	public TouchPointer () {
-		Mesh.AddCircle( Vector3.Zero, Vector3.UnitX, Vector3.UnitZ, 32 );
-		Mesh.AddCircle( Vector3.Zero, Vector3.UnitY, Vector3.UnitX, 32 );
-		Mesh.AddCircle( Vector3.Zero, Vector3.UnitZ, Vector3.UnitY, 32 );
-		Mesh.CreateFullUnsafeUpload().Enqueue();
+		// TODO meshes via resource store
+		File.ReadAllTextAsync( "./Resources/Models/sphere.obj" ).ContinueWith( r => {
+			var mesh = SimpleObjFile.Load( r.Result );
+			mesh.CreateFullUnsafeUpload().Enqueue();
+			Mesh = mesh;
+		} );
 
 		RadiusBindable.BindValueChanged( v => Scale = new( v.NewValue ), true );
-		Alpha = 0.5f;
+		Alpha = 0.3f;
 	}
 
-	Vector3 targetPosition;
-	public void SetTarget ( Vector3 position, Quaternion rotation ) {
-		targetPosition = position;
+	public PointerHit? UpdatePointer ( Vector3 position, Quaternion rotation ) {
+		var targetPosition = position;
 		Rotation = rotation;
-	}
-	public bool IsTouchSource => true;
 
-	protected override void Update () {
 		if ( Position != targetPosition ) {
 			var direction = ( targetPosition - Position ).Normalized();
 			if ( physics.TryHitRay( Position, direction, out var rayHit ) && rayHit.Distance - Radius / 2 < ( Position - targetPosition ).Length ) {
@@ -38,13 +37,8 @@ public class TouchPointer : BasicModel, IPointer {
 			}
 		}
 
-		if ( physics.TryHitSphere( Position, Radius, out var hit ) ) {
-			ColliderHovered?.Invoke( hit );
-		}
-		else {
-			ColliderHovered?.Invoke( null );
-		}
+		return physics.TryHitSphere( Position, Radius, out var hit ) ? hit : null;
 	}
 
-	public event Action<PointerHit?>? ColliderHovered;
+	public bool IsTouchSource => true;
 }
