@@ -16,9 +16,9 @@ public readonly struct PointerHit {
 	public int TrisIndex { get; init; }
 	public IHasCollider? Collider { get; init; }
 
-	public static implicit operator PointerHit ( Raycast.RaycastHit hit )
+	public static implicit operator PointerHit ( RaycastHit hit )
 		=> new() { Point = hit.Point, Normal = hit.Normal, TrisIndex = hit.TrisIndex, Collider = hit.Collider };
 
 	public static implicit operator PointerHit ( SphereHit hit )
-		=> new() { Point = hit.Point, Normal = (hit.Origin - hit.Point).Normalized(), TrisIndex = hit.TrisIndex, Collider = hit.Collider };
+		=> new() { Point = hit.Point, Normal = hit.Normal, TrisIndex = hit.TrisIndex, Collider = hit.Collider };
 }
