@@ -155,8 +155,6 @@ public class SettingPresetComponent<Tlookup, Tvalue> : CompositeDrawable, ISetti
 			}
 		} );
 		selectedPresetBindable.BindValueChanged( v => {
-			updateSource();
-
 			if ( v.OldValue?.Keys is BindableList<Tlookup> old )
 				presetKeys.UnbindFrom( old );
 
