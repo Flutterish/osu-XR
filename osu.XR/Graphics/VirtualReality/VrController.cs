@@ -5,6 +5,7 @@ using osu.Framework.XR.Input;
 using osu.Framework.XR.Physics;
 using osu.Framework.XR.VirtualReality;
 using osu.Framework.XR.VirtualReality.Devices;
+using osu.XR.Configuration;
 using osuTK.Input;
 
 namespace osu.XR.Graphics.VirtualReality;
@@ -14,6 +15,7 @@ public class VrController : BasicVrDevice {
 	RayPointer rayPointer = new();
 	TouchPointer touchPointer = new();
 
+	public Hand Hand => source.Role == Valve.VR.ETrackedControllerRole.LeftHand ? Hand.Left : Hand.Right;
 	IPointer? pointer;
 
 	public IHasCollider? HoveredCollider { get; private set; }
@@ -23,6 +25,10 @@ public class VrController : BasicVrDevice {
 	public VrController ( Controller source, Scene scene ) : base( source ) {
 		this.scene = scene;
 		this.source = source;
+
+		source.IsEnabled.BindValueChanged( _ => {
+			updatePointerType();
+		} );
 	}
 
 	void setPointer ( IPointer? pointer ) {
@@ -32,12 +38,20 @@ public class VrController : BasicVrDevice {
 			scene.Add( @new );
 
 		this.pointer = pointer;
+		if ( pointer is null ) {
+			inputSource.FocusedPanel = null;
+			HoveredCollider = null;
+			isTouchDown = false;
+		}
 
 		updateTouchSetting();
 	}
 
-	[Resolved]
-	IBindableList<VrController> controllers { get; set; } = null!;
+	Bindable<Hand> dominantHand = new( Hand.Right );
+	Bindable<InputMode> inputMode = new( InputMode.DoublePointer );
+	Bindable<bool> singlePointerTouch = new( false );
+	BindableList<VrController> activeControllers = new();
+
 	bool isTouchDown;
 	BindableBool useTouchBindable = new();
 	bool useTouch => useTouchBindable.Value;
@@ -45,10 +59,9 @@ public class VrController : BasicVrDevice {
 
 	Vector2 currentPosition;
 	PanelInteractionSystem.Source inputSource = null!;
-	[BackgroundDependencyLoader]
-	private void load ( PanelInteractionSystem system ) {
+	[BackgroundDependencyLoader(true)]
+	private void load ( PanelInteractionSystem system, OsuXrConfigManager? config, OsuXrGame game ) {
 		inputSource = system.GetSource( this );
-		setPointer( touchPointer );
 
 		var left = source.GetAction<BooleanAction>( VrAction.LeftButton );
 		var right = source.GetAction<BooleanAction>( VrAction.RightButton );
@@ -62,6 +75,29 @@ public class VrController : BasicVrDevice {
 				onButtonStateChanged( v.NewValue, action );
 			};
 		}
+
+		if ( config != null ) {
+			config.BindWith( OsuXrSetting.InputMode, inputMode );
+			config.BindWith( OsuXrSetting.SinglePointerTouch, singlePointerTouch );
+		}
+
+		inputMode.BindValueChanged( _ => {
+			updatePointerType();
+		} );
+		activeControllers.BindTo( game.ActiveVrControllers );
+		activeControllers.BindCollectionChanged( (_, _) => updatePointerType() );
+		dominantHand.BindTo( game.DominantHand );
+		dominantHand.BindValueChanged( _ => updatePointerType() );
+
+		updatePointerType();
+	}
+
+	void updatePointerType () {
+		setPointer( source.IsEnabled.Value ? inputMode.Value switch {
+			InputMode.TouchScreen => touchPointer,
+			InputMode.DoublePointer => rayPointer,
+			_ => (activeControllers.Count == 1 || Hand == dominantHand.Value) ? rayPointer : null
+		} : null );
 	}
 
 	void onButtonStateChanged ( bool value, VrAction action ) {
@@ -96,8 +132,9 @@ public class VrController : BasicVrDevice {
 	}
 
 	void updateTouchSetting () {
-		useTouchBindable.Value = pointer?.IsTouchSource == true
-			|| controllers.Count( x => x.HoveredCollider == HoveredCollider ) >= 2;
+		useTouchBindable.Value = singlePointerTouch.Value 
+			|| pointer?.IsTouchSource == true
+			|| activeControllers.Count( x => x.HoveredCollider == HoveredCollider ) >= 2;
 
 		IsVisible = pointer?.IsTouchSource != true;
 	}
