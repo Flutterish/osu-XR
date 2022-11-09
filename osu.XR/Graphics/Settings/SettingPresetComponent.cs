@@ -44,6 +44,8 @@ public class SettingPresetComponent<Tlookup, Tvalue> : CompositeDrawable, ISetti
 		source.Current = configBindable;
 
 		source.Current.BindValueChanged( v => {
+			if ( updatingSource )
+				return;
 			current.Value = v.NewValue;
 			if ( selectedPresetBindable.Value != null && !presetKeys.Contains( Lookup ) ) {
 				presetKeys.Add( Lookup );
@@ -65,12 +67,15 @@ public class SettingPresetComponent<Tlookup, Tvalue> : CompositeDrawable, ISetti
 		};
 	}
 
+	bool updatingSource;
 	void updateSource () {
+		updatingSource = true;
 		// let updates happen, just not by the user
 		var disabled = current.Disabled;
 		current.Disabled = false;
 		current.Current = selectedPresetBindable.Value?.GetBindable<Tvalue>( Lookup ) ?? config.GetBindable<Tvalue>( Lookup );
 		current.Disabled = disabled;
+		updatingSource = false;
 	}
 
 	Container gripArea = null!;
@@ -165,6 +170,7 @@ public class SettingPresetComponent<Tlookup, Tvalue> : CompositeDrawable, ISetti
 		}, true );
 		(isEditingBindable, isPreviewBindable).BindValuesChanged( updateVisibility, true );
 
+		updateSource();
 		FinishTransforms( true );
 	}
 

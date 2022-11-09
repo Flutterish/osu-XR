@@ -50,7 +50,8 @@ public class OsuXrGame : OsuXrGameBase {
 
 		physics.AddSubtree( scene.Root );
 		Add( movementSystem = new( scene ) { RelativeSizeAxes = Axes.Both } );
-		Add( new BasicPanelInteractionSource( scene, physics, panelInteraction ) { RelativeSizeAxes = Axes.Both } );
+		if ( !useSimulatedVR )
+			Add( new BasicPanelInteractionSource( scene, physics, panelInteraction ) { RelativeSizeAxes = Axes.Both } );
 
 		scene.Add( new HandheldMenu() { Y = 1 } );
 		scene.Add( new VrPlayer() );
