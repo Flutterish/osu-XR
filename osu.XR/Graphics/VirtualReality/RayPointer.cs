@@ -1,6 +1,4 @@
 ﻿using osu.Framework.XR.Graphics;
-using osu.Framework.XR.Graphics.Meshes;
-using osu.Framework.XR.Graphics.Rendering;
 using osu.Framework.XR.Physics;
 
 namespace osu.XR.Graphics.VirtualReality;

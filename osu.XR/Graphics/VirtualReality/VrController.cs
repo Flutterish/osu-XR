@@ -1,12 +1,10 @@
-﻿using OpenVR.NET.Devices;
-using OpenVR.NET.Input;
-using osu.Framework.XR.Graphics;
+﻿using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Graphics.Panels;
 using osu.Framework.XR.Graphics.Rendering;
 using osu.Framework.XR.Input;
 using osu.Framework.XR.Physics;
 using osu.Framework.XR.VirtualReality;
-using osu.XR.VirtualReality;
+using osu.Framework.XR.VirtualReality.Devices;
 using osuTK.Input;
 
 namespace osu.XR.Graphics.VirtualReality;
@@ -52,20 +50,18 @@ public class VrController : BasicVrDevice {
 		inputSource = system.GetSource( this );
 		setPointer( touchPointer );
 
-		source.VR.BindActionsLoaded( () => {
-			var left = source.GetAction<BooleanAction>( VrAction.LeftButton )!;
-			var right = source.GetAction<BooleanAction>( VrAction.RightButton )!;
-			aim = source.GetAction<PoseAction>( VrAction.ControllerTip )!;
+		var left = source.GetAction<BooleanAction>( VrAction.LeftButton );
+		var right = source.GetAction<BooleanAction>( VrAction.RightButton );
+		aim = source.GetAction<PoseAction>( VrAction.ControllerTip );
 
-			foreach ( var (button, action) in new[] { (left, VrAction.LeftButton), (right, VrAction.RightButton) } ) {
-				button.ValueChanged += ( old, @new ) => {
-					if ( pointer?.IsTouchSource == true )
-						return;
+		foreach ( var (button, action) in new[] { (left, VrAction.LeftButton), (right, VrAction.RightButton) } ) {
+			button.Value.ValueChanged += v => {
+				if ( pointer?.IsTouchSource == true )
+					return;
 
-					onButtonStateChanged( @new, action );
-				};
-			}
-		} );
+				onButtonStateChanged( v.NewValue, action );
+			};
+		}
 	}
 
 	void onButtonStateChanged ( bool value, VrAction action ) {
@@ -113,7 +109,7 @@ public class VrController : BasicVrDevice {
 		if ( pointer is null )
 			return;
 
-		if ( aim?.FetchDataForNextFrame() is PoseInput pose ) {
+		if ( aim?.FetchDataForNextFrame() is OpenVR.NET.Input.PoseInput pose ) {
 			var maybeHit = pointer.UpdatePointer( pose.Position.ToOsuTk(), pose.Rotation.ToOsuTk() );
 
 			if ( maybeHit is PointerHit hit ) {

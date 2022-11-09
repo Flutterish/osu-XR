@@ -18,8 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="osu.Framework.XR" Version="2022.1013.0" />
-    <PackageReference Include="ppy.osu.Game" Version="2022.927.0" />
+    <PackageReference Include="osu.Framework.XR" Version="2022.1109.0" />
+    <PackageReference Include="ppy.osu.Game" Version="2022.1101.0" />
   </ItemGroup>
 
 </Project>
