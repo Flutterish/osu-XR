@@ -29,5 +29,11 @@ public abstract class SettingsPanel : MenuPanel {
 			base.LoadComplete();
 			Show();
 		}
+
+		protected override void Update () {
+			base.Update();
+			if ( State.Value is Visibility.Hidden )
+				Show();
+		}
 	}
 }
