@@ -1,4 +1,5 @@
-﻿using osu.Framework.XR.Graphics;
+﻿using osu.Framework.XR;
+using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Graphics.Panels;
 using osu.Framework.XR.Graphics.Rendering;
 using osu.Framework.XR.Input;
@@ -65,15 +66,17 @@ public class VrController : BasicVrDevice {
 
 		var left = source.GetAction<BooleanAction>( VrAction.LeftButton );
 		var right = source.GetAction<BooleanAction>( VrAction.RightButton );
+		var globalLeft = game.Compositor.Input.GetAction<BooleanAction>( VrAction.LeftButton );
+		var globalRight = game.Compositor.Input.GetAction<BooleanAction>( VrAction.RightButton );
 		aim = source.GetAction<PoseAction>( VrAction.ControllerTip );
 
-		foreach ( var (button, action) in new[] { (left, VrAction.LeftButton), (right, VrAction.RightButton) } ) {
-			button.Value.ValueChanged += v => {
+		foreach ( var (button, globalButton, action) in new[] { (left, globalLeft, VrAction.LeftButton), (right, globalRight, VrAction.RightButton) } ) {
+			(button.Value, globalButton.Value).BindValuesChanged( ( local, global ) => {
 				if ( pointer?.IsTouchSource == true )
 					return;
 
-				onButtonStateChanged( v.NewValue, action );
-			};
+				onButtonStateChanged( ( inputMode.Value is InputMode.SinglePointer && pointer != null ) ? global : local, action );
+			} );
 		}
 
 		if ( config != null ) {

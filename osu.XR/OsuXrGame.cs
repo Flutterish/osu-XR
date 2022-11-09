@@ -21,7 +21,7 @@ public class OsuXrGame : OsuXrGameBase {
 	VR vr = new();
 
 	[Cached(typeof(VrCompositor))]
-	VrCompositor compositor;
+	public readonly VrCompositor Compositor;
 
 	[Cached]
 	VrResourceStore vrResourceStore = new();
@@ -42,9 +42,9 @@ public class OsuXrGame : OsuXrGameBase {
 			RelativeSizeAxes = Axes.Both
 		};
 
-		compositor = useSimulatedVR ? setupVrRig() : new VrCompositor();
+		Compositor = useSimulatedVR ? setupVrRig() : new VrCompositor();
 
-		Add( compositor );
+		Add( Compositor );
 		
 		scene.Camera.Z = -5;
 		scene.Camera.Y = 1;
@@ -57,12 +57,12 @@ public class OsuXrGame : OsuXrGameBase {
 		scene.Add( new HandheldMenu() { Y = 1 } );
 		scene.Add( new VrPlayer() );
 
-		compositor.Input.SetActionManifest( new OsuXrActionManifest() );
-		compositor.BindDeviceDetected( addVrDevice );
+		Compositor.Input.SetActionManifest( new OsuXrActionManifest() );
+		Compositor.BindDeviceDetected( addVrDevice );
 
 		dominantHandSetting.BindValueChanged( v => {
 			if ( v.NewValue is Hand.Auto ) {
-				compositor.Input.BindManifestLoaded( vr => {
+				Compositor.Input.BindManifestLoaded( vr => {
 					if ( dominantHandSetting.Value != Hand.Auto ) // TODO this on framework side
 						return;
 
