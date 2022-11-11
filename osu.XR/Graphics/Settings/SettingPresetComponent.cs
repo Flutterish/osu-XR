@@ -44,9 +44,9 @@ public class SettingPresetComponent<Tlookup, Tvalue> : CompositeDrawable, ISetti
 		source.Current = configBindable;
 
 		source.Current.BindValueChanged( v => {
+			current.Value = v.NewValue;
 			if ( updatingSource )
 				return;
-			current.Value = v.NewValue;
 			if ( selectedPresetBindable.Value != null && !presetKeys.Contains( Lookup ) ) {
 				presetKeys.Add( Lookup );
 			}

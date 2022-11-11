@@ -5,8 +5,17 @@ using osu.XR.Graphics.Settings;
 namespace osu.XR.Graphics.Panels.Settings;
 
 public class VrSettingsPanel : SettingsPanel {
+	Sections sections = null!;
 	protected override Sections CreateSectionsContainer ()
-		=> new Sections( false );
+		=> sections = new Sections ( false );
+
+	[BackgroundDependencyLoader(true)]
+	private void load ( OsuXrConfigManager? config ) {
+		if ( config == null )
+			return;
+
+		sections.PresetContainer.Presets.BindTo( config.Presets );
+	}
 
 	public class Sections : SectionsContainer {
 		[Cached]
