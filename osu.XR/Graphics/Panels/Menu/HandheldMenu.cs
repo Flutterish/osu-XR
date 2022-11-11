@@ -23,5 +23,13 @@ public class HandheldMenu : CompositeDrawable3D {
 
 		Sidebar.AddButton( FontAwesome.Solid.Cog, "Settings", () => Panels.FocusPanel( Settings ) );
 		Sidebar.AddButton( FontAwesome.Solid.ExclamationCircle, "Notifications", () => Panels.FocusPanel( Notifications ) );
+
+		VisibilityChanged += onVisibilityChanged;
+	}
+
+	private void onVisibilityChanged ( Drawable3D _, bool isVisible ) {
+		foreach ( var i in Panels.Children ) {
+			i.IsColliderEnabled = isVisible;
+		}
 	}
 }

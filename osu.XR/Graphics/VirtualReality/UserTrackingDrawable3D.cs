@@ -1,5 +1,6 @@
 ﻿using osu.Framework.XR.Graphics.Containers;
 using osu.Framework.XR.Graphics.Transforms;
+using osu.Framework.XR.Physics;
 using osu.Framework.XR.VirtualReality;
 using osu.Framework.XR.VirtualReality.Devices;
 using osu.XR.Configuration;

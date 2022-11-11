@@ -16,6 +16,8 @@ public class VrController : BasicVrDevice {
 	RayPointer rayPointer = new();
 	TouchPointer touchPointer = new();
 
+	HapticAction haptic = null!;
+
 	public bool IsEnabled => source.IsEnabled.Value;
 	public Hand Hand => source.Role == Valve.VR.ETrackedControllerRole.LeftHand ? Hand.Left : Hand.Right;
 	IPointer? pointer;
@@ -85,6 +87,8 @@ public class VrController : BasicVrDevice {
 				ToggleMenuPressed?.Invoke( this );
 		} );
 
+		haptic = source.GetAction<HapticAction>( VrAction.Feedback );
+
 		if ( config != null ) {
 			config.BindWith( OsuXrSetting.InputMode, inputMode );
 			config.BindWith( OsuXrSetting.SinglePointerTouch, singlePointerTouch );
@@ -150,6 +154,10 @@ public class VrController : BasicVrDevice {
 		IsVisible = pointer?.IsTouchSource != true;
 	}
 
+	public void SendHapticVibration ( double duration, double frequency = 40, double amplitude = 1, double delay = 0 ) {
+		haptic?.TriggerVibration( duration, frequency, amplitude, delay );
+	}
+
 	protected override void Update () {
 		base.Update();
 		updateTouchSetting();
@@ -166,8 +174,10 @@ public class VrController : BasicVrDevice {
 					updateTouchSetting();
 					currentPosition = panel.GlobalSpaceContentPositionAt( hit.TrisIndex, hit.Point );
 
-					if ( pointer.IsTouchSource && !isTouchDown )
+					if ( pointer.IsTouchSource && !isTouchDown ) {
 						onButtonStateChanged( true, VrAction.LeftButton );
+						SendHapticVibration( 0.05, 40 );
+					}
 
 					if ( isTouchDown )
 						inputSource.TouchMove( currentPosition );
@@ -176,8 +186,10 @@ public class VrController : BasicVrDevice {
 				}
 			}
 			else {
-				if ( pointer.IsTouchSource && isTouchDown )
+				if ( pointer.IsTouchSource && isTouchDown ) {
 					onButtonStateChanged( false, VrAction.LeftButton );
+					SendHapticVibration( 0.05, 20 );
+				}
 
 				HoveredCollider = null;
 			}

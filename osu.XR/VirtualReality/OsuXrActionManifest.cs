@@ -7,13 +7,16 @@ public class OsuXrActionManifest : ActionManifest<VrActionCategory, VrAction> {
 		ActionSets = new() {
 			new() { Type = ActionSetType.LeftRight, Name = VrActionCategory.General },
 			new() { Type = ActionSetType.LeftRight, Name = VrActionCategory.Poses },
-			new() { Type = ActionSetType.LeftRight, Name = VrActionCategory.Configuration }
+			new() { Type = ActionSetType.LeftRight, Name = VrActionCategory.Configuration },
+			new() { Type = ActionSetType.LeftRight, Name = VrActionCategory.Haptics }
 		};
 		Actions = new() {
 			new() { Category = VrActionCategory.General, Name = VrAction.LeftButton, Type = ActionType.Boolean },
 			new() { Category = VrActionCategory.General, Name = VrAction.RightButton, Type = ActionType.Boolean },
 
 			new() { Category = VrActionCategory.Configuration, Name = VrAction.ToggleMenu, Type = ActionType.Boolean },
+
+			new() { Category = VrActionCategory.Haptics, Name = VrAction.Feedback, Type = ActionType.Vibration },
 
 			new() { Category = VrActionCategory.Poses, Name = VrAction.ControllerTip, Type = ActionType.Pose }
 		};
@@ -23,7 +26,8 @@ public class OsuXrActionManifest : ActionManifest<VrActionCategory, VrAction> {
 public enum VrActionCategory {
 	General,
 	Poses,
-	Configuration
+	Configuration,
+	Haptics
 }
 
 public enum VrAction {
@@ -32,5 +36,7 @@ public enum VrAction {
 
 	ControllerTip,
 
-	ToggleMenu
+	ToggleMenu,
+
+	Feedback
 }
