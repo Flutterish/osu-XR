@@ -15,6 +15,9 @@ public class VrSettingsPanel : SettingsPanel {
 			return;
 
 		sections.PresetContainer.Presets.BindTo( config.Presets );
+		sections.PresetContainer.SelectedPresetBindable.BindValueChanged( v => {
+			config.ApplyPresetPreview( v.NewValue );
+		} );
 	}
 
 	public class Sections : SectionsContainer {

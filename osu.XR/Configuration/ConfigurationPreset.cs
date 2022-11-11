@@ -26,6 +26,8 @@ public class ConfigurationPreset<Tlookup> : InMemoryConfigManager<Tlookup> where
 		revertDefaults[lookup] = bindable.SetDefault;
 		copy[lookup] = clone => clone[lookup] = Get<TBindable>( lookup );
 		Keys.Add( lookup );
+
+		bindable.BindValueChanged( v => SettingChanged?.Invoke( lookup, v.NewValue ) );
 	}
 
 	public void Remove ( Tlookup lookup ) {
@@ -59,4 +61,6 @@ public class ConfigurationPreset<Tlookup> : InMemoryConfigManager<Tlookup> where
 	new public IReadOnlyDictionary<Tlookup, IBindable> ConfigStore => base.ConfigStore;
 
 	public readonly BindableList<Tlookup> Keys = new();
+
+	public event Action<Tlookup, object>? SettingChanged;
 }

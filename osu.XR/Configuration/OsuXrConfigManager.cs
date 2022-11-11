@@ -46,6 +46,29 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 	}
 
 	public readonly BindableList<ConfigurationPreset<OsuXrSetting>> Presets = new();
+	public ConfigurationPreset<OsuXrSetting>? AppliedPreset { get; private set; }
+	ConfigurationPreset<OsuXrSetting>? resetPreview;
+	public void ApplyPresetPreview ( ConfigurationPreset<OsuXrSetting>? preset ) {
+		if ( AppliedPreset != null ) {
+			AppliedPreset.SettingChanged -= onPreviewSettingChanged;
+		}
+		AppliedPreset = preset;
+		if ( AppliedPreset is null ) {
+			LoadPreset( resetPreview! );
+			resetPreview = null;
+		}
+		else {
+			resetPreview ??= CreateFullPreset();
+			LoadPreset( AppliedPreset );
+			AppliedPreset.SettingChanged += onPreviewSettingChanged;
+		}
+	}
+
+	private void onPreviewSettingChanged ( OsuXrSetting lookup, object value ) {
+		if ( setters.TryGetValue( lookup, out var set ) ) {
+			set( value.ToString()! );
+		}
+	}
 
 	public ConfigurationPreset<OsuXrSetting> CreateFullPreset () {
 		var preset = new ConfigurationPreset<OsuXrSetting>();
