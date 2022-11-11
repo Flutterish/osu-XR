@@ -19,7 +19,7 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 		SetDefault( OsuXrSetting.ScreenResolutionY, 1080, 400, 4320 );
 
 		SetDefault( OsuXrSetting.DisableTeleport, false );
-		SetDefault( OsuXrSetting.DominantHand, Hand.Auto );
+		SetDefault( OsuXrSetting.DominantHand, HandSetting.Auto );
 		SetDefault( OsuXrSetting.ShadowType, FeetSymbols.None );
 		SetDefault( OsuXrSetting.ShowDust, true );
 		SetDefault( OsuXrSetting.SkyboxType, SkyBoxType.Solid );

@@ -60,17 +60,17 @@ public class OsuXrGame : OsuXrGameBase {
 		Compositor.Input.SetActionManifest( new OsuXrActionManifest() );
 		Compositor.BindDeviceDetected( addVrDevice );
 
-		dominantHandSetting.BindValueChanged( v => {
-			if ( v.NewValue is Hand.Auto ) {
-				Compositor.Input.BindManifestLoaded( vr => {
-					if ( dominantHandSetting.Value != Hand.Auto ) // TODO this on framework side
-						return;
+		Compositor.Input.DominantHandBindable.BindValueChanged( v => {
+			if ( dominantHandSetting.Value is HandSetting.Auto )
+				DominantHand.Value = v.NewValue;
+		} );
 
-					DominantHand.Value = vr.DominantHand == Valve.VR.ETrackedControllerRole.LeftHand ? Hand.Left : Hand.Right;
-				} );
+		dominantHandSetting.BindValueChanged( v => {
+			if ( v.NewValue is HandSetting.Auto ) {
+				DominantHand.Value = Compositor.Input.DominantHandBindable.Value;
 			}
 			else {
-				DominantHand.Value = v.NewValue;
+				DominantHand.Value = v.NewValue == HandSetting.Right ? Hand.Right : Hand.Left;
 			}
 		} );
 	}
@@ -153,7 +153,7 @@ public class OsuXrGame : OsuXrGameBase {
 		scene.Add( new BasicVrDevice( device ) );
 	}
 
-	Bindable<Hand> dominantHandSetting = new( Hand.Right );
+	Bindable<HandSetting> dominantHandSetting = new( HandSetting.Right );
 	protected override IReadOnlyDependencyContainer CreateChildDependencies ( IReadOnlyDependencyContainer parent ) {
 		var deps = new DependencyContainer( parent );
 

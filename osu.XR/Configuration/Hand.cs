@@ -1,6 +1,6 @@
 ﻿namespace osu.XR.Configuration;
 
-public enum Hand {
+public enum HandSetting {
 	Auto,
 	Left,
 	Right

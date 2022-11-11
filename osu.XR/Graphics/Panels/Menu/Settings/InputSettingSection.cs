@@ -40,7 +40,7 @@ public class InputSettingSection : SettingsSection {
 				LabelText = "Touch deadzone", 
 				TooltipText = "Deadzone after interacting with a panel"
 			}.PresetComponent( config, OsuXrSetting.Deadzone ),
-			new SettingsEnumDropdown<Hand> { 
+			new SettingsEnumDropdown<HandSetting> { 
 				LabelText = "Dominant hand"
 			}.PresetComponent( config, OsuXrSetting.DominantHand ),
 			new SettingsCheckbox { 

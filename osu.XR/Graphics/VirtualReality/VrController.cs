@@ -71,7 +71,7 @@ public class VrController : BasicVrDevice {
 		aim = source.GetAction<PoseAction>( VrAction.ControllerTip );
 
 		foreach ( var (button, globalButton, action) in new[] { (left, globalLeft, VrAction.LeftButton), (right, globalRight, VrAction.RightButton) } ) {
-			(button.Value, globalButton.Value).BindValuesChanged( ( local, global ) => {
+			(button.ValueBindable, globalButton.ValueBindable).BindValuesChanged( ( local, global ) => {
 				if ( pointer?.IsTouchSource == true )
 					return;
 
