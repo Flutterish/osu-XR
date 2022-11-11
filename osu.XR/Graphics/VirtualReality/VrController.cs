@@ -176,7 +176,7 @@ public class VrController : BasicVrDevice {
 
 					if ( pointer.IsTouchSource && !isTouchDown ) {
 						onButtonStateChanged( true, VrAction.LeftButton );
-						SendHapticVibration( 0.05, 40 );
+						SendHapticVibration( 0.05, 20, 0.5 );
 					}
 
 					if ( isTouchDown )
@@ -188,7 +188,7 @@ public class VrController : BasicVrDevice {
 			else {
 				if ( pointer.IsTouchSource && isTouchDown ) {
 					onButtonStateChanged( false, VrAction.LeftButton );
-					SendHapticVibration( 0.05, 20 );
+					SendHapticVibration( 0.05, 10, 0.3 );
 				}
 
 				HoveredCollider = null;

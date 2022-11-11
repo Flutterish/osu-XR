@@ -31,5 +31,6 @@ public class HandheldMenu : CompositeDrawable3D {
 		foreach ( var i in Panels.Children ) {
 			i.IsColliderEnabled = isVisible;
 		}
+		Sidebar.IsColliderEnabled = isVisible;
 	}
 }
