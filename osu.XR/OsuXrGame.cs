@@ -1,11 +1,9 @@
-﻿using OpenVR.NET;
-using osu.Framework.Graphics.Shapes;
+﻿using osu.Framework.Graphics.Shapes;
 using osu.Framework.XR.Input;
 using osu.Framework.XR.Physics;
 using osu.Framework.XR.Testing.VirtualReality;
 using osu.Framework.XR.VirtualReality;
 using osu.Framework.XR.VirtualReality.Devices;
-using osu.XR.Configuration;
 using osu.XR.Graphics;
 using osu.XR.Graphics.Panels;
 using osu.XR.Graphics.Panels.Menu;
@@ -18,15 +16,6 @@ namespace osu.XR;
 [Cached]
 public class OsuXrGame : OsuXrGameBase {
 	[Cached]
-	VR vr = new();
-
-	[Cached(typeof(VrCompositor))]
-	public readonly VrCompositor Compositor;
-
-	[Cached]
-	VrResourceStore vrResourceStore = new();
-
-	[Cached]
 	PhysicsSystem physics = new();
 
 	BasicSceneMovementSystem movementSystem;
@@ -37,12 +26,13 @@ public class OsuXrGame : OsuXrGameBase {
 	OsuXrScene scene;
 	OsuGamePanel osuPanel;
 
-	public OsuXrGame ( bool useSimulatedVR = false ) {
+	public OsuXrGame ( bool useSimulatedVR = false ) : base( useSimulatedVR ) {
 		scene = new() {
 			RelativeSizeAxes = Axes.Both
 		};
 
-		Compositor = useSimulatedVR ? setupVrRig() : new VrCompositor();
+		if ( useSimulatedVR )
+			setupVrRig();
 
 		Add( Compositor );
 		
@@ -54,29 +44,15 @@ public class OsuXrGame : OsuXrGameBase {
 		Add( movementSystem = new( scene ) { RelativeSizeAxes = Axes.Both } );
 		Add( new BasicPanelInteractionSource( scene, physics, panelInteraction ) { RelativeSizeAxes = Axes.Both } );
 
-		scene.Add( new HandheldMenu() { Y = 1 } );
+		scene.Add( new UserTrackingDrawable3D { Child = new HandheldMenu(), Y = 1 } );
 		scene.Add( new VrPlayer() );
 
 		Compositor.Input.SetActionManifest( new OsuXrActionManifest() );
 		Compositor.BindDeviceDetected( addVrDevice );
-
-		Compositor.Input.DominantHandBindable.BindValueChanged( v => {
-			if ( dominantHandSetting.Value is HandSetting.Auto )
-				DominantHand.Value = v.NewValue;
-		} );
-
-		dominantHandSetting.BindValueChanged( v => {
-			if ( v.NewValue is HandSetting.Auto ) {
-				DominantHand.Value = Compositor.Input.DominantHandBindable.Value;
-			}
-			else {
-				DominantHand.Value = v.NewValue == HandSetting.Right ? Hand.Right : Hand.Left;
-			}
-		} );
 	}
 
-	VrCompositor setupVrRig () {
-		var comp = new TestingVrCompositor();
+	void setupVrRig () {
+		var comp = (TestingVrCompositor)Compositor;
 		TestingRig rig = new( scene ) { Depth = -1 };
 		Add( rig );
 
@@ -85,6 +61,7 @@ public class OsuXrGame : OsuXrGameBase {
 		var right = new TestingController( comp, Valve.VR.ETrackedControllerRole.RightHand );
 		right.IsEnabled.Value = true;
 		var head = new TestingHeadset( comp );
+		head.IsEnabled.Value = true;
 
 		left.PositionBindable.BindTo( rig.LeftTarget.PositionBindable );
 		left.RotationBindable.BindTo( rig.LeftTarget.RotationBindable );
@@ -123,14 +100,10 @@ public class OsuXrGame : OsuXrGameBase {
 				}
 			}
 		} );
-
-		return comp;
 	}
 
 	public readonly BindableList<VrController> VrControllers = new();
 	public readonly BindableList<VrController> ActiveVrControllers = new();
-
-	public readonly Bindable<Hand> DominantHand = new( Hand.Right );
 
 	void addVrDevice ( VrDevice device ) {
 		if ( device is Headset )
@@ -153,7 +126,21 @@ public class OsuXrGame : OsuXrGameBase {
 		scene.Add( new BasicVrDevice( device ) );
 	}
 
-	Bindable<HandSetting> dominantHandSetting = new( HandSetting.Right );
+	public VrController? PrimaryController
+		=> VrControllers.FirstOrDefault( x => x.Hand == DominantHand.Value );
+	public VrController? SecondaryController
+		=> VrControllers.FirstOrDefault( x => x.Hand != DominantHand.Value );
+
+	public VrController? PrimaryActiveController
+		=> ActiveVrControllers.OrderBy( x => x.Hand == DominantHand.Value ? 1 : 2 ).FirstOrDefault();
+	public VrController? SecondaryActiveController
+		=> ActiveVrControllers.OrderBy( x => x.Hand == DominantHand.Value ? 1 : 2 ).Skip( 1 ).FirstOrDefault();
+
+	public VrController ControllerFor ( Controller source )
+		=> VrControllers.Single( x => x.Source == source );
+
+	public Headset? Headset => Compositor.TrackedDevices.OfType<Headset>().FirstOrDefault();
+
 	protected override IReadOnlyDependencyContainer CreateChildDependencies ( IReadOnlyDependencyContainer parent ) {
 		var deps = new DependencyContainer( parent );
 
@@ -166,20 +153,5 @@ public class OsuXrGame : OsuXrGameBase {
 		base.LoadComplete();
 		Add( scene );
 		scene.Add( new GridScene() );
-
-		var config = Dependencies.Get<OsuXrConfigManager>();
-		config.BindWith( OsuXrSetting.DominantHand, dominantHandSetting );
-	}
-
-	protected override void Dispose ( bool isDisposing ) {
-		if ( !IsDisposed ) {
-			Task.Run( async () => {
-				await Task.Delay( 1000 );
-				vr.Exit();
-				vrResourceStore.Dispose();
-			} );
-		}
-
-		base.Dispose( isDisposing );
 	}
 }

@@ -1,9 +1,42 @@
-﻿using osu.Framework.Platform;
+﻿using OpenVR.NET;
+using osu.Framework.Platform;
+using osu.Framework.XR.Testing.VirtualReality;
+using osu.Framework.XR.VirtualReality;
 using osu.XR.Configuration;
 
 namespace osu.XR;
 
 public class OsuXrGameBase : Framework.Game {
+	[Cached]
+	VR vr = new();
+
+	[Cached( typeof( VrCompositor ) )]
+	public readonly VrCompositor Compositor;
+
+	[Cached]
+	VrResourceStore vrResourceStore = new();
+
+	public readonly Bindable<Hand> DominantHand = new( Hand.Right );
+	Bindable<HandSetting> dominantHandSetting = new( HandSetting.Right );
+
+	public OsuXrGameBase ( bool useSimulatedVR = true ) {
+		Compositor = useSimulatedVR ? new TestingVrCompositor() : new VrCompositor();
+
+		Compositor.Input.DominantHandBindable.BindValueChanged( v => {
+			if ( dominantHandSetting.Value is HandSetting.Auto )
+				DominantHand.Value = v.NewValue;
+		} );
+
+		dominantHandSetting.BindValueChanged( v => {
+			if ( v.NewValue is HandSetting.Auto ) {
+				DominantHand.Value = Compositor.Input.DominantHandBindable.Value;
+			}
+			else {
+				DominantHand.Value = v.NewValue == HandSetting.Right ? Hand.Right : Hand.Left;
+			}
+		} );
+	}
+
 	Storage storage = null!;
 	OsuXrConfigManager config = null!;
 
@@ -17,5 +50,23 @@ public class OsuXrGameBase : Framework.Game {
 		dependencies.CacheAs( storage );
 		config = new();
 		dependencies.CacheAs( config );
+	}
+
+	protected override void LoadComplete () {
+		base.LoadComplete();
+
+		config.BindWith( OsuXrSetting.DominantHand, dominantHandSetting );
+	}
+
+	protected override void Dispose ( bool isDisposing ) {
+		if ( !IsDisposed ) {
+			Task.Run( async () => {
+				await Task.Delay( 1000 );
+				vr.Exit();
+				vrResourceStore.Dispose();
+			} );
+		}
+
+		base.Dispose( isDisposing );
 	}
 }

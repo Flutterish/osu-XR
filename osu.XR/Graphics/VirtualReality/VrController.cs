@@ -16,6 +16,7 @@ public class VrController : BasicVrDevice {
 	RayPointer rayPointer = new();
 	TouchPointer touchPointer = new();
 
+	public bool IsEnabled => source.IsEnabled.Value;
 	public Hand Hand => source.Role == Valve.VR.ETrackedControllerRole.LeftHand ? Hand.Left : Hand.Right;
 	IPointer? pointer;
 
@@ -79,6 +80,11 @@ public class VrController : BasicVrDevice {
 			} );
 		}
 
+		source.GetAction<BooleanAction>( VrAction.ToggleMenu ).ValueBindable.BindValueChanged( v => {
+			if ( v.NewValue )
+				ToggleMenuPressed?.Invoke( this );
+		} );
+
 		if ( config != null ) {
 			config.BindWith( OsuXrSetting.InputMode, inputMode );
 			config.BindWith( OsuXrSetting.SinglePointerTouch, singlePointerTouch );
@@ -94,6 +100,8 @@ public class VrController : BasicVrDevice {
 
 		updatePointerType();
 	}
+
+	public event Action<VrController>? ToggleMenuPressed;
 
 	void updatePointerType () {
 		setPointer( source.IsEnabled.Value ? inputMode.Value switch {
