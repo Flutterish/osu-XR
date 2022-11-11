@@ -10,6 +10,9 @@ public class OsuXrScene : Scene {
 	protected override ResourceStore<byte[]>? CreateMaterialStoreSource ( IReadOnlyDependencyContainer deps )
 		=> new NamespacedResourceStore<byte[]>( new DllResourceStore( typeof( OsuXrGame ).Assembly ), "Resources/Shaders" );
 
+	protected override ResourceStore<byte[]>? CreateMeshStoreSource ( IReadOnlyDependencyContainer deps )
+		=> new NamespacedResourceStore<byte[]>( new DllResourceStore( typeof( OsuXrGame ).Assembly ), "Resources/Models" );
+
 	protected override IReadOnlyDependencyContainer CreateChildDependencies ( IReadOnlyDependencyContainer parent ) {
 		var r = base.CreateChildDependencies( parent );
 

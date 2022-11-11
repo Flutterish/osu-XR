@@ -1,5 +1,5 @@
 ﻿using osu.Framework.XR.Graphics;
-using osu.Framework.XR.Parsing.Wavefront;
+using osu.Framework.XR.Graphics.Meshes;
 using osu.Framework.XR.Physics;
 
 namespace osu.XR.Graphics.VirtualReality;
@@ -12,15 +12,24 @@ public class TouchPointer : Model, IPointer {
 	public readonly BindableFloat RadiusBindable = new( 0.023f );
 
 	public TouchPointer () {
-		// TODO meshes via resource store
-		File.ReadAllTextAsync( "./Resources/Models/sphere.obj" ).ContinueWith( r => {
-			var mesh = SimpleObjFile.Load( r.Result );
-			mesh.CreateFullUnsafeUpload().Enqueue();
-			Mesh = mesh;
-		} );
-
 		RadiusBindable.BindValueChanged( v => Scale = new( v.NewValue ), true );
 		Alpha = 0.3f;
+	}
+
+	[BackgroundDependencyLoader]
+	private void load ( MeshStore meshes ) {
+		Task.Run( () => {
+			var mesh = meshes.GetNew( "sphere" );
+			mesh.CreateFullUnsafeUpload().Enqueue();
+			Schedule( () => Mesh = mesh );
+		} );
+		// NOTE this has a bug in o!f
+		// meshes.GetAsync( "sphere" ).ContinueWith( r => Schedule( mesh => Mesh = mesh, r.Result ) );
+	}
+
+	// NOTE we dont need this next version
+	protected override Mesh CreateOwnMesh () {
+		return new BasicMesh();
 	}
 
 	public PointerHit? UpdatePointer ( Vector3 position, Quaternion rotation ) {
