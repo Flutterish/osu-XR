@@ -6,7 +6,7 @@ using osu.XR.Configuration;
 
 namespace osu.XR;
 
-public class OsuXrGameBase : Framework.Game {
+public partial class OsuXrGameBase : Framework.Game {
 	[Cached]
 	VR vr = new();
 

@@ -7,7 +7,7 @@ using osu.XR.Graphics.Settings;
 
 namespace osu.XR.Graphics.Panels.Menu.Settings;
 
-public class PresetPreview : SettingsPanel.SectionsContainer {
+public partial class PresetPreview : SettingsPanel.SectionsContainer {
 	[Cached]
 	public readonly SettingPresetContainer<OsuXrSetting> PresetContainer = new();
 
@@ -34,7 +34,7 @@ public class PresetPreview : SettingsPanel.SectionsContainer {
 	protected override Drawable CreateHeader ()
 		=> new SettingsHeader( "Preset Preview", "" );
 
-	class PresetSettingsSection : SettingsSection {
+	partial class PresetSettingsSection : SettingsSection {
 		[Resolved]
 		SettingPresetContainer<OsuXrSetting> presetContainer { get; set; } = null!;
 

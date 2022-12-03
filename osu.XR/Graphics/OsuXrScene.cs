@@ -6,7 +6,7 @@ using MaterialNames = osu.XR.Graphics.Materials.MaterialNames;
 
 namespace osu.XR.Graphics;
 
-public class OsuXrScene : Scene {
+public partial class OsuXrScene : Scene {
 	protected override ResourceStore<byte[]>? CreateMaterialStoreSource ( IReadOnlyDependencyContainer deps )
 		=> new NamespacedResourceStore<byte[]>( new DllResourceStore( typeof( OsuXrGame ).Assembly ), "Resources/Shaders" );
 

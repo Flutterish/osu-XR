@@ -5,7 +5,7 @@ using MaterialNames = osu.XR.Graphics.Materials.MaterialNames;
 
 namespace osu.XR.Graphics.Panels;
 
-public class OsuGamePanel : CurvedPanel {
+public partial class OsuGamePanel : CurvedPanel {
 	public readonly OsuGameContainer GameContainer;
 	public OsuDependencies OsuDependencies => GameContainer.OsuDependencies;
 

@@ -4,7 +4,7 @@ using osu.XR.Graphics.Settings;
 
 namespace osu.XR.Graphics.Panels.Settings;
 
-public class VrSettingsPanel : SettingsPanel {
+public partial class VrSettingsPanel : SettingsPanel {
 	Sections sections = null!;
 	protected override Sections CreateSectionsContainer ()
 		=> sections = new Sections ( false );
@@ -20,7 +20,7 @@ public class VrSettingsPanel : SettingsPanel {
 		} );
 	}
 
-	public class Sections : SectionsContainer {
+	public partial class Sections : SectionsContainer {
 		[Cached]
 		public readonly SettingPresetContainer<OsuXrSetting> PresetContainer = new();
 

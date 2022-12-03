@@ -3,7 +3,7 @@ using osu.XR.Graphics.Panels;
 
 namespace osu.XR.Tests.Visual.Osu;
 
-public class TestSceneOsuGame : Basic3DTestScene {
+public partial class TestSceneOsuGame : Basic3DTestScene {
 	OsuGamePanel osuPanel;
 
 	public TestSceneOsuGame () {

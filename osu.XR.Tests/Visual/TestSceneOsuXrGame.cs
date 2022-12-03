@@ -2,7 +2,7 @@
 
 namespace osu.XR.Tests.Visual;
 
-public class TestSceneOsuXrGame : TestScene {
+public partial class TestSceneOsuXrGame : TestScene {
 	protected override void LoadComplete () {
 		AddGame( new OsuXrGame( true ) );
 	}

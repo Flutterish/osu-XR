@@ -7,7 +7,7 @@ namespace osu.XR.Osu;
 /// <summary>
 /// A container for <see cref="OsuGame"/> capable of capturing cached dependencies and reloading the game
 /// </summary>
-public class OsuGameContainer : CompositeDrawable {
+public partial class OsuGameContainer : CompositeDrawable {
 	public readonly OsuDependencies OsuDependencies = new();
 	public VirtualGameHost VirtualGameHost { get; private set; } = null!;
 

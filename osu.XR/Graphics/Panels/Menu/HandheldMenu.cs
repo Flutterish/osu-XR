@@ -4,7 +4,7 @@ using osu.XR.Graphics.Panels.Settings;
 
 namespace osu.XR.Graphics.Panels.Menu;
 
-public class HandheldMenu : CompositeDrawable3D {
+public partial class HandheldMenu : CompositeDrawable3D {
 	public readonly PanelStack<MenuPanel> Panels;
 	public readonly SidebarMenuPanel Sidebar;
 

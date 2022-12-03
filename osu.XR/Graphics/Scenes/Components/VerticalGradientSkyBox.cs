@@ -7,7 +7,7 @@ using osuTK.Graphics;
 
 namespace osu.XR.Graphics.Scenes.Components;
 
-public class VerticalGradientSkyBox : BasicModel {
+public partial class VerticalGradientSkyBox : BasicModel {
 	public readonly Bindable<Color4> TintBindable = new( new Color4( 253, 35, 115, 255 ) );
 	public readonly BindableFloat OpacityBindable = new( 1 ) { MinValue = 0, MaxValue = 1 };
 

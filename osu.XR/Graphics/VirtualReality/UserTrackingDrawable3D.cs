@@ -7,7 +7,7 @@ using osu.XR.Configuration;
 
 namespace osu.XR.Graphics.VirtualReality;
 
-public class UserTrackingDrawable3D : Container3D {
+public partial class UserTrackingDrawable3D : Container3D {
 	BindableList<VrDevice> activeDevices = new();
 	[BackgroundDependencyLoader( true )]
 	private void load ( VrCompositor? vr, OsuXrConfigManager? config ) {

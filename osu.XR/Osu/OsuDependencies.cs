@@ -61,7 +61,7 @@ public class OsuDependencies : IReadOnlyDependencyContainer {
 	}
 
 	DependencyContainer? injector;
-	public void Inject<T> ( T instance ) where T : class {
+	public void Inject<T> ( T instance ) where T : class, IDependencyInjectionCandidate {
 		(injector ??= new( this )).Inject( instance );
 	}
 }

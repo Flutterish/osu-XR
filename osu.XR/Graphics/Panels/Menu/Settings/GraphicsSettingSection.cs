@@ -6,7 +6,7 @@ using osu.XR.Graphics.Settings;
 
 namespace osu.XR.Graphics.Panels.Settings;
 
-public class GraphicsSettingSection : SettingsSection {
+public partial class GraphicsSettingSection : SettingsSection {
 	public override LocalisableString Header => "Graphics";
 	public override Drawable CreateIcon () => new SpriteIcon {
 		Icon = FontAwesome.Solid.Laptop

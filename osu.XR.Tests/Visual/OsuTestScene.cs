@@ -9,7 +9,7 @@ using osu.XR.Osu;
 
 namespace osu.XR.Tests.Visual;
 
-public abstract class OsuTestScene : TestScene {
+public abstract partial class OsuTestScene : TestScene {
 	OsuDependencies dependencies = new();
 	VirtualGameHost virtualGameHost = null!;
 	OsuGameBase osu = new OsuGameBase { Size = osuTK.Vector2.Zero };
@@ -27,7 +27,7 @@ public abstract class OsuTestScene : TestScene {
 		return base.CreateChildDependencies( parent );
 	}
 
-	class OsuDepsContainer : Container {
+	partial class OsuDepsContainer : Container {
 		OsuDependencies dependencies;
 		OsuTestScene scene;
 

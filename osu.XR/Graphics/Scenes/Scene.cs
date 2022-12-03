@@ -2,6 +2,6 @@
 
 namespace osu.XR.Graphics.Scenes;
 
-public class Scene : CompositeDrawable3D {
+public partial class Scene : CompositeDrawable3D {
 
 }

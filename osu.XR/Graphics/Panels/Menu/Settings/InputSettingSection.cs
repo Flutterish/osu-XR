@@ -6,7 +6,7 @@ using osu.XR.Graphics.Settings;
 
 namespace osu.XR.Graphics.Panels.Settings;
 
-public class InputSettingSection : SettingsSection {
+public partial class InputSettingSection : SettingsSection {
 	public override LocalisableString Header => "Input";
 	public override Drawable CreateIcon () => new SpriteIcon {
 		Icon = FontAwesome.Solid.Keyboard

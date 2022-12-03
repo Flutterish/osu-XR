@@ -4,7 +4,7 @@ using osu.Framework.XR.Physics;
 
 namespace osu.XR.Graphics.VirtualReality;
 
-public class TouchPointer : Model, IPointer {
+public partial class TouchPointer : Model, IPointer {
 	[Resolved]
 	PhysicsSystem physics { get; set; } = null!;
 

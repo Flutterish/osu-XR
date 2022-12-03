@@ -4,7 +4,7 @@ using osu.XR.Graphics.Panels;
 using osuTK.Graphics;
 namespace osu.XR.Tests.Visual.Panels;
 
-public class TestSceneCurvedPanel : Basic3DTestScene {
+public partial class TestSceneCurvedPanel : Basic3DTestScene {
 	CurvedPanel panel;
 	public TestSceneCurvedPanel () {
 		Scene.Add( panel = new CurvedPanel {

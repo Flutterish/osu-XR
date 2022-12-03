@@ -2,7 +2,7 @@
 
 namespace osu.XR.Tests.Visual.Panels;
 
-public class TestSceneHandheldMenu : Osu3DTestScene {
+public partial class TestSceneHandheldMenu : Osu3DTestScene {
 	public TestSceneHandheldMenu () {
 		Scene.Add( new HandheldMenu() );
 	}

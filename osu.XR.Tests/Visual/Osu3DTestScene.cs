@@ -7,6 +7,8 @@ using osu.XR.Osu;
 
 namespace osu.XR.Tests.Visual;
 
+// TODO wait for o!f DI SG fix (confict between member name and namespace)
+#pragma warning disable OFSG001
 public abstract class Osu3DTestScene : Basic3DTestScene {
 	[Cached]
 	OsuDependencies dependencies = new();

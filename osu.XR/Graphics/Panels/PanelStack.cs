@@ -5,7 +5,7 @@ using osu.Framework.XR.Graphics.Panels;
 
 namespace osu.XR.Graphics.Panels;
 
-public abstract class PanelStack<T> : Container3D<T> where T : Panel {
+public abstract partial class PanelStack<T> : Container3D<T> where T : Panel {
 	public virtual IEnumerable<Drawable3D> FlowingChildren => AliveInternalChildren.OrderBy( d => layoutChildren[d] );
 
 	Dictionary<Drawable3D, float> layoutChildren = new();

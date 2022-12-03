@@ -14,7 +14,7 @@ using osu.XR.VirtualReality;
 namespace osu.XR;
 
 [Cached]
-public class OsuXrGame : OsuXrGameBase {
+public partial class OsuXrGame : OsuXrGameBase {
 	[Cached]
 	PhysicsSystem physics = new();
 

@@ -6,7 +6,7 @@ using osuTK.Graphics;
 
 namespace osu.XR.Graphics.Scenes.Components;
 
-public class FloorGrid : BasicModel {
+public partial class FloorGrid : BasicModel {
 	Cached meshCache = new();
 	public readonly BindableInt XSegmentsBindable = new( 7 ) { MinValue = 0, MaxValue = 20, Precision = 1 };
 	public readonly BindableInt ZSegmentsBindable = new( 7 ) { MinValue = 0, MaxValue = 20, Precision = 1 };

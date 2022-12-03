@@ -3,7 +3,7 @@ using osu.Framework.XR.Physics;
 
 namespace osu.XR.Graphics.VirtualReality;
 
-public class RayPointer : CompositeDrawable3D, IPointer {
+public partial class RayPointer : CompositeDrawable3D, IPointer {
 	[Resolved]
 	PhysicsSystem physics { get; set; } = null!;
 

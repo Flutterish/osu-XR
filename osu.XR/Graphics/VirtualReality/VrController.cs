@@ -11,7 +11,7 @@ using osuTK.Input;
 
 namespace osu.XR.Graphics.VirtualReality;
 
-public class VrController : BasicVrDevice {
+public partial class VrController : BasicVrDevice {
 	Controller source;
 	RayPointer rayPointer = new();
 	TouchPointer touchPointer = new();

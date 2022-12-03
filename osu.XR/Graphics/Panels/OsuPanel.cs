@@ -7,7 +7,7 @@ namespace osu.XR.Graphics.Panels;
 /// <summary>
 /// A panel whose content can resolve osu dependencies
 /// </summary>
-public class OsuPanel : Panel {
+public partial class OsuPanel : Panel {
 	protected override IReadOnlyDependencyContainer CreateChildDependencies ( IReadOnlyDependencyContainer parent ) {
 		return base.CreateChildDependencies( new MergedDepencencyContainer( parent.Get<OsuDependencies>(), parent ) );
 	}

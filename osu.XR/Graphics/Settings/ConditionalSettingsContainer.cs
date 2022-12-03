@@ -2,7 +2,7 @@
 
 namespace osu.XR.Graphics.Settings;
 
-public class ConditionalSettingsContainer<T> : FillFlowContainer, IHasCurrentValue<T> where T : notnull {
+public partial class ConditionalSettingsContainer<T> : FillFlowContainer, IHasCurrentValue<T> where T : notnull {
 	BindableWithCurrent<T> current = new();
 	public Bindable<T> Current {
 		get => current;

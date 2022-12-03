@@ -4,7 +4,7 @@ using osu.Game.Overlays.Settings;
 
 namespace osu.XR.Graphics.Panels.Menu;
 
-public class SidebarMenuPanel : MenuPanel {
+public partial class SidebarMenuPanel : MenuPanel {
 	SettingsSidebar sidebar;
 
 	public SidebarMenuPanel () {
@@ -42,7 +42,7 @@ public class SidebarMenuPanel : MenuPanel {
 		} );
 	}
 
-	class FakeSection : SettingsSection {
+	partial class FakeSection : SettingsSection {
 		IconUsage icon;
 		LocalisableString header;
 

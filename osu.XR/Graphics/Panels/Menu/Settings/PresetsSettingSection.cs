@@ -7,7 +7,7 @@ using osu.XR.Graphics.Settings;
 
 namespace osu.XR.Graphics.Panels.Settings;
 
-public class PresetsSettingSection : SettingsSection {
+public partial class PresetsSettingSection : SettingsSection {
 	public override LocalisableString Header => "Presets";
 	public override Drawable CreateIcon () => new SpriteIcon {
 		Icon = FontAwesome.Solid.BoxOpen
@@ -20,7 +20,7 @@ public class PresetsSettingSection : SettingsSection {
 		Add( Management = new ManagementSubsection() );
 	}
 
-	public class ListSubsection : SettingsSubsection {
+	public partial class ListSubsection : SettingsSubsection {
 		protected override LocalisableString Header => "Load";
 
 		[Resolved]
@@ -115,14 +115,14 @@ public class PresetsSettingSection : SettingsSection {
 			buttonsByPreset.Add( preset, buttonsContainer );
 		}
 
-		class PresetButtonContainer : Container {
+		partial class PresetButtonContainer : Container {
 			public Bindable<string> NameBindable = new();
 			public Bindable<ConfigurationPreset<OsuXrSetting>?> PresetBindable = new();
 			public BindableBool IsEditingBindable = new();
 		}
 	}
 
-	public class ManagementSubsection : SettingsSubsection {
+	public partial class ManagementSubsection : SettingsSubsection {
 		protected override LocalisableString Header => "Manage";
 
 		[Resolved]

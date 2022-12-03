@@ -8,7 +8,7 @@ using osuTK.Graphics;
 
 namespace osu.XR.Tests.Visual;
 
-public abstract class Basic3DTestScene : TestScene3D {
+public abstract partial class Basic3DTestScene : TestScene3D {
 	public readonly PhysicsSystem Physics = new();
 	public readonly PanelInteractionSystem InteractionSystem = new();
 	public readonly BasicPanelInteractionSource MouseInteractionSource;

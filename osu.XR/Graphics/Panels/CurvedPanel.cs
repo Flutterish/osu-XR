@@ -2,7 +2,7 @@
 
 namespace osu.XR.Graphics.Panels;
 
-public class CurvedPanel : Panel {
+public partial class CurvedPanel : Panel {
 	public float Arc { get => ArcBindable.Value; set => ArcBindable.Value = value; }
 	public float Radius { get => RadiusBindable.Value; set => RadiusBindable.Value = value; }
 	public float AspectRatio => aspectRatioBindable.Value;

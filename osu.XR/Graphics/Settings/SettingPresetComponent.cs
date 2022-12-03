@@ -14,7 +14,7 @@ public interface ISettingPresetComponent<Tlookup> {
 	Tlookup Lookup { get; }
 }
 
-public class SettingPresetComponent<Tlookup, Tvalue> : CompositeDrawable, ISettingPresetComponent<Tlookup> where Tlookup : struct, Enum {
+public partial class SettingPresetComponent<Tlookup, Tvalue> : CompositeDrawable, ISettingPresetComponent<Tlookup> where Tlookup : struct, Enum {
 	[Resolved]
 	OverlayColourProvider colours { get; set; } = null!;
 
@@ -219,7 +219,7 @@ public class SettingPresetComponent<Tlookup, Tvalue> : CompositeDrawable, ISetti
 			presetContainer.Set( this, Source.Current.Value );
 	}
 
-	class InteractionArea : Drawable {
+	partial class InteractionArea : Drawable {
 		SettingPresetComponent<Tlookup, Tvalue> parent;
 		public InteractionArea ( SettingPresetComponent<Tlookup, Tvalue> parent ) {
 			this.parent = parent;

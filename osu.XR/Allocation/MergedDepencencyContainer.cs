@@ -13,7 +13,7 @@ public class MergedDepencencyContainer : IReadOnlyDependencyContainer {
 		=> sources.Select( x => x.Get( type, info ) ).FirstOrDefault( x => x != null );
 
 	DependencyContainer? injector;
-	public void Inject<T> ( T instance ) where T : class {
+	public void Inject<T> ( T instance ) where T : class, IDependencyInjectionCandidate {
 		( injector ??= new( this ) ).Inject( instance );
 	}
 }

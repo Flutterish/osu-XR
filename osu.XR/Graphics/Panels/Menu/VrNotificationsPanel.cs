@@ -7,7 +7,7 @@ using osu.Game.Resources.Localisation.Web;
 
 namespace osu.XR.Graphics.Panels.Menu;
 
-public class VrNotificationsPanel : MenuPanel {
+public partial class VrNotificationsPanel : MenuPanel {
 	FillFlowContainer<NotificationSection> sections;
 
 	public VrNotificationsPanel () {

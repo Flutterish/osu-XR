@@ -2,7 +2,7 @@
 
 namespace osu.XR.Graphics.Panels.Menu;
 
-public class MenuPanel : OsuPanel {
+public partial class MenuPanel : OsuPanel {
 	[Cached]
 	protected OverlayColourProvider ColourProvider { get; } = new OverlayColourProvider( OverlayColourScheme.Purple );
 
