@@ -1,30 +1,30 @@
 ﻿using osu.Framework.XR.Graphics.Containers;
 using osu.Framework.XR.Graphics.Transforms;
-using osu.Framework.XR.Physics;
-using osu.Framework.XR.VirtualReality;
-using osu.Framework.XR.VirtualReality.Devices;
 using osu.XR.Configuration;
 
 namespace osu.XR.Graphics.VirtualReality;
 
 public partial class UserTrackingDrawable3D : Container3D {
-	BindableList<VrDevice> activeDevices = new();
+	BindableList<VrController> activeControllers = new();
 	[BackgroundDependencyLoader( true )]
-	private void load ( VrCompositor? vr, OsuXrConfigManager? config ) {
-		if ( vr != null ) {
-			activeDevices.BindTarget = vr.ActiveDevices;
-		}
-
+	private void load ( OsuXrConfigManager? config ) {
 		if ( config != null ) {
 			config.BindWith( OsuXrSetting.InputMode, inputMode );
 		}
 
-		game.VrControllers.BindCollectionChanged( (_, e) => {
-			if ( e.NewItems == null )
-				return;
+		activeControllers.BindTo( game.ActiveVrControllers );
 
-			foreach ( VrController i in e.NewItems ) {
-				i.ToggleMenuPressed += onToggleMenuPressed;
+		activeControllers.BindCollectionChanged( (_, e) => { // TODO why is this here?
+			if ( e.NewItems != null ) {
+				foreach ( VrController i in e.NewItems ) {
+					i.ToggleMenuPressed += onToggleMenuPressed;
+				}
+			}
+
+			if ( e.OldItems != null ) {
+				foreach ( VrController i in e.OldItems ) {
+					i.ToggleMenuPressed -= onToggleMenuPressed;
+				}
 			}
 		}, true );
 
@@ -32,7 +32,7 @@ public partial class UserTrackingDrawable3D : Container3D {
 	}
 
 	private void onToggleMenuPressed ( VrController controller ) {
-		if ( IsOpen && (HoldingController == controller || HoldingController == null) ) {
+		if ( IsOpen && (HoldingController == controller || HoldingController == null || activeControllers.Count == 1) ) {
 			IsOpen = false;
 		}
 		else {
@@ -66,7 +66,7 @@ public partial class UserTrackingDrawable3D : Container3D {
 	Bindable<InputMode> inputMode = new();
 	public VrController? HoldingController {
 		get {
-			if ( activeDevices.OfType<Controller>().Count() == 0 ) return null;
+			if ( activeControllers.Count == 0 ) return null;
 			if ( inputMode.Value == InputMode.SinglePointer ) return game.SecondaryActiveController;
 			if ( openingController?.IsEnabled == true ) return openingController;
 			return null;
