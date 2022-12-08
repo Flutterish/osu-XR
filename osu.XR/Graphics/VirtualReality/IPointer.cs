@@ -8,6 +8,7 @@ public interface IPointer {
 	/// Whether this pointer should emulate touch input
 	/// </summary>
 	bool IsTouchSource { get; }
+	void SetTint ( Colour4 tint );
 }
 
 public readonly struct PointerHit {

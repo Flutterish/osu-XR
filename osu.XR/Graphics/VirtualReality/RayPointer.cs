@@ -41,4 +41,8 @@ public partial class RayPointer : CompositeDrawable3D, IPointer {
 	}
 
 	public bool IsTouchSource => false;
+
+	public void SetTint ( Colour4 tint ) {
+		ray.Colour = indicator.Colour = tint;
+	}
 }

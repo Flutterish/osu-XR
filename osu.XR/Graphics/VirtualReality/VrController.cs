@@ -38,8 +38,10 @@ public partial class VrController : BasicVrDevice {
 	void setPointer ( IPointer? pointer ) {
 		if ( this.pointer is Drawable3D old )
 			scene.Remove( old, disposeImmediately: false );
-		if ( pointer is Drawable3D @new )
+		if ( pointer is Drawable3D @new ) {
 			scene.Add( @new );
+			pointer.SetTint( Hand is Hand.Left ? Colour4.Cyan : Colour4.Orange );
+		}
 
 		this.pointer = pointer;
 		if ( pointer is null ) {

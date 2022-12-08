@@ -18,18 +18,7 @@ public partial class TouchPointer : Model, IPointer {
 
 	[BackgroundDependencyLoader]
 	private void load ( MeshStore meshes ) {
-		Task.Run( () => {
-			var mesh = meshes.GetNew( "sphere" );
-			mesh.CreateFullUnsafeUpload().Enqueue();
-			Schedule( () => Mesh = mesh );
-		} );
-		// NOTE this has a bug in o!f
-		// meshes.GetAsync( "sphere" ).ContinueWith( r => Schedule( mesh => Mesh = mesh, r.Result ) );
-	}
-
-	// NOTE we dont need this next version
-	protected override Mesh CreateOwnMesh () {
-		return new BasicMesh();
+		meshes.GetAsync( "sphere" ).ContinueWith( r => Schedule( mesh => Mesh = mesh, r.Result ) );
 	}
 
 	public PointerHit? UpdatePointer ( Vector3 position, Quaternion rotation ) {
@@ -50,4 +39,8 @@ public partial class TouchPointer : Model, IPointer {
 	}
 
 	public bool IsTouchSource => true;
+
+	public void SetTint ( Colour4 tint ) {
+		Colour = tint.Opacity( Alpha );
+	}
 }
