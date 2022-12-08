@@ -33,4 +33,11 @@ public partial class HandheldMenu : CompositeDrawable3D {
 		}
 		Sidebar.IsColliderEnabled = isVisible;
 	}
+
+	protected override void Update () {
+		base.Update();
+		foreach ( var i in Panels.Children )
+			i.Alpha = Alpha;
+		Sidebar.Alpha = Alpha;
+	}
 }

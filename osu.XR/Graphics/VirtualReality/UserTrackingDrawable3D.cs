@@ -32,7 +32,8 @@ public partial class UserTrackingDrawable3D : Container3D {
 	}
 
 	private void onToggleMenuPressed ( VrController controller ) {
-		if ( IsOpen && (HoldingController == controller || HoldingController == null || activeControllers.Count == 1) ) {
+		// TODO there has to be a better way... perhaps feed the input from offhand controller to main one (when appropriate)?
+		if ( IsOpen && (HoldingController == controller || HoldingController == null || activeControllers.Count == 1 || inputMode.Value == InputMode.SinglePointer) ) {
 			IsOpen = false;
 		}
 		else {
@@ -56,7 +57,7 @@ public partial class UserTrackingDrawable3D : Container3D {
 	public bool IsOpen {
 		get => isOpen;
 		set {
-			IsVisible = value;
+			this.FadeTo( value ? 1 : 0, 200, Easing.Out );
 			isOpen = value;
 			if ( !value )
 				openingController = null;
@@ -123,5 +124,9 @@ public partial class UserTrackingDrawable3D : Container3D {
 		// doing this every frame makes it have an Easing.Out-like curve
 		this.MoveTo( TargetPosition, 100 );
 		this.RotateTo( TargetRotation, 100 );
+
+		IsVisible = Alpha != 0;
+		foreach ( var i in Children )
+			i.Alpha = Alpha;
 	}
 }
