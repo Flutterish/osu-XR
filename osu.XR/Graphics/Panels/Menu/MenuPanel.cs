@@ -17,6 +17,24 @@ public partial class MenuPanel : OsuPanel {
 		ContentSize = new( PREFFERED_CONTENT_WIDTH, PREFFERED_CONTENT_HEIGHT );
 	}
 
+	float parentAlpha = 1;
+	public float ParentAlpha {
+		get => parentAlpha;
+		set {
+			parentAlpha = value;
+			base.Alpha = Alpha * parentAlpha;
+		}
+	}
+
+	float alpha = 1;
+	new public float Alpha {
+		get => alpha;
+		set {
+			alpha = value;
+			base.Alpha = Alpha * parentAlpha;
+		}
+	}
+
 	protected override void RegenrateMesh () {
 		var w = PANEL_WIDTH / 2;
 		var h = PANEL_HEIGHT / 2;

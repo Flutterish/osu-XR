@@ -14,7 +14,7 @@ public partial class UserTrackingDrawable3D : Container3D {
 
 		activeControllers.BindTo( game.ActiveVrControllers );
 
-		activeControllers.BindCollectionChanged( (_, e) => { // TODO why is this here?
+		activeControllers.BindCollectionChanged( (_, e) => {
 			if ( e.NewItems != null ) {
 				foreach ( VrController i in e.NewItems ) {
 					i.ToggleMenuPressed += onToggleMenuPressed;
@@ -32,7 +32,6 @@ public partial class UserTrackingDrawable3D : Container3D {
 	}
 
 	private void onToggleMenuPressed ( VrController controller ) {
-		// TODO there has to be a better way... perhaps feed the input from offhand controller to main one (when appropriate)?
 		if ( IsOpen && (HoldingController == controller || HoldingController == null || activeControllers.Count == 1 || inputMode.Value == InputMode.SinglePointer) ) {
 			IsOpen = false;
 		}

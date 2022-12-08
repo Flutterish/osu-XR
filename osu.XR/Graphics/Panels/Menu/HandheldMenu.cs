@@ -1,4 +1,5 @@
 ﻿using osu.Framework.Graphics.Sprites;
+using osu.Framework.Layout;
 using osu.Framework.XR.Graphics;
 using osu.XR.Graphics.Panels.Settings;
 
@@ -37,7 +38,7 @@ public partial class HandheldMenu : CompositeDrawable3D {
 	protected override void Update () {
 		base.Update();
 		foreach ( var i in Panels.Children )
-			i.Alpha = Alpha;
+			i.ParentAlpha = Alpha;
 		Sidebar.Alpha = Alpha;
 	}
 }

@@ -80,7 +80,7 @@ public partial class VrController : BasicVrDevice {
 				if ( pointer?.IsTouchSource == true )
 					return;
 
-				onButtonStateChanged( ( inputMode.Value is InputMode.SinglePointer && pointer != null ) ? global : local, action );
+				onButtonStateChanged( ( (inputMode.Value is InputMode.SinglePointer || activeControllers.Count == 1) && pointer != null ) ? global : local, action );
 			} );
 		}
 
