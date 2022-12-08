@@ -26,7 +26,7 @@ public partial class OsuXrGame : OsuXrGameBase {
 	OsuXrScene scene;
 	OsuGamePanel osuPanel;
 
-	public OsuXrGame ( bool useSimulatedVR = false ) : base( useSimulatedVR ) {
+	public OsuXrGame ( bool useSimulatedVR = false ) : base( useSimulatedVR ) { // TODO I dont really like the 'useSimulatedVR' - can't we extract it up?
 		scene = new() {
 			RelativeSizeAxes = Axes.Both
 		};

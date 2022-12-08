@@ -1,6 +1,7 @@
 ﻿using osu.Framework.Graphics.UserInterface;
 using osu.Game.Configuration;
 using osu.XR.Graphics.Settings;
+using System.Globalization;
 
 namespace osu.XR.Configuration;
 
@@ -81,7 +82,7 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 	public void LoadPreset ( ConfigurationPreset<OsuXrSetting> preset ) {
 		foreach ( var (lookup, value) in preset.ConfigStore ) {
 			if ( setters.TryGetValue( lookup, out var set ) ) {
-				set( value.ToString()! );
+				set( value.ToString(null, CultureInfo.InvariantCulture)! );
 			}
 		}
 	}

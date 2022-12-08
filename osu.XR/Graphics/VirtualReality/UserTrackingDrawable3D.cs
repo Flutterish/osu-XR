@@ -8,6 +8,8 @@ public partial class UserTrackingDrawable3D : Container3D {
 	BindableList<VrController> activeControllers = new();
 	[BackgroundDependencyLoader( true )]
 	private void load ( OsuXrConfigManager? config ) {
+		AlwaysPresent = true;
+
 		if ( config != null ) {
 			config.BindWith( OsuXrSetting.InputMode, inputMode );
 		}
@@ -56,7 +58,7 @@ public partial class UserTrackingDrawable3D : Container3D {
 	public bool IsOpen {
 		get => isOpen;
 		set {
-			this.FadeTo( value ? 1 : 0, 200, Easing.Out );
+			this.FadeTo( value ? 1 : 0, 140, Easing.Out );
 			isOpen = value;
 			if ( !value )
 				openingController = null;
@@ -103,14 +105,15 @@ public partial class UserTrackingDrawable3D : Container3D {
 		}
 	}
 
+	VrController? previousHoldingController;
 	protected override void Update () {
 		base.Update();
 
-		//if ( HoldingController != previousHoldingController ) {
-		//	if ( previousHoldingController is not null ) previousHoldingController.HeldObjects.Remove( this );
-		//	previousHoldingController = HoldingController;
-		//	if ( previousHoldingController is not null ) previousHoldingController.HeldObjects.Add( this );
-		//}
+		if ( HoldingController != previousHoldingController ) {
+			if ( previousHoldingController is not null ) previousHoldingController.SuppressionSources.Remove( this );
+			previousHoldingController = HoldingController;
+			if ( previousHoldingController is not null ) previousHoldingController.SuppressionSources.Add( this );
+		}
 		//if ( Elements.Any( x => x.IsColliderEnabled ) ) {
 		//	if ( VR.EnabledControllerCount == 0 ) {
 		//		Hide();

@@ -15,8 +15,6 @@ public partial class VrController : BasicVrDevice {
 	public bool IsEnabled => source.IsEnabled.Value;
 	public Hand Hand => source.Role == Valve.VR.ETrackedControllerRole.LeftHand ? Hand.Left : Hand.Right;
 
-	PoseAction? aim;
-
 	Scene scene;
 	public IHasCollider? HoveredCollider { get; private set; }
 	public VrController ( Controller source, Scene scene ) : base( source ) {
@@ -31,6 +29,10 @@ public partial class VrController : BasicVrDevice {
 				rightButton.Actuate( null );
 				menuButton.Actuate( null );
 			}
+		} );
+
+		SuppressionSources.BindCollectionChanged( (_, _) => {
+			updatePointerType();
 		} );
 	}
 
@@ -53,15 +55,19 @@ public partial class VrController : BasicVrDevice {
 	}
 
 	void updateTouchSetting () {
-		useTouchBindable.Value = singlePointerTouch.Value
-			|| pointer?.IsTouchSource == true
-			|| activeControllers.Count( x => x.HoveredCollider == HoveredCollider ) >= 2;
-
+		if ( pointer?.IsTouchSource == true ) {
+			useTouchBindable.Value = !tapOnPress.Value;
+		}
+		else {
+			useTouchBindable.Value = singlePointerTouch.Value
+				|| activeControllers.Count( x => x.HoveredCollider == HoveredCollider ) >= 2;
+		}
+		
 		IsVisible = pointer?.IsTouchSource != true;
 	}
 
 	void updatePointerType () {
-		setPointer( IsEnabled ? inputMode.Value switch {
+		setPointer( (IsEnabled && SuppressionSources.Count == 0) ? inputMode.Value switch {
 			InputMode.TouchScreen => touchPointer,
 			InputMode.DoublePointer => rayPointer,
 			_ => ( activeControllers.Count == 1 || Hand == dominantHand.Value ) ? rayPointer : null
@@ -82,6 +88,7 @@ public partial class VrController : BasicVrDevice {
 	Bindable<Hand> dominantHand = new( Hand.Right );
 	Bindable<InputMode> inputMode = new( InputMode.DoublePointer );
 	Bindable<bool> singlePointerTouch = new( false );
+	Bindable<bool> tapOnPress = new( false );
 	BindableList<VrController> activeControllers = new();
 
 	BindableBool useTouchBindable = new();
@@ -108,6 +115,7 @@ public partial class VrController : BasicVrDevice {
 		if ( config != null ) {
 			config.BindWith( OsuXrSetting.InputMode, inputMode );
 			config.BindWith( OsuXrSetting.SinglePointerTouch, singlePointerTouch );
+			config.BindWith( OsuXrSetting.TapOnPress, tapOnPress );
 		}
 
 		inputMode.BindValueChanged( _ => updatePointerType() );
@@ -145,12 +153,16 @@ public partial class VrController : BasicVrDevice {
 		}
 	}
 
+	/// <summary>
+	/// Objects which prevent this pointer from working for various reasons such as getting too close, or holding something with this hand
+	/// </summary>
+	public readonly BindableList<object> SuppressionSources = new();
+
 	bool isTouchDown;
 	Vector2 currentPosition;
-
 	MouseButton buttonFor ( VrAction action ) => action is VrAction.LeftButton ? MouseButton.Left : MouseButton.Right;
 	void onButtonStateChanged ( bool value, VrAction action, bool isFromTouch ) {
-		if ( pointer?.IsTouchSource == true && !isFromTouch )
+		if ( useTouch && !isFromTouch )
 			return;
 
 		if ( value ) {
@@ -183,6 +195,7 @@ public partial class VrController : BasicVrDevice {
 		}
 	}
 
+	PoseAction? aim;
 	protected override void Update () {
 		base.Update();
 		updateTouchSetting();
@@ -206,7 +219,7 @@ public partial class VrController : BasicVrDevice {
 				updateTouchSetting();
 				currentPosition = panel.GlobalSpaceContentPositionAt( hit.TrisIndex, hit.Point );
 
-				if ( pointer.IsTouchSource && !isTouchDown ) {
+				if ( useTouch && !isTouchDown ) {
 					onButtonStateChanged( true, VrAction.LeftButton, isFromTouch: true );
 					SendHapticVibration( 0.05, 20, 0.5 );
 				}
@@ -218,7 +231,7 @@ public partial class VrController : BasicVrDevice {
 			}
 		}
 		else {
-			if ( pointer.IsTouchSource && isTouchDown ) {
+			if ( useTouch && isTouchDown ) {
 				onButtonStateChanged( false, VrAction.LeftButton, isFromTouch: true );
 				SendHapticVibration( 0.05, 10, 0.3 );
 			}
