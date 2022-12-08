@@ -56,30 +56,7 @@ public partial class OsuXrGame : OsuXrGameBase {
 		TestingRig rig = new( scene ) { Depth = -1 };
 		Add( rig );
 
-		var left = new TestingController( comp, Valve.VR.ETrackedControllerRole.LeftHand );
-		left.IsEnabled.Value = true;
-		var right = new TestingController( comp, Valve.VR.ETrackedControllerRole.RightHand );
-		right.IsEnabled.Value = true;
-		var head = new TestingHeadset( comp );
-		head.IsEnabled.Value = true;
-
-		left.PositionBindable.BindTo( rig.LeftTarget.PositionBindable );
-		left.RotationBindable.BindTo( rig.LeftTarget.RotationBindable );
-		right.PositionBindable.BindTo( rig.RightTarget.PositionBindable );
-		right.RotationBindable.BindTo( rig.RightTarget.RotationBindable );
-		head.PositionBindable.BindTo( rig.Head.PositionBindable );
-		head.RotationBindable.BindTo( rig.Head.RotationBindable );
-
-		comp.Input.LeftHandPosition.BindTo( rig.LeftTarget.PositionBindable );
-		comp.Input.LeftHandRotation.BindTo( rig.LeftTarget.RotationBindable );
-		comp.Input.RightHandPosition.BindTo( rig.RightTarget.PositionBindable );
-		comp.Input.RightHandRotation.BindTo( rig.RightTarget.RotationBindable );
-
-		Schedule( () => {
-			comp.AddDevice( left );
-			comp.AddDevice( right );
-			comp.AddDevice( head );
-		} );
+		Schedule( () => comp.AddRig( rig ) );
 
 		var controls = comp.Input.CreateControlsDrawable();
 		controls.AutoSizeAxes = Axes.Y;

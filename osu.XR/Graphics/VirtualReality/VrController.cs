@@ -1,5 +1,4 @@
-﻿using osu.Framework.XR;
-using osu.Framework.XR.Graphics;
+﻿using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Graphics.Panels;
 using osu.Framework.XR.Graphics.Rendering;
 using osu.Framework.XR.Input;
@@ -13,28 +12,31 @@ namespace osu.XR.Graphics.VirtualReality;
 
 public partial class VrController : BasicVrDevice {
 	Controller source;
-	RayPointer rayPointer = new();
-	TouchPointer touchPointer = new();
-
-	HapticAction haptic = null!;
-
 	public bool IsEnabled => source.IsEnabled.Value;
 	public Hand Hand => source.Role == Valve.VR.ETrackedControllerRole.LeftHand ? Hand.Left : Hand.Right;
-	IPointer? pointer;
 
-	public IHasCollider? HoveredCollider { get; private set; }
 	PoseAction? aim;
 
 	Scene scene;
+	public IHasCollider? HoveredCollider { get; private set; }
 	public VrController ( Controller source, Scene scene ) : base( source ) {
 		this.scene = scene;
 		this.source = source;
 
-		source.IsEnabled.BindValueChanged( _ => {
+		source.IsEnabled.BindValueChanged( v => {
 			updatePointerType();
+
+			if ( !v.NewValue ) {
+				leftButton.Actuate( null );
+				rightButton.Actuate( null );
+				menuButton.Actuate( null );
+			}
 		} );
 	}
 
+	IPointer? pointer;
+	RayPointer rayPointer = new();
+	TouchPointer touchPointer = new();
 	void setPointer ( IPointer? pointer ) {
 		if ( this.pointer is Drawable3D old )
 			scene.Remove( old, disposeImmediately: false );
@@ -44,13 +46,37 @@ public partial class VrController : BasicVrDevice {
 		}
 
 		this.pointer = pointer;
-		if ( pointer is null ) {
-			inputSource.FocusedPanel = null;
-			HoveredCollider = null;
-			isTouchDown = false;
-		}
+		if ( pointer is null )
+			unfocus();
 
 		updateTouchSetting();
+	}
+
+	void updateTouchSetting () {
+		useTouchBindable.Value = singlePointerTouch.Value
+			|| pointer?.IsTouchSource == true
+			|| activeControllers.Count( x => x.HoveredCollider == HoveredCollider ) >= 2;
+
+		IsVisible = pointer?.IsTouchSource != true;
+	}
+
+	void updatePointerType () {
+		setPointer( IsEnabled ? inputMode.Value switch {
+			InputMode.TouchScreen => touchPointer,
+			InputMode.DoublePointer => rayPointer,
+			_ => ( activeControllers.Count == 1 || Hand == dominantHand.Value ) ? rayPointer : null
+		} : null );
+	}
+
+	void unfocus () {
+		inputSource.FocusedPanel = null;
+		HoveredCollider = null;
+		isTouchDown = false;
+	}
+
+	HapticAction haptic = null!;
+	public void SendHapticVibration ( double duration, double frequency = 40, double amplitude = 1, double delay = 0 ) {
+		haptic?.TriggerVibration( duration, frequency, amplitude, delay );
 	}
 
 	Bindable<Hand> dominantHand = new( Hand.Right );
@@ -58,36 +84,24 @@ public partial class VrController : BasicVrDevice {
 	Bindable<bool> singlePointerTouch = new( false );
 	BindableList<VrController> activeControllers = new();
 
-	bool isTouchDown;
 	BindableBool useTouchBindable = new();
 	bool useTouch => useTouchBindable.Value;
-	MouseButton buttonFor ( VrAction action ) => action is VrAction.LeftButton ? MouseButton.Left : MouseButton.Right;
 
-	Vector2 currentPosition;
 	PanelInteractionSystem.Source inputSource = null!;
-	[BackgroundDependencyLoader(true)]
+	[BackgroundDependencyLoader( true )]
 	private void load ( PanelInteractionSystem system, OsuXrConfigManager? config, OsuXrGame game ) {
 		inputSource = system.GetSource( this );
 
 		var left = source.GetAction<BooleanAction>( VrAction.LeftButton );
 		var right = source.GetAction<BooleanAction>( VrAction.RightButton );
-		var globalLeft = game.Compositor.Input.GetAction<BooleanAction>( VrAction.LeftButton );
-		var globalRight = game.Compositor.Input.GetAction<BooleanAction>( VrAction.RightButton );
+		var menu = source.GetAction<BooleanAction>( VrAction.ToggleMenu );
 		aim = source.GetAction<PoseAction>( VrAction.ControllerTip );
 
-		foreach ( var (button, globalButton, action) in new[] { (left, globalLeft, VrAction.LeftButton), (right, globalRight, VrAction.RightButton) } ) {
-			(button.ValueBindable, globalButton.ValueBindable).BindValuesChanged( ( local, global ) => {
-				if ( pointer?.IsTouchSource == true )
-					return;
-
-				onButtonStateChanged( ( (inputMode.Value is InputMode.SinglePointer || activeControllers.Count == 1) && pointer != null ) ? global : local, action );
+		foreach ( var (button, action) in new[] { (left, VrAction.LeftButton), (right, VrAction.RightButton), (menu, VrAction.ToggleMenu) } ) {
+			button.ValueBindable.BindValueChanged( v => {
+				onInputSourceValueChanged( action, v.NewValue );
 			} );
 		}
-
-		source.GetAction<BooleanAction>( VrAction.ToggleMenu ).ValueBindable.BindValueChanged( v => {
-			if ( v.NewValue )
-				ToggleMenuPressed?.Invoke( this );
-		} );
 
 		haptic = source.GetAction<HapticAction>( VrAction.Feedback );
 
@@ -96,28 +110,49 @@ public partial class VrController : BasicVrDevice {
 			config.BindWith( OsuXrSetting.SinglePointerTouch, singlePointerTouch );
 		}
 
-		inputMode.BindValueChanged( _ => {
-			updatePointerType();
-		} );
+		inputMode.BindValueChanged( _ => updatePointerType() );
 		activeControllers.BindTo( game.ActiveVrControllers );
-		activeControllers.BindCollectionChanged( (_, _) => updatePointerType() );
+		activeControllers.BindCollectionChanged( ( _, _ ) => updatePointerType() );
 		dominantHand.BindTo( game.DominantHand );
 		dominantHand.BindValueChanged( _ => updatePointerType() );
 
 		updatePointerType();
+		leftButton.OnPressed += () => onButtonStateChanged( true, VrAction.LeftButton, isFromTouch: false );
+		leftButton.OnReleased += () => onButtonStateChanged( false, VrAction.LeftButton, isFromTouch: false );
+		rightButton.OnPressed += () => onButtonStateChanged( true, VrAction.RightButton, isFromTouch: false );
+		rightButton.OnReleased += () => onButtonStateChanged( false, VrAction.RightButton, isFromTouch: false );
+		menuButton.OnPressed += () => ToggleMenuPressed?.Invoke( this );
 	}
 
-	public event Action<VrController>? ToggleMenuPressed;
+	void onInputSourceValueChanged ( VrAction action, bool isDown ) {
+		var ourButton = action switch {
+			VrAction.LeftButton => leftButton,
+			VrAction.RightButton => rightButton,
+			_ => menuButton
+		};
+		if ( isDown ) {
+			var target = inputMode.Value is InputMode.SinglePointer ? activeControllers.OrderBy( x => x.Hand == dominantHand.Value ? 1 : 2 ).First() : this;
+			var theirButton = action switch {
+				VrAction.LeftButton => target.leftButton,
+				VrAction.RightButton => target.rightButton,
+				_ => target.menuButton
+			};
 
-	void updatePointerType () {
-		setPointer( source.IsEnabled.Value ? inputMode.Value switch {
-			InputMode.TouchScreen => touchPointer,
-			InputMode.DoublePointer => rayPointer,
-			_ => (activeControllers.Count == 1 || Hand == dominantHand.Value) ? rayPointer : null
-		} : null );
+			ourButton.Actuate( theirButton );
+		}
+		else {
+			ourButton.Actuate( null );
+		}
 	}
 
-	void onButtonStateChanged ( bool value, VrAction action ) {
+	bool isTouchDown;
+	Vector2 currentPosition;
+
+	MouseButton buttonFor ( VrAction action ) => action is VrAction.LeftButton ? MouseButton.Left : MouseButton.Right;
+	void onButtonStateChanged ( bool value, VrAction action, bool isFromTouch ) {
+		if ( pointer?.IsTouchSource == true && !isFromTouch )
+			return;
+
 		if ( value ) {
 			if ( HoveredCollider is Panel panel ) {
 				inputSource.FocusedPanel = panel;
@@ -148,18 +183,6 @@ public partial class VrController : BasicVrDevice {
 		}
 	}
 
-	void updateTouchSetting () {
-		useTouchBindable.Value = singlePointerTouch.Value 
-			|| pointer?.IsTouchSource == true
-			|| activeControllers.Count( x => x.HoveredCollider == HoveredCollider ) >= 2;
-
-		IsVisible = pointer?.IsTouchSource != true;
-	}
-
-	public void SendHapticVibration ( double duration, double frequency = 40, double amplitude = 1, double delay = 0 ) {
-		haptic?.TriggerVibration( duration, frequency, amplitude, delay );
-	}
-
 	protected override void Update () {
 		base.Update();
 		updateTouchSetting();
@@ -167,34 +190,77 @@ public partial class VrController : BasicVrDevice {
 		if ( pointer is null )
 			return;
 
+		Vector3 pos = Position;
+		Quaternion rot = Rotation;
 		if ( aim?.FetchDataForNextFrame() is OpenVR.NET.Input.PoseInput pose ) {
-			var maybeHit = pointer.UpdatePointer( pose.Position.ToOsuTk(), pose.Rotation.ToOsuTk() );
+			pos = pose.Position.ToOsuTk();
+			rot = pose.Rotation.ToOsuTk();
+		}
+		// TODO report if theres no aim data
 
-			if ( maybeHit is PointerHit hit ) {
-				HoveredCollider = hit.Collider;
-				if ( hit.Collider is Panel panel ) {
-					updateTouchSetting();
-					currentPosition = panel.GlobalSpaceContentPositionAt( hit.TrisIndex, hit.Point );
+		var maybeHit = pointer.UpdatePointer( pos, rot );
 
-					if ( pointer.IsTouchSource && !isTouchDown ) {
-						onButtonStateChanged( true, VrAction.LeftButton );
-						SendHapticVibration( 0.05, 20, 0.5 );
-					}
+		if ( maybeHit is PointerHit hit ) {
+			HoveredCollider = hit.Collider;
+			if ( hit.Collider is Panel panel ) {
+				updateTouchSetting();
+				currentPosition = panel.GlobalSpaceContentPositionAt( hit.TrisIndex, hit.Point );
 
-					if ( isTouchDown )
-						inputSource.TouchMove( currentPosition );
-					else if ( !useTouch )
-						panel.Content.MoveMouse( currentPosition );
-				}
-			}
-			else {
-				if ( pointer.IsTouchSource && isTouchDown ) {
-					onButtonStateChanged( false, VrAction.LeftButton );
-					SendHapticVibration( 0.05, 10, 0.3 );
+				if ( pointer.IsTouchSource && !isTouchDown ) {
+					onButtonStateChanged( true, VrAction.LeftButton, isFromTouch: true );
+					SendHapticVibration( 0.05, 20, 0.5 );
 				}
 
-				HoveredCollider = null;
+				if ( isTouchDown )
+					inputSource.TouchMove( currentPosition );
+				else if ( !useTouch )
+					panel.Content.MoveMouse( currentPosition );
 			}
 		}
+		else {
+			if ( pointer.IsTouchSource && isTouchDown ) {
+				onButtonStateChanged( false, VrAction.LeftButton, isFromTouch: true );
+				SendHapticVibration( 0.05, 10, 0.3 );
+			}
+
+			HoveredCollider = null;
+		}
 	}
+
+	class Button {
+		Button? actuated;
+		int inputSourceCount;
+		public bool IsDown { get; private set; }
+
+		public void Actuate ( Button? who ) {
+			var wasOldDown = actuated?.IsDown;
+			var wasTargetDown = who?.IsDown;
+
+			var old = actuated;
+			if ( old != null )
+				old.inputSourceCount--;
+			if ( who != null )
+				who.inputSourceCount++;
+			actuated = who;
+
+			if ( old != null ) {
+				old.IsDown = old.inputSourceCount != 0;
+				if ( wasOldDown == true && !old.IsDown )
+					old.OnReleased?.Invoke();
+			}
+			if ( who != null ) {
+				who.IsDown = who.inputSourceCount != 0;
+				if ( wasTargetDown == false && who.IsDown )
+					who.OnPressed?.Invoke();
+			}
+		}
+
+		public event Action? OnPressed;
+		public event Action? OnReleased;
+	}
+
+	Button leftButton = new();
+	Button rightButton = new();
+	Button menuButton = new();
+	public event Action<VrController>? ToggleMenuPressed;
 }

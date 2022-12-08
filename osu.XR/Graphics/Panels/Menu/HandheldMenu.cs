@@ -1,5 +1,4 @@
 ﻿using osu.Framework.Graphics.Sprites;
-using osu.Framework.Layout;
 using osu.Framework.XR.Graphics;
 using osu.XR.Graphics.Panels.Settings;
 
