@@ -4,7 +4,7 @@ using osu.XR.Configuration;
 
 namespace osu.XR.Graphics.VirtualReality;
 
-public partial class UserTrackingDrawable3D : Container3D {
+public partial class UserTrackingDrawable3D : Container3D { // TODO this needs a better name, and we need to extract out the menu button
 	BindableList<VrController> activeControllers = new();
 	[BackgroundDependencyLoader( true )]
 	private void load ( OsuXrConfigManager? config ) {

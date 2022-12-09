@@ -20,6 +20,11 @@ public partial class HandheldMenu : CompositeDrawable3D {
 			}
 		} );
 		AddInternal( Sidebar = new SidebarMenuPanel() { X = MenuPanel.PANEL_WIDTH / 2 + 0.01f, EulerY = 0.5f } );
+		var presets = Settings.PresetSettings;
+		AddInternal( presets );
+		presets.OriginX = MenuPanel.PANEL_WIDTH / 2;
+		presets.X = -(MenuPanel.PANEL_WIDTH / 2 + 0.01f);
+		presets.EulerY = -0.5f;
 
 		Sidebar.AddButton( FontAwesome.Solid.Cog, "Settings", () => Panels.FocusPanel( Settings ) );
 		Sidebar.AddButton( FontAwesome.Solid.ExclamationCircle, "Notifications", () => Panels.FocusPanel( Notifications ) );
@@ -39,7 +44,7 @@ public partial class HandheldMenu : CompositeDrawable3D {
 		set {
 			base.Alpha = value;
 
-			foreach ( var i in Panels.Children )
+			foreach ( var i in Panels.Children.Append( Settings.PresetSettings ) )
 				i.ParentAlpha = Alpha;
 			Sidebar.Alpha = Alpha;
 		}
