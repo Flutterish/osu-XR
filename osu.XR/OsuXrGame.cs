@@ -128,6 +128,7 @@ public partial class OsuXrGame : OsuXrGameBase {
 
 	protected override void LoadComplete () {
 		base.LoadComplete();
+		Add( BeatSync );
 		Add( scene );
 		scene.Add( new GridScene() );
 	}

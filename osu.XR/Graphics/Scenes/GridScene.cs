@@ -11,6 +11,7 @@ public partial class GridScene : Scene {
 		VerticalGradientSkyBox skybox;
 		AddInternal( skybox = new VerticalGradientSkyBox() );
 		AddInternal( new FloorGrid() );
+		AddInternal( new BeatingCubes() );
 
 		TintBindable.BindTo( skybox.TintBindable );
 		OpacityBindable.BindTo( skybox.OpacityBindable );

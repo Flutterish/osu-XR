@@ -45,12 +45,18 @@ public class OsuDependencies : IReadOnlyDependencyContainer {
 	}
 
 	private void onOsuLoaded ( OsuGameBase game ) {
-		if ( game != OsuGameBase.Value )
-			return;
+		try {
+			if ( game != OsuGameBase.Value )
+				return;
 
-		var deps = game.Dependencies;
-		currentRuleset.Current = deps.Get<Bindable<RulesetInfo?>>();
+			var deps = game.Dependencies;
+			currentRuleset.Current = deps.Get<Bindable<RulesetInfo?>>();
+		}
+		finally {
+			OsuLoaded?.Invoke( this );
+		}
 	}
+	public event Action<OsuDependencies>? OsuLoaded;
 
 	public object? Get ( Type type ) {
 		return OsuGameBase.Value?.Dependencies.Get( type );
