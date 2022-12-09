@@ -13,6 +13,7 @@ public class OsuXrActionManifest : ActionManifest<VrActionCategory, VrAction> {
 		Actions = new() {
 			new() { Category = VrActionCategory.General, Name = VrAction.LeftButton, Type = ActionType.Boolean },
 			new() { Category = VrActionCategory.General, Name = VrAction.RightButton, Type = ActionType.Boolean },
+			new() { Category = VrActionCategory.General, Name = VrAction.Scoll, Type = ActionType.Vector2 },
 
 			new() { Category = VrActionCategory.Configuration, Name = VrAction.ToggleMenu, Type = ActionType.Boolean },
 
@@ -33,6 +34,7 @@ public enum VrActionCategory {
 public enum VrAction {
 	LeftButton,
 	RightButton,
+	Scoll,
 
 	ControllerTip,
 

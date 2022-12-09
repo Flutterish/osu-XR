@@ -108,6 +108,7 @@ public partial class VrController : BasicVrDevice {
 			} );
 		}
 
+		scroll = source.GetAction<Vector2Action>( VrAction.Scoll );
 		haptic = source.GetAction<HapticAction>( VrAction.Feedback );
 
 		if ( config != null ) {
@@ -130,6 +131,12 @@ public partial class VrController : BasicVrDevice {
 		menuButton.OnPressed += () => ToggleMenuPressed?.Invoke( this );
 	}
 
+	VrController relayController => inputMode.Value is InputMode.SinglePointer // in single pointer, the offhand should activate main hand buttons
+		? activeControllers.OrderBy( x => x.Hand == dominantHand.Value ? 1 : 2 ).First()
+		: useTouch && HoveredCollider is null // in touch modes, unfocused pointers should activate focused hand buttons
+		? activeControllers.Where( x => x.HoveredCollider != null ).Append( this ).First()
+		: this;
+
 	void onInputSourceValueChanged ( VrAction action, bool isDown ) {
 		var ourButton = action switch {
 			VrAction.LeftButton => leftButton,
@@ -137,13 +144,7 @@ public partial class VrController : BasicVrDevice {
 			_ => menuButton
 		};
 		if ( isDown ) {
-			var target = action is VrAction.ToggleMenu
-				? this
-				: inputMode.Value is InputMode.SinglePointer // in single pointer, the offhand should activate main hand buttons
-				? activeControllers.OrderBy( x => x.Hand == dominantHand.Value ? 1 : 2 ).First() 
-				: useTouch && HoveredCollider is null // in touch modes, unfocused pointers should activate focused hand buttons
-				? activeControllers.Where( x => x.HoveredCollider != null ).Append( this ).First()
-				: this;
+			var target = action is VrAction.ToggleMenu ? this : relayController;
 			var theirButton = action switch {
 				VrAction.LeftButton => target.leftButton,
 				VrAction.RightButton => target.rightButton,
@@ -155,6 +156,19 @@ public partial class VrController : BasicVrDevice {
 		else {
 			ourButton.Actuate( null );
 		}
+	}
+
+	Vector2Action scroll = null!;
+	void onScroll ( Vector2 value ) {
+		var panel = HoveredCollider as Panel ?? inputSource.FocusedPanel;
+		if ( panel is null ) {
+			var target = relayController;
+			if ( target != this )
+				target?.onScroll( value );
+			return;
+		}
+
+		panel.Content.Scroll += value;
 	}
 
 	/// <summary>
@@ -212,6 +226,7 @@ public partial class VrController : BasicVrDevice {
 	protected override void Update () {
 		base.Update();
 		updateTouchSetting();
+		onScroll( scroll.Value * (float)Time.Elapsed / 1000 * 30 );
 
 		if ( pointer is null )
 			return;
