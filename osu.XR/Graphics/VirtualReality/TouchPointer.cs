@@ -26,12 +26,19 @@ public partial class TouchPointer : Model, IPointer {
 		Rotation = rotation;
 
 		if ( Position != targetPosition ) {
-			var direction = ( targetPosition - Position ).Normalized();
-			if ( physics.TryHitRay( Position, direction, out var rayHit ) && rayHit.Distance - Radius / 2 < ( Position - targetPosition ).Length ) {
-				Position = rayHit.Point + rayHit.Normal * Radius / 2;
-			}
-			else {
-				Position = targetPosition;
+			for ( int i = 0; i < 10; i++ ) { // this makes "sliding" on colliders better
+				var from = Position;
+				var direction = ( targetPosition - Position ).Normalized();
+				if ( physics.TryHitRay( Position, direction, out var rayHit ) && rayHit.Distance - Radius / 2 < ( Position - targetPosition ).Length ) {
+					Position = rayHit.Point + rayHit.Normal * Radius / 2;
+				}
+				else {
+					Position = targetPosition;
+					break;
+				}
+
+				if ( ( from - position ).LengthSquared < 0.01f )
+					break;
 			}
 		}
 
