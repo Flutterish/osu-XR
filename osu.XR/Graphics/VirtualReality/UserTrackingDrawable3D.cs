@@ -114,21 +114,20 @@ public partial class UserTrackingDrawable3D : Container3D {
 			previousHoldingController = HoldingController;
 			if ( previousHoldingController is not null ) previousHoldingController.SuppressionSources.Add( this );
 		}
-		//if ( Elements.Any( x => x.IsColliderEnabled ) ) {
-		//	if ( VR.EnabledControllerCount == 0 ) {
-		//		Hide();
-		//	}
-		//	foreach ( var i in Elements ) {
-		//		i.RequestedInputMode = HoldingController == Game.MainController ? PanelInputMode.Inverted : PanelInputMode.Regular;
-		//	}
-		//}
 
 		// doing this every frame makes it have an Easing.Out-like curve
 		this.MoveTo( TargetPosition, 100 );
 		this.RotateTo( TargetRotation, 100 );
+	}
 
-		IsVisible = Alpha != 0;
-		foreach ( var i in Children )
-			i.Alpha = Alpha;
+	public override float Alpha { 
+		get => base.Alpha; 
+		set {
+			base.Alpha = value;
+
+			IsVisible = Alpha != 0;
+			foreach ( var i in Children )
+				i.Alpha = Alpha;
+		}
 	}
 }

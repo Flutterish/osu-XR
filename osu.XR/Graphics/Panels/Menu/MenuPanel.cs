@@ -27,7 +27,7 @@ public partial class MenuPanel : OsuPanel {
 	}
 
 	float alpha = 1;
-	new public float Alpha {
+	public override float Alpha {
 		get => alpha;
 		set {
 			alpha = value;

@@ -162,7 +162,7 @@ public partial class VrController : BasicVrDevice {
 	Vector2 currentPosition;
 	MouseButton buttonFor ( VrAction action ) => action is VrAction.LeftButton ? MouseButton.Left : MouseButton.Right;
 	void onButtonStateChanged ( bool value, VrAction action, bool isFromTouch ) {
-		if ( useTouch && !isFromTouch )
+		if ( useTouch && !isFromTouch && !isTouchDown )
 			return;
 
 		if ( value ) {
@@ -173,6 +173,9 @@ public partial class VrController : BasicVrDevice {
 
 			if ( useTouch ) {
 				if ( action is VrAction.LeftButton ) {
+					if ( !isFromTouch )
+						inputSource.TouchUp();
+
 					isTouchDown = true;
 					inputSource.TouchDown( currentPosition );
 				}
@@ -184,7 +187,7 @@ public partial class VrController : BasicVrDevice {
 		}
 		else {
 			if ( isTouchDown ) {
-				if ( action is VrAction.LeftButton ) {
+				if ( action is VrAction.LeftButton && isFromTouch ) {
 					isTouchDown = false;
 					inputSource.TouchUp();
 				}
