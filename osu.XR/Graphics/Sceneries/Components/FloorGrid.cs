@@ -4,7 +4,7 @@ using osu.Framework.XR;
 using osu.Framework.XR.Graphics;
 using osuTK.Graphics;
 
-namespace osu.XR.Graphics.Scenes.Components;
+namespace osu.XR.Graphics.Sceneries.Components;
 
 public partial class FloorGrid : BasicModel {
 	Cached meshCache = new();

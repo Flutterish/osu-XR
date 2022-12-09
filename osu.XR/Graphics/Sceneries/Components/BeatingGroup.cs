@@ -2,7 +2,7 @@
 using osu.Framework.XR.Graphics.Transforms;
 using osu.XR.Timing;
 
-namespace osu.XR.Graphics.Scenes.Components;
+namespace osu.XR.Graphics.Sceneries.Components;
 
 public partial class BeatingGroup : Container3D {
 	Bindable<Beat> bindableBeat = new();

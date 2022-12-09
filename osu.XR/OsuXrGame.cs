@@ -7,7 +7,7 @@ using osu.Framework.XR.VirtualReality.Devices;
 using osu.XR.Graphics;
 using osu.XR.Graphics.Panels;
 using osu.XR.Graphics.Panels.Menu;
-using osu.XR.Graphics.Scenes;
+using osu.XR.Graphics.Sceneries;
 using osu.XR.Graphics.VirtualReality;
 using osu.XR.VirtualReality;
 
@@ -130,6 +130,6 @@ public partial class OsuXrGame : OsuXrGameBase {
 		base.LoadComplete();
 		Add( BeatSync );
 		Add( scene );
-		scene.Add( new GridScene() );
+		scene.Add( new GridScenery() );
 	}
 }

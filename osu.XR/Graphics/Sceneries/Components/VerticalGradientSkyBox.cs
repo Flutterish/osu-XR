@@ -5,7 +5,7 @@ using osu.Framework.XR.Graphics.Meshes;
 using osu.Framework.XR.Graphics.Vertices;
 using osuTK.Graphics;
 
-namespace osu.XR.Graphics.Scenes.Components;
+namespace osu.XR.Graphics.Sceneries.Components;
 
 public partial class VerticalGradientSkyBox : BasicModel {
 	public readonly Bindable<Color4> TintBindable = new( new Color4( 253, 35, 115, 255 ) );

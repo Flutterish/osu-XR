@@ -1,13 +1,13 @@
-﻿using osu.XR.Graphics.Scenes.Components;
+﻿using osu.XR.Graphics.Sceneries.Components;
 using osuTK.Graphics;
 
-namespace osu.XR.Graphics.Scenes;
+namespace osu.XR.Graphics.Sceneries;
 
-public partial class GridScene : Scene {
+public partial class GridScenery : Scenery {
 	public readonly Bindable<Color4> TintBindable = new( new Color4( 253, 35, 115, 255 ) );
 	public readonly BindableFloat OpacityBindable = new( 1 ) { MinValue = 0, MaxValue = 1 };
 
-	public GridScene () {
+	public GridScenery () {
 		VerticalGradientSkyBox skybox;
 		AddInternal( skybox = new VerticalGradientSkyBox() );
 		AddInternal( new FloorGrid() );

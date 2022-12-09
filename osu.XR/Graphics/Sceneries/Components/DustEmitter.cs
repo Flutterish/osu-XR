@@ -5,7 +5,7 @@ using osu.Framework.XR.Graphics.Transforms;
 using osu.XR.Configuration;
 using osu.XR.Graphics.Particles;
 
-namespace osu.XR.Graphics.Scenes.Components;
+namespace osu.XR.Graphics.Sceneries.Components;
 
 public partial class DustEmitter : ParticleEmitter<DustParticle> {
 	protected override DustParticle CreateParticle ()

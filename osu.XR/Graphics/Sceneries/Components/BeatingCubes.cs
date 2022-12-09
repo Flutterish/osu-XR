@@ -2,7 +2,7 @@
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Graphics.Meshes;
 
-namespace osu.XR.Graphics.Scenes.Components;
+namespace osu.XR.Graphics.Sceneries.Components;
 
 public partial class BeatingCubes : CompositeDrawable3D {
 	public BeatingCubes ( int? seed = 0 ) {

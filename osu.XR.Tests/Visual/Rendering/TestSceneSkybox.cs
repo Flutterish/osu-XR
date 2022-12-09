@@ -1,5 +1,4 @@
-﻿using osu.XR.Graphics.Scenes;
-using osu.XR.Graphics.Scenes.Components;
+﻿using osu.XR.Graphics.Sceneries.Components;
 
 namespace osu.XR.Tests.Visual.Rendering;
 
