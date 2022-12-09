@@ -1,15 +1,6 @@
-﻿using NuGet.Configuration;
-using osu.Framework.Graphics.Primitives;
-using osu.Framework.Graphics.Rendering;
-using osu.Framework.Graphics.Transforms;
+﻿using osu.Framework.Graphics.Rendering;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Graphics.Meshes;
-using osu.Framework.XR.Maths;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace osu.XR.Graphics.Particles;
 

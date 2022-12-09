@@ -10,18 +10,21 @@ namespace osu.XR.Osu;
 public partial class OsuGameContainer : CompositeDrawable {
 	public readonly OsuDependencies OsuDependencies = new();
 	public VirtualGameHost VirtualGameHost { get; private set; } = null!;
+	OsuGame osu = new();
 
 	protected override IReadOnlyDependencyContainer CreateChildDependencies ( IReadOnlyDependencyContainer parent ) {
 		var deps = new DependencyContainer( parent );
 		VirtualGameHost = new( parent.Get<GameHost>() );
 		deps.CacheAs<GameHost>( VirtualGameHost );
+		deps.CacheAs<Framework.Game>( osu );
+		deps.CacheAs<OsuGameBase>( osu );
+		deps.CacheAs<OsuGame>( osu );
 		return base.CreateChildDependencies( deps );
 	}
 
 	[BackgroundDependencyLoader]
 	private void load () {
 		RelativeSizeAxes = Axes.Both;
-		var osu = new OsuGame();
 		OsuDependencies.OsuGame.Value = osu;
 
 		osu.SetHost( VirtualGameHost );
