@@ -1,5 +1,5 @@
-﻿using osu.Framework.XR.Graphics.Containers;
-using osu.Framework.XR.Graphics.Transforms;
+﻿using osu.Framework.Utils;
+using osu.Framework.XR.Graphics.Containers;
 using osu.XR.Configuration;
 
 namespace osu.XR.Graphics.VirtualReality;
@@ -68,7 +68,7 @@ public partial class UserTrackingDrawable3D : Container3D {
 	Bindable<InputMode> inputMode = new();
 	public VrController? HoldingController {
 		get {
-			if ( activeControllers.Count == 0 ) return null;
+			if ( activeControllers.Count < 2 ) return null;
 			if ( inputMode.Value == InputMode.SinglePointer ) return game.SecondaryActiveController;
 			if ( openingController?.IsEnabled == true ) return openingController;
 			return null;
@@ -82,7 +82,7 @@ public partial class UserTrackingDrawable3D : Container3D {
 			if ( HoldingController is null ) {
 				if ( game.Headset is null )
 					return Vector3.Zero;
-				return retainedPosition = game.Headset.Position + game.Headset.Rotation.Apply( Vector3.UnitZ ) * 0.5f;
+				return retainedPosition = game.Headset.Position - Vector3.UnitY * 0.1f + game.Headset.Rotation.Apply( Vector3.UnitZ ) * 0.5f;
 			}
 			else {
 				return retainedPosition = HoldingController.Position + HoldingController.Forward * 0.2f + HoldingController.Up * 0.05f;
@@ -115,9 +115,9 @@ public partial class UserTrackingDrawable3D : Container3D {
 			if ( previousHoldingController is not null ) previousHoldingController.SuppressionSources.Add( this );
 		}
 
-		// doing this every frame makes it have an Easing.Out-like curve
-		this.MoveTo( TargetPosition, 100 );
-		this.RotateTo( TargetRotation, 100 );
+		var lerp = (float)Interpolation.DampContinuously( 0, 1, 50, Time.Elapsed );
+		Position = Position + ( TargetPosition - Position ) * lerp;
+		Rotation = Quaternion.Slerp( Rotation, TargetRotation, lerp );
 	}
 
 	public override float Alpha { 
