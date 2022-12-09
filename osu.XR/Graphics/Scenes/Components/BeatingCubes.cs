@@ -20,8 +20,8 @@ public partial class BeatingCubes : CompositeDrawable3D {
 					Child = new BasicModel {
 						Mesh = BasicMesh.UnitCube,
 						IsColliderEnabled = true,
-						OriginY = -0.5f,
-						Scale = new Vector3( (float)( random.NextDouble( 0.05, 0.2 ) * radius ) ),
+						OriginY = -1f,
+						Scale = new Vector3( (float)( random.NextDouble( 0.05, 0.2 ) * radius ) ) / 2,
 						Rotation = Quaternion.FromAxisAngle( Vector3.UnitY, (float)random.NextDouble( 0, Math.PI * 2 ) )
 					}
 				} );

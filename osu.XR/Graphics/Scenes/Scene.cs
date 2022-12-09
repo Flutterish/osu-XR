@@ -1,5 +1,6 @@
 ﻿using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Graphics.Meshes;
+using osu.XR.Graphics.Scenes.Components;
 
 namespace osu.XR.Graphics.Scenes;
 
@@ -11,5 +12,6 @@ public partial class Scene : CompositeDrawable3D {
 			Mesh = BasicMesh.UnitCube,
 			Scale = new( 100, 0, 100 )
 		} );
+		AddInternal( new DustEmitter() );
 	}
 }

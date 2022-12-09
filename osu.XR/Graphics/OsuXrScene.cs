@@ -3,6 +3,9 @@ using osu.Framework.IO.Stores;
 using osu.Framework.XR.Graphics.Materials;
 using osu.Framework.XR.Graphics.Rendering;
 using MaterialNames = osu.XR.Graphics.Materials.MaterialNames;
+using FrameworkMaterialNames = osu.Framework.XR.Graphics.Materials.MaterialNames;
+using osu.Framework.Graphics.Textures;
+using osu.Framework.Platform;
 
 namespace osu.XR.Graphics;
 
@@ -14,12 +17,22 @@ public partial class OsuXrScene : Scene {
 		=> new NamespacedResourceStore<byte[]>( new DllResourceStore( typeof( OsuXrGame ).Assembly ), "Resources/Models" );
 
 	protected override IReadOnlyDependencyContainer CreateChildDependencies ( IReadOnlyDependencyContainer parent ) {
-		var r = base.CreateChildDependencies( parent );
+		var deps = new DependencyContainer( parent );
+		var r = base.CreateChildDependencies( deps );
 
-		MaterialStore.AddDescriptor( MaterialNames.PanelTransparent, new MaterialDescriptor( MaterialStore.GetDescriptor( "unlit_panel" ) )
+		var textures = new TextureStore( parent.Get<IRenderer>() );
+		textures.AddTextureSource( parent.Get<GameHost>().CreateTextureLoaderStore( new NamespacedResourceStore<byte[]>( new DllResourceStore( typeof(OsuXrGame).Assembly ), "Resources/Textures" ) ) );
+		deps.CacheAs( textures );
+
+		MaterialStore.AddDescriptor( MaterialNames.PanelTransparent, new MaterialDescriptor( MaterialStore.GetDescriptor( FrameworkMaterialNames.UnlitPanel ) )
 			.AddOnBind( (m, s) => {
 				m.Shader.SetUniform( "solidPass", s.GetGlobalProperty<bool>( "solidPass" ) );
 			} )	
+		);
+		MaterialStore.AddDescriptor( MaterialNames.Transparent, new MaterialDescriptor( MaterialStore.GetDescriptor( FrameworkMaterialNames.Unlit ) )
+			.AddOnBind( ( m, s ) => {
+				m.Shader.SetUniform( "solidPass", s.GetGlobalProperty<bool>( "solidPass" ) );
+			} )
 		);
 
 		return r;
@@ -59,7 +72,7 @@ public partial class OsuXrScene : Scene {
 
 				MaterialStore.SetGlobalProperty( "solidPass", false );
 				renderer.PushDepthInfo( new( depthTest: true, writeDepth: false ) );
-				foreach ( var i in drawables ) {
+				foreach ( var i in drawables ) { // TODO sort them
 					i.GetDrawNodeAtSubtree( subtreeIndex )?.Draw( renderer );
 				}
 				renderer.PopDepthInfo();
