@@ -1,4 +1,7 @@
-﻿using osu.Game.Overlays.Settings;
+﻿using osu.Framework.Graphics.Sprites;
+using osu.Framework.Localisation;
+using osu.Game.Overlays.Settings;
+using osu.XR.Configuration;
 using osu.XR.Graphics.Panels.Settings;
 
 namespace osu.XR.Graphics.Panels.Menu;
@@ -13,9 +16,25 @@ public partial class SceneManagementPanel : SettingsPanel {
 		protected override Drawable CreateHeader ()
 			=> new SettingsHeader( "Scene Manager", "change up the scenery" );
 
-		protected override void LoadComplete () {
-			base.LoadComplete();
+		protected override IEnumerable<SettingsSection> CreateSections () {
+			yield return new Section();
+		}
 
+		partial class Section : SettingsSection {
+			public Section () {
+				
+			}
+
+			public override Drawable CreateIcon () => new SpriteIcon {
+				Icon = FontAwesome.Solid.Image
+			};
+
+			[BackgroundDependencyLoader]
+			private void load ( OsuXrConfigManager config ) {
+				Add( new SettingsEnumDropdown<SceneryType> { Current = config.GetBindable<SceneryType>( OsuXrSetting.SceneryType ), LabelText = "Scenery type" } );
+			}
+
+			public override LocalisableString Header => "";
 		}
 	}
 }

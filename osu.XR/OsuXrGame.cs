@@ -130,6 +130,6 @@ public partial class OsuXrGame : OsuXrGameBase {
 		base.LoadComplete();
 		Add( BeatSync );
 		Add( scene );
-		scene.Add( new GridScenery() );
+		scene.Add( new SceneryContainer() );
 	}
 }

@@ -19,5 +19,5 @@ public enum OsuXrSetting {
 	ShadowType,
 
 	ShowDust,
-	SkyboxType
+	SceneryType
 }

@@ -23,7 +23,7 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 		SetDefault( OsuXrSetting.DominantHand, HandSetting.Auto );
 		SetDefault( OsuXrSetting.ShadowType, FeetSymbols.None );
 		SetDefault( OsuXrSetting.ShowDust, true );
-		SetDefault( OsuXrSetting.SkyboxType, SkyBoxType.Solid );
+		SetDefault( OsuXrSetting.SceneryType, SceneryType.Solid );
 		base.InitialiseDefaults();
 
 		PerformLoad();

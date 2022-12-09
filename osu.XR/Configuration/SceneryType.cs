@@ -2,11 +2,10 @@
 
 namespace osu.XR.Configuration;
 
-public enum SkyBoxType {
+public enum SceneryType {
+	[Description( "Solid" )]
 	Solid,
 
 	[Description( "Lights Out" )]
-	LightsOut,
-
-	// TODO Storyboard?
+	LightsOut
 }

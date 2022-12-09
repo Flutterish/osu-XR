@@ -10,13 +10,15 @@ public partial class HandheldMenu : CompositeDrawable3D {
 
 	public readonly VrSettingsPanel Settings;
 	public readonly VrNotificationsPanel Notifications;
+	public readonly SceneManagementPanel Scenery;
 
 	public HandheldMenu () {
 		// new ConfigPanel(), Notifications, Inspector, InputBindings, new ChangelogPanel(), new SceneManagerPanel()
 		AddInternal( Panels = new PopoutPanelStack<MenuPanel> {
 			Children = new MenuPanel[] {
 				Settings = new VrSettingsPanel(),
-				Notifications = new VrNotificationsPanel()
+				Notifications = new VrNotificationsPanel(),
+				Scenery = new SceneManagementPanel()
 			}
 		} );
 		AddInternal( Sidebar = new SidebarMenuPanel() { X = MenuPanel.PANEL_WIDTH / 2 + 0.01f, EulerY = 0.5f } );
@@ -28,6 +30,7 @@ public partial class HandheldMenu : CompositeDrawable3D {
 
 		Sidebar.AddButton( FontAwesome.Solid.Cog, "Settings", () => Panels.FocusPanel( Settings ) );
 		Sidebar.AddButton( FontAwesome.Solid.ExclamationCircle, "Notifications", () => Panels.FocusPanel( Notifications ) );
+		Sidebar.AddButton( FontAwesome.Solid.Image, "Scenery", () => Panels.FocusPanel( Scenery ) );
 
 		VisibilityChanged += onVisibilityChanged;
 	}
