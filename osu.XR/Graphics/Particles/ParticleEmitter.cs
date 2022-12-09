@@ -37,4 +37,15 @@ public abstract partial class ParticleEmitter : CompositeDrawable3D { // TODO ba
 
 		return particle;
 	}
+
+	protected override void Dispose ( bool isDisposing ) {
+		if ( !IsDisposed ) {
+			ClearInternal();
+			foreach ( var i in particlePool ) {
+				i.Dispose();
+			}
+		}
+
+		base.Dispose( isDisposing );
+	}
 }
