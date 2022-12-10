@@ -12,6 +12,7 @@ public partial class TouchPointer : Model, IPointer {
 	public readonly BindableFloat RadiusBindable = new( 0.023f );
 
 	public TouchPointer () {
+		Y = 1;
 		RadiusBindable.BindValueChanged( v => Scale = new( v.NewValue ), true );
 		Alpha = 0.3f;
 	}

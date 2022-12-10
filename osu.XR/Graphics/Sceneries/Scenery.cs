@@ -10,7 +10,7 @@ public partial class Scenery : CompositeDrawable3D {
 			IsColliderEnabled = true,
 			IsVisible = false,
 			Mesh = BasicMesh.UnitCube,
-			Scale = new( 100, 0, 100 )
+			Scale = new( 100, 0.01f, 100 )
 		} );
 		AddInternal( new DustEmitter() );
 	}

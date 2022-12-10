@@ -156,7 +156,7 @@ public partial class VrController : BasicVrDevice {
 	}
 
 	VrController relayController => inputMode.Value is InputMode.SinglePointer // in single pointer, the offhand should activate main hand buttons
-		? activeControllers.OrderBy( x => x.Hand == dominantHand.Value ? 1 : 2 ).First()
+		? activeControllers.OrderBy( x => x.Hand == dominantHand.Value ? 1 : 2 ).Append( this ).First()
 		: useTouch && HoveredCollider is null // in touch modes, unfocused pointers should activate focused hand buttons
 		? activeControllers.Where( x => x.HoveredCollider != null ).Append( this ).First()
 		: this;
