@@ -21,21 +21,14 @@ public partial class InputSettingSection : SettingsSection {
 				LabelText = "Input mode", 
 				TooltipText = "How your controllers interact with the panels" 
 			}).PresetComponent( config, OsuXrSetting.InputMode ),
-			new ConditionalSettingsContainer<InputMode> {
-				Current = inputMode.Current,
-				[InputMode.SinglePointer] = new Drawable[] {
-					new SettingsCheckbox { 
-						LabelText = "[Single pointer] Emulate touch", 
-						TooltipText = "Emulate touch instead of mouse" 
-					}.PresetComponent( config, OsuXrSetting.SinglePointerTouch ),
-				},
-				[InputMode.TouchScreen] = new Drawable[] {
-					new SettingsCheckbox { 
-						LabelText = "[Touchscreen] Tap only on press", 
-						TooltipText = "Press a button to tap the screen" 
-					}.PresetComponent( config, OsuXrSetting.TapOnPress )
-				}
-			},
+			new SettingsCheckbox {
+				LabelText = "[Pointer] Emulate touch",
+				TooltipText = "Emulate touch instead of mouse"
+			}.PresetComponent( config, OsuXrSetting.TouchPointers ),
+			new SettingsCheckbox {
+				LabelText = "[Touch] Allow strumming",
+				TooltipText = "Tap an additional time when releasing a button"
+			}.PresetComponent( config, OsuXrSetting.TapStrum ),
 			new SettingsSlider<int, PxSliderBar> { 
 				LabelText = "Touch deadzone", 
 				TooltipText = "Deadzone after interacting with a panel"

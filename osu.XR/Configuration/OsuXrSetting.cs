@@ -2,8 +2,8 @@
 
 public enum OsuXrSetting {
 	InputMode,
-	SinglePointerTouch,
-	TapOnPress,
+	TouchPointers,
+	TapStrum,
 	Deadzone,
 
 	ScreenArc,

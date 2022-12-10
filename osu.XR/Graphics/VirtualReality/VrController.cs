@@ -63,7 +63,7 @@ public partial class VrController : BasicVrDevice {
 	}
 
 	void updateTouchSetting () {
-		useTouchBindable.Value = singlePointerTouch.Value
+		useTouchBindable.Value = pointerTouch.Value
 			|| pointer?.IsTouchSource == true
 			|| (HoveredCollider != null && activeControllers.Count( x => x.HoveredCollider == HoveredCollider ) >= 2);
 		
@@ -91,8 +91,8 @@ public partial class VrController : BasicVrDevice {
 
 	Bindable<Hand> dominantHand = new( Hand.Right );
 	Bindable<InputMode> inputMode = new( InputMode.DoublePointer );
-	Bindable<bool> singlePointerTouch = new( false ); // TODO rename
-	Bindable<bool> tapOnPress = new( false );
+	Bindable<bool> pointerTouch = new( false );
+	Bindable<bool> tapStrum = new( false );
 	BindableList<VrController> activeControllers = new();
 
 	BindableBool useTouchBindable = new();
@@ -134,8 +134,8 @@ public partial class VrController : BasicVrDevice {
 
 		if ( config != null ) {
 			config.BindWith( OsuXrSetting.InputMode, inputMode );
-			config.BindWith( OsuXrSetting.SinglePointerTouch, singlePointerTouch );
-			config.BindWith( OsuXrSetting.TapOnPress, tapOnPress );
+			config.BindWith( OsuXrSetting.TouchPointers, pointerTouch );
+			config.BindWith( OsuXrSetting.TapStrum, tapStrum );
 			config.BindWith( OsuXrSetting.DisableTeleport, disableTeleport );
 		}
 
@@ -157,7 +157,7 @@ public partial class VrController : BasicVrDevice {
 
 	VrController relayController => inputMode.Value is InputMode.SinglePointer // in single pointer, the offhand should activate main hand buttons
 		? activeControllers.OrderBy( x => x.Hand == dominantHand.Value ? 1 : 2 ).Append( this ).First()
-		: useTouch && HoveredCollider is null // in touch modes, unfocused pointers should activate focused hand buttons
+		: (useTouch || pointer is null) && HoveredCollider is null // in touch modes, unfocused pointers should activate focused hand buttons
 		? activeControllers.Where( x => x.HoveredCollider != null ).Append( this ).First()
 		: this;
 
@@ -228,6 +228,10 @@ public partial class VrController : BasicVrDevice {
 				isTouchDown = false;
 				SendHapticVibration( 0.05, 10, 0.3 );
 				inputSource.TouchUp();
+			}
+			else if ( tapStrum.Value ) {
+				inputSource.TouchUp();
+				inputSource.TouchDown( currentPosition );
 			}
 		}
 		else if ( value ) {

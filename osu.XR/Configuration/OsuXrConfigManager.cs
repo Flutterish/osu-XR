@@ -8,8 +8,8 @@ namespace osu.XR.Configuration;
 public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 	protected override void InitialiseDefaults () {
 		SetDefault( OsuXrSetting.InputMode, InputMode.SinglePointer );
-		SetDefault( OsuXrSetting.SinglePointerTouch, false );
-		SetDefault( OsuXrSetting.TapOnPress, false );
+		SetDefault( OsuXrSetting.TouchPointers, false );
+		SetDefault( OsuXrSetting.TapStrum, false );
 		SetDefault( OsuXrSetting.Deadzone, 20, 0, 100 );
 
 		SetDefault( OsuXrSetting.ScreenArc, MathF.PI * 0.7f, MathF.PI / 18, MathF.PI * 2 );
@@ -90,7 +90,7 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 	public readonly ConfigurationPreset<OsuXrSetting> DefaultPreset = new() {
 		Name = "Default",
 		[OsuXrSetting.InputMode] = InputMode.SinglePointer,
-		[OsuXrSetting.SinglePointerTouch] = false,
+		[OsuXrSetting.TouchPointers] = false,
 		[OsuXrSetting.ScreenArc] = MathF.PI * 0.7f,
 		[OsuXrSetting.ScreenRadius] = 1.6f,
 		[OsuXrSetting.ScreenHeight] = 1.8f,
