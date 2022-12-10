@@ -40,6 +40,7 @@ public partial class VrController : BasicVrDevice {
 		} );
 	}
 
+	Bindable<bool> disableTeleport = new( false );
 	TeleportVisual teleportVisual = new();
 
 	IPointer? pointer;
@@ -116,14 +117,14 @@ public partial class VrController : BasicVrDevice {
 
 		var teleport = source.GetAction<BooleanAction>( VrAction.Teleport );
 		teleport.ValueBindable.BindValueChanged( v => {
-			teleportVisual.IsActive.Value = v.NewValue /*&& !DisableTeleportBindable.Value*/;
+			teleportVisual.IsActive.Value = v.NewValue && !disableTeleport.Value;
 			if ( !v.NewValue ) {
 				teleportPlayer();
 			}
 		} );
 
 		void teleportPlayer () {
-			if ( teleportVisual.HasHitGround /*&& !DisableTeleportBindable.Value*/ ) {
+			if ( teleportVisual.HasHitGround && !disableTeleport.Value ) {
 				var offset = teleportVisual.HitPosition - ( game.Player.Position - game.Player.PositionOffset );
 				game.Player.PositionOffset = new Vector3( offset.X, 0, offset.Z );
 			}
@@ -136,6 +137,7 @@ public partial class VrController : BasicVrDevice {
 			config.BindWith( OsuXrSetting.InputMode, inputMode );
 			config.BindWith( OsuXrSetting.SinglePointerTouch, singlePointerTouch );
 			config.BindWith( OsuXrSetting.TapOnPress, tapOnPress );
+			config.BindWith( OsuXrSetting.DisableTeleport, disableTeleport );
 		}
 
 		inputMode.BindValueChanged( _ => updatePointerType() );
