@@ -2,7 +2,6 @@
 using osu.Framework.XR.Graphics.Panels;
 using osu.Framework.XR.Graphics.Rendering;
 using osu.Framework.XR.Input;
-using osu.Framework.XR.Maths;
 using osu.Framework.XR.Physics;
 using osu.Framework.XR.VirtualReality;
 using osu.Framework.XR.VirtualReality.Devices;
@@ -147,10 +146,12 @@ public partial class VrController : BasicVrDevice {
 		dominantHand.BindValueChanged( _ => updatePointerType() );
 
 		updatePointerType();
-		leftButton.OnPressed += () => onButtonStateChanged( true, VrAction.LeftButton, isFromTouch: false );
-		leftButton.OnReleased += () => onButtonStateChanged( false, VrAction.LeftButton, isFromTouch: false );
-		rightButton.OnPressed += () => onButtonStateChanged( true, VrAction.RightButton, isFromTouch: false );
-		rightButton.OnReleased += () => onButtonStateChanged( false, VrAction.RightButton, isFromTouch: false );
+		leftButton.OnPressed += () => onButtonStateChanged( true, VrAction.LeftButton );
+		leftButton.OnRepeated += () => onButtonStateChanged( true, VrAction.LeftButton, isRepeated: true );
+		leftButton.OnReleased += () => onButtonStateChanged( false, VrAction.LeftButton );
+		rightButton.OnPressed += () => onButtonStateChanged( true, VrAction.RightButton );
+		rightButton.OnRepeated += () => onButtonStateChanged( true, VrAction.RightButton, isRepeated: true );
+		rightButton.OnReleased += () => onButtonStateChanged( false, VrAction.RightButton );
 		menuButton.OnPressed += () => ToggleMenuPressed?.Invoke( this );
 	}
 
@@ -202,7 +203,7 @@ public partial class VrController : BasicVrDevice {
 	bool isTouchDown;
 	Vector2 currentPosition;
 	MouseButton buttonFor ( VrAction action ) => action is VrAction.LeftButton ? MouseButton.Left : MouseButton.Right;
-	void onButtonStateChanged ( bool value, VrAction action, bool isFromTouch ) {
+	void onButtonStateChanged ( bool value, VrAction action, bool isFromTouch = false, bool isRepeated = false ) {
 		if ( HoveredCollider is Panel panel ) {
 			inputSource.FocusedPanel = panel;
 		}
@@ -211,7 +212,7 @@ public partial class VrController : BasicVrDevice {
 		if ( useTouch )
 			handleTouch( value, action, isFromTouch );
 		else
-			handleMouse( value, action, isFromTouch );
+			handleMouse( value, action, isRepeated );
 	}
 
 	void handleTouch ( bool value, VrAction action, bool isFromTouch ) {
@@ -236,8 +237,11 @@ public partial class VrController : BasicVrDevice {
 		}
 	}
 
-	void handleMouse ( bool value, VrAction action, bool isFromTouch ) {
+	void handleMouse ( bool value, VrAction action, bool isRepeated ) {
 		if ( value ) {
+			if ( isRepeated )
+				inputSource.Release( buttonFor( action ) );
+
 			inputSource.Press( buttonFor( action ) );
 		}
 		else {
@@ -298,6 +302,9 @@ public partial class VrController : BasicVrDevice {
 		public bool IsDown { get; private set; }
 
 		public void Actuate ( Button? who ) {
+			if ( actuated == who )
+				return;
+
 			var wasOldDown = actuated?.IsDown;
 			var wasTargetDown = who?.IsDown;
 
@@ -317,10 +324,14 @@ public partial class VrController : BasicVrDevice {
 				who.IsDown = who.inputSourceCount != 0;
 				if ( wasTargetDown == false && who.IsDown )
 					who.OnPressed?.Invoke();
+				else if ( wasTargetDown == true ) {
+					who.OnRepeated?.Invoke();
+				}
 			}
 		}
 
 		public event Action? OnPressed;
+		public event Action? OnRepeated;
 		public event Action? OnReleased;
 	}
 
