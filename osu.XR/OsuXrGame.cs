@@ -27,6 +27,9 @@ public partial class OsuXrGame : OsuXrGameBase {
 	OsuXrScene scene;
 	OsuGamePanel osuPanel;
 
+	[Cached]
+	public readonly OsuXrPlayer Player;
+
 	public OsuXrGame ( bool useSimulatedVR = false ) : base( useSimulatedVR ) { // TODO I dont really like the 'useSimulatedVR' - can't we extract it up?
 		scene = new() {
 			RelativeSizeAxes = Axes.Both
@@ -46,7 +49,7 @@ public partial class OsuXrGame : OsuXrGameBase {
 		Add( new BasicPanelInteractionSource( scene, physics, panelInteraction ) { RelativeSizeAxes = Axes.Both } );
 
 		scene.Add( new UserTrackingDrawable3D { Child = new HandheldMenu(), Y = 1 } );
-		scene.Add( new OsuXrPlayer() );
+		scene.Add( Player = new OsuXrPlayer() );
 
 		Compositor.Input.SetActionManifest( new OsuXrActionManifest() );
 		Compositor.BindDeviceDetected( addVrDevice );

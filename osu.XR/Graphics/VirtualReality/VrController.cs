@@ -2,10 +2,12 @@
 using osu.Framework.XR.Graphics.Panels;
 using osu.Framework.XR.Graphics.Rendering;
 using osu.Framework.XR.Input;
+using osu.Framework.XR.Maths;
 using osu.Framework.XR.Physics;
 using osu.Framework.XR.VirtualReality;
 using osu.Framework.XR.VirtualReality.Devices;
 using osu.XR.Configuration;
+using osu.XR.Graphics.Player;
 using osuTK.Input;
 
 namespace osu.XR.Graphics.VirtualReality;
@@ -21,6 +23,8 @@ public partial class VrController : BasicVrDevice {
 		this.scene = scene;
 		this.source = source;
 
+		AddInternal( teleportVisual );
+
 		source.IsEnabled.BindValueChanged( v => {
 			updatePointerType();
 
@@ -35,6 +39,8 @@ public partial class VrController : BasicVrDevice {
 			updatePointerType();
 		} );
 	}
+
+	TeleportVisual teleportVisual = new();
 
 	IPointer? pointer;
 	RayPointer rayPointer = new();
@@ -106,6 +112,21 @@ public partial class VrController : BasicVrDevice {
 			button.ValueBindable.BindValueChanged( v => {
 				onInputSourceValueChanged( action, v.NewValue );
 			} );
+		}
+
+		var teleport = source.GetAction<BooleanAction>( VrAction.Teleport );
+		teleport.ValueBindable.BindValueChanged( v => {
+			teleportVisual.IsActive.Value = v.NewValue /*&& !DisableTeleportBindable.Value*/;
+			if ( !v.NewValue ) {
+				teleportPlayer();
+			}
+		} );
+
+		void teleportPlayer () {
+			if ( teleportVisual.HasHitGround /*&& !DisableTeleportBindable.Value*/ ) {
+				var offset = teleportVisual.HitPosition - ( game.Player.Position - game.Player.PositionOffset );
+				game.Player.PositionOffset = new Vector3( offset.X, 0, offset.Z );
+			}
 		}
 
 		scroll = source.GetAction<Vector2Action>( VrAction.Scoll );
@@ -228,16 +249,19 @@ public partial class VrController : BasicVrDevice {
 		updateTouchSetting();
 		onScroll( scroll.Value * (float)Time.Elapsed / 1000 * 30 );
 
-		if ( pointer is null )
-			return;
-
 		Vector3 pos = Position;
 		Quaternion rot = Rotation;
-		if ( aim?.FetchDataForNextFrame() is OpenVR.NET.Input.PoseInput pose ) {
-			pos = pose.Position.ToOsuTk();
-			rot = pose.Rotation.ToOsuTk();
+		if ( aim?.FetchDataForNextFrame() is PoseInput pose ) {
+			pos = pose.Position;
+			rot = pose.Rotation;
 		}
 		// TODO report if theres no aim data
+
+		teleportVisual.OriginBindable.Value = pos;
+		teleportVisual.DirectionBindable.Value = rot.Apply( Vector3.UnitZ ) * 5;
+
+		if ( pointer is null )
+			return;
 
 		var maybeHit = pointer.UpdatePointer( pos, rot );
 
