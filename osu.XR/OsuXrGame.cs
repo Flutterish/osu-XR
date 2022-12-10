@@ -7,6 +7,7 @@ using osu.Framework.XR.VirtualReality.Devices;
 using osu.XR.Graphics;
 using osu.XR.Graphics.Panels;
 using osu.XR.Graphics.Panels.Menu;
+using osu.XR.Graphics.Player;
 using osu.XR.Graphics.Sceneries;
 using osu.XR.Graphics.VirtualReality;
 using osu.XR.VirtualReality;
@@ -45,7 +46,7 @@ public partial class OsuXrGame : OsuXrGameBase {
 		Add( new BasicPanelInteractionSource( scene, physics, panelInteraction ) { RelativeSizeAxes = Axes.Both } );
 
 		scene.Add( new UserTrackingDrawable3D { Child = new HandheldMenu(), Y = 1 } );
-		scene.Add( new VrPlayer() );
+		scene.Add( new OsuXrPlayer() );
 
 		Compositor.Input.SetActionManifest( new OsuXrActionManifest() );
 		Compositor.BindDeviceDetected( addVrDevice );

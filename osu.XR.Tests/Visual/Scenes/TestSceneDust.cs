@@ -1,10 +1,4 @@
-﻿using osu.XR.Graphics.Sceneries;
-using osu.XR.Graphics.Sceneries.Components;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using osu.XR.Graphics.Sceneries.Components;
 
 namespace osu.XR.Tests.Visual.Scenes;
 
