@@ -73,7 +73,6 @@ public partial class OsuXrScene : Scene {
 				MaterialStore.SetGlobalProperty( "solidPass", false );
 				renderer.PushDepthInfo( new( depthTest: true, writeDepth: false ) );
 				foreach ( var i in drawables ) { // TODO sort them
-					renderer.SetBlend( BlendingParameters.Mixture );
 					i.GetDrawNodeAtSubtree( subtreeIndex )?.Draw( renderer );
 				}
 				renderer.PopDepthInfo();
