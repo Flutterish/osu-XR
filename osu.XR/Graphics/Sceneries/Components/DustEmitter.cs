@@ -10,7 +10,7 @@ using osuTK.Graphics;
 
 namespace osu.XR.Graphics.Sceneries.Components;
 
-public partial class DustEmitter : SpriteParticleEmitter<DustParticle2> {
+public partial class DustEmitter : SpriteParticleEmitter<DustParticle> {
 	// TODO track player
 	//[Resolved]
 	//VrPlayer player { get; set; }
@@ -19,8 +19,8 @@ public partial class DustEmitter : SpriteParticleEmitter<DustParticle2> {
 		RenderStage = RenderingStage.Transparent;
 	}
 
-	protected override DustParticle2 CreateParticle () {
-		return new DustParticle2 {
+	protected override DustParticle CreateParticle () {
+		return new DustParticle {
 			TotalLifetime = 1200,
 			InitialPosition = new Vector3( MathF.CopySign( RNG.NextSingle( 0.5f, 5 ), RNG.NextSingle( -1, 1 ) ), RNG.NextSingle( 0, 6 ), MathF.CopySign( RNG.NextSingle( 0.5f, 5 ), RNG.NextSingle( -1, 1 ) ) ) /*+ player.GlobalPosition.With( y: 0 )*/,
 			Velocity = new Vector3( RNG.NextSingle( -1, 1 ), RNG.NextSingle( -1, 1 ), RNG.NextSingle( -1, 1 ) ) * 0.1f / 1200
@@ -52,7 +52,7 @@ public partial class DustEmitter : SpriteParticleEmitter<DustParticle2> {
 		Material.SetTexture( "tex", textures.Get( "dust" ) );
 	}
 
-	protected override bool UpdateParticle ( ref DustParticle2 particle, float deltaTime ) {
+	protected override bool UpdateParticle ( ref DustParticle particle, float deltaTime ) {
 		particle.Lifetime += deltaTime;
 		return particle.Lifetime < particle.TotalLifetime;
 	}
@@ -61,11 +61,11 @@ public partial class DustEmitter : SpriteParticleEmitter<DustParticle2> {
 		return materials.GetNew( Materials.MaterialNames.Transparent );
 	}
 
-	protected override SpriteParticleEmitter<DustParticle2>.DrawNode CreateDrawNode3D ( int subtreeIndex )
+	protected override SpriteParticleEmitter<DustParticle>.DrawNode CreateDrawNode3D ( int subtreeIndex )
 		=> new DrawNode( this, subtreeIndex );
 
-	new class DrawNode : SpriteParticleEmitter<DustParticle2>.DrawNode {
-		public DrawNode ( BatchedParticleEmitter<DustParticle2, BasicMesh> source, int index ) : base( source, index ) { }
+	new class DrawNode : SpriteParticleEmitter<DustParticle>.DrawNode {
+		public DrawNode ( BatchedParticleEmitter<DustParticle, BasicMesh> source, int index ) : base( source, index ) { }
 
 		Framework.XR.Graphics.Shaders.IUniform<Color4> tint = null!;
 		Color4 tintValue;
@@ -75,7 +75,7 @@ public partial class DustEmitter : SpriteParticleEmitter<DustParticle2> {
 			base.Draw( renderer, ctx );
 		}
 
-		protected override void Draw ( in DustParticle2 particle, IRenderer renderer, object? ctx = null ) {
+		protected override void Draw ( in DustParticle particle, IRenderer renderer, object? ctx = null ) {
 			tintValue.A = particle.Alpha;
 			tint.UpdateValue( ref tintValue );
 			base.Draw( particle, renderer, ctx );
@@ -83,7 +83,7 @@ public partial class DustEmitter : SpriteParticleEmitter<DustParticle2> {
 	}
 }
 
-public struct DustParticle2 : IHasMatrix {
+public struct DustParticle : IHasMatrix {
 	float fadeInDuration => TotalLifetime / 3;
 	public float Alpha => Lifetime < fadeInDuration
 		? Interpolation.ValueAt( Lifetime, 0f, 1f, 0, fadeInDuration, Easing.Out )

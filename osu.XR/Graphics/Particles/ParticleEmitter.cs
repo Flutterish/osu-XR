@@ -11,7 +11,7 @@ public abstract partial class ParticleEmitter<T> : ParticleEmitter where T : Par
 /// <summary>
 /// A primitive particle emmiter that uses sprite particles.
 /// </summary>
-public abstract partial class ParticleEmitter : CompositeDrawable3D { // TODO batched particle emiter
+public abstract partial class ParticleEmitter : CompositeDrawable3D {
 	readonly List<Particle> particlePool = new();
 
 	public int ActiveParticles { get; private set; } = 0;
