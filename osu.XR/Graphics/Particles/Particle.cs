@@ -28,6 +28,7 @@ abstract partial class ParticleEmitter {
 		public Particle () {
 			Mesh = quadMesh;
 			Scale = new Vector3( 0.03f );
+			RenderStage = RenderingStage.Transparent;
 		}
 
 		public void Apply ( ParticleEmitter emiter ) {
