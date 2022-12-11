@@ -5,7 +5,7 @@ using osu.Framework.Localisation;
 
 namespace osu.XR.Localisation.Config.Graphics {
 	public static class ScreenStrings {
-		private const string PREFIX = "osu.XR.Localisation.Config.Graphics.Screen.Strings";
+		private const string PREFIX = "osu.XR.Localisation.Resx.Config.Graphics.Screen.Strings";
 		private static string getKey( string key ) => $"{PREFIX}:{key}";
 
 		/// <summary>

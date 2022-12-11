@@ -5,7 +5,7 @@ using osu.Framework.Localisation;
 
 namespace osu.XR.Localisation.Config.Graphics {
 	public static class ShadowStrings {
-		private const string PREFIX = "osu.XR.Localisation.Config.Graphics.Shadow.Strings";
+		private const string PREFIX = "osu.XR.Localisation.Resx.Config.Graphics.Shadow.Strings";
 		private static string getKey( string key ) => $"{PREFIX}:{key}";
 
 		/// <summary>

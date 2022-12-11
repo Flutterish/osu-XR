@@ -5,7 +5,7 @@ using osu.Framework.Localisation;
 
 namespace osu.XR.Localisation.Config.Input {
 	public static class DisableTeleportingStrings {
-		private const string PREFIX = "osu.XR.Localisation.Config.Input.DisableTeleporting.Strings";
+		private const string PREFIX = "osu.XR.Localisation.Resx.Config.Input.DisableTeleporting.Strings";
 		private static string getKey( string key ) => $"{PREFIX}:{key}";
 
 		/// <summary>

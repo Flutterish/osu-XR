@@ -5,7 +5,7 @@ using osu.Framework.Localisation;
 
 namespace osu.XR.Localisation.Config {
 	public static class InputStrings {
-		private const string PREFIX = "osu.XR.Localisation.Config.Input.Strings";
+		private const string PREFIX = "osu.XR.Localisation.Resx.Config.Input.Strings";
 		private static string getKey( string key ) => $"{PREFIX}:{key}";
 
 		/// <summary>

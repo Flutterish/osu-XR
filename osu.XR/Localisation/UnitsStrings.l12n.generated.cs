@@ -5,7 +5,7 @@ using osu.Framework.Localisation;
 
 namespace osu.XR.Localisation {
 	public static class UnitsStrings {
-		private const string PREFIX = "osu.XR.Localisation.Units.Strings";
+		private const string PREFIX = "osu.XR.Localisation.Resx.Units.Strings";
 		private static string getKey( string key ) => $"{PREFIX}:{key}";
 
 		/// <summary>
