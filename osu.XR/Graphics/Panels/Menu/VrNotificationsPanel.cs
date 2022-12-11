@@ -1,9 +1,13 @@
 ﻿using osu.Framework.Audio;
+using osu.Framework.Extensions.TypeExtensions;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Logging;
+using osu.Framework.XR.VirtualReality;
 using osu.Game.Graphics.Containers;
 using osu.Game.Overlays.Notifications;
 using osu.Game.Overlays.Settings;
 using osu.Game.Resources.Localisation.Web;
+using System.Runtime.InteropServices;
 
 namespace osu.XR.Graphics.Panels.Menu;
 
@@ -57,8 +61,36 @@ public partial class VrNotificationsPanel : MenuPanel {
 	} );
 
 	[Resolved]
-	private AudioManager audio { get; set; } = null!;
-	private void playSample ( string sampleName ) {
+	AudioManager audio { get; set; } = null!;
+	void playSample ( string sampleName ) {
 		audio.Samples.Get( sampleName )?.Play();
+	}
+
+	[BackgroundDependencyLoader(permitNulls: true)]
+	private void load ( VrCompositor? comp ) {
+		if ( comp is null )
+			return;
+
+		comp.Initialized += comp => {
+			var vr = comp.VR!;
+			vr.Events.OnOpenVrEvent += onOpenVrEvent;
+			vr.Events.OnLog += onLog;
+			vr.Events.OnException += onException;
+		};
+	}
+
+	void onException ( string msg, OpenVR.NET.EventType type, object? ctx, Exception ex ) {
+		Post( new SimpleErrorNotification() { Text = $"Exception ~ {type} - {msg}" } );
+		Logger.Error( ex, $"{type} - {msg}", "openvr-net", true );
+	}
+
+	void onLog ( string msg, OpenVR.NET.EventType type, object? ctx ) {
+		Post( new SimpleNotification() { Text = $"OpenVR.NET ~ {type} - {msg}" } );
+		Logger.Log( $"{type} - {msg}", "openvr-net", LogLevel.Important );
+	}
+
+	void onOpenVrEvent ( Valve.VR.EVREventType type, OpenVR.NET.Devices.VrDevice? device, float age, in Valve.VR.VREvent_Data_t data ) {
+		var bytes = MemoryMarshal.AsBytes(stackalloc Valve.VR.VREvent_Data_t[1] { data });
+		Logger.Log( $"Type: {type} - Device: {(device is null ? "None" : $"{device.GetType().ReadableName()} : {device.DeviceIndex}")} - {Convert.ToHexString(bytes)}", "openvr", LogLevel.Debug );
 	}
 }
