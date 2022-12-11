@@ -28,9 +28,9 @@ public partial class HandheldMenu : CompositeDrawable3D {
 		presets.X = -(MenuPanel.PANEL_WIDTH / 2 + 0.01f);
 		presets.EulerY = -0.5f;
 
-		Sidebar.AddButton( FontAwesome.Solid.Cog, "Settings", () => Panels.FocusPanel( Settings ) );
-		Sidebar.AddButton( FontAwesome.Solid.ExclamationCircle, "Notifications", () => Panels.FocusPanel( Notifications ) );
-		Sidebar.AddButton( FontAwesome.Solid.Image, "Scenery", () => Panels.FocusPanel( Scenery ) );
+		Sidebar.AddButton( FontAwesome.Solid.Cog, Localisation.MenuStrings.Settings, () => Panels.FocusPanel( Settings ) );
+		Sidebar.AddButton( FontAwesome.Solid.ExclamationCircle, Localisation.MenuStrings.Notifications, () => Panels.FocusPanel( Notifications ) );
+		Sidebar.AddButton( FontAwesome.Solid.Image, Localisation.MenuStrings.Scenery, () => Panels.FocusPanel( Scenery ) );
 
 		VisibilityChanged += onVisibilityChanged;
 	}

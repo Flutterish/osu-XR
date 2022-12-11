@@ -88,7 +88,7 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 	}
 
 	public readonly ConfigurationPreset<OsuXrSetting> DefaultPreset = new() {
-		Name = "Default",
+		Name = @"Default",
 		[OsuXrSetting.InputMode] = InputMode.SinglePointer,
 		[OsuXrSetting.TouchPointers] = false,
 		[OsuXrSetting.ScreenArc] = MathF.PI * 0.7f,
@@ -99,7 +99,7 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 	};
 
 	public readonly ConfigurationPreset<OsuXrSetting> PresetTouchscreenBig = new() {
-		Name = "Touchscreen Big",
+		Name = @"Touchscreen Big",
 		[OsuXrSetting.InputMode] = InputMode.TouchScreen,
 		[OsuXrSetting.ScreenArc] = 1.2f,
 		[OsuXrSetting.ScreenRadius] = 1.01f,
@@ -109,7 +109,7 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 	};
 
 	public readonly ConfigurationPreset<OsuXrSetting> PresetTouchscreenSmall = new() {
-		Name = "Touchscreen Small",
+		Name = @"Touchscreen Small",
 		[OsuXrSetting.InputMode] = InputMode.TouchScreen,
 		[OsuXrSetting.ScreenArc] = 1.2f,
 		[OsuXrSetting.ScreenRadius] = 0.69f,

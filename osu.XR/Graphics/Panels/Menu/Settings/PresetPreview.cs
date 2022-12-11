@@ -32,7 +32,7 @@ public partial class PresetPreview : SettingsPanel.SectionsContainer {
 	}
 
 	protected override Drawable CreateHeader ()
-		=> new SettingsHeader( "Preset Preview", "" );
+		=> new SettingsHeader( Localisation.Config.Presets.PreviewStrings.Header, "" );
 
 	partial class PresetSettingsSection : SettingsSection {
 		[Resolved]
@@ -41,7 +41,7 @@ public partial class PresetPreview : SettingsPanel.SectionsContainer {
 		public override Drawable CreateIcon ()
 			=> new SpriteIcon { Icon = FontAwesome.Solid.Cog };
 
-		public override LocalisableString Header => "Preset settings";
+		public override LocalisableString Header => Localisation.Config.Presets.PreviewStrings.Settings;
 
 		Bindable<ConfigurationPreset<OsuXrSetting>?> presetBindable = new();
 		readonly BindableWithCurrent<bool> isEditingBindable = new();
@@ -61,35 +61,35 @@ public partial class PresetPreview : SettingsPanel.SectionsContainer {
 					return;
 
 				Add( new SettingsTextBox {
-					LabelText = "Title",
+					LabelText = Localisation.Config.Presets.PreviewStrings.PresetName,
 					Current = preset.NameBindable
 				} );
 				Add( new SettingsButton {
-					Text = "Toggle adding/removing items",
+					Text = Localisation.Config.Presets.PreviewStrings.ToggleItems,
 					Action = () => {
 						isEditingBindable.Value = !isEditingBindable.Value;
 					}
 				} );
 				Add( new SettingsButton {
-					Text = "Save",
+					Text = Localisation.Config.Presets.PreviewStrings.Save,
 					Action = preset.SaveDefaults
 				} );
 				Add( new SettingsButton {
-					Text = "Clone",
+					Text = Localisation.Config.Presets.PreviewStrings.Clone,
 					Action = () => {
 						var clone = preset.Clone();
-						clone.Name = $"{preset.Name} (Copy)";
+						clone.Name = $@"{preset.Name} (Copy)"; // TODO this from localisable string
 						presetContainer.Presets.Add( clone );
 						presetContainer.IsEditingBindable.Value = false;
 						presetContainer.SelectedPresetBindable.Value = clone;
 					}
 				} );
 				Add( new SettingsButton {
-					Text = "Revert defauls",
+					Text = Localisation.Config.Presets.PreviewStrings.Revert,
 					Action = preset.RevertToDefault
 				} );
 				Add( new DangerousSettingsButton {
-					Text = "Delete",
+					Text = Localisation.Config.Presets.PreviewStrings.Delete,
 					Action = () => {
 						presetContainer.Presets.Remove( preset );
 						presetBindable.Value = null;

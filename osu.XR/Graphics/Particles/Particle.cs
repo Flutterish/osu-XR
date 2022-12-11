@@ -31,7 +31,7 @@ abstract partial class ParticleEmitter {
 		}
 
 		public void Apply ( ParticleEmitter emiter ) {
-			if ( IsApplied ) throw new InvalidOperationException( "Cannot apply an already applied praticle" );
+			if ( IsApplied ) throw new InvalidOperationException( "Cannot apply an already applied particle" );
 
 			IsApplied = true;
 			OnApply( this.emiter = emiter );
@@ -39,7 +39,7 @@ abstract partial class ParticleEmitter {
 		protected virtual void OnApply ( ParticleEmitter emmiter ) { }
 
 		public void Release () {
-			if ( !IsApplied ) throw new InvalidOperationException( "Cannot release a non-applied praticle" );
+			if ( !IsApplied ) throw new InvalidOperationException( "Cannot release a non-applied particle" );
 
 			IsApplied = false;
 			OnReleased();

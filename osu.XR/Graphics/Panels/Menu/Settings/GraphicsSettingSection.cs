@@ -7,7 +7,7 @@ using osu.XR.Graphics.Settings;
 namespace osu.XR.Graphics.Panels.Settings;
 
 public partial class GraphicsSettingSection : SettingsSection {
-	public override LocalisableString Header => "Graphics";
+	public override LocalisableString Header => Localisation.Config.GraphicsStrings.Header;
 	public override Drawable CreateIcon () => new SpriteIcon {
 		Icon = FontAwesome.Solid.Laptop
 	};
@@ -16,24 +16,24 @@ public partial class GraphicsSettingSection : SettingsSection {
 	private void load ( OsuXrConfigManager config ) {
 		Children = new Drawable[] {
 			new SettingsSlider<float,RadToDegreeSliderBar> {
-				LabelText = "Screen arc"
+				LabelText = Localisation.Config.Graphics.ScreenStrings.Arc
 			}.PresetComponent( config, OsuXrSetting.ScreenArc ),
 			new SettingsSlider<float,MetersSliderBar> { 
-				LabelText = "Screen radius"
+				LabelText = Localisation.Config.Graphics.ScreenStrings.Radius
 			}.PresetComponent( config, OsuXrSetting.ScreenRadius ),
 			new SettingsSlider<float,MetersSliderBar> { 
-				LabelText = "Screen height"
+				LabelText = Localisation.Config.Graphics.ScreenStrings.Height
 			}.PresetComponent( config, OsuXrSetting.ScreenHeight ),
 
 			new SettingsSlider<int,PxSliderBar> { 
-				LabelText = "Screen resolution X"
+				LabelText = Localisation.Config.Graphics.ScreenStrings.ResolutionX
 			}.PresetComponent( config, OsuXrSetting.ScreenResolutionX ),
 			new SettingsSlider<int,PxSliderBar> {
-				LabelText = "Screen resolution Y"
+				LabelText = Localisation.Config.Graphics.ScreenStrings.ResolutionY
 			}.PresetComponent( config, OsuXrSetting.ScreenResolutionY ),
 
 			new SettingsEnumDropdown<FeetSymbols> { 
-				LabelText = "Shadow type"
+				LabelText = Localisation.Config.Graphics.ShadowStrings.Label
 			}.PresetComponent( config, OsuXrSetting.ShadowType )
 		};
 		// TODO computer interaction - render to screen, either vr view or custom camera

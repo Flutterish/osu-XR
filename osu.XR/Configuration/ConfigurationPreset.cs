@@ -4,7 +4,7 @@ namespace osu.XR.Configuration;
 
 public class ConfigurationPreset<Tlookup> : InMemoryConfigManager<Tlookup> where Tlookup : struct, Enum {
 	public readonly Bindable<string> NameBindable = new( string.Empty );
-	public string Name {
+	public string Name { // TODO figure out a way to integrate localisable and user-provided strings here
 		get => NameBindable.Value;
 		set {
 			NameBindable.Default = value;

@@ -1,11 +1,12 @@
-﻿using System.ComponentModel;
+﻿using osu.Framework.Localisation;
+using osu.XR.Localisation.Scenery;
 
 namespace osu.XR.Configuration;
 
 public enum SceneryType {
-	[Description( "Solid" )]
+	[LocalisableDescription(typeof(TypesStrings), nameof(TypesStrings.Solid))]
 	Solid,
 
-	[Description( "Lights Out" )]
+	[LocalisableDescription(typeof(TypesStrings), nameof(TypesStrings.LightsOut))]
 	LightsOut
 }

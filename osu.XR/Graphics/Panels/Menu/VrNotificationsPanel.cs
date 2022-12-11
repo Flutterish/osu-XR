@@ -28,14 +28,14 @@ public partial class VrNotificationsPanel : MenuPanel {
 					AutoSizeAxes = Axes.Y,
 					RelativeSizeAxes = Axes.X,
 					Children = new Drawable[] {
-						new SettingsHeader( "Vr Notifications", "" ),
+						new SettingsHeader( Localisation.NotificationsStrings.Header, "" ),
 						sections = new FillFlowContainer<NotificationSection> {
 							Direction = FillDirection.Vertical,
 							AutoSizeAxes = Axes.Y,
 							RelativeSizeAxes = Axes.X,
 							Children = new[] {
-								new NotificationSection(AccountsStrings.NotificationsTitle, new[] { typeof(SimpleNotification) }, "Clear All"),
-								new NotificationSection(@"Running Tasks", new[] { typeof(ProgressNotification) }, @"Cancel All"),
+								new NotificationSection(Localisation.NotificationsStrings.Notifications, new[] { typeof(SimpleNotification) }, @"Clear All"), // TODO wait for osu to implement
+								new NotificationSection(Localisation.NotificationsStrings.Tasks, new[] { typeof(ProgressNotification) }, @"Cancel All"), // TODO wait for osu to implement
 							}
 						}
 					}

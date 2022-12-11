@@ -1,14 +1,15 @@
-﻿using System.ComponentModel;
+﻿using osu.Framework.Localisation;
+using osu.XR.Localisation.Config.Input;
 
 namespace osu.XR.Configuration;
 
 public enum InputMode {
-	[Description( "Single Pointer" )]
+	[LocalisableDescription(typeof(ModeStrings), nameof(ModeStrings.Single))]
 	SinglePointer,
 
-	[Description( "Two Pointers" )]
+	[LocalisableDescription(typeof(ModeStrings), nameof(ModeStrings.Double))]
 	DoublePointer,
 
-	[Description( "Touchscreen" )]
+	[LocalisableDescription(typeof(ModeStrings), nameof(ModeStrings.Touch))]
 	TouchScreen
 }

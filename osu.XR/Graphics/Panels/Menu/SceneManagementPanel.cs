@@ -14,7 +14,7 @@ public partial class SceneManagementPanel : SettingsPanel {
 		public Sections ( bool showSidebar ) : base( showSidebar ) { }
 
 		protected override Drawable CreateHeader ()
-			=> new SettingsHeader( "Scene Manager", "change up the scenery" );
+			=> new SettingsHeader( Localisation.SceneryStrings.Header, Localisation.SceneryStrings.Flavour );
 
 		protected override IEnumerable<SettingsSection> CreateSections () {
 			yield return new Section();
@@ -31,10 +31,13 @@ public partial class SceneManagementPanel : SettingsPanel {
 
 			[BackgroundDependencyLoader]
 			private void load ( OsuXrConfigManager config ) {
-				Add( new SettingsEnumDropdown<SceneryType> { Current = config.GetBindable<SceneryType>( OsuXrSetting.SceneryType ), LabelText = "Scenery type" } );
+				Add( new SettingsEnumDropdown<SceneryType> { 
+					Current = config.GetBindable<SceneryType>( OsuXrSetting.SceneryType ), 
+					LabelText = Localisation.SceneryStrings.Type 
+				} );
 			}
 
-			public override LocalisableString Header => "";
+			public override LocalisableString Header => string.Empty;
 		}
 	}
 }

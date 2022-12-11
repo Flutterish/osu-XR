@@ -59,6 +59,6 @@ public partial class VrSettingsPanel : SettingsPanel {
 		}
 
 		protected override Drawable CreateHeader ()
-			=> new SettingsHeader( "VR Settings", "change the way osu!XR behaves" );
+			=> new SettingsHeader( Localisation.ConfigStrings.Header, Localisation.ConfigStrings.Flavour );
 	}
 }

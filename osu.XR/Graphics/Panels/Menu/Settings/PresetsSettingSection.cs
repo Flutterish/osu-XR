@@ -8,7 +8,7 @@ using osu.XR.Graphics.Settings;
 namespace osu.XR.Graphics.Panels.Settings;
 
 public partial class PresetsSettingSection : SettingsSection {
-	public override LocalisableString Header => "Presets";
+	public override LocalisableString Header => Localisation.Config.PresetsStrings.Header;
 	public override Drawable CreateIcon () => new SpriteIcon {
 		Icon = FontAwesome.Solid.BoxOpen
 	};
@@ -21,7 +21,7 @@ public partial class PresetsSettingSection : SettingsSection {
 	}
 
 	public partial class ListSubsection : SettingsSubsection {
-		protected override LocalisableString Header => "Load";
+		protected override LocalisableString Header => Localisation.Config.PresetsStrings.LoadHeader;
 
 		[Resolved]
 		SettingPresetContainer<OsuXrSetting> presetContainer { get; set; } = null!;
@@ -123,7 +123,7 @@ public partial class PresetsSettingSection : SettingsSection {
 	}
 
 	public partial class ManagementSubsection : SettingsSubsection {
-		protected override LocalisableString Header => "Manage";
+		protected override LocalisableString Header => Localisation.Config.PresetsStrings.ManageHeader;
 
 		[Resolved]
 		SettingPresetContainer<OsuXrSetting> presetContainer { get; set; } = null!;
@@ -132,11 +132,11 @@ public partial class PresetsSettingSection : SettingsSection {
 		private void load ( OsuXrConfigManager config ) {
 			SettingsButton createButton;
 			Add( createButton = new SettingsButton {
-				Text = "Create new preset",
-				TooltipText = "Creates a new preset with current settings",
+				Text = Localisation.Config.Presets.ManageStrings.New,
+				TooltipText = Localisation.Config.Presets.ManageStrings.NewTooltip,
 				Action = () => {
 					var preset = config.CreateFullPreset();
-					preset.Name = "New Preset";
+					preset.Name = @"New Preset"; // TODO this from localisation
 					presetContainer.Presets.Add( preset );
 					presetContainer.IsEditingBindable.Value = false;
 					presetContainer.SelectedPresetBindable.Value = preset;

@@ -7,37 +7,36 @@ using osu.XR.Graphics.Settings;
 namespace osu.XR.Graphics.Panels.Settings;
 
 public partial class InputSettingSection : SettingsSection {
-	public override LocalisableString Header => "Input";
+	public override LocalisableString Header => Localisation.Config.InputStrings.Header;
 	public override Drawable CreateIcon () => new SpriteIcon {
 		Icon = FontAwesome.Solid.Keyboard
 	};
 
 	[BackgroundDependencyLoader]
 	private void load ( OsuXrConfigManager config ) {
-		SettingsEnumDropdown<InputMode> inputMode;
-
 		Children = new Drawable[] {
-			(inputMode = new SettingsEnumDropdown<InputMode> { 
-				LabelText = "Input mode", 
-				TooltipText = "How your controllers interact with the panels" 
-			}).PresetComponent( config, OsuXrSetting.InputMode ),
+			new SettingsEnumDropdown<InputMode> { 
+				LabelText = Localisation.Config.Input.ModeStrings.Label, 
+				TooltipText = Localisation.Config.Input.ModeStrings.Tooltip
+			}.PresetComponent( config, OsuXrSetting.InputMode ),
 			new SettingsCheckbox {
-				LabelText = "[Pointer] Emulate touch",
-				TooltipText = "Emulate touch instead of mouse"
+				LabelText = Localisation.Config.Input.PointerTouchStrings.Label,
+				TooltipText = Localisation.Config.Input.PointerTouchStrings.Tooltip
 			}.PresetComponent( config, OsuXrSetting.TouchPointers ),
 			new SettingsCheckbox {
-				LabelText = "[Touch] Allow strumming",
-				TooltipText = "Tap an additional time when releasing a button"
+				LabelText = Localisation.Config.Input.TapStrumStrings.Label,
+				TooltipText = Localisation.Config.Input.TapStrumStrings.Tooltip
 			}.PresetComponent( config, OsuXrSetting.TapStrum ),
 			new SettingsSlider<int, PxSliderBar> { 
-				LabelText = "Touch deadzone", 
-				TooltipText = "Deadzone after interacting with a panel"
+				LabelText = Localisation.Config.Input.TouchDeadzoneStrings.Label, 
+				TooltipText = Localisation.Config.Input.TouchDeadzoneStrings.Tooltip
 			}.PresetComponent( config, OsuXrSetting.Deadzone ),
 			new SettingsEnumDropdown<HandSetting> { 
-				LabelText = "Dominant hand"
+				LabelText = Localisation.Config.Input.MainHandStrings.Label
 			}.PresetComponent( config, OsuXrSetting.DominantHand ),
 			new SettingsCheckbox { 
-				LabelText = "Disable teleporting"
+				LabelText = Localisation.Config.Input.DisableTeleportingStrings.Label,
+				TooltipText = Localisation.Config.Input.DisableTeleportingStrings.Tooltip
 			}.PresetComponent( config, OsuXrSetting.DisableTeleport ),
 		};
 	}

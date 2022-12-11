@@ -4,17 +4,17 @@ using osu.Game.Graphics.UserInterface;
 namespace osu.XR.Graphics.Settings;
 
 public partial class PxSliderBar : OsuSliderBar<int> {
-	public override LocalisableString TooltipText => $"{Current.Value}px";
+	public override LocalisableString TooltipText => Localisation.UnitsStrings.Pixel(Current.Value);
 }
 
 public partial class RadToDegreeSliderBar : OsuSliderBar<float> {
-	public override LocalisableString TooltipText => $"{Current.Value / Math.PI * 180:N0}°";
+	public override LocalisableString TooltipText => Localisation.UnitsStrings.Degrees(Current.Value / Math.PI * 180);
 }
 
 public partial class MetersSliderBar : OsuSliderBar<float> {
-	public override LocalisableString TooltipText => $"{Current.Value:N2}m";
+	public override LocalisableString TooltipText => Localisation.UnitsStrings.Meters(Current.Value);
 }
 
 public partial class PercentSliderBar : OsuSliderBar<float> {
-	public override LocalisableString TooltipText => $"{Current.Value:0%}";
+	public override LocalisableString TooltipText => Localisation.UnitsStrings.Percent(Current.Value);
 }
