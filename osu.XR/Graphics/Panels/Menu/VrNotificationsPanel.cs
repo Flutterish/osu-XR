@@ -6,7 +6,6 @@ using osu.Framework.XR.VirtualReality;
 using osu.Game.Graphics.Containers;
 using osu.Game.Overlays.Notifications;
 using osu.Game.Overlays.Settings;
-using osu.Game.Resources.Localisation.Web;
 using System.Runtime.InteropServices;
 
 namespace osu.XR.Graphics.Panels.Menu;
