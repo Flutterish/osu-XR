@@ -4,15 +4,16 @@ using osu.Framework.Utils;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Graphics.Materials;
 using osu.Framework.XR.Graphics.Particles;
+using osu.Framework.XR.VirtualReality;
 using osu.XR.Configuration;
 using osuTK.Graphics;
 
 namespace osu.XR.Graphics.Sceneries.Components;
 
 public partial class DustEmitter : SpriteParticleEmitter<DustParticle> {
-	// TODO track player
-	//[Resolved]
-	//VrPlayer player { get; set; }
+	[Resolved(canBeNull: true)]
+	VrPlayer? player { get; set; }
+	Vector3 playerPosition;
 
 	public DustEmitter () {
 		RenderStage = RenderingStage.Transparent;
@@ -21,7 +22,7 @@ public partial class DustEmitter : SpriteParticleEmitter<DustParticle> {
 	protected override DustParticle CreateParticle () {
 		return new DustParticle {
 			TotalLifetime = 1200,
-			InitialPosition = new Vector3( MathF.CopySign( RNG.NextSingle( 0.5f, 5 ), RNG.NextSingle( -1, 1 ) ), RNG.NextSingle( 0, 6 ), MathF.CopySign( RNG.NextSingle( 0.5f, 5 ), RNG.NextSingle( -1, 1 ) ) ) /*+ player.GlobalPosition.With( y: 0 )*/,
+			InitialPosition = new Vector3( MathF.CopySign( RNG.NextSingle( 0.5f, 5 ), RNG.NextSingle( -1, 1 ) ), RNG.NextSingle( 0, 6 ), MathF.CopySign( RNG.NextSingle( 0.5f, 5 ), RNG.NextSingle( -1, 1 ) ) ) + playerPosition,
 			Velocity = new Vector3( RNG.NextSingle( -1, 1 ), RNG.NextSingle( -1, 1 ), RNG.NextSingle( -1, 1 ) ) * 0.1f / 1200
 		};
 	}
@@ -30,6 +31,7 @@ public partial class DustEmitter : SpriteParticleEmitter<DustParticle> {
 	double emitInterval = 5;
 	protected override void Update () {
 		base.Update();
+		playerPosition = ( player?.GlobalPosition ?? Vector3.Zero ) with { Y = 0 };
 
 		if ( !showDust.Value ) return;
 

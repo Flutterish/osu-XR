@@ -28,6 +28,7 @@ public partial class OsuXrGame : OsuXrGameBase {
 	OsuGamePanel osuPanel;
 
 	[Cached]
+	[Cached(typeof(VrPlayer))]
 	public readonly OsuXrPlayer Player;
 
 	public OsuXrGame ( bool useSimulatedVR = false ) : base( useSimulatedVR ) { // TODO I dont really like the 'useSimulatedVR' - can't we extract it up?
