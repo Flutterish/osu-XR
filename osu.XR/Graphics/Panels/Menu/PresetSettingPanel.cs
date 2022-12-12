@@ -1,6 +1,6 @@
-﻿using osu.XR.Graphics.Panels.Settings;
+﻿using osu.XR.Graphics.Settings;
 
-namespace osu.XR.Graphics.Panels.Menu.Settings;
+namespace osu.XR.Graphics.Panels.Menu;
 
 public partial class PresetSettingPanel : SettingsPanel {
 	new public PresetPreview Content = null!;

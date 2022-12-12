@@ -2,10 +2,9 @@
 using osu.Framework.Localisation;
 using osu.Game.Overlays.Settings;
 using osu.XR.Configuration;
-using osu.XR.Graphics.Panels.Settings;
-using osu.XR.Graphics.Settings;
+using osu.XR.Graphics.Panels.Menu;
 
-namespace osu.XR.Graphics.Panels.Menu.Settings;
+namespace osu.XR.Graphics.Settings;
 
 public partial class PresetPreview : SettingsPanel.SectionsContainer {
 	[Cached]

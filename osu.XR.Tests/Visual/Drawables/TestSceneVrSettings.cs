@@ -1,8 +1,8 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Graphics.Containers;
 using osu.XR.Configuration;
-using osu.XR.Graphics.Panels.Menu.Settings;
-using osu.XR.Graphics.Panels.Settings;
+using osu.XR.Graphics.Panels.Menu;
+using osu.XR.Graphics.Settings;
 
 namespace osu.XR.Tests.Visual.Drawables;
 

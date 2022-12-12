@@ -25,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Graphics\Bindings\" />
     <Folder Include="Localisation\Resx\" />
   </ItemGroup>
 

@@ -2,9 +2,8 @@
 using osu.Framework.Localisation;
 using osu.Game.Overlays.Settings;
 using osu.XR.Configuration;
-using osu.XR.Graphics.Settings;
 
-namespace osu.XR.Graphics.Panels.Settings;
+namespace osu.XR.Graphics.Settings;
 
 public partial class InputSettingSection : SettingsSection {
 	public override LocalisableString Header => Localisation.Config.InputStrings.Header;
@@ -30,7 +29,7 @@ public partial class InputSettingSection : SettingsSection {
 			new SettingsSlider<int, PxSliderBar> { 
 				LabelText = Localisation.Config.Input.TouchDeadzoneStrings.Label, 
 				TooltipText = Localisation.Config.Input.TouchDeadzoneStrings.Tooltip
-			}.PresetComponent( config, OsuXrSetting.Deadzone ),
+			}.PresetComponent( config, OsuXrSetting.Deadzone ), // TODO touch deadzone
 			new SettingsEnumDropdown<HandSetting> { 
 				LabelText = Localisation.Config.Input.MainHandStrings.Label
 			}.PresetComponent( config, OsuXrSetting.DominantHand ),

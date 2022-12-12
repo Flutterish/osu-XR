@@ -3,9 +3,8 @@ using osu.Framework.Localisation;
 using osu.Framework.XR;
 using osu.Game.Overlays.Settings;
 using osu.XR.Configuration;
-using osu.XR.Graphics.Settings;
 
-namespace osu.XR.Graphics.Panels.Settings;
+namespace osu.XR.Graphics.Settings;
 
 public partial class PresetsSettingSection : SettingsSection {
 	public override LocalisableString Header => Localisation.Config.PresetsStrings.Header;

@@ -2,7 +2,6 @@
 using osu.Framework.Localisation;
 using osu.Game.Overlays.Settings;
 using osu.XR.Configuration;
-using osu.XR.Graphics.Panels.Settings;
 
 namespace osu.XR.Graphics.Panels.Menu;
 

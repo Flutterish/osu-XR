@@ -1,9 +1,8 @@
 ﻿using osu.Game.Overlays.Settings;
 using osu.XR.Configuration;
-using osu.XR.Graphics.Panels.Menu.Settings;
 using osu.XR.Graphics.Settings;
 
-namespace osu.XR.Graphics.Panels.Settings;
+namespace osu.XR.Graphics.Panels.Menu;
 
 public partial class VrSettingsPanel : SettingsPanel {
 	public PresetSettingPanel PresetSettings { get; private set; } = null!;

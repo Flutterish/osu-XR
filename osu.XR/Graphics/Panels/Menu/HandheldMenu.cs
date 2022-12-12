@@ -1,6 +1,5 @@
 ﻿using osu.Framework.Graphics.Sprites;
 using osu.Framework.XR.Graphics;
-using osu.XR.Graphics.Panels.Settings;
 
 namespace osu.XR.Graphics.Panels.Menu;
 

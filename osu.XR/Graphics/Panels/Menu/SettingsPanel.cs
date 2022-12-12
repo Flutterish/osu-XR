@@ -1,8 +1,6 @@
 ﻿using osu.Game.Graphics.Cursor;
 using osu.XR.Allocation;
-using osu.XR.Graphics.Panels.Menu;
-
-namespace osu.XR.Graphics.Panels.Settings;
+namespace osu.XR.Graphics.Panels.Menu;
 
 public abstract partial class SettingsPanel : MenuPanel {
 	public SettingsPanel () {
