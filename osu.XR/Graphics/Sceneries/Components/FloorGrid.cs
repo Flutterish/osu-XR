@@ -2,7 +2,10 @@
 using osu.Framework.Graphics.Rendering;
 using osu.Framework.XR;
 using osu.Framework.XR.Graphics;
+using osu.Framework.XR.Graphics.Materials;
+using osu.XR.Graphics.Materials;
 using osuTK.Graphics;
+using MaterialNames = osu.XR.Graphics.Materials.MaterialNames;
 
 namespace osu.XR.Graphics.Sceneries.Components;
 
@@ -15,6 +18,7 @@ public partial class FloorGrid : BasicModel {
 	public readonly BindableFloat SegmentLengthBindable = new( 16.7f ) { MinValue = 5, MaxValue = 50 };
 
 	public FloorGrid () {
+		RenderStage = RenderingStage.Transparent;
 		(XSegmentsBindable, ZSegmentsBindable, SegmentWidthBindable, SegmentSpreadBindable, SegmentLengthBindable).BindValuesChanged( () => meshCache.Invalidate(), true );
 	}
 
@@ -26,6 +30,9 @@ public partial class FloorGrid : BasicModel {
 		}
 		base.Update();
 	}
+
+	protected override Material CreateDefaultMaterial ( MaterialStore materials )
+		=> materials.GetNew( MaterialNames.Transparent );
 
 	[BackgroundDependencyLoader]
 	private void load ( IRenderer renderer ) {
