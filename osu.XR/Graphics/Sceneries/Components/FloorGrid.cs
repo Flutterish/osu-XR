@@ -3,7 +3,6 @@ using osu.Framework.Graphics.Rendering;
 using osu.Framework.XR;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Graphics.Materials;
-using osu.XR.Graphics.Materials;
 using osuTK.Graphics;
 using MaterialNames = osu.XR.Graphics.Materials.MaterialNames;
 
