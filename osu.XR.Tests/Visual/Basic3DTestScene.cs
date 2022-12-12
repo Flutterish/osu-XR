@@ -19,7 +19,7 @@ public abstract partial class Basic3DTestScene : TestScene3D {
 		Scene.Camera.Z = -10;
 
 		Scene.Add( new BasicModel() {
-			Mesh = BasicMesh.UnitCube,
+			Mesh = BasicMesh.UnitCornerCube,
 			Colour = Color4.Red,
 			Scale = new( 10, 0.01f, 0.01f ),
 			Origin = new( -1, 0, 0 ),
@@ -27,7 +27,7 @@ public abstract partial class Basic3DTestScene : TestScene3D {
 		} );
 		for ( int i = 1; i < 6; i++ ) {
 			Scene.Add( new BasicModel() {
-				Mesh = BasicMesh.UnitCube,
+				Mesh = BasicMesh.UnitCornerCube,
 				Colour = Color4.Red,
 				Scale = new( 0.03f ),
 				Position = new( i, 0, 0 ),
@@ -35,7 +35,7 @@ public abstract partial class Basic3DTestScene : TestScene3D {
 			} );
 		}
 		Scene.Add( new BasicModel() {
-			Mesh = BasicMesh.UnitCube,
+			Mesh = BasicMesh.UnitCornerCube,
 			Colour = Color4.Green,
 			Scale = new( 0.01f, 10, 0.01f ),
 			Origin = new( 0, -1, 0 ),
@@ -43,7 +43,7 @@ public abstract partial class Basic3DTestScene : TestScene3D {
 		} );
 		for ( int i = 1; i < 6; i++ ) {
 			Scene.Add( new BasicModel() {
-				Mesh = BasicMesh.UnitCube,
+				Mesh = BasicMesh.UnitCornerCube,
 				Colour = Color4.Green,
 				Scale = new( 0.03f ),
 				Position = new( 0, i, 0 ),
@@ -51,7 +51,7 @@ public abstract partial class Basic3DTestScene : TestScene3D {
 			} );
 		}
 		Scene.Add( new BasicModel() {
-			Mesh = BasicMesh.UnitCube,
+			Mesh = BasicMesh.UnitCornerCube,
 			Colour = Color4.Blue,
 			Scale = new( 0.01f, 0.01f, 10 ),
 			Origin = new( 0, 0, -1 ),
@@ -59,7 +59,7 @@ public abstract partial class Basic3DTestScene : TestScene3D {
 		} );
 		for ( int i = 1; i < 6; i++ ) {
 			Scene.Add( new BasicModel() {
-				Mesh = BasicMesh.UnitCube,
+				Mesh = BasicMesh.UnitCornerCube,
 				Colour = Color4.Blue,
 				Scale = new( 0.03f ),
 				Position = new( 0, 0, i ),

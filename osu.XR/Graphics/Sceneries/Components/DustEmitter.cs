@@ -3,9 +3,8 @@ using osu.Framework.Graphics.Textures;
 using osu.Framework.Utils;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Graphics.Materials;
-using osu.Framework.XR.Graphics.Meshes;
+using osu.Framework.XR.Graphics.Particles;
 using osu.XR.Configuration;
-using osu.XR.Graphics.Particles;
 using osuTK.Graphics;
 
 namespace osu.XR.Graphics.Sceneries.Components;
@@ -61,11 +60,11 @@ public partial class DustEmitter : SpriteParticleEmitter<DustParticle> {
 		return materials.GetNew( Materials.MaterialNames.Transparent );
 	}
 
-	protected override SpriteParticleEmitter<DustParticle>.DrawNode CreateDrawNode3D ( int subtreeIndex )
+	protected override SpriteParticleEmitterDrawNode CreateDrawNode3D ( int subtreeIndex )
 		=> new DrawNode( this, subtreeIndex );
 
-	new class DrawNode : SpriteParticleEmitter<DustParticle>.DrawNode {
-		public DrawNode ( BatchedParticleEmitter<DustParticle, BasicMesh> source, int index ) : base( source, index ) { }
+	class DrawNode : SpriteParticleEmitterDrawNode {
+		public DrawNode ( DustEmitter source, int index ) : base( source, index ) { }
 
 		Framework.XR.Graphics.Shaders.IUniform<Color4> tint = null!;
 		Color4 tintValue;
@@ -94,5 +93,6 @@ public struct DustParticle : IHasMatrix {
 	public Vector3 Position => InitialPosition + Velocity * Lifetime;
 	public Vector3 Velocity;
 
-	public Matrix4 Matrix => Matrix4.CreateScale( 0.03f ) * Matrix4.CreateTranslation( Position );
+	public float Scale => ( MathF.Sin( Lifetime / TotalLifetime * MathF.PI ) + 1 ) / 2;
+	public Matrix4 Matrix => Matrix4.CreateScale( 0.03f * Scale ) * Matrix4.CreateTranslation( Position );
 }

@@ -21,7 +21,7 @@ public partial class BeatingCubes : CompositeDrawable3D {
 						Mesh = BasicMesh.UnitCube,
 						IsColliderEnabled = true,
 						OriginY = -1f,
-						Scale = new Vector3( (float)( random.NextDouble( 0.05, 0.2 ) * radius ) ) / 2,
+						Scale = new Vector3( (float)( random.NextDouble( 0.05, 0.2 ) * radius ) ),
 						Rotation = Quaternion.FromAxisAngle( Vector3.UnitY, (float)random.NextDouble( 0, Math.PI * 2 ) )
 					}
 				} );
