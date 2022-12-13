@@ -8,6 +8,9 @@ namespace osu.XR.Input;
 /// </summary>
 public abstract class ActionBinding {
 	public abstract LocalisableString Name { get; }
+	public abstract bool ShouldBeSaved { get; }
+
+	public abstract Drawable CreateEditor ();
 
 	protected void TrackSetting<T> ( IBindable<T> bindable, [CallerArgumentExpression(nameof(bindable))] string? member = null ) {
 		bindable.BindValueChanged( _ => OnSettingsChanged() );

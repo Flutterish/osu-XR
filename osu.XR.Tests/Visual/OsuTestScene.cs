@@ -10,15 +10,16 @@ using osu.XR.Osu;
 namespace osu.XR.Tests.Visual;
 
 public abstract partial class OsuTestScene : TestScene {
-	OsuDependencies dependencies = new();
+	[Cached]
+	protected readonly OsuDependencies OsuDependencies = new();
 	VirtualGameHost virtualGameHost = null!;
 	OsuGameBase osu = new OsuGameBase { Size = osuTK.Vector2.Zero };
 
 	OsuDepsContainer deps;
 	protected override Container<Drawable> Content => deps;
 	public OsuTestScene () {
-		dependencies.OsuGameBase.Value = osu;
-		base.Content.Add( deps = new( dependencies, this ) { RelativeSizeAxes = Axes.Both } );
+		OsuDependencies.OsuGameBase.Value = osu;
+		base.Content.Add( deps = new( OsuDependencies, this ) { RelativeSizeAxes = Axes.Both } );
 	}
 
 	protected override IReadOnlyDependencyContainer CreateChildDependencies ( IReadOnlyDependencyContainer parent ) {

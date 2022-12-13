@@ -9,19 +9,19 @@ namespace osu.XR.Localisation.Bindings.Types {
 		private static string getKey( string key ) => $"{PREFIX}:{key}";
 
 		/// <summary>
-		/// Zone
-		/// </summary>
-		public static readonly LocalisableString Zone = new TranslatableString(
-			getKey( "zone" ),
-			"Zone"
-		);
-
-		/// <summary>
 		/// Movement
 		/// </summary>
 		public static readonly LocalisableString Movement = new TranslatableString(
 			getKey( "movement" ),
 			"Movement"
+		);
+
+		/// <summary>
+		/// Zone
+		/// </summary>
+		public static readonly LocalisableString Zone = new TranslatableString(
+			getKey( "zone" ),
+			"Zone"
 		);
 	}
 }

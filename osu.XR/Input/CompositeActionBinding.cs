@@ -4,6 +4,8 @@
 /// An <see cref="ActionBinding"/> which is composed of other <see cref="ActionBinding"/>s
 /// </summary>
 public abstract class CompositeActionBinding : ActionBinding {
+	public override bool ShouldBeSaved => Children.Any( x => x.ShouldBeSaved );
+
 	public CompositeActionBinding () {
 		Children.BindCollectionChanged( ( _, e ) => {
 			if ( e.OldItems != null ) {

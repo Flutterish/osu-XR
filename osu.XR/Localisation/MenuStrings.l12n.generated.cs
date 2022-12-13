@@ -17,6 +17,14 @@ namespace osu.XR.Localisation {
 		);
 
 		/// <summary>
+		/// Ruleset
+		/// </summary>
+		public static readonly LocalisableString Ruleset = new TranslatableString(
+			getKey( "ruleset" ),
+			"Ruleset"
+		);
+
+		/// <summary>
 		/// Scenery
 		/// </summary>
 		public static readonly LocalisableString Scenery = new TranslatableString(

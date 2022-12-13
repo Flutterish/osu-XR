@@ -9,32 +9,6 @@ namespace osu.XR.Localisation.Bindings {
 		private static string getKey( string key ) => $"{PREFIX}:{key}";
 
 		/// <summary>
-		/// {hand} Buttons
-		/// </summary>
-		public static LocalisableString Buttons( object hand ) => new TranslatableString(
-			getKey( "buttons" ),
-			"{0} Buttons",
-			hand
-		);
-
-		/// <summary>
-		/// Clap
-		/// </summary>
-		public static readonly LocalisableString Clap = new TranslatableString(
-			getKey( "clap" ),
-			"Clap"
-		);
-
-		/// <summary>
-		/// {hand} Joystick
-		/// </summary>
-		public static LocalisableString Joystick( object hand ) => new TranslatableString(
-			getKey( "joystick" ),
-			"{0} Joystick",
-			hand
-		);
-
-		/// <summary>
 		/// Left Buttons
 		/// </summary>
 		public static readonly LocalisableString ButtonsLeft = new TranslatableString(
@@ -48,6 +22,14 @@ namespace osu.XR.Localisation.Bindings {
 		public static readonly LocalisableString ButtonsRight = new TranslatableString(
 			getKey( "buttons-right" ),
 			"Right Butttons"
+		);
+
+		/// <summary>
+		/// Clap
+		/// </summary>
+		public static readonly LocalisableString Clap = new TranslatableString(
+			getKey( "clap" ),
+			"Clap"
 		);
 
 		/// <summary>

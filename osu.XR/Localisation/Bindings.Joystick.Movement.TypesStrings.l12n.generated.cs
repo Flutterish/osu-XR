@@ -3,9 +3,9 @@
 
 using osu.Framework.Localisation;
 
-namespace osu.XR.Localisation.Bindings.Types.Joystick {
-	public static class MovementStrings {
-		private const string PREFIX = "osu.XR.Localisation.Resx.Bindings.Types.Joystick.Movement.Strings";
+namespace osu.XR.Localisation.Bindings.Joystick.Movement {
+	public static class TypesStrings {
+		private const string PREFIX = "osu.XR.Localisation.Resx.Bindings.Joystick.Movement.Types.Strings";
 		private static string getKey( string key ) => $"{PREFIX}:{key}";
 
 		/// <summary>
