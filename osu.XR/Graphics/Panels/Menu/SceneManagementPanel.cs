@@ -20,16 +20,12 @@ public partial class SceneManagementPanel : SettingsPanel {
 		}
 
 		partial class Section : SettingsSection {
-			public Section () {
-				
-			}
-
 			public override Drawable CreateIcon () => new SpriteIcon {
 				Icon = FontAwesome.Solid.Image
 			};
 
 			[BackgroundDependencyLoader]
-			private void load ( OsuXrConfigManager config ) {
+			private void load ( OsuXrConfigManager config ) { // TODO this should not be saved to presets
 				Add( new SettingsEnumDropdown<SceneryType> { 
 					Current = config.GetBindable<SceneryType>( OsuXrSetting.SceneryType ), 
 					LabelText = Localisation.SceneryStrings.Type 

@@ -44,7 +44,7 @@ public partial class VariantBindingsSection : FillFlowContainer {
 	[Cached(name: "RulesetActions" )]
 	public readonly List<object> RulesetActions;
 
-	static List<ActionBinding> getAvailableBindings () => new() {
+	static List<IHasBindingType> getAvailableBindings () => new() {
 		new ButtonBinding( Hand.Left ),
 		new ButtonBinding( Hand.Right ),
 		new JoystickBindings( Hand.Left ),

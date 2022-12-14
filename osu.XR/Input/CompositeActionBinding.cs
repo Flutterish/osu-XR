@@ -1,4 +1,5 @@
 ﻿using osu.XR.Input.Handlers;
+using osu.XR.IO;
 using System.Diagnostics.CodeAnalysis;
 
 namespace osu.XR.Input;
@@ -25,6 +26,14 @@ public abstract class CompositeActionBinding<Tchild> : ActionBinding where Tchil
 			OnSettingsChanged();
 		} );
 	}
+
+	public sealed override object CreateSaveData ( BindingsSaveContext context )
+		=> CreateSaveData( Children.Where( x => x.ShouldBeSaved ), context );
+
+	protected abstract object CreateSaveData ( IEnumerable<Tchild> children, BindingsSaveContext context );
+
+	protected object[] CreateSaveDataAsList ( IEnumerable<Tchild> children, BindingsSaveContext context )
+		=> children.Select( x => x.CreateSaveData( context ) ).ToArray();
 
 	public override Drawable? CreateEditor () => null;
 	public override CompositeHandler<Tchild> CreateHandler () => new( this );
@@ -71,4 +80,7 @@ public abstract class UniqueCompositeActionBinding<Tchild, K> : CompositeActionB
 
 	public bool Contains ( Tchild action )
 		=> childKeys.ContainsKey( GetKey( action ) );
+
+	protected Dictionary<K, object> CreateSaveDataAsDictionary ( IEnumerable<Tchild> children, BindingsSaveContext context )
+		=> children.ToDictionary( GetKey, e => e.CreateSaveData( context ) );
 }

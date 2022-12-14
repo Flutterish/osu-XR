@@ -1,5 +1,6 @@
 ﻿using osu.Framework.Localisation;
 using osu.XR.Input.Handlers;
+using osu.XR.IO;
 using System.Runtime.CompilerServices;
 
 namespace osu.XR.Input;
@@ -13,6 +14,8 @@ public abstract class ActionBinding : IActionBinding {
 
 	public abstract Drawable? CreateEditor ();
 	public virtual ActionBindingHandler? CreateHandler () => null;
+
+	public abstract object CreateSaveData ( BindingsSaveContext context );
 
 	protected void TrackSetting<T> ( IBindable<T> bindable, [CallerArgumentExpression(nameof(bindable))] string? member = null ) {
 		bindable.BindValueChanged( _ => OnSettingsChanged() );
@@ -33,6 +36,8 @@ public interface IActionBinding {
 
 	Drawable? CreateEditor ();
 	ActionBindingHandler? CreateHandler ();
+
+	object CreateSaveData ( BindingsSaveContext context );
 
 	/// <summary>
 	/// Invoked when settings of this, or nested settings are changed, thus invalidating the save file

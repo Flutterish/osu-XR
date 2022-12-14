@@ -106,6 +106,7 @@ public partial class RulesetBindingsSection : FillFlowContainer {
 			if ( !bindings.TryGetChild( ruleset.ShortName, out var rulesetBindings ) ) {
 				bindings.Add( rulesetBindings = new( ruleset.ShortName ) );
 			}
+			rulesetBindings.Ruleset = ruleset;
 			if ( !rulesetBindings.TryGetChild( variant, out var variantBindings ) ) {
 				rulesetBindings.Add( variantBindings = new( variant ) );
 			}

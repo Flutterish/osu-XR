@@ -1,11 +1,12 @@
 ﻿using osu.Framework.Localisation;
 using osu.XR.Graphics.Bindings.Editors;
 using osu.XR.Input.Handlers;
+using osu.XR.IO;
 using osu.XR.Localisation.Bindings;
 
 namespace osu.XR.Input.Actions;
 
-public class ClapBinding : ActionBinding {
+public class ClapBinding : ActionBinding, IHasBindingType {
 	public override LocalisableString Name => TypesStrings.Clap;
 	public override bool ShouldBeSaved => Action.Value != null;
 	public override Drawable CreateEditor () => new ClapEditor( this );
@@ -15,9 +16,22 @@ public class ClapBinding : ActionBinding {
 	public readonly Bindable<double> ThresholdABindable = new( 0.325 );
 	public readonly Bindable<double> ThresholdBBindable = new( 0.275 );
 
+	public BindingType Type => BindingType.Clap;
 	public ClapBinding () {
 		TrackSetting( ThresholdABindable );
 		TrackSetting( ThresholdBBindable );
 		TrackSetting( Action );
+	}
+
+	public override object CreateSaveData ( BindingsSaveContext context ) => new SaveData {
+		ThresholdA = ThresholdABindable.Value,
+		ThresholdB = ThresholdBBindable.Value,
+		Action = context.SaveAction( Action )
+	};
+
+	public struct SaveData {
+		public double ThresholdA;
+		public double ThresholdB;
+		public ActionData? Action;
 	}
 }
