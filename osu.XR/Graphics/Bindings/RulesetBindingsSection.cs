@@ -8,7 +8,8 @@ using osu.XR.Osu;
 namespace osu.XR.Graphics.Bindings;
 
 public partial class RulesetBindingsSection : FillFlowContainer {
-	BindingsFile bindings = new();
+	protected readonly Bindable<BindingsFile> Bindings = new();
+
 	SettingsHeader? header;
 	public RulesetBindingsSection () {
 		Direction = FillDirection.Vertical;
@@ -18,6 +19,18 @@ public partial class RulesetBindingsSection : FillFlowContainer {
 		ruleset.ValueChanged += v => {
 			onRulesetChanged( getRuleset( v.NewValue ) );
 		};
+
+		Bindings.BindValueChanged( v => {
+			if ( selectedVariant != null )
+				Remove( selectedVariant, disposeImmediately: false );
+			selectedVariant = null;
+
+			foreach ( var i in variantSections.Values ) {
+				i.Dispose();
+			}
+			variantSections.Clear();
+			onRulesetChanged( getRuleset( ruleset.Value ) );
+		} );
 	}
 
 	void setHeader ( Ruleset? ruleset ) {
@@ -35,8 +48,9 @@ public partial class RulesetBindingsSection : FillFlowContainer {
 	Bindable<RulesetInfo?> ruleset = new();
 
 	[BackgroundDependencyLoader]
-	private void load ( OsuDependencies osu ) {
+	private void load ( OsuDependencies osu, Bindable<BindingsFile> bindings ) {
 		ruleset.BindTo( osu.Ruleset );
+		Bindings.BindTo( bindings );
 	}
 
 	static Ruleset? getRuleset ( RulesetInfo? info ) {
@@ -88,6 +102,7 @@ public partial class RulesetBindingsSection : FillFlowContainer {
 			Remove( selectedVariant, disposeImmediately: false );
 
 		if ( !variantSections.TryGetValue( (ruleset.ShortName, variant), out var section ) ) {
+			var bindings = Bindings.Value;
 			if ( !bindings.TryGetChild( ruleset.ShortName, out var rulesetBindings ) ) {
 				bindings.Add( rulesetBindings = new( ruleset.ShortName ) );
 			}

@@ -3,6 +3,7 @@ using osu.Framework.Platform;
 using osu.Framework.XR.Testing.VirtualReality;
 using osu.Framework.XR.VirtualReality;
 using osu.XR.Configuration;
+using osu.XR.IO;
 using osu.XR.Timing;
 using osu.XR.VirtualReality;
 
@@ -24,6 +25,9 @@ public partial class OsuXrGameBase : Framework.Game {
 
 	[Cached]
 	protected BeatSyncSource BeatSync = new();
+
+	[Cached]
+	public readonly Bindable<BindingsFile> Bindings = new( new() );
 
 	public readonly Bindable<Hand> DominantHand = new( Hand.Right );
 	Bindable<HandSetting> dominantHandSetting = new( HandSetting.Right );

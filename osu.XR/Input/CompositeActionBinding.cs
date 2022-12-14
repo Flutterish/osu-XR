@@ -27,7 +27,7 @@ public abstract class CompositeActionBinding<Tchild> : ActionBinding where Tchil
 	}
 
 	public override Drawable? CreateEditor () => null;
-	public override ActionBindingHandler? CreateHandler () => null;
+	public override CompositeHandler<Tchild> CreateHandler () => new( this );
 
 	public virtual bool Add ( Tchild action ) {
 		Children.Add( action );

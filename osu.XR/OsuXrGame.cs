@@ -1,9 +1,11 @@
 ﻿using osu.Framework.Graphics.Shapes;
+using osu.Framework.Logging;
 using osu.Framework.XR.Input;
 using osu.Framework.XR.Physics;
 using osu.Framework.XR.Testing.VirtualReality;
 using osu.Framework.XR.VirtualReality;
 using osu.Framework.XR.VirtualReality.Devices;
+using osu.Game.Overlays.Notifications;
 using osu.XR.Graphics;
 using osu.XR.Graphics.Panels;
 using osu.XR.Graphics.Panels.Menu;
@@ -30,6 +32,8 @@ public partial class OsuXrGame : OsuXrGameBase {
 	[Cached(typeof(VrPlayer))]
 	public readonly OsuXrPlayer Player;
 
+	HandheldMenu menu;
+
 	public OsuXrGame ( bool useSimulatedVR = false ) : base( useSimulatedVR ) { // TODO I dont really like the 'useSimulatedVR' - can't we extract it up?
 		scene = new() {
 			RelativeSizeAxes = Axes.Both
@@ -46,8 +50,12 @@ public partial class OsuXrGame : OsuXrGameBase {
 		Add( movementSystem = new( scene ) { RelativeSizeAxes = Axes.Both } );
 		Add( new BasicPanelInteractionSource( scene, physics, panelInteraction ) { RelativeSizeAxes = Axes.Both } );
 
-		scene.Add( new UserTrackingDrawable3D { Child = new HandheldMenu(), Y = 1 } );
+		scene.Add( new UserTrackingDrawable3D { Child = menu = new HandheldMenu(), Y = 1 } );
 		scene.Add( Player = new OsuXrPlayer() );
+		osuPanel.OsuDependencies.ExceptionInvoked += ( msg, ex ) => {
+			menu.Notifications.Post( new SimpleErrorNotification { Text = msg } );
+			Logger.Error( ex, msg.ToString(), recursive: true );
+		};
 
 		Compositor.BindDeviceDetected( addVrDevice );
 	}
