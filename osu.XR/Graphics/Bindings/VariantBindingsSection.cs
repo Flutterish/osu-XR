@@ -10,6 +10,12 @@ public partial class VariantBindingsSection : FillFlowContainer {
 	public readonly Ruleset Ruleset;
 	public readonly int Variant;
 
+	VariantBindings? _bindings;
+	public VariantBindings Bindings {
+		get => _bindings ??= new( Variant );
+		init => _bindings = value;
+	}
+
 	public VariantBindingsSection ( Ruleset ruleset, int variant ) {
 		Direction = FillDirection.Vertical;
 		RelativeSizeAxes = Axes.X;
@@ -18,11 +24,19 @@ public partial class VariantBindingsSection : FillFlowContainer {
 		Ruleset = ruleset;
 		Variant = variant;
 		RulesetActions = ruleset.GetDefaultKeyBindings( variant ).Select( x => x.Action ).Distinct().ToList();
+	}
 
-		foreach ( var i in availableBindings ) {
+	protected override void LoadComplete () {
+		base.LoadComplete();
+
+		foreach ( var i in getAvailableBindings() ) {
+			var binding = Bindings.GetOrAdd( i );
+			if ( binding is not IHasEditor editor )
+				continue;
+
 			Add( new CollapsibleSection {
 				Header = i.Name,
-				Child = i.CreateEditor()
+				Child = editor.CreateEditor()
 			} );
 		}
 	}
@@ -30,7 +44,7 @@ public partial class VariantBindingsSection : FillFlowContainer {
 	[Cached(name: "RulesetActions" )]
 	public readonly List<object> RulesetActions;
 
-	List<ActionBinding> availableBindings = new() {
+	static List<ActionBinding> getAvailableBindings () => new() {
 		new ButtonBinding( Hand.Left ),
 		new ButtonBinding( Hand.Right ),
 		new JoystickBindings( Hand.Left ),

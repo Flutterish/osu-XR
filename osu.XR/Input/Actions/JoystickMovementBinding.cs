@@ -5,10 +5,11 @@ using osu.XR.Localisation.Bindings.Types;
 
 namespace osu.XR.Input.Actions;
 
-public class JoystickMovementBinding : ActionBinding, IJoystickBinding {
+public class JoystickMovementBinding : ActionBinding, IJoystickBinding, IHasEditor {
 	public override LocalisableString Name => JoystickStrings.Movement;
 	public override bool ShouldBeSaved => MovementType.Value != JoystickMovementType.None;
-	public override Drawable CreateEditor () => new JoystickMovementEditor( this );
+	public JoystickBindings? Parent { get; set; }
+	public Drawable CreateEditor () => new JoystickMovementEditor( this );
 
 	public readonly Bindable<JoystickMovementType> MovementType = new( JoystickMovementType.None );
 	public readonly BindableDouble Distance = new( 100 ) { MinValue = 0, MaxValue = 100 };
@@ -17,6 +18,7 @@ public class JoystickMovementBinding : ActionBinding, IJoystickBinding {
 		TrackSetting( MovementType );
 		TrackSetting( Distance );
 	}
+
 }
 
 public enum JoystickMovementType {

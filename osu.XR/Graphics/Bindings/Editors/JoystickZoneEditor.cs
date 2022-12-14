@@ -35,7 +35,7 @@ public partial class JoystickZoneEditor : FillFlowContainer {
 			dropdown = new(),
 			new DangerousSettingsButton {
 				Text = JoystickStrings.RemoveZone,
-				Action = () => RemoveRequested?.Invoke( this )
+				Action = () => source.Parent?.Remove( source )
 			}
 		} );
 
@@ -45,6 +45,4 @@ public partial class JoystickZoneEditor : FillFlowContainer {
 
 		dropdown.RulesetAction.BindTo( source.Action );
 	}
-
-	public event Action<JoystickZoneEditor>? RemoveRequested;
 }

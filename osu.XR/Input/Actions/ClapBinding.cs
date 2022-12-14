@@ -4,10 +4,10 @@ using osu.XR.Localisation.Bindings;
 
 namespace osu.XR.Input.Actions;
 
-public class ClapBinding : ActionBinding {
+public class ClapBinding : ActionBinding, IHasEditor {
 	public override LocalisableString Name => TypesStrings.Clap;
 	public override bool ShouldBeSaved => Action.Value != null;
-	public override Drawable CreateEditor () => new ClapEditor( this );
+	public Drawable CreateEditor () => new ClapEditor( this );
 
 	public readonly Bindable<object?> Action = new();
 	public readonly Bindable<double> ThresholdABindable = new( 0.325 );

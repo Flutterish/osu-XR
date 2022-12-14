@@ -1,12 +1,14 @@
 ﻿using osu.Framework.Localisation;
 using osu.Game.Overlays.Settings;
 using osu.Game.Rulesets;
+using osu.XR.IO;
 using osu.XR.Localisation.Config;
 using osu.XR.Osu;
 
 namespace osu.XR.Graphics.Bindings;
 
 public partial class RulesetBindingsSection : FillFlowContainer {
+	BindingsFile bindings = new();
 	SettingsHeader? header;
 	public RulesetBindingsSection () {
 		Direction = FillDirection.Vertical;
@@ -86,7 +88,14 @@ public partial class RulesetBindingsSection : FillFlowContainer {
 			Remove( selectedVariant, disposeImmediately: false );
 
 		if ( !variantSections.TryGetValue( (ruleset.ShortName, variant), out var section ) ) {
-			variantSections[(ruleset.ShortName, variant)] = section = new( ruleset, variant );
+			if ( !bindings.TryGetChild( ruleset.ShortName, out var rulesetBindings ) ) {
+				bindings.Add( rulesetBindings = new( ruleset.ShortName ) );
+			}
+			if ( !rulesetBindings.TryGetChild( variant, out var variantBindings ) ) {
+				rulesetBindings.Add( variantBindings = new( variant ) );
+			}
+
+			variantSections[(ruleset.ShortName, variant)] = section = new( ruleset, variant ) { Bindings = variantBindings };
 		}
 
 		Add( selectedVariant = section );

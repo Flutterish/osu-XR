@@ -21,7 +21,7 @@ namespace osu.XR.Localisation.Bindings.Joystick {
 		/// </summary>
 		public static readonly LocalisableString Warning = new TranslatableString(
 			getKey( "warning" ),
-			"Current implementation disables all input from outside the ruleset binding section.\\nMake sure to bind your other buttons here too."
+			"Current implementation disables all input from outside the ruleset binding section.\nMake sure to bind your other buttons here too."
 		);
 	}
 }

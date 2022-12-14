@@ -1,20 +1,23 @@
-﻿namespace osu.XR.Input;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace osu.XR.Input;
+
+public abstract class CompositeActionBinding : CompositeActionBinding<ActionBinding> { }
 /// <summary>
 /// An <see cref="ActionBinding"/> which is composed of other <see cref="ActionBinding"/>s
 /// </summary>
-public abstract class CompositeActionBinding : ActionBinding {
+public abstract class CompositeActionBinding<Tchild> : ActionBinding where Tchild : IActionBinding {
 	public override bool ShouldBeSaved => Children.Any( x => x.ShouldBeSaved );
 
 	public CompositeActionBinding () {
 		Children.BindCollectionChanged( ( _, e ) => {
 			if ( e.OldItems != null ) {
-				foreach ( ActionBinding i in e.OldItems ) {
+				foreach ( Tchild i in e.OldItems ) {
 					i.SettingsChanged -= OnSettingsChanged;
 				}
 			}
 			if ( e.NewItems != null ) {
-				foreach ( ActionBinding i in e.NewItems ) {
+				foreach ( Tchild i in e.NewItems ) {
 					i.SettingsChanged += OnSettingsChanged;
 				}
 			}
@@ -22,29 +25,46 @@ public abstract class CompositeActionBinding : ActionBinding {
 		} );
 	}
 
-	public virtual void Add ( ActionBinding action )
-		=> Children.Add( action );
-	public virtual void Remove ( ActionBinding action )
+	public virtual bool Add ( Tchild action ) {
+		Children.Add( action );
+		return true;
+	}
+	public virtual bool Remove ( Tchild action )
 		=> Children.Remove( action );
 
-	public readonly BindableList<ActionBinding> Children = new();
+	public readonly BindableList<Tchild> Children = new();
 }
 
-public abstract class UniqueCompositeActionBinding<K> : CompositeActionBinding where K : notnull {
-	HashSet<K> childKeys = new();
-	protected abstract K? GetKey ( ActionBinding action );
+public abstract class UniqueCompositeActionBinding<K> : UniqueCompositeActionBinding<ActionBinding, K> where K : notnull { }
+public abstract class UniqueCompositeActionBinding<Tchild, K> : CompositeActionBinding<Tchild> where K : notnull where Tchild : IActionBinding {
+	Dictionary<K, Tchild> childKeys = new();
+	protected abstract K GetKey ( Tchild action );
 
-	public override void Add ( ActionBinding action ) {
+	public Tchild GetOrAdd ( Tchild action ) {
 		var key = GetKey( action );
-		if ( key != null && childKeys.Add( key ) ) {
+		if ( childKeys.TryAdd( key, action ) ) {
 			base.Add( action );
+			return action;
+		}
+		else {
+			return childKeys[key];
 		}
 	}
-
-	public override void Remove ( ActionBinding action ) {
-		base.Remove( action );
-		var key = GetKey( action );
-		if ( key != null )
-			childKeys.Remove( key );
+	public override bool Add ( Tchild action ) {
+		return childKeys.TryAdd( GetKey( action ), action ) && base.Add( action );
 	}
+
+	public bool Remove ( K key ) {
+		return childKeys.Remove( key, out var child ) && base.Remove( child );
+	}
+	public override bool Remove ( Tchild action ) {
+		return childKeys.Remove( GetKey( action ) ) && base.Remove( action );
+	}
+
+	public bool TryGetChild ( K key, [NotNullWhen(true)] out Tchild? child ) {
+		return childKeys.TryGetValue( key, out child );
+	}
+
+	public bool Contains ( Tchild action )
+		=> childKeys.ContainsKey( GetKey( action ) );
 }
