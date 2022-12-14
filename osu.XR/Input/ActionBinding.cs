@@ -1,4 +1,5 @@
 ﻿using osu.Framework.Localisation;
+using osu.XR.Input.Handlers;
 using System.Runtime.CompilerServices;
 
 namespace osu.XR.Input;
@@ -9,6 +10,9 @@ namespace osu.XR.Input;
 public abstract class ActionBinding : IActionBinding {
 	public abstract LocalisableString Name { get; }
 	public abstract bool ShouldBeSaved { get; }
+
+	public abstract Drawable? CreateEditor ();
+	public virtual ActionBindingHandler? CreateHandler () => null;
 
 	protected void TrackSetting<T> ( IBindable<T> bindable, [CallerArgumentExpression(nameof(bindable))] string? member = null ) {
 		bindable.BindValueChanged( _ => OnSettingsChanged() );
@@ -27,12 +31,11 @@ public interface IActionBinding {
 	LocalisableString Name { get; }
 	bool ShouldBeSaved { get; }
 
+	Drawable? CreateEditor ();
+	ActionBindingHandler? CreateHandler ();
+
 	/// <summary>
 	/// Invoked when settings of this, or nested settings are changed, thus invalidating the save file
 	/// </summary>
 	event Action? SettingsChanged;
-}
-
-public interface IHasEditor {
-	Drawable CreateEditor ();
 }

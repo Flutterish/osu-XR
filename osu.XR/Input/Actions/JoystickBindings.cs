@@ -5,9 +5,9 @@ using osu.XR.Localisation.Bindings;
 
 namespace osu.XR.Input.Actions;
 
-public class JoystickBindings : CompositeActionBinding<IJoystickBinding>, IIsHanded, IHasEditor {
+public class JoystickBindings : CompositeActionBinding<IJoystickBinding>, IIsHanded {
 	public override LocalisableString Name => Hand is Hand.Left ? TypesStrings.JoystickLeft : TypesStrings.JoystickRight;
-	public Drawable CreateEditor () => new JoystickEditor( this );
+	public override Drawable CreateEditor () => new JoystickEditor( this );
 
 	public readonly Hand Hand;
 	Hand IIsHanded.Hand => Hand;

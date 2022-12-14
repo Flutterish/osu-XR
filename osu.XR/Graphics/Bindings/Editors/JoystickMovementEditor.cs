@@ -12,7 +12,9 @@ public partial class JoystickMovementEditor : FillFlowContainer {
 		Direction = FillDirection.Vertical;
 		RelativeSizeAxes = Axes.X;
 		AutoSizeAxes = Axes.Y;
+		var handler = source.CreateHandler();
 		AddRange( new Drawable[] {
+			handler,
 			new Container {
 				Child = visual = new JoystickPiece {
 					RelativeSizeAxes = Axes.Both,
@@ -39,5 +41,7 @@ public partial class JoystickMovementEditor : FillFlowContainer {
 			else
 				type.SetNoticeText( MovementStrings.Warning );
 		}, true );
+
+		visual.JoystickPosition.BindTo( handler.JoystickPosition );
 	}
 }

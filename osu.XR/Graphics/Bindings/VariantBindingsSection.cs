@@ -31,12 +31,12 @@ public partial class VariantBindingsSection : FillFlowContainer {
 
 		foreach ( var i in getAvailableBindings() ) {
 			var binding = Bindings.GetOrAdd( i );
-			if ( binding is not IHasEditor editor )
+			if ( binding.CreateEditor() is not Drawable editor )
 				continue;
 
 			Add( new CollapsibleSection {
 				Header = i.Name,
-				Child = editor.CreateEditor()
+				Child = editor
 			} );
 		}
 	}

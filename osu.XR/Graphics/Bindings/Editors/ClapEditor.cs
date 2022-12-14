@@ -17,18 +17,21 @@ public partial class ClapEditor : FillFlowContainer {
 	public ClapEditor ( ClapBinding source ) {
 		RelativeSizeAxes = Axes.X;
 		AutoSizeAxes = Axes.Y;
+		var handler = source.CreateHandler();
 		InternalChild = new FillFlowContainer {
 			Direction = FillDirection.Vertical,
 			RelativeSizeAxes = Axes.X,
 			AutoSizeAxes = Axes.Y,
 			Children = new Drawable[] {
+				handler,
 				new Container {
 					RelativeSizeAxes = Axes.X,
 					AutoSizeAxes = Axes.Y,
 					Child = indicator = new() {
 						Anchor = Anchor.Centre,
 						Origin = Anchor.Centre,
-						Margin = new MarginPadding { Bottom = 6 }
+						Margin = new MarginPadding { Bottom = 6 },
+						Current = handler.Active
 					}
 				},
 				thresholdBar = new Container {
@@ -56,6 +59,9 @@ public partial class ClapEditor : FillFlowContainer {
 		dropdown.RulesetAction.BindTo( source.Action );
 		thresholdA.Progress.BindTo( source.ThresholdABindable );
 		thresholdB.Progress.BindTo( source.ThresholdBBindable );
+		handler.Progress.BindValueChanged( v => {
+			fill.Width = 1 - (float)v.NewValue;
+		}, true );
 	}
 
 	protected override void Update () {
@@ -64,7 +70,6 @@ public partial class ClapEditor : FillFlowContainer {
 	}
 
 	partial class ThresholdBar : CompositeDrawable {
-
 		[Resolved]
 		protected OverlayColourProvider Colours { get; private set; } = null!;
 

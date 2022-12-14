@@ -12,7 +12,9 @@ public partial class JoystickZoneEditor : FillFlowContainer {
 		Direction = FillDirection.Vertical;
 		RelativeSizeAxes = Axes.X;
 		AutoSizeAxes = Axes.Y;
+		var handler = source.CreateHandler();
 		AddRange( new Drawable[] {
+			handler,
 			new Container {
 				Child = visual = new JoystickZonePiece {
 					RelativeSizeAxes = Axes.Both,
@@ -29,7 +31,8 @@ public partial class JoystickZoneEditor : FillFlowContainer {
 				AutoSizeAxes = Axes.Y,
 				Child = indicator = new ActivationIndicator {
 					Anchor = Anchor.Centre,
-					Origin = Anchor.Centre
+					Origin = Anchor.Centre,
+					Current = handler.Active
 				}
 			},
 			dropdown = new(),
@@ -44,5 +47,6 @@ public partial class JoystickZoneEditor : FillFlowContainer {
 		visual.DeadzonePercentage.BindTo( source.Deadzone );
 
 		dropdown.RulesetAction.BindTo( source.Action );
+		visual.JoystickPosition.BindTo( handler.JoystickPosition );
 	}
 }

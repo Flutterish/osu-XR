@@ -4,6 +4,8 @@ using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Input.Events;
 
 namespace osu.XR.Graphics.Bindings.Editors;
+
+// TODO this is copy-pasted from v1, we can probably remove some things
 public partial class JoystickZonePiece : JoystickPiece {
 	public readonly BindableDouble ZoneStartAngle = new( -30 );
 	public readonly BindableDouble ZoneDeltaAngle = new( 60 );
@@ -100,6 +102,7 @@ public partial class JoystickZonePiece : JoystickPiece {
 				progressInner.FadeColour(  Colours.Background5, 200 );
 			}
 		};
+		updateActivation();
 	}
 
 	double deltaAngle ( double current, double goal ) {

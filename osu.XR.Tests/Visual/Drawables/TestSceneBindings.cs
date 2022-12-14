@@ -2,6 +2,7 @@
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Input.Bindings;
+using osu.Framework.XR.Testing.VirtualReality;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics.Containers;
 using osu.Game.Overlays;
@@ -36,6 +37,12 @@ public partial class TestSceneBindings : OsuTestScene {
 				}
 			}
 		} );
+	}
+
+	[BackgroundDependencyLoader]
+	private void load ( OsuXrGameBase game ) {
+		if ( game.VrInput is VirtualVrInput input )
+			AddVrControls( input );
 	}
 
 	protected override void LoadComplete () {

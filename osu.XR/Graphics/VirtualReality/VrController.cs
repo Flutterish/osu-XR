@@ -129,7 +129,7 @@ public partial class VrController : BasicVrDevice {
 			}
 		}
 
-		scroll = source.GetAction<Vector2Action>( VrAction.Scoll );
+		scroll = source.GetAction<Vector2Action>( VrAction.Scroll );
 		haptic = source.GetAction<HapticAction>( VrAction.Feedback );
 
 		if ( config != null ) {

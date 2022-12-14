@@ -3,7 +3,7 @@ using osu.Game.Overlays;
 
 namespace osu.XR.Graphics.Bindings.Editors;
 
-public partial class JoystickPiece : CompositeDrawable {
+public partial class JoystickPiece : Container {
 	readonly BindableWithCurrent<Vector2> current = new();
 	public Bindable<Vector2> JoystickPosition {
 		get => current;
@@ -15,6 +15,8 @@ public partial class JoystickPiece : CompositeDrawable {
 
 	[Resolved]
 	protected OverlayColourProvider Colours { get; private set; } = null!;
+
+	protected override Container<Drawable> Content => outside;
 
 	protected override void LoadComplete () {
 		base.LoadComplete();
@@ -57,7 +59,7 @@ public partial class JoystickPiece : CompositeDrawable {
 
 		JoystickPosition.BindValueChanged( v => {
 			inside.MoveTo( v.NewValue / 2, 50, Easing.Out );
-		} );
+		}, true );
 	}
 
 	protected virtual void CreateInteractiveElements () { }

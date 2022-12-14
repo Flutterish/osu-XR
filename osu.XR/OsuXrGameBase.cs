@@ -4,15 +4,20 @@ using osu.Framework.XR.Testing.VirtualReality;
 using osu.Framework.XR.VirtualReality;
 using osu.XR.Configuration;
 using osu.XR.Timing;
+using osu.XR.VirtualReality;
 
 namespace osu.XR;
 
+[Cached]
 public partial class OsuXrGameBase : Framework.Game {
 	[Cached]
 	VR vr = new();
 
 	[Cached( typeof( VrCompositor ) )]
 	public readonly VrCompositor Compositor;
+
+	[Cached( typeof( VrInput ) )]
+	public readonly VrInput VrInput;
 
 	[Cached]
 	VrResourceStore vrResourceStore = new();
@@ -25,6 +30,7 @@ public partial class OsuXrGameBase : Framework.Game {
 
 	public OsuXrGameBase ( bool useSimulatedVR = true ) {
 		Compositor = useSimulatedVR ? new TestingVrCompositor() : new VrCompositor();
+		VrInput = Compositor.Input;
 
 		Compositor.Input.DominantHandBindable.BindValueChanged( v => {
 			if ( dominantHandSetting.Value is HandSetting.Auto )
@@ -39,6 +45,9 @@ public partial class OsuXrGameBase : Framework.Game {
 				DominantHand.Value = v.NewValue == HandSetting.Right ? Hand.Right : Hand.Left;
 			}
 		} );
+
+		Add( Compositor );
+		Compositor.Input.SetActionManifest( new OsuXrActionManifest() );
 	}
 
 	Storage storage = null!;

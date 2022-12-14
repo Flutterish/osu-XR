@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using osu.XR.Input.Handlers;
+using System.Diagnostics.CodeAnalysis;
 
 namespace osu.XR.Input;
 
@@ -24,6 +25,9 @@ public abstract class CompositeActionBinding<Tchild> : ActionBinding where Tchil
 			OnSettingsChanged();
 		} );
 	}
+
+	public override Drawable? CreateEditor () => null;
+	public override ActionBindingHandler? CreateHandler () => null;
 
 	public virtual bool Add ( Tchild action ) {
 		Children.Add( action );
