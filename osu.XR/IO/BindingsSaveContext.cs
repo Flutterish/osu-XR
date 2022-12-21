@@ -1,5 +1,4 @@
-﻿global using ActionData = System.Int32;
-using osu.Game.Rulesets;
+﻿using osu.Game.Rulesets;
 
 namespace osu.XR.IO;
 
@@ -7,13 +6,33 @@ public class BindingsSaveContext {
 	public Ruleset? Ruleset;
 	public int Variant;
 
+	public BindingsSaveContext SetVaraint ( int value ) {
+		Variant = value;
+		return this;
+	}
+	public BindingsSaveContext SetRuleset ( Ruleset? value ) {
+		Ruleset = value;
+		return this;
+	}
+
 	public ActionData? SaveAction ( Bindable<object?> action )
 		=> SaveAction( action.Value );
 	public ActionData? SaveAction ( object? action ) {
 		if ( action is null )
 			return null;
 
-		return indices[action];
+		return new() {
+			Name = action.ToString()!,
+			ID = indices[action]
+		};
+	}
+
+	public object? LoadAction ( ActionData? data ) {
+		if ( data is not ActionData save )
+			return null;
+		
+		// TODO check name integrity
+		return actions.TryGetValue( save.ID, out var action ) ? action : null;
 	}
 
 	public Dictionary<int, string> VariantsChecksum ( Ruleset ruleset ) {
@@ -34,4 +53,9 @@ public class BindingsSaveContext {
 		indices = actions.ToDictionary( x => x.Value, x => x.Key );
 		return actions.ToDictionary( x => x.Key, x => x.Value.ToString()! );
 	}
+}
+
+public struct ActionData {
+	public string Name;
+	public int ID;
 }

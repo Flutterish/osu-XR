@@ -2,8 +2,10 @@
 using osu.Framework.XR.VirtualReality;
 using osu.XR.Graphics.Bindings.Editors;
 using osu.XR.Input.Handlers;
+using osu.XR.Input.Migration;
 using osu.XR.IO;
 using osu.XR.Localisation.Bindings;
+using System.Text.Json;
 
 namespace osu.XR.Input.Actions;
 
@@ -26,13 +28,36 @@ public class ButtonBinding : ActionBinding, IHasBindingType, IIsHanded {
 	}
 
 	public override object CreateSaveData ( BindingsSaveContext context ) => new SaveData() {
+		Type = BindingType.Buttons,
 		Hand = Hand,
 		Primary = context.SaveAction( Primary ),
 		Secondary = context.SaveAction( Secondary )
 	};
 
+	public static ButtonBinding? Load ( JsonElement data, BindingsSaveContext ctx ) => Load<ButtonBinding, SaveData>( data, ctx, static (save, ctx) => {
+		var buttons = new ButtonBinding( save.Hand );
+		buttons.Primary.Value = ctx.LoadAction( save.Primary );
+		buttons.Secondary.Value = ctx.LoadAction( save.Secondary );
+		return buttons;
+	} );
+
+	[MigrateFrom(typeof(V1SaveData), "[Initial]")]
 	public struct SaveData {
+		public BindingType Type;
 		public Hand Hand;
+		public ActionData? Primary;
+		public ActionData? Secondary;
+
+		public static implicit operator SaveData ( V1SaveData from ) => new() {
+			Type = BindingType.Buttons,
+			Hand = from.Type == "Left Buttons" ? Hand.Left : Hand.Right,
+			Primary = from.Primary,
+			Secondary = from.Secondary
+		};
+	}
+
+	public struct V1SaveData {
+		public string Type;
 		public ActionData? Primary;
 		public ActionData? Secondary;
 	}

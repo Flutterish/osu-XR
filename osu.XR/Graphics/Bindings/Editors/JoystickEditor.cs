@@ -15,7 +15,8 @@ public partial class JoystickEditor : FillFlowContainer {
 		}
 		Add( new CollapsibleSection {
 			Header = movement.Name,
-			Child = movement.CreateEditor()
+			Child = movement.CreateEditor(),
+			Expanded = movement.ShouldBeSaved
 		} );
 
 		Add( new SettingsButton {
@@ -42,7 +43,7 @@ public partial class JoystickEditor : FillFlowContainer {
 					Add( section = new CollapsibleSection {
 						Header = zone.Name,
 						Child = zone.CreateEditor(),
-						Expanded = expandSection
+						Expanded = expandSection || zone.ShouldBeSaved
 					} );
 					zones.Add( zone, section );
 				}

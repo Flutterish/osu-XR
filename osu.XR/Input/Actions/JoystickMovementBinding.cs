@@ -4,6 +4,7 @@ using osu.XR.Input.Handlers;
 using osu.XR.IO;
 using osu.XR.Localisation.Bindings.Joystick.Movement;
 using osu.XR.Localisation.Bindings.Types;
+using System.Text.Json;
 
 namespace osu.XR.Input.Actions;
 
@@ -27,6 +28,13 @@ public class JoystickMovementBinding : ActionBinding, IJoystickBinding {
 		Type = MovementType.Value,
 		Distance = Distance.Value
 	};
+
+	public static JoystickMovementBinding? Load ( JsonElement data, BindingsSaveContext ctx ) => Load<JoystickMovementBinding, SaveData>( data, ctx, static (save, ctx) => {
+		var movement = new JoystickMovementBinding();
+		movement.MovementType.Value = save.Type;
+		movement.Distance.Value = save.Distance;
+		return movement;
+	} );
 
 	public struct SaveData {
 		public JoystickMovementType Type;

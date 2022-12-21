@@ -36,7 +36,8 @@ public partial class VariantBindingsSection : FillFlowContainer {
 
 			Add( new CollapsibleSection {
 				Header = i.Name,
-				Child = editor
+				Child = editor,
+				Expanded = binding.ShouldBeSaved
 			} );
 		}
 	}

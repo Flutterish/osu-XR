@@ -1,7 +1,9 @@
 ﻿using osu.Framework.Localisation;
 using osu.XR.Input.Handlers;
+using osu.XR.Input.Migration;
 using osu.XR.IO;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 
 namespace osu.XR.Input;
 
@@ -16,6 +18,12 @@ public abstract class ActionBinding : IActionBinding {
 	public virtual ActionBindingHandler? CreateHandler () => null;
 
 	public abstract object CreateSaveData ( BindingsSaveContext context );
+
+	protected static T? Load<T, Tdata> ( JsonElement data, BindingsSaveContext ctx, Func<Tdata, BindingsSaveContext, T> factory, JsonSerializerOptions? options = null ) {
+		if ( !data.DeserializeBindingData<Tdata>( ctx, out var save, options ) )
+			return default;
+		return factory( save, ctx );
+	}
 
 	protected void TrackSetting<T> ( IBindable<T> bindable, [CallerArgumentExpression(nameof(bindable))] string? member = null ) {
 		bindable.BindValueChanged( _ => OnSettingsChanged() );

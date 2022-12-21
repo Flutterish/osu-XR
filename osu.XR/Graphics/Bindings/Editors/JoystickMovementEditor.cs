@@ -35,13 +35,17 @@ public partial class JoystickMovementEditor : FillFlowContainer {
 			}
 		} );
 
+		visual.JoystickPosition.BindTo( handler.JoystickPosition );
+	}
+
+	protected override void LoadComplete () {
+		base.LoadComplete();
+
 		type.Current.BindValueChanged( v => {
 			if ( v.NewValue is JoystickMovementType.None )
 				type.ClearNoticeText();
 			else
-				type.SetNoticeText( MovementStrings.Warning );
+				type.SetNoticeText( MovementStrings.Warning, isWarning: true );
 		}, true );
-
-		visual.JoystickPosition.BindTo( handler.JoystickPosition );
 	}
 }

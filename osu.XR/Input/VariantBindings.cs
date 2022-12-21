@@ -1,7 +1,9 @@
 ﻿using osu.Framework.Localisation;
 using osu.Framework.XR.VirtualReality;
 using osu.XR.Input.Actions;
+using osu.XR.Input.Migration;
 using osu.XR.IO;
+using System.Text.Json;
 
 namespace osu.XR.Input;
 
@@ -15,18 +17,48 @@ public class VariantBindings : UniqueCompositeActionBinding<IHasBindingType, (Bi
 	}
 
 	protected override object CreateSaveData ( IEnumerable<IHasBindingType> children, BindingsSaveContext context ) => new SaveData {
+		Name = context.VariantName( Variant ),
 		Actions = context.ActionsChecksum( Variant ),
-		Bindings = children.Select( x => new ChildSaveData { Type = x.Type, Data = x.CreateSaveData( context ) } ).ToArray()
+		Bindings = CreateSaveDataAsArray( children, context )
 	};
 
-	public struct SaveData {
-		public Dictionary<int, string>? Actions;
-		public ChildSaveData[] Bindings;
-	}
+	public static VariantBindings? Load ( JsonElement data, int variant, BindingsSaveContext context ) => Load<VariantBindings, SaveData>( data, context.SetVaraint( variant ), static (save, ctx) => {
+		var variant = new VariantBindings( ctx.Variant );
+		var checksum = ctx.ActionsChecksum( ctx.Variant );
+		// TODO actions checksum
+		variant.LoadChildren( save.Bindings, ctx, static (data, ctx) => {
+			if ( !data.DeserializeBindingData<ChildSaveData>( ctx, out var childData ) )
+				return null;
 
+			return childData.Type switch {
+				BindingType.Buttons => ButtonBinding.Load( data, ctx ),
+				BindingType.Joystick => JoystickBindings.Load( data, ctx ),
+				BindingType.Clap => ClapBinding.Load( data, ctx ),
+				_ => null
+			};
+		} );
+		return variant;
+	} );
+
+	[MigrateFrom(typeof(V1ChildSaveData), "[Initial]")]
 	public struct ChildSaveData {
 		public BindingType Type;
-		public object Data;
+
+		public static implicit operator ChildSaveData ( V1ChildSaveData from ) => new() {
+			Type = from.Type.EndsWith( "Buttons" ) ? BindingType.Buttons 
+				: from.Type.EndsWith( "Joystick" ) ? BindingType.Joystick
+				: BindingType.Clap
+		};
+	}
+
+	public struct V1ChildSaveData {
+		public string Type;
+	}
+
+	public struct SaveData {
+		public string Name;
+		public Dictionary<int, string>? Actions;
+		public object[] Bindings;
 	}
 }
 

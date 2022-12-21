@@ -1,6 +1,8 @@
 ﻿using osu.XR.Input.Handlers;
+using osu.XR.Input.Migration;
 using osu.XR.IO;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
 
 namespace osu.XR.Input;
 
@@ -30,10 +32,26 @@ public abstract class CompositeActionBinding<Tchild> : ActionBinding where Tchil
 	public sealed override object CreateSaveData ( BindingsSaveContext context )
 		=> CreateSaveData( Children.Where( x => x.ShouldBeSaved ), context );
 
+	protected void LoadChildren ( IEnumerable<object> children, BindingsSaveContext context, Func<JsonElement, BindingsSaveContext, Tchild?> factory )
+		=> LoadChildren<JsonElement>( children, context, factory );
+	protected void LoadChildren<Tdata> ( IEnumerable<object> children, BindingsSaveContext context, Func<Tdata, BindingsSaveContext, Tchild?> factory, JsonSerializerOptions? options = null ) {
+		foreach ( JsonElement i in children ) {
+			if ( !i.DeserializeBindingData<Tdata>( context, out var data, options ) )
+				continue;
+
+			var child = factory( data, context );
+			// TODO report invalid children
+			if ( child != null )
+				Add( child );
+		}
+	}
+
 	protected abstract object CreateSaveData ( IEnumerable<Tchild> children, BindingsSaveContext context );
 
-	protected object[] CreateSaveDataAsList ( IEnumerable<Tchild> children, BindingsSaveContext context )
+	protected object[] CreateSaveDataAsArray ( IEnumerable<Tchild> children, BindingsSaveContext context )
 		=> children.Select( x => x.CreateSaveData( context ) ).ToArray();
+	protected List<object> CreateSaveDataAsList ( IEnumerable<Tchild> children, BindingsSaveContext context )
+		=> children.Select( x => x.CreateSaveData( context ) ).ToList();
 
 	public override Drawable? CreateEditor () => null;
 	public override CompositeHandler<Tchild> CreateHandler () => new( this );
@@ -83,4 +101,18 @@ public abstract class UniqueCompositeActionBinding<Tchild, K> : CompositeActionB
 
 	protected Dictionary<K, object> CreateSaveDataAsDictionary ( IEnumerable<Tchild> children, BindingsSaveContext context )
 		=> children.ToDictionary( GetKey, e => e.CreateSaveData( context ) );
+
+	protected void LoadChildren ( IDictionary<K, object> children, BindingsSaveContext context, Func<JsonElement, K, BindingsSaveContext, Tchild?> factory )
+		=> LoadChildren<JsonElement>( children, context, factory );
+	protected void LoadChildren<Tdata> ( IDictionary<K, object> children, BindingsSaveContext context, Func<Tdata, K, BindingsSaveContext, Tchild?> factory, JsonSerializerOptions? options = null ) {
+		foreach ( (K key, object i) in children ) {
+			if ( !( (JsonElement)i ).DeserializeBindingData<Tdata>( context, out var data, options ) )
+				continue;
+
+			var child = factory( data, key, context );
+			// TODO validate key
+			if ( child != null )
+				Add( child );
+		}
+	}
 }
