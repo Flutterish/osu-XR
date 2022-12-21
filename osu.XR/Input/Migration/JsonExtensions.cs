@@ -32,7 +32,18 @@ public static class JsonExtensions
         if ( !GetMigrant( typeof(T) ).Migrate( json, context, out value, options ) )
             return false;
 
-        // TODO validate nullability
+		foreach ( var i in typeof(T).GetFields( BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance ) ) {
+			if ( !i.IsNullable() && i.GetValue( value ) == null ) {
+				context.Error( $@"Invalid binding data - '{i.Name}' must be present", value );
+				return false;
+			}
+		}
+		foreach ( var i in typeof(T).GetProperties( BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance ).Where( x => x.CanRead && x.GetIndexParameters().Length == 0 ) ) {
+			if ( !i.IsNullable() && i.GetValue( value ) == null ) {
+				context.Error( $@"Invalid binding data - '{i.Name}' must be present", value );
+				return false;
+			}
+		}
         return true;
     }
 
@@ -55,7 +66,8 @@ public static class JsonExtensions
 				value = json.Deserialize<T>( options ?? defaultOptions );
 				return value != null;
 			}
-			catch {
+			catch ( Exception e ) {
+				context.Error( @"Could not load binding data", json, e );
 				value = default;
 				return false;
 			}
@@ -66,14 +78,14 @@ public static class JsonExtensions
 				value = json.Deserialize( type, options ?? defaultOptions );
 				return value != null;
 			}
-			catch {
+			catch ( Exception e ) {
+				context.Error( @"Could not load binding data", json, e );
 				value = default;
 				return false;
 			}
 		}
 
 		public bool Migrate<T> ( JsonElement json, BindingsSaveContext context, [NotNullWhen(true)] out T? value, JsonSerializerOptions? options = null ) {
-            // TODO report errors
             if ( !formatbyVersion.Any() ) {
                 return Deserialize( json, context, out value, options );
 			}
@@ -83,6 +95,7 @@ public static class JsonExtensions
                 versionContainer = json.Deserialize<VersionContainer>( defaultOptions );
             }
             catch {
+				context.Error( @"Could not load binding version", json );
 				value = default;
 				return false;
 			}
@@ -93,6 +106,7 @@ public static class JsonExtensions
 			}
 
             if ( !formatbyVersion.TryGetValue( version, out var formatData ) ) {
+				context.Error( @"Unknown binding data version", json );
 				value = default;
 				return false;
 			}

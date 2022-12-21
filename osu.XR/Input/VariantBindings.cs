@@ -25,7 +25,22 @@ public class VariantBindings : UniqueCompositeActionBinding<IHasBindingType, (Bi
 	public static VariantBindings? Load ( JsonElement data, int variant, BindingsSaveContext context ) => Load<VariantBindings, SaveData>( data, context.SetVaraint( variant ), static (save, ctx) => {
 		var variant = new VariantBindings( ctx.Variant );
 		var checksum = ctx.ActionsChecksum( ctx.Variant );
-		// TODO actions checksum
+		var declared = save.Actions;
+		if ( declared is null ) {
+			ctx.Warning( @"Variant does not have an action checksum", save );
+		}
+		else {
+			if ( declared.Values.Except( checksum.Values ).Any() ) {
+				ctx.Warning( @"Variant action checksum has non-existent actions", save );
+			}
+			else if ( declared.Except( checksum ).Any() ) {
+				ctx.Warning( @"Variant action checksum is invalid", save );
+			}
+			// TODO try to fix this?
+		}
+		if ( ctx.VariantName( ctx.Variant ) != save.Name ) {
+			ctx.Warning( @"Variant name mismatch", save );
+		}
 		variant.LoadChildren( save.Bindings, ctx, static (data, ctx) => {
 			if ( !data.DeserializeBindingData<ChildSaveData>( ctx, out var childData ) )
 				return null;

@@ -40,9 +40,10 @@ public abstract class CompositeActionBinding<Tchild> : ActionBinding where Tchil
 				continue;
 
 			var child = factory( data, context );
-			// TODO report invalid children
 			if ( child != null )
 				Add( child );
+			else
+				context.Error( @"Could not load a binding", data );
 		}
 	}
 
@@ -110,9 +111,17 @@ public abstract class UniqueCompositeActionBinding<Tchild, K> : CompositeActionB
 				continue;
 
 			var child = factory( data, key, context );
-			// TODO validate key
-			if ( child != null )
-				Add( child );
+			if ( child != null ) {
+				if ( !GetKey( child ).Equals( key ) ) {
+					context.Warning( @"Mismatched binding identifiers", data );
+				}
+				if ( !Add( child ) ) {
+					context.Error( @"Duplicate binding found", data );
+				}
+			}
+			else {
+				context.Error( @"Could not load a binding", data );
+			}
 		}
 	}
 }

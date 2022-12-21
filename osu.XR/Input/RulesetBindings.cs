@@ -19,9 +19,21 @@ public class RulesetBindings : UniqueCompositeActionBinding<VariantBindings, int
 			if ( toBeLoaded is not SaveData save )
 				return;
 
-			var ctx = new BindingsSaveContext();
-			var checksum = ctx.VariantsChecksum( value );
-			// TODO validate variants
+			var checksum = ctx!.VariantsChecksum( value );
+			var declared = save.VariantNames;
+			if ( declared is null ) {
+				ctx.Warning( @"Ruleset does not have a variant checksum", save );
+			}
+			else {
+				if ( declared.Values.Except( checksum.Values ).Any() ) {
+					ctx.Warning( @"Ruleset action checksum has non-existent variants", save );
+				}
+				else if ( declared.Except( checksum ).Any() ) {
+					ctx.Warning( @"Ruleset action action checksum is invalid" , save );
+				}
+				// TODO try to fix this?
+			}
+
 			LoadChildren( save.Variants, ctx, VariantBindings.Load );
 
 			toBeLoaded = null;
@@ -29,13 +41,18 @@ public class RulesetBindings : UniqueCompositeActionBinding<VariantBindings, int
 	}
 
 	SaveData? toBeLoaded;
+	BindingsSaveContext? ctx;
 	public string ShortName { get; private set; }
 	public RulesetBindings ( string shortName ) {
 		ShortName = shortName;
 	}
+
+	public override bool ShouldBeSaved => base.ShouldBeSaved || toBeLoaded != null; // TODO we probably want to generalise this to everything so things dont get erased
+
 	public static RulesetBindings? Load ( JsonElement data, BindingsSaveContext ctx ) => Load<RulesetBindings, SaveData>( data, ctx, static (save, ctx) => {
 		return new RulesetBindings( save.Name ) {
-			toBeLoaded = save
+			toBeLoaded = save,
+			ctx = ctx
 		};
 	} );
 
