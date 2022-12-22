@@ -1,4 +1,6 @@
-﻿using osu.Framework.XR.VirtualReality;
+﻿using osu.Framework.Localisation;
+using osu.Framework.Logging;
+using osu.Framework.XR.VirtualReality;
 using osu.Framework.XR.VirtualReality.Devices;
 using osu.XR.Input.Actions;
 
@@ -13,29 +15,43 @@ public partial class ActionBindingHandler : CompositeComponent {
 	protected VrInput Input { get; private set; } = null!;
 	[Resolved(canBeNull: true)]
 	protected InjectedInput? Target { get; private set; }
+	public readonly IActionBinding Source;
+	new public virtual LocalisableString Name => Source.Name;
+	public ActionBindingHandler ( IActionBinding source ) {
+		Source = source;
+	}
 
 	List<(Bindable<object?> action, Bindable<bool> state)> boundActions = new();
 	protected void RegisterAction ( RulesetAction action, Bindable<bool> state ) {
 		Bindable<object?> ownAction = new() { BindTarget = action };
 		boundActions.Add( (ownAction, state) );
 
+		void press ( object action ) {
+			Logger.Log( $@"Trigerred {action} with {Name}", "osu!xr-input", LogLevel.Debug );
+			ActionPressed?.Invoke( action );
+		}
+		void release ( object action ) {
+			Logger.Log( $@"Released {action} with {Name}", "osu!xr-input", LogLevel.Debug );
+			ActionReleased?.Invoke( action );
+		}
+
 		ownAction.BindValueChanged( v => {
 			if ( !state.Value )
 				return;
 
 			if ( v.OldValue != null )
-				ActionReleased?.Invoke( v.OldValue );
+				release( v.OldValue );
 			if ( v.NewValue != null )
-				ActionPressed?.Invoke( v.NewValue );
+				press( v.NewValue );
 		} );
 		state.BindValueChanged( v => {
 			if ( ownAction.Value is null )
 				return;
 
 			if ( v.NewValue )
-				ActionPressed?.Invoke( ownAction.Value );
+				press( ownAction.Value );
 			else
-				ActionReleased?.Invoke( ownAction.Value );
+				release( ownAction.Value );
 		} );
 	}
 	public event Action<object>? ActionPressed;
@@ -55,6 +71,7 @@ public partial class ActionBindingHandler : CompositeComponent {
 	}
 
 	List<Action<VrDevice>> disposeActions = new();
+
 	protected void GetDevice ( Func<VrDevice, bool> validator ) {
 		void perform () {
 			foreach ( var i in VR.TrackedDevices ) {

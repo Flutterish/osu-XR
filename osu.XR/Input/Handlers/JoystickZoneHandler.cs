@@ -7,7 +7,7 @@ public partial class JoystickZoneHandler : JoystickHandler {
 	BindableDouble startAngle = new();
 	BindableDouble arc = new();
 	BindableDouble deadzone = new();
-	public JoystickZoneHandler ( JoystickZoneBinding source ) : base( source.Parent?.Hand ) {
+	public JoystickZoneHandler ( JoystickZoneBinding source ) : base( source.Parent?.Hand, source ) {
 		startAngle.BindTo( source.StartAngle );
 		arc.BindTo( source.Arc );
 		deadzone.BindTo( source.Deadzone );

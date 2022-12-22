@@ -8,7 +8,7 @@ public partial class ClapHandler : ActionBindingHandler {
 	Controller? left;
 	Controller? right;
 	ClapBinding source;
-	public ClapHandler ( ClapBinding source ) {
+	public ClapHandler ( ClapBinding source ) : base( source ) {
 		this.source = source;
 		GetController( Hand.Left, c => left = c );
 		GetController( Hand.Right, c => right = c );

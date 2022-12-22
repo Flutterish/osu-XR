@@ -3,7 +3,7 @@
 public partial class CompositeHandler<Tchild> : ActionBindingHandler where Tchild : IActionBinding {
 	BindableList<Tchild> children = new();
 	Dictionary<Tchild, ActionBindingHandler> childHandlers = new();
-	public CompositeHandler ( CompositeActionBinding<Tchild> source ) {
+	public CompositeHandler ( CompositeActionBinding<Tchild> source ) : base( source ) {
 		children.BindTo( source.Children );
 		children.BindCollectionChanged( (_, e) => {
 			if ( e.OldItems != null ) {

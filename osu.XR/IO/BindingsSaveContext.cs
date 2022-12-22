@@ -87,18 +87,18 @@ public class BindingsSaveContext {
 	public readonly BindableList<Message> Messages = new(); // TODO forward this to notifications
 	public void Log ( LocalisableString text, object? context = null ) {
 		Messages.Add( new() { Severity = Severity.Log, Text = text, Context = context, Ruleset = Ruleset, Variant = Variant } );
-		Logger.Log( $"{text} - {Ruleset} (Variant {Variant}) - {context}" );
+		Logger.Log( $"{text} - {Ruleset} (Variant {Variant}) - {context}", "osu!xr-runtime" );
 	}
 	public void Warning ( LocalisableString text, object? context = null ) {
 		Messages.Add( new() { Severity = Severity.Warning, Text = text, Context = context, Ruleset = Ruleset, Variant = Variant } );
-		Logger.Log( $"{text} - {Ruleset} (Variant {Variant}) - {context}", level: LogLevel.Important );
+		Logger.Log( $"{text} - {Ruleset} (Variant {Variant}) - {context}", "osu!xr-runtime", level: LogLevel.Important );
 	}
 	public void Error ( LocalisableString text, object? context = null, Exception? exception = null ) {
 		Messages.Add( new() { Severity = Severity.Error, Text = text, Context = context, Ruleset = Ruleset, Variant = Variant, Exception = exception } );
 		if ( exception != null )
-			Logger.Error( exception, $"{text} - {Ruleset} (Variant {Variant}) - {context}", recursive: true );
+			Logger.Error( exception, $"{text} - {Ruleset} (Variant {Variant}) - {context}", "osu!xr-runtime", recursive: true );
 		else
-			Logger.Log( $"{text} - {Ruleset} (Variant {Variant}) - {context}", level: LogLevel.Error );
+			Logger.Log( $"{text} - {Ruleset} (Variant {Variant}) - {context}", "osu!xr-runtime", level: LogLevel.Error );
 	}
 
 	public struct Message {
