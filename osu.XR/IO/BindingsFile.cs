@@ -1,6 +1,8 @@
 ﻿using osu.Framework.Localisation;
+using osu.Framework.Platform;
 using osu.XR.Input;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace osu.XR.IO;
 
@@ -24,6 +26,26 @@ public class BindingsFile : UniqueCompositeActionBinding<RulesetBindings, string
 		file.LoadChildren( save.Rulesets, ctx, RulesetBindings.Load );
 		return file;
 	} );
+
+	public static BindingsFile LoadFromStorage ( Storage storage, string filename, BindingsSaveContext ctx ) {
+		if ( !storage.Exists( filename ) )
+			return new();
+
+		using var stream = storage.GetStream( filename, FileAccess.Read, FileMode.Open );
+		var data = JsonSerializer.Deserialize<JsonElement>( stream );
+		return Load( data, ctx ) ?? new();
+	}
+
+	public void SaveToStorage ( Storage storage, string filename, BindingsSaveContext ctx ) {
+		var opts = new JsonSerializerOptions {
+			IncludeFields = true,
+			WriteIndented = true,
+			DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+		};
+		opts.Converters.Add( new JsonStringEnumConverter() );
+		using var stream = storage.CreateFileSafely( filename );
+		JsonSerializer.Serialize( stream, CreateSaveData( ctx ), opts );
+	}
 
 	public struct SaveData {
 		public string Name;

@@ -73,6 +73,20 @@ public partial class OsuXrGameBase : Framework.Game {
 		dependencies.CacheAs( storage );
 		config = new();
 		dependencies.CacheAs( config );
+		Bindings.Value = BindingsFile.LoadFromStorage( storage, "Bindings.json", new() );
+	}
+
+	protected override bool OnExiting () {
+		if ( !Bindings.IsDefault ) {
+			if ( storage.Exists( "Bindings.json~" ) )
+				storage.Delete( "Bindings.json~" );
+			if ( storage.Exists( "Bindings.json" ) )
+				storage.Move( "Bindings.json", "Bindings.json~" );
+
+			Bindings.Value.SaveToStorage( storage, "Bindings.json", new() );
+		}
+
+		return base.OnExiting();
 	}
 
 	protected override void LoadComplete () {
