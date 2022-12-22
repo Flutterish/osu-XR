@@ -1,4 +1,5 @@
 ﻿using OpenVR.NET;
+using osu.Framework.Configuration;
 using osu.Framework.Platform;
 using osu.Framework.XR.Testing.VirtualReality;
 using osu.Framework.XR.VirtualReality;
@@ -52,16 +53,6 @@ public partial class OsuXrGameBase : Framework.Game {
 
 		Add( Compositor );
 		Compositor.Input.SetActionManifest( new OsuXrActionManifest() );
-
-		//Bindings.Value.SettingsChanged += () => {
-		//	var opts = new JsonSerializerOptions {
-		//		IncludeFields = true,
-		//		WriteIndented = true,
-		//		DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-		//	};
-		//	opts.Converters.Add( new JsonStringEnumConverter() );
-		//	File.WriteAllText( "C:\\Users\\Charm\\AppData\\Roaming\\osu\\XR\\test.json", System.Text.Json.JsonSerializer.Serialize( Bindings.Value.CreateSaveData( new() ), opts ) );
-		//};
 	}
 
 	Storage storage = null!;
@@ -70,6 +61,11 @@ public partial class OsuXrGameBase : Framework.Game {
 	DependencyContainer dependencies = null!;
 	protected override IReadOnlyDependencyContainer CreateChildDependencies ( IReadOnlyDependencyContainer parent )
 		=> dependencies = new DependencyContainer( base.CreateChildDependencies( parent ) );
+
+	protected override IDictionary<FrameworkSetting, object> GetFrameworkConfigDefaults () {
+		Logging.LogAsOsuXr();
+		return base.GetFrameworkConfigDefaults();
+	}
 
 	[BackgroundDependencyLoader]
 	private void load ( GameHost host ) {
