@@ -47,7 +47,7 @@ public class RulesetBindings : UniqueCompositeActionBinding<VariantBindings, int
 		ShortName = shortName;
 	}
 
-	public override bool ShouldBeSaved => base.ShouldBeSaved || toBeLoaded != null; // TODO we probably want to generalise this to everything so things dont get erased
+	public override bool ShouldBeSaved => base.ShouldBeSaved || toBeLoaded != null;
 
 	public static RulesetBindings? Load ( JsonElement data, BindingsSaveContext ctx ) => Load<RulesetBindings, SaveData>( data, ctx, static (save, ctx) => {
 		return new RulesetBindings( save.Name ) {

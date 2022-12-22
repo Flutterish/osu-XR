@@ -1,5 +1,6 @@
 ﻿using osu.Framework.XR.VirtualReality;
 using osu.Framework.XR.VirtualReality.Devices;
+using osu.XR.Input.Actions;
 
 namespace osu.XR.Input.Handlers;
 
@@ -14,7 +15,7 @@ public partial class ActionBindingHandler : CompositeComponent {
 	protected InjectedInput? Target { get; private set; }
 
 	List<(Bindable<object?> action, Bindable<bool> state)> boundActions = new();
-	protected void RegisterAction ( Bindable<object?> action, Bindable<bool> state ) {
+	protected void RegisterAction ( RulesetAction action, Bindable<bool> state ) {
 		Bindable<object?> ownAction = new() { BindTarget = action };
 		boundActions.Add( (ownAction, state) );
 

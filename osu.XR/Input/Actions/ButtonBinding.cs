@@ -11,12 +11,12 @@ namespace osu.XR.Input.Actions;
 
 public class ButtonBinding : ActionBinding, IHasBindingType, IIsHanded {
 	public override LocalisableString Name => Hand is Hand.Left ? TypesStrings.ButtonsLeft : TypesStrings.ButtonsRight;
-	public override bool ShouldBeSaved => Primary.Value != null || Secondary.Value != null;
+	public override bool ShouldBeSaved => Primary.ShouldBeSaved || Secondary.ShouldBeSaved;
 	public override Drawable CreateEditor () => new ButtonEditor( this );
 	public override ButtonsHandler CreateHandler () => new( this );
 
-	public readonly Bindable<object?> Primary = new();
-	public readonly Bindable<object?> Secondary = new();
+	public readonly RulesetAction Primary = new();
+	public readonly RulesetAction Secondary = new();
 
 	public readonly Hand Hand;
 	Hand IIsHanded.Hand => Hand;
@@ -36,8 +36,8 @@ public class ButtonBinding : ActionBinding, IHasBindingType, IIsHanded {
 
 	public static ButtonBinding? Load ( JsonElement data, BindingsSaveContext ctx ) => Load<ButtonBinding, SaveData>( data, ctx, static (save, ctx) => {
 		var buttons = new ButtonBinding( save.Hand );
-		buttons.Primary.Value = ctx.LoadAction( save.Primary );
-		buttons.Secondary.Value = ctx.LoadAction( save.Secondary );
+		ctx.LoadAction( buttons.Primary, save.Primary );
+		ctx.LoadAction( buttons.Secondary, save.Secondary );
 		return buttons;
 	} );
 

@@ -12,19 +12,30 @@ public class VariantBindings : UniqueCompositeActionBinding<IHasBindingType, (Bi
 	protected override (BindingType, Hand?) GetKey ( IHasBindingType action ) => (action.Type, action is IIsHanded handed ? handed.Hand : null);
 
 	public readonly int Variant;
+	SaveData? unloaded;
 	public VariantBindings ( int variant ) {
 		Variant = variant;
 	}
 
-	protected override object CreateSaveData ( IEnumerable<IHasBindingType> children, BindingsSaveContext context ) => new SaveData {
+	public override bool ShouldBeSaved => base.ShouldBeSaved || unloaded != null;
+
+	protected override object CreateSaveData ( IEnumerable<IHasBindingType> children, BindingsSaveContext context ) => unloaded ?? new SaveData {
 		Name = context.VariantName( Variant ),
 		Actions = context.ActionsChecksum( Variant ),
 		Bindings = CreateSaveDataAsArray( children, context )
 	};
 
 	public static VariantBindings? Load ( JsonElement data, int variant, BindingsSaveContext context ) => Load<VariantBindings, SaveData>( data, context.SetVaraint( variant ), static (save, ctx) => {
-		var variant = new VariantBindings( ctx.Variant );
-		var checksum = ctx.ActionsChecksum( ctx.Variant );
+		var variant = ctx.Variant!.Value;
+		if ( !ctx.Ruleset!.AvailableVariants.Contains( variant ) ) {
+			ctx.Error( $@"Could not load variant {variant}", save );
+			return new VariantBindings( variant ) {
+				unloaded = save
+			};
+		}
+
+		var bindings = new VariantBindings( variant );
+		var checksum = ctx.ActionsChecksum( variant );
 		var declared = save.Actions;
 		if ( declared is null ) {
 			ctx.Warning( @"Variant does not have an action checksum", save );
@@ -38,10 +49,10 @@ public class VariantBindings : UniqueCompositeActionBinding<IHasBindingType, (Bi
 			}
 			// TODO try to fix this?
 		}
-		if ( ctx.VariantName( ctx.Variant ) != save.Name ) {
+		if ( ctx.VariantName( variant ) != save.Name ) {
 			ctx.Warning( @"Variant name mismatch", save );
 		}
-		variant.LoadChildren( save.Bindings, ctx, static (data, ctx) => {
+		bindings.LoadChildren( save.Bindings, ctx, static (data, ctx) => {
 			if ( !data.DeserializeBindingData<ChildSaveData>( ctx, out var childData ) )
 				return null;
 
@@ -52,7 +63,7 @@ public class VariantBindings : UniqueCompositeActionBinding<IHasBindingType, (Bi
 				_ => null
 			};
 		} );
-		return variant;
+		return bindings;
 	} );
 
 	[MigrateFrom(typeof(V1ChildSaveData), "[Initial]")]

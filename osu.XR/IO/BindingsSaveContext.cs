@@ -1,12 +1,13 @@
 ﻿using osu.Framework.Localisation;
 using osu.Framework.Logging;
 using osu.Game.Rulesets;
+using osu.XR.Input.Actions;
 
 namespace osu.XR.IO;
 
 public class BindingsSaveContext {
 	public Ruleset? Ruleset;
-	public int Variant;
+	public int? Variant;
 
 	public BindingsSaveContext SetVaraint ( int value ) {
 		Variant = value;
@@ -14,6 +15,7 @@ public class BindingsSaveContext {
 	}
 	public BindingsSaveContext SetRuleset ( Ruleset? value ) {
 		Ruleset = value;
+		Variant = null;
 		return this;
 	}
 
@@ -29,9 +31,10 @@ public class BindingsSaveContext {
 		};
 	}
 
-	public object? LoadAction ( ActionData? data ) {
+	public bool LoadAction ( RulesetAction action, ActionData? data ) {
 		if ( data is not ActionData save )
-			return null;
+			return false;
+		action.NotLoaded = save;
 
 		if ( !actions.TryGetValue( save.ID, out var byId ) ) {
 			Warning( $@"Could not load action '{save.Name}' by ID", save );
@@ -42,23 +45,26 @@ public class BindingsSaveContext {
 		if ( byId == byName ) {
 			if ( byId == null ) {
 				Error( $@"Could not load action '{save.Name}'", save );
-				return null;
+				return false;
 			}
-			return byName;
+			action.Value = byName;
+			return true;
 		}
 		if ( byName != null ) {
 			Warning( $@"Mismatched action name and ID, loading '{save.Name}' based on name", save );
-			return byName;
+			action.Value = byName;
+			return true;
 		}
 		else {
 			if ( byId!.ToString() != save.Name )
 				Warning( $@"Action '{save.Name}' loaded by ID has mismatched name ({byId})", save );
-			return byId;
+			action.Value = byId;
+			return true;
 		}
 	}
 
 	public Dictionary<int, string> VariantsChecksum ( Ruleset ruleset ) {
-		Ruleset = ruleset;
+		SetRuleset( ruleset );
 		return ruleset.AvailableVariants.ToDictionary( x => x, x => ruleset.GetVariantName(x).ToString() );
 	}
 
@@ -69,7 +75,7 @@ public class BindingsSaveContext {
 	Dictionary<object, int> indices = null!;
 	Dictionary<string, object> names = null!;
 	public Dictionary<int, string> ActionsChecksum ( int variant ) {
-		Variant = variant;
+		SetVaraint( variant );
 
 		actions = Ruleset!.GetDefaultKeyBindings( variant ).Select( x => x.Action ).Distinct().Select( ( x, i ) => (x, i) )
 			.ToDictionary( x => x.i, x => x.x );
@@ -101,7 +107,7 @@ public class BindingsSaveContext {
 		public object? Context;
 		public Exception? Exception;
 		public Ruleset? Ruleset;
-		public int Variant;
+		public int? Variant;
 	}
 }
 

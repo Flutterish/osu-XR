@@ -9,7 +9,7 @@ namespace osu.XR.Input.Actions;
 
 public class JoystickZoneBinding : ActionBinding, IJoystickBinding {
 	public override LocalisableString Name => JoystickStrings.Zone;
-	public override bool ShouldBeSaved => Action.Value != null;
+	public override bool ShouldBeSaved => Action.ShouldBeSaved;
 	public JoystickBindingType Type => JoystickBindingType.Zone;
 	public JoystickBindings? Parent { get; set; }
 	public override JoystickZoneEditor CreateEditor () => new JoystickZoneEditor( this );
@@ -18,7 +18,7 @@ public class JoystickZoneBinding : ActionBinding, IJoystickBinding {
 	public readonly BindableDouble StartAngle = new( -30 );
 	public readonly BindableDouble Arc = new( 60 ) { MinValue = 0, MaxValue = 360 };
 	public readonly BindableDouble Deadzone = new( 0.4 ) { MinValue = 0, MaxValue = 1 };
-	public readonly Bindable<object?> Action = new();
+	public readonly RulesetAction Action = new();
 
 	public JoystickZoneBinding () {
 		TrackSetting( StartAngle );
@@ -36,7 +36,7 @@ public class JoystickZoneBinding : ActionBinding, IJoystickBinding {
 
 	public static JoystickZoneBinding? Load ( JsonElement data, BindingsSaveContext ctx ) => Load<JoystickZoneBinding, SaveData>( data, ctx, static (save, ctx) => {
 		var zone = new JoystickZoneBinding();
-		zone.Action.Value = ctx.LoadAction( save.Action );
+		ctx.LoadAction( zone.Action, save.Action );
 		zone.StartAngle.Value = save.StartAngle;
 		zone.Arc.Value = save.Arc;
 		zone.Deadzone.Value = save.Deadzone;
