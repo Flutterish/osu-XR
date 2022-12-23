@@ -31,20 +31,31 @@ public class BindingsFile : UniqueCompositeActionBinding<RulesetBindings, string
 		if ( !storage.Exists( filename ) )
 			return new();
 
-		using var stream = storage.GetStream( filename, FileAccess.Read, FileMode.Open );
-		var data = JsonSerializer.Deserialize<JsonElement>( stream );
-		return Load( data, ctx ) ?? new();
+		try {
+			using var stream = storage.GetStream( filename, FileAccess.Read, FileMode.Open );
+			var data = JsonSerializer.Deserialize<JsonElement>( stream );
+			return Load( data, ctx ) ?? new();
+		}
+		catch ( Exception e ) {
+			ctx.Error( @"Failed to load bindings", filename, e );
+			return new();
+		}
 	}
 
 	public void SaveToStorage ( Storage storage, string filename, BindingsSaveContext ctx ) {
-		var opts = new JsonSerializerOptions {
-			IncludeFields = true,
-			WriteIndented = true,
-			DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-		};
-		opts.Converters.Add( new JsonStringEnumConverter() );
-		using var stream = storage.CreateFileSafely( filename );
-		JsonSerializer.Serialize( stream, CreateSaveData( ctx ), opts );
+		try {
+			var opts = new JsonSerializerOptions {
+				IncludeFields = true,
+				WriteIndented = true,
+				DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+			};
+			opts.Converters.Add( new JsonStringEnumConverter() );
+			using var stream = storage.CreateFileSafely( filename );
+			JsonSerializer.Serialize( stream, CreateSaveData( ctx ), opts );
+		}
+		catch ( Exception e ) {
+			ctx.Error( @"Failed to save bindings", filename, e );
+		}
 	}
 
 	public struct SaveData {
