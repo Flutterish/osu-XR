@@ -95,6 +95,6 @@ public struct DustParticle : IHasMatrix {
 	public Vector3 Position => InitialPosition + Velocity * Lifetime;
 	public Vector3 Velocity;
 
-	public float Scale => ( MathF.Sin( Lifetime / TotalLifetime * MathF.PI ) + 1 ) / 2;
+	public float Scale => ( MathF.Sin( Lifetime / TotalLifetime * MathF.PI ) + 1 ) / 4;
 	public Matrix4 Matrix => Matrix4.CreateScale( 0.03f * Scale ) * Matrix4.CreateTranslation( Position );
 }
