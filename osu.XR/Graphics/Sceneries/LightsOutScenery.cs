@@ -20,10 +20,8 @@ public partial class LightsOutScenery : Scenery {
 		bindableBeat.ValueChanged += v => {
 			this.TransformBindableTo( velocity, (float)v.NewValue.AverageAmplitude * (float)v.NewValue.TimingPoint.BPM / 30, 100 );
 			foreach ( var child in clockwise.Children.Concat( counterClockwise.Children ) ) {
-				child.FinishTransforms();
-				var tint = (Color4)child.Colour.TopLeft;
-				var flash = Interpolation.ValueAt( 0.4f, tint, Color4.White, 0, 1 );
-				child.FadeColour( flash ).Then().FadeColour( tint, v.NewValue.TimingPoint.BeatLength * 2 / 3, Easing.Out );
+				var flash = Interpolation.ValueAt( 0.4f, child.Tint, Color4.White, 0, 1 );
+				child.FlashColour( flash, v.NewValue.TimingPoint.BeatLength * 2 / 3, Easing.Out );
 			}
 		};
 	}

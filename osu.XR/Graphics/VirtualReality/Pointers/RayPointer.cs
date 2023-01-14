@@ -1,7 +1,7 @@
 ﻿using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Physics;
 
-namespace osu.XR.Graphics.VirtualReality;
+namespace osu.XR.Graphics.VirtualReality.Pointers;
 
 public partial class RayPointer : CompositeDrawable3D, IPointer {
 	[Resolved]

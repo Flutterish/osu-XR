@@ -8,7 +8,8 @@ public class OsuXrActionManifest : ActionManifest<VrActionCategory, VrAction> {
 			new() { Type = ActionSetType.LeftRight, Name = VrActionCategory.General },
 			new() { Type = ActionSetType.LeftRight, Name = VrActionCategory.Poses },
 			new() { Type = ActionSetType.LeftRight, Name = VrActionCategory.Configuration },
-			new() { Type = ActionSetType.LeftRight, Name = VrActionCategory.Haptics }
+			new() { Type = ActionSetType.LeftRight, Name = VrActionCategory.Haptics },
+			new() { Type = ActionSetType.LeftRight, Name = VrActionCategory.Skeleton }
 		};
 		Actions = new() {
 			new() { Category = VrActionCategory.General, Name = VrAction.LeftButton, Type = ActionType.Boolean },
@@ -20,7 +21,10 @@ public class OsuXrActionManifest : ActionManifest<VrActionCategory, VrAction> {
 
 			new() { Category = VrActionCategory.Haptics, Name = VrAction.Feedback, Type = ActionType.Vibration },
 
-			new() { Category = VrActionCategory.Poses, Name = VrAction.ControllerTip, Type = ActionType.Pose }
+			new() { Category = VrActionCategory.Poses, Name = VrAction.ControllerTip, Type = ActionType.Pose },
+
+			new() { Category = VrActionCategory.Skeleton, Name = VrAction.LeftHandSkeleton, Type = ActionType.LeftHandSkeleton },
+			new() { Category = VrActionCategory.Skeleton, Name = VrAction.RightHandSkeleton, Type = ActionType.RightHandSkeleton }
 		};
 	}
 }
@@ -29,7 +33,8 @@ public enum VrActionCategory {
 	General,
 	Poses,
 	Configuration,
-	Haptics
+	Haptics,
+	Skeleton
 }
 
 public enum VrAction {
@@ -42,5 +47,8 @@ public enum VrAction {
 
 	ToggleMenu,
 
-	Feedback
+	Feedback,
+
+	LeftHandSkeleton,
+	RightHandSkeleton
 }

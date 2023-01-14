@@ -1,5 +1,6 @@
 ﻿using osu.Framework.Localisation;
 using osu.XR.Localisation.Config.Input;
+using System.ComponentModel;
 
 namespace osu.XR.Configuration;
 
@@ -11,5 +12,8 @@ public enum InputMode {
 	DoublePointer,
 
 	[LocalisableDescription(typeof(ModeStrings), nameof(ModeStrings.Touch))]
-	TouchScreen
+	TouchScreen,
+
+	[Description(@"Touchscreen (hand skeleton)")]
+	FingerTouchScreen
 }

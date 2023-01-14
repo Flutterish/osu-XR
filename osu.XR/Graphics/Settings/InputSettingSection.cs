@@ -30,7 +30,10 @@ public partial class InputSettingSection : SettingsSection {
 				LabelText = Localisation.Config.Input.TouchDeadzoneStrings.Label, 
 				TooltipText = Localisation.Config.Input.TouchDeadzoneStrings.Tooltip
 			}.PresetComponent( config, OsuXrSetting.Deadzone ), // TODO touch deadzone
-			new SettingsEnumDropdown<HandSetting> { 
+			new SettingsEnumDropdown<MotionRange> {
+				LabelText = @"Hand skeletion motion range"
+			}.PresetComponent( config, OsuXrSetting.HandSkeletonMotionRange ),
+			new SettingsEnumDropdown<HandSetting> {
 				LabelText = Localisation.Config.Input.MainHandStrings.Label
 			}.PresetComponent( config, OsuXrSetting.DominantHand ),
 			new SettingsCheckbox { 

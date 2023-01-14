@@ -21,7 +21,9 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 
 		SetDefault( OsuXrSetting.DisableTeleport, false );
 		SetDefault( OsuXrSetting.DominantHand, HandSetting.Auto );
+		SetDefault( OsuXrSetting.HandSkeletonMotionRange, MotionRange.WithController );
 		SetDefault( OsuXrSetting.ShadowType, FeetSymbols.None );
+
 		SetDefault( OsuXrSetting.ShowDust, true );
 		SetDefault( OsuXrSetting.SceneryType, SceneryType.Solid );
 		base.InitialiseDefaults();

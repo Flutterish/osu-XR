@@ -14,6 +14,7 @@ public enum OsuXrSetting {
 	ScreenResolutionY,
 
 	DominantHand,
+	HandSkeletonMotionRange,
 
 	DisableTeleport,
 	ShadowType,

@@ -2,7 +2,7 @@
 using osu.Framework.XR.Graphics.Meshes;
 using osu.Framework.XR.Physics;
 
-namespace osu.XR.Graphics.VirtualReality;
+namespace osu.XR.Graphics.VirtualReality.Pointers;
 
 public partial class TouchPointer : Model, IPointer {
 	[Resolved]
@@ -49,6 +49,6 @@ public partial class TouchPointer : Model, IPointer {
 	public bool IsTouchSource => true;
 
 	public void SetTint ( Colour4 tint ) {
-		Colour = tint.Opacity( Alpha );
+		Colour = tint.Opacity( 0.3f );
 	}
 }
