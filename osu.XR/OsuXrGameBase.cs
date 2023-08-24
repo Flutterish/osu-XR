@@ -71,8 +71,9 @@ public partial class OsuXrGameBase : Framework.Game {
 	private void load ( GameHost host ) {
 		storage = host.Storage.GetStorageForDirectory( "XR" );
 		dependencies.CacheAs( storage );
-		config = new();
+		config = new( storage );
 		dependencies.CacheAs( config );
+		config.Load();
 		Bindings.Value = BindingsFile.LoadFromStorage( storage, "Bindings.json", new() );
 	}
 
@@ -85,6 +86,8 @@ public partial class OsuXrGameBase : Framework.Game {
 
 			Bindings.Value.SaveToStorage( storage, "Bindings.json", new() );
 		}
+
+		config.Save();
 
 		return base.OnExiting();
 	}

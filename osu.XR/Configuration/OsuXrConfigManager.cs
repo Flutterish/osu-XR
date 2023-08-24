@@ -1,4 +1,5 @@
 ﻿using osu.Framework.Graphics.UserInterface;
+using osu.Framework.Platform;
 using osu.Game.Configuration;
 using osu.XR.Graphics.Settings;
 using System.Globalization;
@@ -6,6 +7,11 @@ using System.Globalization;
 namespace osu.XR.Configuration;
 
 public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
+	Storage Storage;
+	public OsuXrConfigManager ( Storage storage ) {
+		Storage = storage;
+	}
+	
 	protected override void InitialiseDefaults () {
 		SetDefault( OsuXrSetting.InputMode, InputMode.SinglePointer );
 		SetDefault( OsuXrSetting.TouchPointers, false );
@@ -27,16 +33,74 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 		SetDefault( OsuXrSetting.ShowDust, true );
 		SetDefault( OsuXrSetting.SceneryType, SceneryType.Solid );
 		base.InitialiseDefaults();
-
-		PerformLoad();
 	}
 
 	protected override void PerformLoad () {
-		base.PerformLoad();
+		if ( Storage.Exists( "XrSettings.json" ) ) {
+			LoadPreset( load( Storage, "XrSettings.json" ) );
+		}
 
-		Presets.Add( DefaultPreset );
-		Presets.Add( PresetTouchscreenBig );
-		Presets.Add( PresetTouchscreenSmall );
+		if ( !Storage.ExistsDirectory( "Presets" ) ) {
+			Presets.Add( DefaultPreset );
+			Presets.Add( PresetTouchscreenBig );
+			Presets.Add( PresetTouchscreenSmall );
+			return;
+		}
+
+		var presetStorage = Storage.GetStorageForDirectory( "Presets" );
+		foreach ( var i in presetStorage.GetFiles( "." ) ) {
+			if ( i.EndsWith( "~" ) )
+				continue;
+
+			Presets.Add( load( presetStorage, i ) );
+		}
+	}
+
+	ConfigurationPreset<OsuXrSetting> load ( Storage storage, string file ) {
+		var preset = CreateFullPreset();
+
+		using ( var stream = storage.GetStream( file, FileAccess.Read, FileMode.Open ) ) {
+			using var reader = new StreamReader( stream );
+			preset.Parse( reader.ReadToEnd() );
+		}
+
+		return preset;
+	}
+
+	protected override bool PerformSave () {
+		if ( Storage.Exists( "XrSettings.json" + "~" ) )
+			Storage.Delete( "XrSettings.json" + "~" );
+		write( Storage, "XrSettings.json", CreateFullPreset().Stringify() );
+
+		var presetStorage = Storage.GetStorageForDirectory( "Presets" );
+		foreach ( var i in presetStorage.GetFiles( "." ) ) {
+			if ( i.EndsWith( "~" ) )
+				presetStorage.Delete( i );
+		}
+
+		foreach ( var i in presetStorage.GetFiles( "." ) ) {
+			presetStorage.Move( i, i + "~" );
+		}
+
+		int j = 1;
+		foreach ( var i in Presets ) {
+			var name = $"Preset_{j.ToString().PadLeft(4, '0')}_{i.Name}.json";
+			foreach ( var c in Path.GetInvalidFileNameChars() ) {
+				name = name.Replace( c, '~' );
+			}
+
+			write( presetStorage, name, i.Stringify() );
+			j++;
+		}
+
+		return true;
+	}
+
+	void write ( Storage storage, string path, string data ) {
+		using ( var stream = storage.GetStream( path, FileAccess.Write, FileMode.Create ) ) {
+			using var writer = new StreamWriter( stream );
+			writer.Write( data );
+		}
 	}
 
 	Dictionary<OsuXrSetting, Func<object>> getters = new();

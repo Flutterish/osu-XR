@@ -79,13 +79,17 @@ public partial class OsuXrGame : OsuXrGameBase {
 			keyboardInteractionSource.Release( key );
 		};
 		KeyboardInput.Activated = () => {
-			isKeyboardActive = true;
-			scene.Add( Keyboard );
+			Schedule( () => {
+				isKeyboardActive = true;
+				scene.Add( Keyboard );
+			} );
 		};
 		KeyboardInput.Deactivated = () => {
-			isKeyboardActive = false;
-			keyboardInteractionSource.ReleaseAllInput();
-			scene.Remove( Keyboard, disposeImmediately: false );
+			Schedule( ()  => {
+				isKeyboardActive = false;
+				keyboardInteractionSource.ReleaseAllInput();
+				scene.Remove( Keyboard, disposeImmediately: false );
+			} );
 		};
 
 		osuPanel.OsuDependencies.ExceptionInvoked += ( msg, ex ) => {
