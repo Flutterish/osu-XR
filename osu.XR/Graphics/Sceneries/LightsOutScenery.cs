@@ -16,19 +16,26 @@ public partial class LightsOutScenery : Scenery {
 	public LightsOutScenery () {
 		AddInternal( clockwise = new Container3D() );
 		AddInternal( counterClockwise = new Container3D() );
+	}
+
+	protected override void LoadComplete () {
+		base.LoadComplete();
 
 		bindableBeat.ValueChanged += v => {
 			this.TransformBindableTo( velocity, (float)v.NewValue.AverageAmplitude * (float)v.NewValue.TimingPoint.BPM / 30, 100 );
 			foreach ( var child in clockwise.Children.Concat( counterClockwise.Children ) ) {
-				var flash = Interpolation.ValueAt( 0.4f, child.Tint, Color4.White, 0, 1 );
-				child.FlashColour( flash, v.NewValue.TimingPoint.BeatLength * 2 / 3, Easing.Out );
+				var tint = tints[child];
+				var flash = Interpolation.ValueAt( 0.4f, tint, Color4.White, 0, 1 );
+				child.FadeColour( flash ).FadeColour( tint, v.NewValue.TimingPoint.BeatLength * 2 / 3, Easing.Out );
 			}
 		};
 	}
 
+	Dictionary<Drawable3D, Color4> tints = new();
 	void recalculateChildren () {
 		this.clockwise.Clear();
 		counterClockwise.Clear();
+		tints.Clear();
 		bool clockwise = true;
 
 		Random random = new Random();
@@ -46,6 +53,7 @@ public partial class LightsOutScenery : Scenery {
 				child.Mesh.CreateFullUnsafeUpload().Enqueue();
 				child.OnLoadComplete += _ => child.Material.Set( "useGamma", true );
 				child.Tint = NeonColours.NextRandom( random );
+				tints.Add( child, child.Tint );
 
 				theta += delta;
 			}
@@ -66,6 +74,7 @@ public partial class LightsOutScenery : Scenery {
 				child.Mesh.CreateFullUnsafeUpload().Enqueue();
 				child.OnLoadComplete += _ => child.Material.Set( "useGamma", true );
 				child.Tint = NeonColours.NextRandom( random );
+				tints.Add( child, child.Tint );
 
 				theta += delta;
 			}
