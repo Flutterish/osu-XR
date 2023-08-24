@@ -24,7 +24,7 @@ public partial class SidebarMenuPanel : MenuPanel {
 	protected override void UpdateAfterChildren () {
 		if ( contentWidth != Content.DrawWidth ) {
 			contentWidth = Content.DrawWidth;
-			MeshCache.Invalidate();
+			InvalidateMesh();
 		}
 
 		base.UpdateAfterChildren();

@@ -13,10 +13,10 @@ public partial class CurvedPanel : Panel {
 	public readonly BindableInt ResolutionBindable = new( 64 );
 
 	public CurvedPanel () {
-		ArcBindable.ValueChanged += _ => MeshCache.Invalidate();
-		RadiusBindable.ValueChanged += _ => MeshCache.Invalidate();
-		aspectRatioBindable.ValueChanged += _ => MeshCache.Invalidate();
-		ResolutionBindable.ValueChanged += _ => MeshCache.Invalidate();
+		ArcBindable.ValueChanged += _ => InvalidateMesh();
+		RadiusBindable.ValueChanged += _ => InvalidateMesh();
+		aspectRatioBindable.ValueChanged += _ => InvalidateMesh();
+		ResolutionBindable.ValueChanged += _ => InvalidateMesh();
 	}
 
 	protected override void UpdateAfterChildren () {

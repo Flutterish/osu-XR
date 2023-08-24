@@ -12,16 +12,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Resources\Models\paw.obj" />
-    <None Remove="Resources\Models\shoe.obj" />
+    <None Remove="Resources\Meshes\keyboard.obj" />
+    <None Remove="Resources\Meshes\paw.obj" />
+    <None Remove="Resources\Meshes\shoe.obj" />
     <None Remove="resources\shaders\transparent.frag" />
     <None Remove="resources\shaders\transparent.vert" />
     <None Remove="Resources\Textures\dust.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="osu.Framework.XR" Version="2022.1212.0" />
-    <PackageReference Include="ppy.osu.Game" Version="2022.1214.0" />
+    <PackageReference Include="osu.Framework.XR" Version="2023.824.0" />
+    <PackageReference Include="ppy.osu.Game" Version="2022.1225.1" />
   </ItemGroup>
 
   <ItemGroup>
