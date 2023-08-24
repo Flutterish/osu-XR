@@ -1,4 +1,5 @@
 ﻿using osu.Framework.Graphics.Sprites;
+using osu.Framework.Input;
 using osu.Framework.Input.Events;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Graphics.Materials;
@@ -16,7 +17,10 @@ using osuTK.Input;
 
 namespace osu.XR.Graphics.VirtualReality;
 
-public partial class VrKeyboard : CompositeDrawable3D {
+public partial class VrKeyboard : CompositeDrawable3D {  // TODO add sticky keys
+	[Cached]
+	protected OverlayColourProvider ColourProvider { get; } = new OverlayColourProvider( OverlayColourScheme.Purple );
+
 	List<Key> keys = new();
 	HashSet<osuTK.Input.Key> pressedKeys = new();
 	bool isCapsLockEnabled;
@@ -25,6 +29,10 @@ public partial class VrKeyboard : CompositeDrawable3D {
 	public Action<osuTK.Input.Key>? KeyDown;
 	public Action<osuTK.Input.Key>? KeyUp;
 	public Action<string>? TextEmitted;
+
+	public bool IsKeyboardPanel ( Panel panel ) {
+		return InternalChildren.Contains( panel );
+	}
 
 	void onKeyDown ( Key key ) {
 		pressedKeys.Add( key.Binding.Key );
@@ -71,43 +79,43 @@ public partial class VrKeyboard : CompositeDrawable3D {
 	}
 
 	[BackgroundDependencyLoader]
-	private void load ( MeshStore meshStore, OverlayColourProvider overlayColours ) {
+	private void load ( MeshStore meshStore ) {
 		base.LoadComplete();
 		var kb = meshStore.GetCollection( "keyboard" );
 		foreach ( var i in kb.AllObjects ) {
 			var mesh = i.MeshParts[0].Mesh.Mesh;
 			AddInternal( new Model {
 				Mesh = mesh,
-				Tint = overlayColours.Background4
+				Tint = ColourProvider.Background4
 			} );
 
 			if ( mesh is not ITriangleMesh tringular )
 				continue;
 
 			Panel panel;
-			if ( tringular.FindFlatMeshPlane() is Plane plane ) {
-				var rotation = plane.Normal.LookRotation();
-				var rotationInverse = rotation.Inverted();
-				var bb = new AABox( tringular.EnumerateVertices().Select( x => rotationInverse.Apply( x ) ) );
-				bool flipped = plane.Normal.Z < 0;
-				var forward = flipped ? -plane.Normal : plane.Normal;
+			//if ( tringular.FindFlatMeshPlane() is Plane plane ) {
+			//	var rotation = plane.Normal.LookRotation();
+			//	var rotationInverse = rotation.Inverted();
+			//	var bb = new AABox( tringular.EnumerateVertices().Select( x => rotationInverse.Apply( x ) ) );
+			//	bool flipped = plane.Normal.Z < 0;
+			//	var forward = flipped ? -plane.Normal : plane.Normal;
 
-				panel = new FlatPanel() {
-					Position = rotation.Apply( bb.Center ) + forward * 0.05f,
-					Scale = bb.Size / 2,
-					Rotation = rotation
-				};
-				if ( !flipped )
-					panel.ScaleX = -panel.ScaleX;
-				panel.ContentSize = new( bb.Size.X * 64, bb.Size.Y * 64 );
-			}
-			else {
+			//	panel = new FlatPanel() {
+			//		Position = rotation.Apply( bb.Center ) + forward * 0.05f,
+			//		Scale = bb.Size / 2,
+			//		Rotation = rotation
+			//	};
+			//	if ( !flipped )
+			//		panel.ScaleX = -panel.ScaleX;
+			//	panel.ContentSize = new( bb.Size.X * 64, bb.Size.Y * 64 );
+			//}
+			//else {
 				var objMesh = (ObjFile.ObjMesh)mesh;
 
 				panel = new ModelledPanel( objMesh );
 				panel.ContentSize = new( tringular.BoundingBox.Size.X * 64, tringular.BoundingBox.Size.Y * 64 );
 				panel.Position += Vector3.UnitZ * 0.05f;
-			}
+			//}
 
 			var name = (i.Name ?? string.Empty).ToUpperInvariant();
 			if ( name.Contains( '_' ) )
@@ -251,7 +259,7 @@ public partial class VrKeyboard : CompositeDrawable3D {
 			protected override bool OnMouseDown ( MouseDownEvent e ) {
 				if ( e.Button == MouseButton.Left ) {
 					Pressed?.Invoke();
-					return true;
+					return base.OnMouseDown( e );
 				}
 				return base.OnMouseDown( e );
 			}
@@ -405,6 +413,25 @@ public record KeyboardKey( Key Key ) {
 		[Key.KeypadDivide] = new( Key.KeypadDivide ) { Text = "/" },
 		[Key.KeypadMultiply] = new( Key.KeypadMultiply ) { Text = "*" },
 		[Key.KeypadSubtract] = new( Key.KeypadSubtract ) { Text = "-" },
-		[Key.KeypadPeriod] = new( Key.KeypadPeriod ) { Text = "." }
+		[Key.KeypadPeriod] = new( Key.KeypadPeriod ) { Text = "." },
+		[Key.Space] = new( Key.Space ) { Text = " " }
 	};
+}
+
+public class VrKeyboardInputSource : TextInputSource {
+	public VrKeyboardInputSource ( VrKeyboard keyboard ) {
+		keyboard.TextEmitted = text => {
+			TriggerTextInput( text );
+		};
+	}
+
+	protected override void ActivateTextInput ( bool allowIme ) {
+		Activated?.Invoke();
+	}
+	protected override void DeactivateTextInput () {
+		Deactivated?.Invoke();
+	}
+
+	public Action? Activated;
+	public Action? Deactivated;
 }

@@ -33,6 +33,12 @@ public partial class OsuXrGame : OsuXrGameBase {
 	public readonly OsuXrPlayer Player;
 
 	HandheldMenu menu;
+	[Cached]
+	public readonly VrKeyboard Keyboard;
+	[Cached]
+	public readonly VrKeyboardInputSource KeyboardInput;
+	PanelInteractionSystem.Source keyboardInteractionSource;
+	bool isKeyboardActive;
 
 	public OsuXrGame ( bool useSimulatedVR = false ) : base( useSimulatedVR ) { // TODO I dont really like the 'useSimulatedVR' - can't we extract it up?
 		scene = new() {
@@ -52,6 +58,36 @@ public partial class OsuXrGame : OsuXrGameBase {
 
 		scene.Add( new UserTrackingDrawable3D { Child = menu = new HandheldMenu(), Y = 1 } );
 		scene.Add( Player = new OsuXrPlayer() );
+
+		Keyboard = new() {
+			Scale = new( 0.02f ),
+			Y = 1,
+			Z = 0.5f,
+			Rotation = Quaternion.FromAxisAngle( Vector3.UnitY, MathF.PI ) * Quaternion.FromAxisAngle( Vector3.UnitX, -MathF.PI * 1 / 4 )
+		};
+		KeyboardInput = new( Keyboard );
+		keyboardInteractionSource = panelInteraction.GetSource( Keyboard );
+		panelInteraction.PanelFocused += panel => { // TODO show when there is input focus OR a toggle is pressed
+			if ( !Keyboard.IsKeyboardPanel( panel ) ) {
+				keyboardInteractionSource.FocusedPanel = panel;
+			}
+		};
+		Keyboard.KeyDown = key => {
+			keyboardInteractionSource.Press( key );
+		};
+		Keyboard.KeyUp = key => {
+			keyboardInteractionSource.Release( key );
+		};
+		KeyboardInput.Activated = () => {
+			isKeyboardActive = true;
+			scene.Add( Keyboard );
+		};
+		KeyboardInput.Deactivated = () => {
+			isKeyboardActive = false;
+			keyboardInteractionSource.ReleaseAllInput();
+			scene.Remove( Keyboard, disposeImmediately: false );
+		};
+
 		osuPanel.OsuDependencies.ExceptionInvoked += ( msg, ex ) => {
 			menu.Notifications.Post( new SimpleErrorNotification { Text = msg } );
 			Logger.Error( ex, msg.ToString(), recursive: true );
