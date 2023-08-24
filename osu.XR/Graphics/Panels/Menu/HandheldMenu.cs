@@ -35,6 +35,7 @@ public partial class HandheldMenu : CompositeDrawable3D {
 		Sidebar.AddButton( FontAwesome.Solid.Gamepad, Localisation.MenuStrings.Ruleset, () => Panels.FocusPanel( Bindings ) );
 
 		VisibilityChanged += onVisibilityChanged;
+		Panels.FocusPanel( Notifications );
 	}
 
 	private void onVisibilityChanged ( Drawable3D _, bool isVisible ) {

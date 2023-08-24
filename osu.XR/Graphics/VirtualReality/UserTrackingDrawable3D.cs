@@ -30,7 +30,7 @@ public partial class UserTrackingDrawable3D : Container3D { // TODO this needs a
 			}
 		}, true );
 
-		IsOpen = false;
+		IsOpen = true;
 	}
 
 	private void onToggleMenuPressed ( VrController controller ) {
