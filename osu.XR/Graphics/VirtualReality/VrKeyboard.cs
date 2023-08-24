@@ -1,14 +1,10 @@
-﻿using osu.Framework.Graphics.Shapes;
-using osu.Framework.Graphics.Sprites;
-using osu.Framework.Graphics.Textures;
-using osu.Framework.Input.Bindings;
+﻿using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Graphics.Materials;
 using osu.Framework.XR.Graphics.Meshes;
 using osu.Framework.XR.Graphics.Panels;
 using osu.Framework.XR.Parsing.Wavefront;
-using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
@@ -17,11 +13,62 @@ using osu.XR.Allocation;
 using osu.XR.Osu;
 using osuTK.Graphics;
 using osuTK.Input;
-using TagLib.IFD;
 
 namespace osu.XR.Graphics.VirtualReality;
 
 public partial class VrKeyboard : CompositeDrawable3D {
+	List<Key> keys = new();
+	HashSet<osuTK.Input.Key> pressedKeys = new();
+	bool isCapsLockEnabled;
+	bool isAnyShiftPressed => pressedKeys.Contains( osuTK.Input.Key.ShiftLeft ) || pressedKeys.Contains( osuTK.Input.Key.ShiftRight );
+
+	public Action<osuTK.Input.Key>? KeyDown;
+	public Action<osuTK.Input.Key>? KeyUp;
+	public Action<string>? TextEmitted;
+
+	void onKeyDown ( Key key ) {
+		pressedKeys.Add( key.Binding.Key );
+
+		if ( key.Binding.Key == osuTK.Input.Key.CapsLock ) {
+			isCapsLockEnabled = !isCapsLockEnabled;
+			updateShiftState();
+
+			KeyDown?.Invoke( key.Binding.Key );
+			return;
+		}
+		if ( key.Binding.Key is osuTK.Input.Key.ShiftLeft or osuTK.Input.Key.ShiftRight ) {
+			updateShiftState();
+
+			KeyDown?.Invoke( key.Binding.Key );
+			return;
+		}
+
+		KeyDown?.Invoke( key.Binding.Key ); // TODO shifted keys
+		var text = key.IsShifted ? key.Binding.ShiftedText ?? key.Binding.Text : key.Binding.Text;
+		if ( text != null )
+			TextEmitted?.Invoke( text );
+	}
+	void onKeyUp ( Key key ) {
+		pressedKeys.Remove( key.Binding.Key );
+
+		if ( key.Binding.Key is osuTK.Input.Key.ShiftLeft or osuTK.Input.Key.ShiftRight ) {
+			updateShiftState();
+
+			KeyUp?.Invoke( key.Binding.Key );
+			return;
+		}
+
+		KeyUp?.Invoke( key.Binding.Key ); // TODO shifted keys
+	}
+
+	void updateShiftState () {
+		var caps = isCapsLockEnabled;
+		var shift = isAnyShiftPressed;
+
+		foreach ( var i in keys ) {
+			i.updateModifiers( shift, caps );
+		}
+	}
 
 	[BackgroundDependencyLoader]
 	private void load ( MeshStore meshStore, OverlayColourProvider overlayColours ) {
@@ -70,8 +117,17 @@ public partial class VrKeyboard : CompositeDrawable3D {
 				throw new InvalidDataException();
 			}
 
-			panel.Content.Add( new Key( KeyboardKey.prefabs[key] ) );
+			var button = new Key( KeyboardKey.prefabs[key] );
+			panel.Content.Add( button );
 			AddInternal( panel );
+
+			keys.Add( button );
+			button.Pressed = () => {
+				onKeyDown( button );
+			};
+			button.Released = () => {
+				onKeyUp( button );
+			};
 		}
 	}
 
@@ -141,23 +197,79 @@ public partial class VrKeyboard : CompositeDrawable3D {
 				} );
 			}
 
-			AddInternal( new OsuAnimatedButton() {
+			AddInternal( new KeyButton() {
 				RelativeSizeAxes = Axes.Both,
-				Action = () => {
-					
+				Action = () => { },
+				Pressed = () => {
+					Pressed?.Invoke();
+				},
+				Released = () => {
+					Released?.Invoke();
 				}
 			} );
+		}
+
+		public Action? Pressed;
+		public Action? Released;
+
+		public bool IsShifted;
+		public void updateModifiers ( bool shift, bool caps ) {
+			const double duration = 200;
+			const Easing easing = Easing.Out;
+
+			if ( Binding.Key == osuTK.Input.Key.CapsLock ) {
+				baseDrawable.FadeColour( caps ? Color4.Cyan : Color4.White, duration, easing );
+			}
+
+			bool isShifted = (!Binding.IsCapsLockDisabled && caps) != shift;
+			if ( isShifted == IsShifted )
+				return;
+
+			IsShifted = isShifted;
+
+			if ( shiftedDrawable == null )
+				return;
+
+			if ( IsShifted ) {
+				shiftedDrawable.ScaleTo( 1, duration, easing );
+				shiftedDrawable.MoveTo( new( 0, 0 ), duration, easing );
+				baseDrawable.ScaleTo( 0.6f, duration, easing );
+				baseDrawable.MoveTo( new( 20, 40 ), duration, easing );
+			}
+			else {
+				baseDrawable.ScaleTo( 1, duration, easing );
+				baseDrawable.MoveTo( new( 0, 0 ), duration, easing );
+				shiftedDrawable.ScaleTo( 0.6f, duration, easing );
+				shiftedDrawable.MoveTo( new( 20, -40 ), duration, easing );
+			}
+		}
+
+		partial class KeyButton : OsuAnimatedButton {
+			public Action? Pressed;
+			public Action? Released;
+
+			protected override bool OnMouseDown ( MouseDownEvent e ) {
+				if ( e.Button == MouseButton.Left ) {
+					Pressed?.Invoke();
+					return true;
+				}
+				return base.OnMouseDown( e );
+			}
+
+			protected override void OnMouseUp ( MouseUpEvent e ) {
+				base.OnMouseUp( e );
+				Released?.Invoke();
+			}
 		}
 
 		Drawable createDrawable ( osuTK.Input.Key key, string? text ) {
 			if ( icons.TryGetValue( key, out var icon ) ) {
 				return new SpriteIcon {
-					RelativeSizeAxes = Axes.Both,
+					Size = new Vector2( 128, 128 ) * 0.4f,
 					Origin = Anchor.Centre,
 					Anchor = Anchor.Centre,
 					Icon = icon,
-					Scale = new( 0.4f ),
-					Position = key == osuTK.Input.Key.Enter ? new( 20, -40 ) : new()
+					Position = key == osuTK.Input.Key.Enter ? new( 14, -60 ) : new()
 				};
 			}
 
@@ -214,8 +326,8 @@ public partial class VrKeyboard : CompositeDrawable3D {
 			[osuTK.Input.Key.Down] = FontAwesome.Solid.ArrowDown,
 			[osuTK.Input.Key.Left] = FontAwesome.Solid.ArrowLeft,
 			[osuTK.Input.Key.Right] = FontAwesome.Solid.ArrowRight,
-			[osuTK.Input.Key.BackSpace] = FontAwesome.Solid.ChevronLeft,
-			[osuTK.Input.Key.Enter] = OsuIcon.Logo
+			[osuTK.Input.Key.BackSpace] = FontAwesome.Solid.Backspace,
+			[osuTK.Input.Key.Enter] = FontAwesome.Solid.Reply
 		};
 	}
 }

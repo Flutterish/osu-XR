@@ -1,5 +1,5 @@
-﻿using osu.Framework.Input.Bindings;
-using osu.Framework.Input;
+﻿using osu.Framework.Input;
+using osu.Framework.Input.Bindings;
 using osu.Framework.Localisation;
 using osu.Framework.Screens;
 using osu.Game;

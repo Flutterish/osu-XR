@@ -1,6 +1,6 @@
-﻿using osu.Framework.XR.Graphics.Containers;
+﻿using osu.Framework.XR.Graphics;
+using osu.Framework.XR.Graphics.Containers;
 using osu.Framework.XR.Graphics.Meshes;
-using osu.Framework.XR.Graphics;
 using osu.Framework.XR.VirtualReality;
 using osu.XR.Configuration;
 using osuTK.Graphics;

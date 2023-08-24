@@ -1,8 +1,8 @@
-﻿using osu.Framework.Graphics.Textures;
+﻿using osu.Framework.Graphics.Rendering;
+using osu.Framework.Graphics.Textures;
 using osuTK.Graphics;
-using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp;
-using osu.Framework.Graphics.Rendering;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace osu.XR.Graphics;
 

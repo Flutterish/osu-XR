@@ -3,7 +3,6 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Platform;
 using osu.Framework.XR.Graphics.Panels;
 using osu.Game;
-using osu.Game.Configuration;
 using osu.XR.Osu;
 
 namespace osu.XR.Tests.Visual;

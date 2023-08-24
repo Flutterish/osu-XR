@@ -1,9 +1,9 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using osu.Framework.Extensions.TypeExtensions;
+using osu.XR.IO;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using osu.Framework.Extensions.TypeExtensions;
-using osu.XR.IO;
 
 namespace osu.XR.Input.Migration;
 

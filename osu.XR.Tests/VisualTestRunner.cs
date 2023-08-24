@@ -1,5 +1,5 @@
-﻿using osu.Framework.Platform;
-using osu.Framework;
+﻿using osu.Framework;
+using osu.Framework.Platform;
 using osu.XR.Tests;
 
 using ( DesktopGameHost host = Host.GetSuitableDesktopHost( "osu" ) ) {

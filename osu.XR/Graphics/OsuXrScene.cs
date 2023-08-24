@@ -1,13 +1,13 @@
 ﻿using osu.Framework.Graphics.Rendering;
-using osu.Framework.IO.Stores;
-using osu.Framework.XR.Graphics.Materials;
-using osu.Framework.XR.Graphics.Rendering;
-using MaterialNames = osu.XR.Graphics.Materials.MaterialNames;
-using FrameworkMaterialNames = osu.Framework.XR.Graphics.Materials.MaterialNames;
 using osu.Framework.Graphics.Textures;
+using osu.Framework.IO.Stores;
 using osu.Framework.Platform;
+using osu.Framework.XR.Graphics.Materials;
 using osu.Framework.XR.Graphics.Meshes;
+using osu.Framework.XR.Graphics.Rendering;
 using osu.Framework.XR.Parsing.Wavefront;
+using FrameworkMaterialNames = osu.Framework.XR.Graphics.Materials.MaterialNames;
+using MaterialNames = osu.XR.Graphics.Materials.MaterialNames;
 
 namespace osu.XR.Graphics;
 

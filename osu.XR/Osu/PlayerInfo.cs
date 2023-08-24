@@ -1,5 +1,5 @@
-﻿using osu.Framework.Input.Bindings;
-using osu.Framework.Input;
+﻿using osu.Framework.Input;
+using osu.Framework.Input.Bindings;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.UI;
 using osu.Game.Screens.Play;
