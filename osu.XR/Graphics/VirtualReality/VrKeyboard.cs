@@ -93,29 +93,37 @@ public partial class VrKeyboard : CompositeDrawable3D {  // TODO add sticky keys
 				continue;
 
 			Panel panel;
-			//if ( tringular.FindFlatMeshPlane() is Plane plane ) {
-			//	var rotation = plane.Normal.LookRotation();
-			//	var rotationInverse = rotation.Inverted();
-			//	var bb = new AABox( tringular.EnumerateVertices().Select( x => rotationInverse.Apply( x ) ) );
-			//	bool flipped = plane.Normal.Z < 0;
-			//	var forward = flipped ? -plane.Normal : plane.Normal;
+			if ( tringular.FindFlatMeshPlane() is Plane plane ) {
+				var objMesh = (ObjFile.ObjMesh)mesh;
 
-			//	panel = new FlatPanel() {
-			//		Position = rotation.Apply( bb.Center ) + forward * 0.05f,
-			//		Scale = bb.Size / 2,
-			//		Rotation = rotation
-			//	};
-			//	if ( !flipped )
-			//		panel.ScaleX = -panel.ScaleX;
-			//	panel.ContentSize = new( bb.Size.X * 64, bb.Size.Y * 64 );
-			//}
-			//else {
+				panel = new ModelledPanel( objMesh );
+				var rotation = plane.Normal.LookRotation();
+				var rotationInverse = rotation.Inverted();
+				var bb = new AABox( tringular.EnumerateVertices().Select( x => rotationInverse.Apply( x ) ) );
+				panel.ContentSize = new( bb.Size.X * 64, bb.Size.Y * 64 );
+				panel.Position += Vector3.UnitZ * 0.05f;
+				//	var rotation = plane.Normal.LookRotation();
+				//	var rotationInverse = rotation.Inverted();
+				//	var bb = new AABox( tringular.EnumerateVertices().Select( x => rotationInverse.Apply( x ) ) );
+				//	bool flipped = plane.Normal.Z < 0;
+				//	var forward = flipped ? -plane.Normal : plane.Normal;
+
+				//	panel = new FlatPanel() {
+				//		Position = rotation.Apply( bb.Center ) + forward * 0.05f,
+				//		Scale = bb.Size / 2,
+				//		Rotation = rotation
+				//	};
+				//	if ( !flipped )
+				//		panel.ScaleX = -panel.ScaleX;
+				//	panel.ContentSize = new( bb.Size.X * 64, bb.Size.Y * 64 );
+			}
+			else {
 				var objMesh = (ObjFile.ObjMesh)mesh;
 
 				panel = new ModelledPanel( objMesh );
 				panel.ContentSize = new( tringular.BoundingBox.Size.X * 64, tringular.BoundingBox.Size.Y * 64 );
 				panel.Position += Vector3.UnitZ * 0.05f;
-			//}
+			}
 
 			var name = (i.Name ?? string.Empty).ToUpperInvariant();
 			if ( name.Contains( '_' ) )
