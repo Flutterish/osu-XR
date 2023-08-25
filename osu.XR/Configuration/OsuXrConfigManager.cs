@@ -32,6 +32,8 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 
 		SetDefault( OsuXrSetting.ShowDust, true );
 		SetDefault( OsuXrSetting.SceneryType, SceneryType.Solid );
+
+		SetDefault( OsuXrSetting.CameraMode, CameraMode.Disabled );
 		base.InitialiseDefaults();
 	}
 

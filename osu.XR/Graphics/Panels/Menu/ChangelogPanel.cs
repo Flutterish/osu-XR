@@ -1,14 +1,8 @@
-﻿using osu.Framework.Graphics.Containers.Markdown;
-using osu.Framework.Graphics.Sprites;
+﻿using osu.Framework.Graphics.Sprites;
 using osu.Framework.Localisation;
 using osu.Game.Graphics.Containers.Markdown;
 using osu.Game.Overlays.Settings;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace osu.XR.Graphics.Panels.Menu;
 

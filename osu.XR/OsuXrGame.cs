@@ -20,6 +20,7 @@ public partial class OsuXrGame : OsuXrGameBase {
 	[Cached]
 	PhysicsSystem physics = new();
 
+	[Cached]
 	BasicSceneMovementSystem movementSystem;
 
 	[Cached]
@@ -42,7 +43,8 @@ public partial class OsuXrGame : OsuXrGameBase {
 
 	public OsuXrGame ( bool useSimulatedVR = false ) : base( useSimulatedVR ) { // TODO I dont really like the 'useSimulatedVR' - can't we extract it up?
 		scene = new() {
-			RelativeSizeAxes = Axes.Both
+			RelativeSizeAxes = Axes.Both,
+			RenderToScreen = useSimulatedVR
 		};
 
 		if ( useSimulatedVR )

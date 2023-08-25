@@ -14,6 +14,10 @@ public partial class GraphicsSettingSection : SettingsSection {
 	[BackgroundDependencyLoader]
 	private void load ( OsuXrConfigManager config ) {
 		Children = new Drawable[] {
+			new SettingsEnumDropdown<CameraMode> {
+				LabelText = @"Render to screen",
+				Current = config.GetBindable<CameraMode>( OsuXrSetting.CameraMode )
+			},
 			new SettingsSlider<float,RadToDegreeSliderBar> {
 				LabelText = Localisation.Config.Graphics.ScreenStrings.Arc
 			}.PresetComponent( config, OsuXrSetting.ScreenArc ),
@@ -35,6 +39,5 @@ public partial class GraphicsSettingSection : SettingsSection {
 				LabelText = Localisation.Config.Graphics.ShadowStrings.Label
 			}.PresetComponent( config, OsuXrSetting.ShadowType )
 		};
-		// TODO computer interaction - render to screen, either vr view or custom camera
 	}
 }
