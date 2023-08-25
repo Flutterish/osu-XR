@@ -149,8 +149,6 @@ public partial class VrKeyboard : CompositeDrawable3D {  // TODO add sticky keys
 
 	partial class ModelledPanel : Panel {
 		public ModelledPanel ( ObjFile.ObjMesh mesh ) {
-			RenderStage = RenderingStage.Transparent;
-
 			var indices = mesh.ElementBuffer.Indices;
 			for ( int i = 0; i < indices.Count / 3; i++ ) {
 				var (a, b, c) = (indices[i * 3], indices[i * 3 + 1], indices[i * 3 + 2]);
@@ -178,10 +176,6 @@ public partial class VrKeyboard : CompositeDrawable3D {  // TODO add sticky keys
 
 		protected override bool ClearMeshOnInvalidate => false;
 		protected override void RegenrateMesh () { }
-
-		protected override Material GetDefaultMaterial ( MaterialStore materials ) { // TODO disable gamma for this one
-			return materials.GetNew( osu.XR.Graphics.Materials.MaterialNames.PanelTransparent );
-		}
 	}
 
 	partial class Key : CompositeDrawable {
