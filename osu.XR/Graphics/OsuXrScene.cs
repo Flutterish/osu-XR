@@ -1,4 +1,5 @@
-﻿using OpenVR.NET;
+﻿using MongoDB.Bson.IO;
+using OpenVR.NET;
 using OpenVR.NET.Devices;
 using osu.Framework.Graphics.Rendering;
 using osu.Framework.Graphics.Textures;
@@ -15,15 +16,18 @@ using MaterialNames = osu.XR.Graphics.Materials.MaterialNames;
 namespace osu.XR.Graphics;
 
 public partial class OsuXrScene : Scene {
-	[Resolved]
+	[Resolved( canBeNull: true )]
 	VrCompositor compositor { get; set; } = null!;
 
-	[Resolved]
+	[Resolved( canBeNull: true )]
 	BasicSceneMovementSystem movementSystem { get; set; } = null!;
 
 	Bindable<CameraMode> cameraMode = new( CameraMode.ThirdPerson );
-	[BackgroundDependencyLoader]
-	private void load ( OsuXrConfigManager config ) {
+	[BackgroundDependencyLoader(permitNulls: true)]
+	private void load ( OsuXrConfigManager? config ) {
+		if ( config == null || movementSystem == null || compositor == null )
+			return;
+
 		config.BindWith( OsuXrSetting.CameraMode, cameraMode );
 
 		if ( RenderToScreen ) { // HACK its only enabled when we use simulated vr
