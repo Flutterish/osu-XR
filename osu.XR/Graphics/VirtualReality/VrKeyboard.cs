@@ -179,10 +179,6 @@ public partial class VrKeyboard : CompositeDrawable3D {  // TODO add sticky keys
 		protected override bool ClearMeshOnInvalidate => false;
 		protected override void RegenrateMesh () { }
 
-		protected override void Update () {
-			base.Update();
-		}
-
 		protected override Material GetDefaultMaterial ( MaterialStore materials ) { // TODO disable gamma for this one
 			return materials.GetNew( osu.XR.Graphics.Materials.MaterialNames.PanelTransparent );
 		}
