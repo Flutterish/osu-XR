@@ -25,7 +25,7 @@ public partial class OsuXrGameBase : Framework.Game {
 	VrResourceStore vrResourceStore = new();
 
 	[Cached]
-	protected BeatSyncSource BeatSync = new();
+	protected readonly BeatSyncSource BeatSync = new();
 
 	[Cached]
 	public readonly Bindable<BindingsFile> Bindings = new( new() );

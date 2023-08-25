@@ -54,11 +54,6 @@ public class VirtualOsuGameHost : VirtualGameHost {
 		return keyboardSource == null ? baseSource : new MergedTextInputSource( new[] { keyboardSource, baseSource } );
 	}
 
-
-	public override Clipboard GetClipboard () {
-		return base.GetClipboard();
-	}
-
 	class MergedTextInputSource : TextInputSource {
 		TextInputSource[] sources;
 		public MergedTextInputSource ( IEnumerable<TextInputSource> sources ) {

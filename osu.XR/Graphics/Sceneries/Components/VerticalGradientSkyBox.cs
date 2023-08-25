@@ -8,7 +8,7 @@ using osuTK.Graphics;
 namespace osu.XR.Graphics.Sceneries.Components;
 
 public partial class VerticalGradientSkyBox : BasicModel {
-	public readonly Bindable<Color4> TintBindable = new( new Color4( 253, 35, 115, 255 ) );
+	public readonly Bindable<Color4> TintBindable = new( Color4.HotPink );
 	public readonly BindableFloat OpacityBindable = new( 1 ) { MinValue = 0, MaxValue = 1 };
 
 	public VerticalGradientSkyBox () {
@@ -44,7 +44,7 @@ public partial class VerticalGradientSkyBox : BasicModel {
 
 	[BackgroundDependencyLoader]
 	private void load ( IRenderer renderer ) {
-		Material.Set( "useGamma", true );
+		Material.Set( "useGamma", false );
 		Material.SetTexture( "tex", TextureGeneration.VerticalGradient( renderer, Color4.Black, Color4.White, 100, x => MathF.Pow( x, 2 ) ) );
 	}
 
