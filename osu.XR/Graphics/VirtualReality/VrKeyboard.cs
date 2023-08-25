@@ -268,6 +268,7 @@ public partial class VrKeyboard : CompositeDrawable3D {  // TODO add sticky keys
 			protected override bool OnMouseDown ( MouseDownEvent e ) {
 				if ( e.Button == MouseButton.Left ) {
 					Pressed?.Invoke();
+					base.OnHover( new HoverEvent( e.CurrentState ) { Target = this } );
 					return base.OnMouseDown( e );
 				}
 				return base.OnMouseDown( e );
@@ -275,7 +276,12 @@ public partial class VrKeyboard : CompositeDrawable3D {  // TODO add sticky keys
 
 			protected override void OnMouseUp ( MouseUpEvent e ) {
 				base.OnMouseUp( e );
+				base.OnHoverLost( new HoverLostEvent( e.CurrentState ) { Target = this } );
 				Released?.Invoke();
+			}
+
+			protected override bool OnHover ( HoverEvent e ) {
+				return true;
 			}
 		}
 
