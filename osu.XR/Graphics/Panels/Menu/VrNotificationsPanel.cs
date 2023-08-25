@@ -33,8 +33,8 @@ public partial class VrNotificationsPanel : MenuPanel {
 							AutoSizeAxes = Axes.Y,
 							RelativeSizeAxes = Axes.X,
 							Children = new[] {
-								new NotificationSection(Localisation.NotificationsStrings.Notifications, new[] { typeof(SimpleNotification) }, @"Clear All"), // TODO wait for osu to implement
-								new NotificationSection(Localisation.NotificationsStrings.Tasks, new[] { typeof(ProgressNotification) }, @"Cancel All"), // TODO wait for osu to implement
+								new NotificationSection(Localisation.NotificationsStrings.Notifications, new[] { typeof(SimpleNotification) }), // TODO @"Clear All"
+								new NotificationSection(Localisation.NotificationsStrings.Tasks, new[] { typeof(ProgressNotification) }), // TODO @"Cancel All"
 							}
 						}
 					}

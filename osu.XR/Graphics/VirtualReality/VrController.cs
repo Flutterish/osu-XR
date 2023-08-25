@@ -138,7 +138,7 @@ public partial class VrController : BasicVrDevice {
 	BindableList<VrController> activeControllers = new();
 
 	[Resolved]
-	public PanelInteractionSystem InteractionSystem { get; set; } = null!;
+	public PanelInteractionSystem InteractionSystem { get; private set; } = null!;
 	[BackgroundDependencyLoader( true )]
 	private void load ( OsuXrConfigManager? config, OsuXrGame game ) {
 		var left = source.GetAction<BooleanAction>( VrAction.LeftButton );
