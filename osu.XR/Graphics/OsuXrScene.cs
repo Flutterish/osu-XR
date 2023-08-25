@@ -12,17 +12,6 @@ using MaterialNames = osu.XR.Graphics.Materials.MaterialNames;
 namespace osu.XR.Graphics;
 
 public partial class OsuXrScene : Scene {
-	protected override MaterialStore CreateMaterialStore ( IReadOnlyDependencyContainer dependencies ) {
-		return new MaterialStore( new ResourceStore<byte[]>( new[] { // TODO why does game not have our namespace?
-			new NamespacedResourceStore<byte[]>( new DllResourceStore( typeof(OsuXrGameBase).Assembly ), "Resources/Shaders" ),
-			new NamespacedResourceStore<byte[]>( new DllResourceStore( typeof(Scene).Assembly ), "Resources/Shaders" )
-		} ) );
-	}
-	protected override void CreateMeshStoreSources ( MeshStore meshes, IReadOnlyDependencyContainer dependencies ) {
-		var resources = new NamespacedResourceStore<byte[]>( new DllResourceStore( typeof( OsuXrGameBase ).Assembly ), "Resources/Meshes" );
-		meshes.AddStore( new SingleObjMeshStore( resources ) );
-		meshes.AddStore( new ObjMeshCollectionStore( resources ) );
-	}
 	protected override IReadOnlyDependencyContainer CreateChildDependencies ( IReadOnlyDependencyContainer parent ) {
 		var deps = new DependencyContainer( parent );
 		var r = base.CreateChildDependencies( deps );

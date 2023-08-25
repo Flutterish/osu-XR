@@ -1,5 +1,6 @@
 ﻿using OpenVR.NET;
 using osu.Framework.Configuration;
+using osu.Framework.IO.Stores;
 using osu.Framework.Platform;
 using osu.Framework.XR.Testing.VirtualReality;
 using osu.Framework.XR.VirtualReality;
@@ -69,6 +70,7 @@ public partial class OsuXrGameBase : Framework.Game {
 
 	[BackgroundDependencyLoader]
 	private void load ( GameHost host ) {
+		Resources.AddStore( new NamespacedResourceStore<byte[]>( new DllResourceStore( typeof( OsuXrGameBase ).Assembly ), "Resources" ) );
 		storage = host.Storage.GetStorageForDirectory( "XR" );
 		dependencies.CacheAs( storage );
 		config = new( storage );
