@@ -157,7 +157,7 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 
 	public void LoadPreset ( ConfigurationPreset<OsuXrSetting> preset ) {
 		foreach ( var (lookup, value) in preset.ConfigStore ) {
-			if ( setters.TryGetValue( lookup, out var set ) ) {
+			if ( preset.Keys.Contains(lookup) && setters.TryGetValue( lookup, out var set ) ) {
 				set( value.ToString(null, CultureInfo.InvariantCulture)! );
 			}
 		}
