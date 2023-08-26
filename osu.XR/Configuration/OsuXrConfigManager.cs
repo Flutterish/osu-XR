@@ -72,7 +72,7 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 	protected override bool PerformSave () {
 		if ( Storage.Exists( "XrSettings.json" + "~" ) )
 			Storage.Delete( "XrSettings.json" + "~" );
-		write( Storage, "XrSettings.json", CreateFullPreset().Stringify() );
+		write( Storage, "XrSettings.json", CreateFullSavePreset().Stringify() );
 
 		var presetStorage = Storage.GetStorageForDirectory( "Presets" );
 		foreach ( var i in presetStorage.GetFiles( "." ) ) {
@@ -139,9 +139,17 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 		}
 	}
 
-	public ConfigurationPreset<OsuXrSetting> CreateFullPreset () {
+	public ConfigurationPreset<OsuXrSetting> CreateFullSavePreset () {
 		var preset = new ConfigurationPreset<OsuXrSetting>();
 		foreach ( var (key, get) in getters ) {
+			preset[key] = get();
+		}
+		return preset;
+	}
+
+	public ConfigurationPreset<OsuXrSetting> CreateFullPreset () {
+		var preset = new ConfigurationPreset<OsuXrSetting>();
+		foreach ( var (key, get) in getters.Where( x => x.Key is not OsuXrSetting.CameraMode ) ) { // TODO this should depend on which elements have a "preset component" in settings
 			preset[key] = get();
 		}
 		return preset;
