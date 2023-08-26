@@ -4,7 +4,7 @@ namespace osu.XR.VirtualReality;
 
 public class OsuXrAppManifest : VrManifest {
 	public OsuXrAppManifest () {
-		AppKey = "";
+		AppKey = "osu-xr";
 		ActionManifestPath = "ActionManifest.json";
 		WindowsPath = Path.Combine( Directory.GetCurrentDirectory(), "osu.XR.Desktop.exe" );
 		IsDashboardOverlay = false;
