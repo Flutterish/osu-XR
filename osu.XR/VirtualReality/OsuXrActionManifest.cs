@@ -4,6 +4,7 @@ namespace osu.XR.VirtualReality;
 
 public class OsuXrActionManifest : ActionManifest<VrActionCategory, VrAction> {
 	public OsuXrActionManifest () {
+		SupportsDominantHandSetting = true;
 		ActionSets = new() {
 			new() { Type = ActionSetType.LeftRight, Name = VrActionCategory.General },
 			new() { Type = ActionSetType.LeftRight, Name = VrActionCategory.Poses },

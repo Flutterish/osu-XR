@@ -55,6 +55,9 @@ public partial class OsuXrGameBase : Framework.Game {
 
 		Add( Compositor );
 		Compositor.Input.SetActionManifest( new OsuXrActionManifest() );
+		Compositor.Input.BindManifestLoaded( vr => {
+			vr.InstallApp( new OsuXrAppManifest() );
+		} );
 	}
 
 	Storage storage = null!;
