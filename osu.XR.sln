@@ -9,8 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "osu.XR.Tests", "osu.XR.Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "osu.XR.Desktop", "osu.XR.Desktop\osu.XR.Desktop.csproj", "{A84C2AEA-EE91-4A43-9F95-B704E4E7E44F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "osu.Framework.XR", "..\..\osu.Framework.XR\osu.Framework.XR\osu.Framework.XR\osu.Framework.XR.csproj", "{71F9B7EF-26F2-458C-ADA7-A5BDBED9ABC8}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,10 +27,6 @@ Global
 		{A84C2AEA-EE91-4A43-9F95-B704E4E7E44F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A84C2AEA-EE91-4A43-9F95-B704E4E7E44F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A84C2AEA-EE91-4A43-9F95-B704E4E7E44F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{71F9B7EF-26F2-458C-ADA7-A5BDBED9ABC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{71F9B7EF-26F2-458C-ADA7-A5BDBED9ABC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{71F9B7EF-26F2-458C-ADA7-A5BDBED9ABC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{71F9B7EF-26F2-458C-ADA7-A5BDBED9ABC8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

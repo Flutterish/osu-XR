@@ -21,15 +21,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="osu.Framework.XR" Version="2023.826.0" />
     <PackageReference Include="ppy.osu.Game" Version="2023.815.0" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Localisation\Resx\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\osu.Framework.XR\osu.Framework.XR\osu.Framework.XR\osu.Framework.XR.csproj" />
   </ItemGroup>
 
 </Project>

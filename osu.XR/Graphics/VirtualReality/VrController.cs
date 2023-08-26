@@ -7,6 +7,7 @@ using osu.Framework.XR.VirtualReality.Devices;
 using osu.XR.Configuration;
 using osu.XR.Graphics.Player;
 using osu.XR.Graphics.VirtualReality.Pointers;
+using osu.XR.Osu;
 
 namespace osu.XR.Graphics.VirtualReality;
 
@@ -36,6 +37,9 @@ public partial class VrController : BasicVrDevice {
 			updatePointerType();
 		} );
 	}
+
+	Bindable<bool> settingsTeleportDisabled = new( false );
+	Bindable<PlayerInfo?> currentPlayer = new();
 
 	Bindable<bool> disableTeleport = new( false );
 	TeleportVisual teleportVisual = new();
@@ -140,7 +144,7 @@ public partial class VrController : BasicVrDevice {
 	[Resolved]
 	public PanelInteractionSystem InteractionSystem { get; private set; } = null!;
 	[BackgroundDependencyLoader( true )]
-	private void load ( OsuXrConfigManager? config, OsuXrGame game ) {
+	private void load ( OsuXrConfigManager? config, OsuXrGame game, OsuDependencies osu ) {
 		var left = source.GetAction<BooleanAction>( VrAction.LeftButton );
 		var right = source.GetAction<BooleanAction>( VrAction.RightButton );
 		var menu = source.GetAction<BooleanAction>( VrAction.ToggleMenu );
@@ -174,8 +178,11 @@ public partial class VrController : BasicVrDevice {
 			config.BindWith( OsuXrSetting.InputMode, inputMode );
 			config.BindWith( OsuXrSetting.TouchPointers, pointerTouch );
 			config.BindWith( OsuXrSetting.TapStrum, tapStrum );
-			config.BindWith( OsuXrSetting.DisableTeleport, disableTeleport );
+			config.BindWith( OsuXrSetting.DisableTeleport, settingsTeleportDisabled );
+			settingsTeleportDisabled.BindValueChanged( _ => updateTeleportCapability() );
 		}
+		currentPlayer.BindTo( osu.Player );
+		currentPlayer.BindValueChanged( _ => updateTeleportCapability(), true );
 
 		inputMode.BindValueChanged( _ => updatePointerType() );
 		activeControllers.BindTo( game.ActiveVrControllers );
@@ -185,6 +192,10 @@ public partial class VrController : BasicVrDevice {
 
 		menuButton.OnPressed += () => ToggleMenuPressed?.Invoke( this );
 		updatePointerType();
+	}
+
+	void updateTeleportCapability () {
+		disableTeleport.Value = settingsTeleportDisabled.Value || currentPlayer.Value != null;
 	}
 
 	public bool IsFocusedOnAnything => pointers?.Any( x => x.HoveredCollider != null ) == true;
