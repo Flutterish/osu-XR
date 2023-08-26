@@ -10,9 +10,14 @@ public abstract partial class JoystickHandler : ActionBindingHandler {
 	public JoystickHandler ( Hand? hand, IActionBinding source ) : base( source ) {
 		this.hand = hand;
 		GetController( hand, c => {
-			JoystickPosition.BindTo( Input.GetAction<Vector2Action>( VrAction.Scroll, c ).ValueBindable );
+			actualJoystickPosition.BindTo( Input.GetAction<Vector2Action>( VrAction.Scroll, c ).ValueBindable );
+		} );
+
+		actualJoystickPosition.BindValueChanged( v => {
+			JoystickPosition.Value = new( v.NewValue.X, -v.NewValue.Y );
 		} );
 	}
 
+	Bindable<Vector2> actualJoystickPosition = new();
 	public readonly Bindable<Vector2> JoystickPosition = new();
 }

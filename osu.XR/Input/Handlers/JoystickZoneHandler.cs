@@ -28,9 +28,6 @@ public partial class JoystickZoneHandler : JoystickHandler {
 
 		return diff;
 	}
-	double closestEquivalentAngle ( double current, double goal ) {
-		return current + deltaAngle( current, goal );
-	}
 
 	public bool IsNormalizedPointInside ( Vector2 pos ) {
 		if ( pos.Length < deadzone.Value ) return false;

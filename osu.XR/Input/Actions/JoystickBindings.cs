@@ -24,10 +24,12 @@ public class JoystickBindings : CompositeActionBinding<IJoystickBinding>, IHasBi
 		if ( action.Type is JoystickBindingType.Movement && Children.Any( x => x.Type == JoystickBindingType.Movement ) )
 			return false;
 
+		var oldParent = action.Parent;
+		action.Parent = this;
 		if ( base.Add( action ) ) {
-			action.Parent = this;
 			return true;
 		}
+		action.Parent = oldParent;
 		return false;
 	}
 
