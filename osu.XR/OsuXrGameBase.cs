@@ -1,5 +1,6 @@
 ﻿using OpenVR.NET;
 using osu.Framework.Configuration;
+using osu.Framework.Development;
 using osu.Framework.IO.Stores;
 using osu.Framework.Platform;
 using osu.Framework.XR.Testing.VirtualReality;
@@ -80,6 +81,9 @@ public partial class OsuXrGameBase : Framework.Game {
 	}
 
 	protected override bool OnExiting () {
+		if ( DebugUtils.IsDebugBuild )
+			return base.OnExiting();
+		
 		if ( !Bindings.IsDefault ) {
 			if ( storage.Exists( "Bindings.json~" ) )
 				storage.Delete( "Bindings.json~" );
