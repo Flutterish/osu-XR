@@ -59,7 +59,7 @@ public partial class OsuXrGame : OsuXrGameBase {
 		Add( new BasicPanelInteractionSource( scene, physics, panelInteraction ) { RelativeSizeAxes = Axes.Both } );
 
 		scene.Add( new UserTrackingDrawable3D { Child = menu = new HandheldMenu(), Y = 1 } );
-		menu.Notifications.Post( new SimpleNotification { Text = @"Welcome to OXR! This is the menu panel, which you can open and close with you VR controller (probably the A or B button). Check out other sections, configure your game, and close this menu when you are ready. Also, please make sure you are running in mutithreaded mode with unlimited framerate (I haven't figured out how to change that through code yet)." } );
+		menu.Notifications.Post( new SimpleNotification { Text = @"Welcome to OXR! This is the menu panel, which you can open and close with you VR controller (probably the A or B button). Check out other sections, configure your game, and close this menu when you are ready." } );
 		scene.Add( Player = new OsuXrPlayer() );
 
 		Keyboard = new() {

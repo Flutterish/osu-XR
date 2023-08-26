@@ -15,16 +15,9 @@ public partial class ChangelogPanel : SettingsPanel {
 		public Sections ( bool showSidebar ) : base( showSidebar ) { }
 
 		protected override IEnumerable<SettingsSection> CreateSections () { // TODO this really shouldnt be hardcoded
-			yield return new ChangelogEntry( @"2023.826.0 (Current)", @"
-				### Hello, World!
-
-				This is the release version for the overhaul of OXR!
-
-				This version features improvements such as significantly less bugs and a few visual changes. We also reworkwed the whole 3D framework.
-
-				There are also new settings, and you can play using your fingers, given your controller can detect them.
-
-				Speaking of settings, you can now create, edit and save setting presets!
+			yield return new ChangelogEntry( @"(Current)", @"
+				#### Performance
+				* Lock execution mode to multithreaded with unlimited framerate (it's actually limited to the refresh rate of your HMD).
 			" );
 
 			yield return new ChangelogEntry( @"Upcoming", @"
@@ -47,6 +40,18 @@ public partial class ChangelogPanel : SettingsPanel {
 				* Spatial sound for enviornment objects.
 				#### Milestones
 				* VR API for osu! rulesets. This will allow them to display elements in 3D space, create interactible props and much more.
+			" );
+
+			yield return new ChangelogEntry( @"2023.826.0", @"
+				### Hello, World!
+
+				This is the release version for the overhaul of OXR!
+
+				This version features improvements such as significantly less bugs and a few visual changes. We also reworkwed the whole 3D framework.
+
+				There are also new settings, and you can play using your fingers, given your controller can detect them.
+
+				Speaking of settings, you can now create, edit and save setting presets!
 			" );
 		}
 

@@ -73,7 +73,7 @@ public partial class OsuXrGameBase : Framework.Game {
 	}
 
 	[BackgroundDependencyLoader]
-	private void load ( GameHost host ) {
+	private void load ( GameHost host, FrameworkConfigManager frameworkConfig ) {
 		Resources.AddStore( new NamespacedResourceStore<byte[]>( new DllResourceStore( typeof( OsuXrGameBase ).Assembly ), "Resources" ) );
 		storage = host.Storage.GetStorageForDirectory( "XR" );
 		dependencies.CacheAs( storage );
@@ -81,6 +81,19 @@ public partial class OsuXrGameBase : Framework.Game {
 		dependencies.CacheAs( config );
 		config.Load();
 		Bindings.Value = BindingsFile.LoadFromStorage( storage, "Bindings.json", new() );
+
+		var renderer = frameworkConfig.GetBindable<RendererType>( FrameworkSetting.Renderer );
+		renderer.Disabled = true;
+
+		var mode = frameworkConfig.GetBindable<ExecutionMode>( FrameworkSetting.ExecutionMode );
+		mode.Disabled = false;
+		mode.Value = ExecutionMode.MultiThreaded;
+		mode.Disabled = true;
+
+		var framerate = frameworkConfig.GetBindable<FrameSync>( FrameworkSetting.FrameSync );
+		framerate.Disabled = false;
+		framerate.Value = FrameSync.Unlimited;
+		framerate.Disabled = true;
 	}
 
 	protected override bool OnExiting () {
