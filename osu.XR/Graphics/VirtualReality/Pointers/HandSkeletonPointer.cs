@@ -23,10 +23,10 @@ public partial class HandSkeletonPointer : CompositeDrawable3D, IPointerSource {
 
 	public IEnumerable<Pointer> Pointers => fingertipPointers;
 
-	public RentedArray<PointerHit?> UpdatePointers ( Vector3 position, Quaternion rotation ) {
+	public RentedArray<PointerHit?> UpdatePointers ( Vector3 playerPosition, Vector3 position, Quaternion rotation ) {
 		var arr = MemoryPool<PointerHit?>.Shared.Rent(5);
 		for ( int i = 0; i < 5; i++ ) {
-			arr[i] = fingertipPointers[i].Update( skeleton.LocalMatrix.Apply( skeleton.Fingertips[i] ), Quaternion.Identity );
+			arr[i] = fingertipPointers[i].Update( playerPosition, skeleton.LocalMatrix.Apply( skeleton.Fingertips[i] ), Quaternion.Identity );
 		}
 		return arr;
 	}

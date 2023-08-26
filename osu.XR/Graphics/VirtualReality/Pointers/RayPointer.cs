@@ -22,7 +22,7 @@ public partial class RayPointer : CompositeDrawable3D, IPointer {
 		indicator.Mesh.CreateFullUnsafeUpload().Enqueue();
 	}
 
-	public PointerHit? UpdatePointer ( Vector3 position, Quaternion rotation ) {
+	public PointerHit? UpdatePointer ( Vector3 playerPosition, Vector3 position, Quaternion rotation ) {
 		Position = position;
 		Rotation = rotation;
 

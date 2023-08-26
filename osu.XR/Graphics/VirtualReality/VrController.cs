@@ -1,4 +1,5 @@
-﻿using osu.Framework.XR.Graphics;
+﻿using OpenVR.NET.Devices;
+using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Graphics.Panels;
 using osu.Framework.XR.Graphics.Rendering;
 using osu.Framework.XR.Input;
@@ -8,6 +9,8 @@ using osu.XR.Configuration;
 using osu.XR.Graphics.Player;
 using osu.XR.Graphics.VirtualReality.Pointers;
 using osu.XR.Osu;
+using Controller = osu.Framework.XR.VirtualReality.Devices.Controller;
+using Headset = osu.Framework.XR.VirtualReality.Devices.Headset;
 
 namespace osu.XR.Graphics.VirtualReality;
 
@@ -142,6 +145,9 @@ public partial class VrController : BasicVrDevice {
 	BindableList<VrController> activeControllers = new();
 
 	[Resolved]
+	VrCompositor compositor { get; set; } = null!;
+
+	[Resolved]
 	public PanelInteractionSystem InteractionSystem { get; private set; } = null!;
 	[BackgroundDependencyLoader( true )]
 	private void load ( OsuXrConfigManager? config, OsuXrGame game, OsuDependencies osu ) {
@@ -274,12 +280,13 @@ public partial class VrController : BasicVrDevice {
 		teleportVisual.OriginBindable.Value = pos;
 		teleportVisual.DirectionBindable.Value = rot.Apply( Vector3.UnitZ ) * 5;
 
+		Vector3 player = compositor.TrackedDevices.OfType<Headset>().SingleOrDefault() is Headset headset ? headset.Position : Vector3.Zero;
 		if ( pointerSource is IPointerSource source ) {
-			source.UpdatePointers( pos, rot ).Dispose();
+			source.UpdatePointers( player, pos, rot ).Dispose();
 		}
 		else if ( pointers != null ) {
 			foreach ( var i in pointers ) {
-				i.Update( pos, rot );
+				i.Update( player, pos, rot );
 			}
 		}
 	}

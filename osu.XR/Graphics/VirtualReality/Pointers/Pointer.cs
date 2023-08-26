@@ -40,8 +40,8 @@ public class Pointer {
 		}
 	}
 
-	public PointerHit? Update ( Vector3 position, Quaternion rotation ) {
-		var maybeHit = Source.UpdatePointer( position, rotation );
+	public PointerHit? Update ( Vector3 playerPosition, Vector3 position, Quaternion rotation ) {
+		var maybeHit = Source.UpdatePointer( playerPosition, position, rotation );
 
 		if ( maybeHit is PointerHit hit ) {
 			HoveredCollider = hit.Collider;

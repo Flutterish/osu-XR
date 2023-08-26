@@ -22,11 +22,16 @@ public partial class TouchPointer : Model, IPointer {
 		meshes.GetAsync( "sphere" ).ContinueWith( r => Schedule( mesh => Mesh = mesh, r.Result ) );
 	}
 
-	public PointerHit? UpdatePointer ( Vector3 position, Quaternion rotation ) {
+	public PointerHit? UpdatePointer ( Vector3 playerPosition, Vector3 position, Quaternion rotation ) {
 		var targetPosition = position;
 		Rotation = rotation;
 
 		if ( Position != targetPosition ) {
+			if ( (targetPosition - Position).Dot(playerPosition - Position) > 0 ) { // going towards the player, this will help if the player got the pointer stuck somewhere
+				Position = targetPosition;
+				goto end;
+			}
+
 			for ( int i = 0; i < 10; i++ ) { // this makes "sliding" on colliders better
 				var from = Position;
 				var direction = ( targetPosition - Position ).Normalized();
@@ -43,6 +48,7 @@ public partial class TouchPointer : Model, IPointer {
 			}
 		}
 
+		end:
 		return physics.TryHitSphere( Position, Radius, out var hit ) ? hit : null;
 	}
 
