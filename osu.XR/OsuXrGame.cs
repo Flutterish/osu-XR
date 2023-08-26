@@ -70,7 +70,7 @@ public partial class OsuXrGame : OsuXrGameBase {
 		};
 		KeyboardInput = new( Keyboard );
 		keyboardInteractionSource = panelInteraction.GetSource( Keyboard );
-		panelInteraction.PanelFocused += panel => { // TODO show when there is input focus OR a toggle is pressed
+		panelInteraction.PanelGainedFocusSource += (panel, source) => { // TODO show when there is input focus OR a toggle is pressed
 			if ( !Keyboard.IsKeyboardPanel( panel ) ) {
 				keyboardInteractionSource.FocusedPanel = panel;
 			}
