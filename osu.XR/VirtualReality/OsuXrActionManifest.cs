@@ -26,6 +26,20 @@ public class OsuXrActionManifest : ActionManifest<VrActionCategory, VrAction> {
 			new() { Category = VrActionCategory.Skeleton, Name = VrAction.LeftHandSkeleton, Type = ActionType.LeftHandSkeleton },
 			new() { Category = VrActionCategory.Skeleton, Name = VrAction.RightHandSkeleton, Type = ActionType.RightHandSkeleton }
 		};
+		DefaultBindings = new() {
+			new() {
+				ControllerType = "knuckles",
+				Path = "DefaultBindings/knuckles.json"
+			},
+			new() {
+				ControllerType = "vive_controller",
+				Path = "DefaultBindings/vive_controller.json"
+			},
+			new() {
+				ControllerType = "oculus_touch",
+				Path = "DefaultBindings/oculus_touch.json"
+			}
+		};
 	}
 }
 
