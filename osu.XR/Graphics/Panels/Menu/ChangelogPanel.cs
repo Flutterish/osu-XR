@@ -15,7 +15,7 @@ public partial class ChangelogPanel : SettingsPanel {
 		public Sections ( bool showSidebar ) : base( showSidebar ) { }
 
 		protected override IEnumerable<SettingsSection> CreateSections () { // TODO this really shouldnt be hardcoded
-			yield return new ChangelogEntry( @"2023.825.0 (Current)", @"
+			yield return new ChangelogEntry( @"2023.826.0 (Current)", @"
 				### Hello, World!
 
 				This is the release version for the overhaul of OXR!
