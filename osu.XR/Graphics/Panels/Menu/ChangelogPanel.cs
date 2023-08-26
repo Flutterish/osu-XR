@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace osu.XR.Graphics.Panels.Menu;
 
-public class ChangelogPanel : SettingsPanel {
+public partial class ChangelogPanel : SettingsPanel {
 	protected override SectionsContainer CreateSectionsContainer () {
 		return new Sections( false );
 	}
@@ -16,10 +16,14 @@ public class ChangelogPanel : SettingsPanel {
 
 		protected override IEnumerable<SettingsSection> CreateSections () { // TODO this really shouldnt be hardcoded
 			yield return new ChangelogEntry( @"2023.825.0 (Current)", @"
-				Hello, World!
+				### Hello, World!
+
 				This is the release version for the overhaul of OXR!
+
 				This version features improvements such as significantly less bugs and a few visual changes. We also reworkwed the whole 3D framework.
+
 				There are also new settings, and you can play using your fingers, given your controller can detect them.
+
 				Speaking of settings, you can now create, edit and save setting presets!
 			" );
 
@@ -51,7 +55,7 @@ public class ChangelogPanel : SettingsPanel {
 	}
 
 	partial class ChangelogEntry : SettingsSection {
-		static Regex deadspacePattern = new( @"(^\n$)|(^[\t ]+)", RegexOptions.Compiled | RegexOptions.Multiline );
+		static Regex deadspacePattern = new( @"^[\t ]+", RegexOptions.Compiled | RegexOptions.Multiline );
 		public ChangelogEntry ( LocalisableString header, string markdown ) {
 			Header = header;
 			RelativeSizeAxes = Axes.X;

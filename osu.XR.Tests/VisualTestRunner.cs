@@ -1,5 +1,4 @@
-﻿using osu.Framework;
-using osu.Framework.Platform;
+﻿using osu.Framework.Platform;
 using osu.Framework.XR;
 using osu.XR.Tests;
 

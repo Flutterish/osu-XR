@@ -59,7 +59,7 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 	}
 
 	ConfigurationPreset<OsuXrSetting> load ( Storage storage, string file ) {
-		var preset = CreateFullPreset();
+		var preset = CreateFullSavePreset();
 
 		using ( var stream = storage.GetStream( file, FileAccess.Read, FileMode.Open ) ) {
 			using var reader = new StreamReader( stream );
@@ -149,7 +149,7 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 
 	public ConfigurationPreset<OsuXrSetting> CreateFullPreset () {
 		var preset = new ConfigurationPreset<OsuXrSetting>();
-		foreach ( var (key, get) in getters.Where( x => x.Key is not OsuXrSetting.CameraMode ) ) { // TODO this should depend on which elements have a "preset component" in settings
+		foreach ( var (key, get) in getters.Where( x => x.Key is not OsuXrSetting.CameraMode or OsuXrSetting.SceneryType ) ) { // TODO this should depend on which elements have a "preset component" in settings
 			preset[key] = get();
 		}
 		return preset;

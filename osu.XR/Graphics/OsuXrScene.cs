@@ -1,5 +1,4 @@
-﻿using MongoDB.Bson.IO;
-using OpenVR.NET;
+﻿using OpenVR.NET;
 using OpenVR.NET.Devices;
 using osu.Framework.Graphics.Rendering;
 using osu.Framework.Graphics.Textures;
