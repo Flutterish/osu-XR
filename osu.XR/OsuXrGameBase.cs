@@ -94,6 +94,13 @@ public partial class OsuXrGameBase : Framework.Game {
 		framerate.Disabled = false;
 		framerate.Value = FrameSync.Unlimited;
 		framerate.Disabled = true;
+
+		var forcedActiveWindowBindable = (Bindable<bool>)Window.IsActive;
+		forcedActiveWindowBindable.BindValueChanged( v => {
+			if ( !v.NewValue ) {
+				forcedActiveWindowBindable.Value = true;
+			}
+		} );
 	}
 
 	protected override bool OnExiting () {
