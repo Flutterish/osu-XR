@@ -135,9 +135,6 @@ public partial class OsuXrGame : OsuXrGameBase {
 	public readonly BindableList<VrController> ActiveVrControllers = new();
 
 	void addVrDevice ( VrDevice device ) {
-		if ( device is Headset )
-			return;
-
 		if ( device is Controller controller ) {
 			VrController vrController;
 			scene.Add( vrController = new VrController( controller, scene ) );
@@ -152,7 +149,12 @@ public partial class OsuXrGame : OsuXrGameBase {
 			return;
 		}
 
-		scene.Add( new BasicVrDevice( device ) );
+		var model = new BasicVrDevice( device );
+		if ( device is Headset ) {
+			model.RenderLayer = RenderLayer.HMD;
+		}
+
+		scene.Add( model );
 	}
 
 	public VrController? PrimaryController

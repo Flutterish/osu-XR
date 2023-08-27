@@ -16,6 +16,7 @@ public partial class OsuXrPlayer : VrPlayer {
 
 	public readonly Bindable<FeetSymbols> FeetSymbols = new( Configuration.FeetSymbols.None );
 	public OsuXrPlayer () {
+		RenderMask = Graphics.RenderLayer.All & ~(Graphics.RenderLayer.HMD);
 		AddInternal( shadow = new BasicModel() );
 		invariantContainer.Add( footRight = new Foot { Scale = new Vector3( -0.1f, 0.1f, 0.1f ), X = 0.1f, Z = 0.03f, Y = -0.001f, EulerY = 14 / 180f * MathF.PI } );
 		invariantContainer.Add( footLeft = new Foot { Scale = new Vector3( 0.1f, 0.1f, 0.1f ), X = -0.1f, Y = -0.001f, EulerY = -10 / 180f * MathF.PI } );

@@ -40,16 +40,19 @@ public partial class OsuXrScene : Scene {
 					break;
 
 				case CameraMode.FirstPersonVR:
+					ScreenRenderMask = RenderLayer.All & ~(RenderLayer.HMD);
 					break;
 
 				case CameraMode.FirstPerson:
 					RenderToScreen = true;
+					ScreenRenderMask = RenderLayer.All;
 					movementSystem.ControlType = ControlType.Fly;
 					// TODO panel interaction toggle - Im thinking some F-key shortcut would toggle an on screen panel with settings
 					break;
 
 				case CameraMode.ThirdPerson:
 					RenderToScreen = true;
+					ScreenRenderMask = RenderLayer.All;
 					movementSystem.ControlType = ControlType.Orbit;
 					break;
 			}
@@ -100,11 +103,12 @@ public partial class OsuXrScene : Scene {
 	class Pipeline : BasicRenderPiepline {
 		public Pipeline ( OsuXrScene source ) : base( source ) { }
 
-		protected override void Draw ( IRenderer renderer, int subtreeIndex, Matrix4 projectionMatrix ) {
+		protected override void Draw ( IRenderer renderer, int subtreeIndex, Matrix4 projectionMatrix, ulong mask ) {
 			if ( TryGetRenderStage( RenderingStage.Skybox, out var drawables ) ) {
 				renderer.PushDepthInfo( new( depthTest: false, writeDepth: false ) );
 				foreach ( var i in drawables ) {
-					i.GetDrawNodeAtSubtree( subtreeIndex )?.Draw( renderer );
+					if ( (i.RenderLayer & mask) != 0 )
+						i.GetDrawNodeAtSubtree( subtreeIndex )?.Draw( renderer );
 				}
 				renderer.PopDepthInfo();
 			}
@@ -114,21 +118,24 @@ public partial class OsuXrScene : Scene {
 					continue;
 
 				foreach ( var i in GetRenderStage( stage ) ) {
-					i.GetDrawNodeAtSubtree( subtreeIndex )?.Draw( renderer );
+					if ( (i.RenderLayer & mask) != 0 )
+						i.GetDrawNodeAtSubtree( subtreeIndex )?.Draw( renderer );
 				}
 			}
 
 			if ( TryGetRenderStage( RenderingStage.Transparent, out drawables ) ) {
 				MaterialStore.SetGlobalProperty( "solidPass", true );
 				foreach ( var i in drawables ) {
-					i.GetDrawNodeAtSubtree( subtreeIndex )?.Draw( renderer );
+					if ( (i.RenderLayer & mask) != 0 )
+						i.GetDrawNodeAtSubtree( subtreeIndex )?.Draw( renderer );
 				}
 				Material.Unbind(); // reset property
 
 				MaterialStore.SetGlobalProperty( "solidPass", false );
 				renderer.PushDepthInfo( new( depthTest: true, writeDepth: false ) );
 				foreach ( var i in drawables ) { // TODO sort them
-					i.GetDrawNodeAtSubtree( subtreeIndex )?.Draw( renderer );
+					if ( (i.RenderLayer & mask) != 0 )
+						i.GetDrawNodeAtSubtree( subtreeIndex )?.Draw( renderer );
 				}
 				renderer.PopDepthInfo();
 			}

@@ -19,6 +19,8 @@ public partial class ChangelogPanel : SettingsPanel {
 				#### Performance
 				* Lock execution mode to multithreaded with unlimited framerate (it's actually limited to the refresh rate of your HMD).
 				* Lock window to be always ""active"". This will make it so when you unfocus the window, it will not limit the update rate to 60Hz.
+				### Visual
+				* The VR headset is now rendered on screen.
 			" );
 
 			yield return new ChangelogEntry( @"Upcoming", @"
