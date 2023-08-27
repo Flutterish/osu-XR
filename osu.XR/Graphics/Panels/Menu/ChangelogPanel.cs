@@ -24,7 +24,6 @@ public partial class ChangelogPanel : SettingsPanel {
 			yield return new ChangelogEntry( @"Upcoming", @"
 				### This section contains changes that you can expect in following updates.
 				#### QOL
-				* Programmatically ensure the game is running in multithreaded and unlimited framerate.
 				* Ability to pin and move around elements such as menu panels and the keyboard. You will be able to pin them in space, or relative to another object or set of objects.
 				* A small first-time tutorial screen.
 				#### Input
@@ -37,6 +36,7 @@ public partial class ChangelogPanel : SettingsPanel {
 				* Movable render-to-window camera prop.
 				* Player avatar.
 				* A non-invasive thank you to contribuitors and ko-fi supporters somewhere.
+				* Anti-aliasing. I'm a bit limited on this one though, because osu!framework doesn't support it yet.
 				#### Audio
 				* Spatial sound for enviornment objects.
 				#### Milestones
