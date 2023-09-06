@@ -27,9 +27,11 @@ public partial class JoystickMovementEditor : FillFlowContainer {
 				RelativeSizeAxes = Axes.X
 			}.With( x =>  x.OnUpdate += x => x.Height = x.DrawWidth - 40 ),
 			type = new() {
+				ShowsDefaultIndicator = false,
 				Current = source.MovementType
 			},
 			slider = new() {
+				ShowsDefaultIndicator = false,
 				LabelText = MovementStrings.Distance,
 				Current = source.Distance
 			}

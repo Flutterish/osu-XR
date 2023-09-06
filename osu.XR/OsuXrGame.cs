@@ -1,4 +1,5 @@
 ﻿using osu.Framework.Graphics.Shapes;
+using osu.Framework.Graphics.Sprites;
 using osu.Framework.Logging;
 using osu.Framework.XR.Input;
 using osu.Framework.XR.Physics;
@@ -12,6 +13,7 @@ using osu.XR.Graphics.Panels.Menu;
 using osu.XR.Graphics.Player;
 using osu.XR.Graphics.Sceneries;
 using osu.XR.Graphics.VirtualReality;
+using osu.XR.IO;
 
 namespace osu.XR;
 
@@ -101,6 +103,19 @@ public partial class OsuXrGame : OsuXrGameBase {
 		};
 
 		Compositor.BindDeviceDetected( addVrDevice );
+	}
+
+	protected override void OnBindingsLoadMessage ( BindingsSaveContext.Message message ) {
+		base.OnBindingsLoadMessage( message );
+
+		if ( message.Severity is Severity.Warning or Severity.Error ) {
+			menu.Notifications.Post( new SimpleErrorNotification {
+				Icon = message.Severity == Severity.Error ? FontAwesome.Solid.Bomb : FontAwesome.Solid.ExclamationTriangle,
+				Text = message.Ruleset == null ? message.Text : message.Ruleset.AvailableVariants.Count() > 1
+				? $@"{message.Text} in {message.Ruleset.RulesetInfo.Name} ({message.Ruleset.GetVariantName(message.Variant!.Value)})"
+				: $@"{message.Text} in {message.Ruleset.RulesetInfo.Name}"
+			} );
+		}
 	}
 
 	void setupVrRig () {

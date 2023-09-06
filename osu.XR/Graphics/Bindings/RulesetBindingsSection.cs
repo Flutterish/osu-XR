@@ -85,6 +85,7 @@ public partial class RulesetBindingsSection : FillFlowContainer {
 		var variants = ruleset.AvailableVariants;
 		if ( variants.Skip( 1 ).Any() ) {
 			Add( settings = new SettingsDropdown<LocalisableString> {
+				ShowsDefaultIndicator = false,
 				LabelText = BindingsStrings.Variant,
 				Items = variants.Select( x => ruleset.GetVariantName( x ) ),
 				Current = new Bindable<LocalisableString>( ruleset.GetVariantName( variants.FirstOrDefault() ) )

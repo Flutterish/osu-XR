@@ -13,6 +13,7 @@ public partial class RulesetActionDropdown : SettingsDropdown<LocalisableString>
 	LocalisableString none = BindingsStrings.ActionNone;
 
 	public RulesetActionDropdown () {
+		ShowsDefaultIndicator = false;
 		Current = new Bindable<LocalisableString>( none );
 
 		RulesetAction.ValueChanged += v => {

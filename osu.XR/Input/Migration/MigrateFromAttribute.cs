@@ -5,8 +5,8 @@ public class MigrateFromAttribute : Attribute {
 	public readonly Type Format;
 	public readonly string VersionName;
 
-	public MigrateFromAttribute ( Type format, string versionName ) {
+	public MigrateFromAttribute ( Type format, string? versionName ) {
 		Format = format;
-		VersionName = versionName;
+		VersionName = versionName ?? string.Empty;
 	}
 }

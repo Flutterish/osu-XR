@@ -25,11 +25,13 @@ public class RulesetBindings : UniqueCompositeActionBinding<VariantBindings, int
 				ctx.Warning( @"Ruleset does not have a variant checksum", save );
 			}
 			else {
+				var expected = $@"save declared {string.Join(", ", declared.Select( x => $@"(ID {x.Key} = {x.Value})" ))}, but it was {string.Join( ", ", checksum.Select( x => $@"(ID {x.Key} = {x.Value})" ) )}";
+
 				if ( declared.Values.Except( checksum.Values ).Any() ) {
-					ctx.Warning( @"Ruleset action checksum has non-existent variants", save );
+					ctx.Warning( $@"Ruleset action checksum has non-existent variants - {expected}", save );
 				}
 				else if ( declared.Except( checksum ).Any() ) {
-					ctx.Warning( @"Ruleset action action checksum is invalid" , save );
+					ctx.Warning( $@"Ruleset action action checksum is invalid - {expected}" , save );
 				}
 				// TODO try to fix this?
 			}
@@ -42,6 +44,7 @@ public class RulesetBindings : UniqueCompositeActionBinding<VariantBindings, int
 
 	SaveData? toBeLoaded;
 	BindingsSaveContext? ctx;
+	public BindingsSaveContext? SaveContext => ctx;
 	public string ShortName { get; private set; }
 	public RulesetBindings ( string shortName ) {
 		ShortName = shortName;

@@ -41,11 +41,13 @@ public class VariantBindings : UniqueCompositeActionBinding<IHasBindingType, (Bi
 			ctx.Warning( @"Variant does not have an action checksum", save );
 		}
 		else {
+			var expected = $@"save declared {string.Join( ", ", declared.Select( x => $@"(ID {x.Key} = {x.Value})" ) )}, but it was {string.Join( ", ", checksum.Select( x => $@"(ID {x.Key} = {x.Value})" ) )}";
+
 			if ( declared.Values.Except( checksum.Values ).Any() ) {
-				ctx.Warning( @"Variant action checksum has non-existent actions", save );
+				ctx.Warning( $@"Variant action checksum has non-existent actions - {expected}", save );
 			}
 			else if ( declared.Except( checksum ).Any() ) {
-				ctx.Warning( @"Variant action checksum is invalid", save );
+				ctx.Warning( $@"Variant action checksum is invalid - {expected}", save );
 			}
 			// TODO try to fix this?
 		}

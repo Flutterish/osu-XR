@@ -1,10 +1,8 @@
-﻿using OpenVR.NET.Devices;
-using osu.Framework.XR.Graphics;
+﻿using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Graphics.Panels;
 using osu.Framework.XR.Graphics.Rendering;
 using osu.Framework.XR.Input;
 using osu.Framework.XR.VirtualReality;
-using osu.Framework.XR.VirtualReality.Devices;
 using osu.XR.Configuration;
 using osu.XR.Graphics.Player;
 using osu.XR.Graphics.VirtualReality.Pointers;

@@ -14,13 +14,21 @@ public partial class ChangelogPanel : SettingsPanel {
 	partial class Sections : SectionsContainer {
 		public Sections ( bool showSidebar ) : base( showSidebar ) { }
 
+		const string RulesetSection = "`\uf11b Ruleset`"; // TODO make these clickable
+		const string SettingsSection = "`\uf013 Settings`";
+
 		protected override IEnumerable<SettingsSection> CreateSections () { // TODO this really shouldnt be hardcoded
-			yield return new ChangelogEntry( @"(Current)", @"
+			yield return new ChangelogEntry( @"(Current)", $@"
 				#### Performance
 				* Lock execution mode to multithreaded with unlimited framerate (it's actually limited to the refresh rate of your HMD).
 				* Lock window to be always ""active"". This will make it so when you unfocus the window, it will not limit the update rate to 60Hz.
 				### Visual
 				* The VR headset is now rendered on screen.
+				### Input
+				* Made joystick zones easier to customize.
+				### Other
+				* Removed ""revert to default"" buttons in the {RulesetSection} section.
+				* Added notifications when ruleset binding load fails.
 			" );
 
 			yield return new ChangelogEntry( @"Upcoming", @"

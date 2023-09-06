@@ -72,6 +72,8 @@ public partial class OsuXrGameBase : Framework.Game {
 		return base.GetFrameworkConfigDefaults();
 	}
 
+	protected virtual void OnBindingsLoadMessage ( BindingsSaveContext.Message message ) { }
+
 	[BackgroundDependencyLoader]
 	private void load ( GameHost host, FrameworkConfigManager frameworkConfig ) {
 		Resources.AddStore( new NamespacedResourceStore<byte[]>( new DllResourceStore( typeof( OsuXrGameBase ).Assembly ), "Resources" ) );
@@ -80,7 +82,15 @@ public partial class OsuXrGameBase : Framework.Game {
 		config = new( storage );
 		dependencies.CacheAs( config );
 		config.Load();
-		Bindings.Value = BindingsFile.LoadFromStorage( storage, "Bindings.json", new() );
+		BindingsSaveContext saveContext = new();
+		saveContext.Messages.BindCollectionChanged( (_,e) => {
+			if ( e.NewItems != null ) {
+				foreach ( BindingsSaveContext.Message i in e.NewItems ) {
+					OnBindingsLoadMessage( i );
+				}
+			}
+		} );
+		Bindings.Value = BindingsFile.LoadFromStorage( storage, "Bindings.json", saveContext );
 
 		var renderer = frameworkConfig.GetBindable<RendererType>( FrameworkSetting.Renderer );
 		renderer.Disabled = true;

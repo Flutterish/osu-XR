@@ -1,6 +1,5 @@
 ﻿using osu.Framework.Input.Bindings;
 using osu.Framework.XR.Graphics.Panels;
-using osu.Game.Overlays.BeatmapSet;
 using osu.XR.Osu;
 using System.Reflection;
 

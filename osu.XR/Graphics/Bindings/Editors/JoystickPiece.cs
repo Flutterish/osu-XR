@@ -18,9 +18,15 @@ public partial class JoystickPiece : Container {
 
 	protected override Container<Drawable> Content => outside;
 
+	bool drawOutline;
+	public JoystickPiece ( bool drawOutline = true ) {
+		this.drawOutline = drawOutline;
+	}
+
 	protected override void LoadComplete () {
 		base.LoadComplete();
 
+		if ( drawOutline )
 		AddInternal( new Circle {
 			Anchor = Anchor.Centre,
 			Origin = Anchor.Centre,
@@ -31,6 +37,7 @@ public partial class JoystickPiece : Container {
 
 		CreateInteractiveElements();
 
+		if ( drawOutline )
 		AddInternal( outside = new CircularContainer {
 			Masking = true,
 			BorderThickness = 10,
@@ -44,6 +51,8 @@ public partial class JoystickPiece : Container {
 				AlwaysPresent = true
 			}
 		} );
+
+		if ( drawOutline )
 		AddInternal( inside = new CircularContainer {
 			Masking = true,
 			BorderThickness = 5,
@@ -57,6 +66,7 @@ public partial class JoystickPiece : Container {
 			}
 		} );
 
+		if ( drawOutline )
 		JoystickPosition.BindValueChanged( v => {
 			inside.MoveTo( v.NewValue / 2, 50, Easing.Out );
 		}, true );
@@ -67,8 +77,10 @@ public partial class JoystickPiece : Container {
 	protected override void Update () {
 		base.Update();
 
-		outside.BorderThickness = 10 * DrawSize.X / 320;
-		inside.BorderThickness = 5 * DrawSize.X / 320;
-		inside.Size = DrawSize * 74f / 320 + new Vector2( inside.BorderThickness );
+		if ( drawOutline ) {
+			outside.BorderThickness = 10 * DrawSize.X / 320;
+			inside.BorderThickness = 5 * DrawSize.X / 320;
+			inside.Size = DrawSize * 74f / 320 + new Vector2( inside.BorderThickness );
+		}
 	}
 }
