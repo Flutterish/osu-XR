@@ -1,7 +1,7 @@
 {
    "action_manifest_version" : 0,
    "alias_info" : {},
-   "app_key" : "system.generated.osu.xr.exe",
+   "app_key" : "system.generated.osu.xr.desktop.exe",
    "bindings" : {
       "/actions/configuration" : {
          "sources" : [
@@ -12,7 +12,7 @@
                   }
                },
                "mode" : "button",
-               "path" : "/user/hand/right/input/a"
+               "path" : "/user/hand/left/input/a"
             },
             {
                "inputs" : {
@@ -21,7 +21,71 @@
                   }
                },
                "mode" : "button",
-               "path" : "/user/hand/left/input/a"
+               "path" : "/user/hand/right/input/a"
+            }
+         ]
+      },
+      "/actions/general" : {
+         "sources" : [
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/general/in/leftbutton"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/left/input/trigger"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/general/in/rightbutton"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/b"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/general/in/rightbutton"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/left/input/b"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/general/in/leftbutton"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/trigger"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/general/in/teleport"
+                  },
+                  "position" : {
+                     "output" : "/actions/general/in/scroll"
+                  }
+               },
+               "mode" : "joystick",
+               "path" : "/user/hand/right/input/thumbstick"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/general/in/teleport"
+                  },
+                  "position" : {
+                     "output" : "/actions/general/in/scroll"
+                  }
+               },
+               "mode" : "joystick",
+               "path" : "/user/hand/left/input/thumbstick"
             }
          ]
       },
@@ -38,51 +102,46 @@
          ],
          "sources" : []
       },
-      "/actions/pointer" : {
-         "sources" : [
+      "/actions/poses" : {
+         "poses" : [
             {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/pointer/in/mouseleft"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/right/input/trigger"
+               "output" : "none",
+               "path" : "/user/hand/right/pose/base"
             },
             {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/pointer/in/mouseright"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/left/input/trigger"
+               "output" : "none",
+               "path" : "/user/hand/right/pose/tip"
             },
             {
-               "inputs" : {
-                  "position" : {
-                     "output" : "/actions/pointer/in/scroll"
-                  }
-               },
-               "mode" : "joystick",
-               "path" : "/user/hand/right/input/thumbstick"
+               "output" : "/actions/poses/in/controllertip",
+               "path" : "/user/hand/left/pose/tip"
             },
             {
-               "inputs" : {
-                  "position" : {
-                     "output" : "/actions/pointer/in/scroll"
-                  }
-               },
-               "mode" : "joystick",
-               "path" : "/user/hand/left/input/thumbstick"
+               "output" : "/actions/poses/in/controllertip",
+               "path" : "/user/hand/right/pose/gdc2015"
             }
-         ]
+         ],
+         "sources" : []
+      },
+      "/actions/skeleton" : {
+         "skeleton" : [
+            {
+               "output" : "/actions/skeleton/in/lefthandskeleton",
+               "path" : "/user/hand/left/input/skeleton/left"
+            },
+            {
+               "output" : "/actions/skeleton/in/righthandskeleton",
+               "path" : "/user/hand/right/input/skeleton/right"
+            }
+         ],
+         "sources" : []
       }
    },
    "category" : "steamvr_input",
    "controller_type" : "knuckles",
    "description" : "",
-   "name" : "Default osu.XR configuration for Index Controller",
+   "interaction_profile" : "",
+   "name" : "Default osu.XR.Desktop configuration for Index Controller",
    "options" : {},
    "simulated_actions" : []
 }
