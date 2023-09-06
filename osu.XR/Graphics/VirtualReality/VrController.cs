@@ -243,6 +243,9 @@ public partial class VrController : BasicVrDevice {
 
 	Vector2Action scroll = null!;
 	void onScroll ( Vector2 value ) {
+		if ( currentPlayer.Value != null )
+			return;
+
 		var pointers = relayController.pointers?.DistinctBy( x => x.HoveredCollider );
 		if ( pointers is null )
 			return;

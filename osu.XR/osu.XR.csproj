@@ -13,8 +13,6 @@
 
   <ItemGroup>
     <None Remove="DefaultBindings\knuckles.json" />
-    <None Remove="DefaultBindings\oculus_touch.json" />
-    <None Remove="DefaultBindings\vive_controller.json" />
     <None Remove="Resources\Meshes\keyboard.obj" />
     <None Remove="Resources\Meshes\paw.obj" />
     <None Remove="Resources\Meshes\shoe.obj" />
@@ -25,12 +23,6 @@
 
   <ItemGroup>
     <Content Include="DefaultBindings\knuckles.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="DefaultBindings\oculus_touch.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="DefaultBindings\vive_controller.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
