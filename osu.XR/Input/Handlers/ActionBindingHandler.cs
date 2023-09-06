@@ -96,7 +96,7 @@ public partial class ActionBindingHandler : CompositeComponent {
 			OnLoadComplete += _ => perform();
 	}
 
-	protected void GetController ( Hand? hand, Action<Controller?> action ) {
+	protected void GetController ( Hand? hand, Action<Controller> action ) {
 		GetDevice( d => {
 			if ( d is Controller controller && controller.Role == (hand == Hand.Left ? Valve.VR.ETrackedControllerRole.LeftHand : Valve.VR.ETrackedControllerRole.RightHand) ) {
 				action( controller );

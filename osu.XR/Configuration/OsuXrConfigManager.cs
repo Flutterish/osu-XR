@@ -34,6 +34,7 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 		SetDefault( OsuXrSetting.SceneryType, SceneryType.Solid );
 
 		SetDefault( OsuXrSetting.CameraMode, CameraMode.Disabled );
+		SetDefault( OsuXrSetting.ShowInputDisplay, false );
 		base.InitialiseDefaults();
 	}
 
@@ -149,7 +150,7 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 
 	public ConfigurationPreset<OsuXrSetting> CreateFullPreset () {
 		var preset = new ConfigurationPreset<OsuXrSetting>();
-		foreach ( var (key, get) in getters.Where( x => x.Key is not OsuXrSetting.CameraMode or OsuXrSetting.SceneryType ) ) { // TODO this should depend on which elements have a "preset component" in settings
+		foreach ( var (key, get) in getters.Where( x => x.Key is not OsuXrSetting.CameraMode or OsuXrSetting.SceneryType or OsuXrSetting.ShowInputDisplay ) ) { // TODO this should depend on which elements have a "preset component" in settings
 			preset[key] = get();
 		}
 		return preset;

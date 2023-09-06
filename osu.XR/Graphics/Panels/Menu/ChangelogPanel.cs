@@ -25,6 +25,7 @@ public partial class ChangelogPanel : SettingsPanel {
 				### Visual
 				* The VR headset is now rendered on screen.
 				* Added on-screen warning when rendering to screen is turned off.
+				* Added an option to show input display.
 				### Input
 				* Made joystick zones easier to customize.
 				### Other

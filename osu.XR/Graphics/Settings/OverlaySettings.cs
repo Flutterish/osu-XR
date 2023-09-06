@@ -31,7 +31,10 @@ public partial class OverlayGraphicsSettingSection : SettingsSection {
 			LabelText = @"Render to screen",
 			Current = config.GetBindable<CameraMode>( OsuXrSetting.CameraMode )
 		} );
-		// TODO input display
+		Add( new SettingsCheckbox {
+			LabelText = @"Input display",
+			Current = config.GetBindable<bool>( OsuXrSetting.ShowInputDisplay )
+		} );
 	}
 }
 

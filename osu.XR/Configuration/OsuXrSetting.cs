@@ -22,5 +22,6 @@ public enum OsuXrSetting {
 	ShowDust,
 	SceneryType,
 
-	CameraMode
+	CameraMode,
+	ShowInputDisplay
 }
