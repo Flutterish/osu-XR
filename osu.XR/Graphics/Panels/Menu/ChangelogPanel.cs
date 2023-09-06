@@ -44,7 +44,6 @@ public partial class ChangelogPanel : SettingsPanel {
 				* Ability to import props and create ruleset interactions with them.
 				* More ruleset binding customisation, including: 3D activation zones and gestures.
 				#### Visual
-				* Input display when rendering to window.
 				* Movable render-to-window camera prop.
 				* Player avatar.
 				* A non-invasive thank you to contribuitors and ko-fi supporters somewhere.
