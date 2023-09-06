@@ -47,7 +47,7 @@ public partial class InjectedInput : CompositeDrawable {
 	}
 
 	Vector2 mousePos;
-	public void MoveBy ( Vector2 position, bool isNormalized = false ) {
+	public void MoveBy ( Vector2 position, bool isNormalized = false ) { // TODO allow multiple cursors
 		var quad = info.InputManager.ScreenSpaceDrawQuad;
 
 		if ( info.InputManager.UseParentInput ) {

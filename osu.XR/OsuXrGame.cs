@@ -28,7 +28,7 @@ public partial class OsuXrGame : OsuXrGameBase {
 	[Cached]
 	PanelInteractionSystem panelInteraction = new();
 
-	OsuXrScene scene;
+	public readonly OsuXrScene Scene;
 	OsuGamePanel osuPanel;
 
 	[Cached]
@@ -44,25 +44,24 @@ public partial class OsuXrGame : OsuXrGameBase {
 	bool isKeyboardActive;
 
 	public OsuXrGame ( bool useSimulatedVR = false ) : base( useSimulatedVR ) { // TODO I dont really like the 'useSimulatedVR' - can't we extract it up?
-		scene = new() {
-			RelativeSizeAxes = Axes.Both,
-			RenderToScreen = useSimulatedVR
+		Scene = new() {
+			RelativeSizeAxes = Axes.Both
 		};
 
 		if ( useSimulatedVR )
 			setupVrRig();
 
-		scene.Camera.Z = -5;
-		scene.Camera.Y = 1;
-		scene.Add( osuPanel = new() );
+		Scene.Camera.Z = -5;
+		Scene.Camera.Y = 1;
+		Scene.Add( osuPanel = new() );
 
-		physics.AddSubtree( scene.Root );
-		Add( movementSystem = new( scene ) { RelativeSizeAxes = Axes.Both } );
-		Add( new BasicPanelInteractionSource( scene, physics, panelInteraction ) { RelativeSizeAxes = Axes.Both } );
+		physics.AddSubtree( Scene.Root );
+		Add( movementSystem = new( Scene ) { RelativeSizeAxes = Axes.Both } );
+		Add( new BasicPanelInteractionSource( Scene, physics, panelInteraction ) { RelativeSizeAxes = Axes.Both } );
 
-		scene.Add( new UserTrackingDrawable3D { Child = menu = new HandheldMenu(), Y = 1 } );
+		Scene.Add( new UserTrackingDrawable3D { Child = menu = new HandheldMenu(), Y = 1 } );
 		menu.Notifications.Post( new SimpleNotification { Text = @"Welcome to OXR! This is the menu panel, which you can open and close with you VR controller (probably the A or B button). Check out other sections, configure your game, and close this menu when you are ready." } );
-		scene.Add( Player = new OsuXrPlayer() );
+		Scene.Add( Player = new OsuXrPlayer() );
 
 		Keyboard = new() {
 			Scale = new( 0.02f ),
@@ -86,14 +85,14 @@ public partial class OsuXrGame : OsuXrGameBase {
 		KeyboardInput.Activated = () => {
 			Schedule( () => {
 				isKeyboardActive = true;
-				scene.Add( Keyboard );
+				Scene.Add( Keyboard );
 			} );
 		};
 		KeyboardInput.Deactivated = () => {
 			Schedule( ()  => {
 				isKeyboardActive = false;
 				keyboardInteractionSource.ReleaseAllInput();
-				scene.Remove( Keyboard, disposeImmediately: false );
+				Scene.Remove( Keyboard, disposeImmediately: false );
 			} );
 		};
 
@@ -120,7 +119,7 @@ public partial class OsuXrGame : OsuXrGameBase {
 
 	void setupVrRig () {
 		var comp = (TestingVrCompositor)Compositor;
-		TestingRig rig = new( scene ) { Depth = -1 };
+		TestingRig rig = new( Scene ) { Depth = -1 };
 		Add( rig );
 
 		Schedule( () => comp.AddRig( rig ) );
@@ -152,7 +151,7 @@ public partial class OsuXrGame : OsuXrGameBase {
 	void addVrDevice ( VrDevice device ) {
 		if ( device is Controller controller ) {
 			VrController vrController;
-			scene.Add( vrController = new VrController( controller, scene ) );
+			Scene.Add( vrController = new VrController( controller, Scene ) );
 			VrControllers.Add( vrController );
 
 			controller.IsEnabled.BindValueChanged( v => {
@@ -169,7 +168,7 @@ public partial class OsuXrGame : OsuXrGameBase {
 			model.RenderLayer = RenderLayer.HMD;
 		}
 
-		scene.Add( model );
+		Scene.Add( model );
 	}
 
 	public VrController? PrimaryController
@@ -198,7 +197,8 @@ public partial class OsuXrGame : OsuXrGameBase {
 	protected override void LoadComplete () {
 		base.LoadComplete();
 		Add( BeatSync );
-		Add( scene );
-		scene.Add( new SceneryContainer() );
+		Add( Scene );
+		Scene.Add( new SceneryContainer() ); 
+		Add( new ScreenOverlay() );
 	}
 }

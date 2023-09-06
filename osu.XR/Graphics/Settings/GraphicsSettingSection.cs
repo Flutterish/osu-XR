@@ -14,10 +14,6 @@ public partial class GraphicsSettingSection : SettingsSection {
 	[BackgroundDependencyLoader]
 	private void load ( OsuXrConfigManager config ) {
 		Children = new Drawable[] {
-			new SettingsEnumDropdown<CameraMode> {
-				LabelText = @"Render to screen",
-				Current = config.GetBindable<CameraMode>( OsuXrSetting.CameraMode )
-			},
 			new SettingsSlider<float,RadToDegreeSliderBar> {
 				LabelText = Localisation.Config.Graphics.ScreenStrings.Arc
 			}.PresetComponent( config, OsuXrSetting.ScreenArc ),

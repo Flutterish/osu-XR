@@ -29,10 +29,6 @@ public partial class OsuXrScene : Scene {
 
 		config.BindWith( OsuXrSetting.CameraMode, cameraMode );
 
-		if ( RenderToScreen ) { // HACK its only enabled when we use simulated vr
-			cameraMode.Value = CameraMode.ThirdPerson;
-		}
-
 		cameraMode.BindValueChanged( v => {
 			switch ( v.NewValue ) {
 				case CameraMode.Disabled:
