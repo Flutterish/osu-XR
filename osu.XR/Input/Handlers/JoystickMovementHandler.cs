@@ -16,7 +16,7 @@ public partial class JoystickMovementHandler : JoystickHandler {
 		if ( MovementType.Value == JoystickMovementType.Absolute ) {
 			MoveTo( JoystickPosition.Value * (float)Distance.Value / 100, isNormalized: true );
 		}
-		else {
+		else if ( MovementType.Value == JoystickMovementType.Relative ) {
 			MoveBy( JoystickPosition.Value * (float)(Distance.Value / 100 * Time.Elapsed / 100), isNormalized: true );
 		}
 	}
