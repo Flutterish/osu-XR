@@ -29,6 +29,7 @@ public partial class ChangelogPanel : SettingsPanel {
 				#### Input
 				* Made joystick zones easier to customize.
 				* Added a windmill gesture - it allows you to use your whole arm as a joystick.
+				* Double joystick cursors now work properly.
 				#### Other
 				* Removed ""revert to default"" buttons in the {RulesetSection} section.
 				* Added notifications when ruleset binding load fails.
