@@ -26,6 +26,9 @@ public partial class InputSettingSection : SettingsSection {
 				LabelText = Localisation.Config.Input.TapStrumStrings.Label,
 				TooltipText = Localisation.Config.Input.TapStrumStrings.Tooltip
 			}.PresetComponent( config, OsuXrSetting.TapStrum ),
+			new SettingsFlagEnumCheckbox<Fingers> {
+				LabelText = @"[Hand] Active fingers"
+			}.PresetComponent( config, OsuXrSetting.HandSkeletonFingers ),
 			new SettingsSlider<int, PxSliderBar> { 
 				LabelText = Localisation.Config.Input.TouchDeadzoneStrings.Label, 
 				TooltipText = Localisation.Config.Input.TouchDeadzoneStrings.Tooltip

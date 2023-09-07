@@ -59,8 +59,8 @@ public class BindingsFile : UniqueCompositeActionBinding<RulesetBindings, string
 		}
 	}
 
-	[FormatVersion( "[Initial]" )]
 	[FormatVersion( "" )]
+	[FormatVersion( "[Initial]" )]
 	public struct SaveData {
 		public string Name;
 		public string Description;

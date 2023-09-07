@@ -15,6 +15,7 @@ public enum OsuXrSetting {
 
 	DominantHand,
 	HandSkeletonMotionRange,
+	HandSkeletonFingers,
 
 	DisableTeleport,
 	ShadowType,

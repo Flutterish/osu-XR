@@ -11,22 +11,42 @@ public partial class HandSkeletonPointer : CompositeDrawable3D, IPointerSource {
 	TouchPointer[] fingertips;
 	Pointer[] fingertipPointers;
 
+	List<Pointer> activePointers = new();
+
 	public HandSkeletonPointer ( VrController controller ) {
 		AddInternal( skeleton = new OsuXrHandSkeleton( (Controller)controller.Source, controller.Hand is Hand.Left ? VrAction.LeftHandSkeleton : VrAction.RightHandSkeleton ) );
-		AddRangeInternal( fingertips = new TouchPointer[] {
+		fingertips = new TouchPointer[] {
 			new(), new(), new(), new(), new()
-		} );
+		};
 		fingertipPointers = fingertips.Select( x => new Pointer(x, controller.InteractionSystem) ).ToArray();
 		foreach ( var i in fingertips )
 			i.RadiusBindable.Value = 0.012f;
+
+		activeFingers.BindValueChanged( v => {
+			foreach ( var i in fingertips ) {
+				if ( i.Parent != null ) {
+					RemoveInternal( i, disposeImmediately: false );
+				}
+			}
+
+			activePointers.Clear();
+			foreach ( var (i, flag) in new[] { (0, Fingers.Index), (1, Fingers.Middle), (2, Fingers.Ring), (3, Fingers.Pinky), (4, Fingers.Thumb) } ) {
+				if ( v.NewValue.HasFlag( flag ) || (v.NewValue == Fingers.None && flag == Fingers.Index) ) {
+					activePointers.Add( fingertipPointers[i] );
+					AddInternal( fingertips[i] );
+				}
+			}
+		}, true );
 	}
 
-	public IEnumerable<Pointer> Pointers => fingertipPointers;
+	public IEnumerable<Pointer> Pointers => activePointers;
 
 	public RentedArray<PointerHit?> UpdatePointers ( Vector3 playerPosition, Vector3 position, Quaternion rotation ) {
-		var arr = MemoryPool<PointerHit?>.Shared.Rent(5);
+		var arr = MemoryPool<PointerHit?>.Shared.Rent( activePointers.Count );
+		int index = 0;
 		for ( int i = 0; i < 5; i++ ) {
-			arr[i] = fingertipPointers[i].Update( playerPosition, skeleton.LocalMatrix.Apply( skeleton.Fingertips[i] ), Quaternion.Identity );
+			if ( activePointers.Contains( fingertipPointers[i] ) )
+			arr[index++] = fingertipPointers[i].Update( playerPosition, skeleton.LocalMatrix.Apply( skeleton.Fingertips[i] ), Quaternion.Identity );
 		}
 		return arr;
 	}
@@ -36,6 +56,12 @@ public partial class HandSkeletonPointer : CompositeDrawable3D, IPointerSource {
 		foreach ( var i in fingertips ) {
 			i.SetTint( tint );
 		}
+	}
+
+	Bindable<Fingers> activeFingers = new( Fingers.All );
+	[BackgroundDependencyLoader]
+	private void load ( OsuXrConfigManager? config ) {
+		config?.BindWith( OsuXrSetting.HandSkeletonFingers, activeFingers );
 	}
 }
 
