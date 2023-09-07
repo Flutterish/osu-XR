@@ -34,3 +34,11 @@ public partial class CompositeEditor<TChild> : FillFlowContainer where TChild : 
 	BindableList<TChild> children = new();
 	Dictionary<TChild, Drawable> childEditors = new();
 }
+
+public partial class FullCompositeEditor<TChild, K> : CompositeEditor<TChild> where TChild : IActionBinding where K : notnull {
+	public FullCompositeEditor ( UniqueCompositeActionBinding<TChild, K> source, IEnumerable<TChild> childTypes ) : base( source ) {
+		foreach ( var i in childTypes ) {
+			var binding = source.GetOrAdd( i );
+		}
+	}
+}

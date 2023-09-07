@@ -59,7 +59,7 @@ public partial class OsuXrScene : Scene {
 		if ( cameraMode.Value == CameraMode.FirstPersonVR ) {
 			if ( compositor.VR is VR vr && vr.Headset is Headset headset ) {
 				RenderToScreen = true;
-				Camera.Position = headset.Position.ToOsuTk(); // TODO use render position
+				Camera.Position = (compositor.ActivePlayer?.PositionOffset ?? Vector3.Zero) + headset.Position.ToOsuTk(); // TODO use render position
 				Camera.Rotation = headset.Rotation.ToOsuTk();
 			}
 			else {

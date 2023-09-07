@@ -4,6 +4,7 @@ using osu.XR.Graphics.Containers;
 using osu.XR.Input;
 using osu.XR.Input.Actions;
 using osu.XR.Input.Actions.Gestures;
+using osu.XR.Input.Handlers;
 
 namespace osu.XR.Graphics.Bindings;
 
@@ -15,6 +16,16 @@ public partial class VariantBindingsSection : FillFlowContainer {
 	public VariantBindings Bindings {
 		get => _bindings ??= new( Variant );
 		init => _bindings = value;
+	}
+
+	[Cached]
+	BindableList<HandlerMod> handlerMods = new();
+	protected override void UpdateAfterChildren () {
+		base.UpdateAfterChildren();
+
+		foreach ( var i in handlerMods ) {
+			i.UpdateSubTree();
+		}
 	}
 
 	public VariantBindingsSection ( Ruleset ruleset, int variant ) {

@@ -15,8 +15,8 @@ public class ClapBinding : ActionBinding, IHasGestureType {
 	public override ClapHandler CreateHandler () => new( this );
 
 	public readonly RulesetAction Action = new();
-	public readonly Bindable<double> ThresholdABindable = new( 0.325 );
-	public readonly Bindable<double> ThresholdBBindable = new( 0.275 );
+	public readonly BindableNumber<double> ThresholdABindable = new( 0.325 ) { MinValue = 0, MaxValue = 1 };
+	public readonly BindableNumber<double> ThresholdBBindable = new( 0.275 ) { MinValue = 0, MaxValue = 1 };
 
 	public GestureType Type => GestureType.Clap;
 	public ClapBinding () {

@@ -58,6 +58,12 @@ public partial class ActionBindingHandler : CompositeComponent {
 	public event Action<object>? ActionReleased;
 	public IEnumerable<object> PressedActions => boundActions.Where( x => x.state.Value && x.action.Value != null ).Select( x => x.action.Value! );
 
+	public readonly BindableList<HandlerMod> HandlerMods = new();
+	[BackgroundDependencyLoader]
+	private void load ( BindableList<HandlerMod> handlerMods ) {
+		HandlerMods.BindTarget = handlerMods;
+	}
+
 	protected override void LoadComplete () {
 		base.LoadComplete();
 		if ( Target is null )

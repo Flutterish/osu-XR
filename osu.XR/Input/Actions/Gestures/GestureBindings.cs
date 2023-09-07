@@ -1,13 +1,23 @@
 ﻿using osu.Framework.Localisation;
+using osu.XR.Graphics.Bindings.Editors;
 using osu.XR.Input.Migration;
 using osu.XR.IO;
 using System.Text.Json;
 
 namespace osu.XR.Input.Actions.Gestures;
 
-public class GestureBindings : CompositeActionBinding<IHasGestureType>, IHasBindingType {
+public class GestureBindings : UniqueCompositeActionBinding<IHasGestureType, GestureType>, IHasBindingType {
 	public override LocalisableString Name => @"Gestures";
 	public BindingType Type => BindingType.Gestures;
+
+	public override Drawable? CreateEditor () => new FullCompositeEditor<IHasGestureType, GestureType>( this, new IHasGestureType[] {
+		new ClapBinding(),
+		new WindmillBinding()
+	} );
+
+	protected override GestureType GetKey ( IHasGestureType action ) {
+		return action.Type;
+	}
 
 	protected override object CreateSaveData ( IEnumerable<IHasGestureType> children, BindingsSaveContext context ) => new SaveData {
 		Type = BindingType.Gestures,
@@ -18,6 +28,7 @@ public class GestureBindings : CompositeActionBinding<IHasGestureType>, IHasBind
 		var gestures = new GestureBindings();
 		gestures.LoadChildren<ChildSaveData>( save.Data, ctx, static ( save, ctx ) => save.Type switch {
 			GestureType.Clap => ClapBinding.Load( (JsonElement)save.Data, ctx ),
+			GestureType.Windmill => WindmillBinding.Load( (JsonElement)save.Data, ctx ),
 			_ => null
 		} );
 		return gestures;

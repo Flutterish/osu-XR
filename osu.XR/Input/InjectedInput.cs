@@ -1,5 +1,6 @@
 ﻿using osu.Framework.Input.Bindings;
 using osu.Framework.XR.Graphics.Panels;
+using osu.XR.Input.Handlers;
 using osu.XR.Osu;
 using System.Reflection;
 
@@ -14,6 +15,12 @@ public partial class InjectedInput : CompositeDrawable {
 
 		info.InputManager.GetType().GetMethod( "AddHandler", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic )!.Invoke( info.InputManager, new object[] { mouseHandler } );
 	}
+
+	/// <summary>
+	/// Handlers which modify how other handlers work register themselves there.
+	/// </summary>
+	[Cached]
+	BindableList<HandlerMod> handlerMods = new();
 
 	MethodInfo? press;
 	public void TriggerPressed ( object action ) {
