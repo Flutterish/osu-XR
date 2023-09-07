@@ -1,4 +1,5 @@
-﻿using osu.XR.Input.Handlers;
+﻿using osu.XR.Graphics.Bindings.Editors;
+using osu.XR.Input.Handlers;
 using osu.XR.IO;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
@@ -53,8 +54,8 @@ public abstract class CompositeActionBinding<Tchild> : ActionBinding where Tchil
 	protected List<object> CreateSaveDataAsList ( IEnumerable<Tchild> children, BindingsSaveContext context )
 		=> children.Select( x => x.GetSaveData( context ) ).ToList();
 
-	public override Drawable? CreateEditor () => null;
-	public override CompositeHandler<Tchild> CreateHandler () => new( this );
+	public override Drawable? CreateEditor () => new CompositeEditor<Tchild>( this );
+	public override ActionBindingHandler? CreateHandler () => new CompositeHandler<Tchild>( this );
 
 	public virtual bool Add ( Tchild action ) {
 		Children.Add( action );

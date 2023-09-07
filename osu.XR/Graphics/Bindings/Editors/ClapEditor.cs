@@ -2,7 +2,7 @@
 using osu.Framework.Input.Events;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays;
-using osu.XR.Input.Actions;
+using osu.XR.Input.Actions.Gestures;
 
 namespace osu.XR.Graphics.Bindings.Editors;
 

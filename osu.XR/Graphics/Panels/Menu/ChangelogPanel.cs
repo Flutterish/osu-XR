@@ -39,7 +39,6 @@ public partial class ChangelogPanel : SettingsPanel {
 				* Ability to pin and move around elements such as menu panels and the keyboard. You will be able to pin them in space, or relative to another object or set of objects.
 				* A small first-time tutorial screen.
 				#### Input
-				* Ability to select which hand skeleton fingers are active.
 				* On-screen keyboard for panels when text input is active.
 				* Ability to import props and create ruleset interactions with them.
 				* More ruleset binding customisation, including: 3D activation zones and gestures.

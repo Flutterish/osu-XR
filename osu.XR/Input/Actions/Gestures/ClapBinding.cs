@@ -6,9 +6,9 @@ using osu.XR.IO;
 using osu.XR.Localisation.Bindings;
 using System.Text.Json;
 
-namespace osu.XR.Input.Actions;
+namespace osu.XR.Input.Actions.Gestures;
 
-public class ClapBinding : ActionBinding, IHasBindingType {
+public class ClapBinding : ActionBinding, IHasGestureType {
 	public override LocalisableString Name => TypesStrings.Clap;
 	public override bool ShouldBeSaved => Action.ShouldBeSaved;
 	public override Drawable CreateEditor () => new ClapEditor( this );
@@ -18,7 +18,7 @@ public class ClapBinding : ActionBinding, IHasBindingType {
 	public readonly Bindable<double> ThresholdABindable = new( 0.325 );
 	public readonly Bindable<double> ThresholdBBindable = new( 0.275 );
 
-	public BindingType Type => BindingType.Clap;
+	public GestureType Type => GestureType.Clap;
 	public ClapBinding () {
 		TrackSetting( ThresholdABindable );
 		TrackSetting( ThresholdBBindable );
@@ -26,7 +26,6 @@ public class ClapBinding : ActionBinding, IHasBindingType {
 	}
 
 	protected override object CreateSaveData ( BindingsSaveContext context ) => new SaveData {
-		Type = BindingType.Clap,
 		ThresholdA = ThresholdABindable.Value,
 		ThresholdB = ThresholdBBindable.Value,
 		Action = context.SaveAction( Action )
@@ -40,12 +39,29 @@ public class ClapBinding : ActionBinding, IHasBindingType {
 		return clap;
 	} );
 
-	[FormatVersion( "" )]
-	[FormatVersion( "[Initial]" )]
+	[FormatVersion( "Clap Gesture" )]
 	public struct SaveData {
-		public BindingType Type;
 		public double ThresholdA;
 		public double ThresholdB;
 		public ActionData? Action;
+
+		public static implicit operator SaveData ( NoSubmenuSaveData data ) => new() {
+			ThresholdA = data.Data.ThresholdA,
+			ThresholdB = data.Data.ThresholdB,
+			Action = data.Data.Action
+		};
+	}
+
+	[FormatVersion( "" )]
+	[FormatVersion( "[Initial]" )]
+	public struct NoSubmenuSaveData {
+		public BindingType Type;
+		public DataStruct Data;
+
+		public struct DataStruct {
+			public double ThresholdA;
+			public double ThresholdB;
+			public ActionData? Action;
+		}
 	}
 }

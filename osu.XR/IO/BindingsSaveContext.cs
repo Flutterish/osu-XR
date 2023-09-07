@@ -12,9 +12,9 @@ using System.Text.Json.Serialization;
 namespace osu.XR.IO;
 
 public class BindingsSaveContext {
-	static JsonSerializerOptions defaultOptions = new() { IncludeFields = true };
+	public static readonly JsonSerializerOptions DefaultOptions = new() { IncludeFields = true };
 	static BindingsSaveContext () {
-		defaultOptions.Converters.Add( new JsonStringEnumConverter() );
+		DefaultOptions.Converters.Add( new JsonStringEnumConverter() );
 	}
 
 	public Ruleset? Ruleset;
@@ -43,7 +43,7 @@ public class BindingsSaveContext {
 	}
 
 	public bool LoadAction ( RulesetAction action, ActionData? data ) {
-		if ( data is not ActionData save )
+		if ( data is not ActionData save || save.Name == null || save.ID < 0 )
 			return false;
 		action.NotLoaded = save;
 
@@ -81,7 +81,7 @@ public class BindingsSaveContext {
 			return true;
 		}
 
-		options ??= defaultOptions;
+		options ??= DefaultOptions;
 		var versionContainer = json.Deserialize<VersionContainer>( options );
 
 		var migrator = migrant.GetMigrator<T>( versionContainer.FormatVersion );

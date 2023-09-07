@@ -3,6 +3,7 @@ using osu.Game.Rulesets;
 using osu.XR.Graphics.Containers;
 using osu.XR.Input;
 using osu.XR.Input.Actions;
+using osu.XR.Input.Actions.Gestures;
 
 namespace osu.XR.Graphics.Bindings;
 
@@ -50,6 +51,6 @@ public partial class VariantBindingsSection : FillFlowContainer {
 		new ButtonBinding( Hand.Right ),
 		new JoystickBindings( Hand.Left ),
 		new JoystickBindings( Hand.Right ),
-		new ClapBinding()
+		new GestureBindings()
 	};
 }

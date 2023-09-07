@@ -1,6 +1,6 @@
 ﻿using osu.Framework.XR.VirtualReality;
 using osu.Framework.XR.VirtualReality.Devices;
-using osu.XR.Input.Actions;
+using osu.XR.Input.Actions.Gestures;
 
 namespace osu.XR.Input.Handlers;
 

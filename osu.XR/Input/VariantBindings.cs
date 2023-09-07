@@ -1,6 +1,7 @@
 ﻿using osu.Framework.Localisation;
 using osu.Framework.XR.VirtualReality;
 using osu.XR.Input.Actions;
+using osu.XR.Input.Actions.Gestures;
 using osu.XR.Input.Migration;
 using osu.XR.IO;
 using System.Text.Json;
@@ -54,6 +55,7 @@ public class VariantBindings : UniqueCompositeActionBinding<IHasBindingType, (Bi
 		if ( ctx.VariantName( variant ) != save.Name ) {
 			ctx.Warning( @"Variant name mismatch", save );
 		}
+
 		bindings.LoadChildren( save.Bindings, ctx, static (data, ctx) => {
 			if ( !ctx.DeserializeBindingData<ChildSaveData>( data, out var childData ) )
 				return null;
@@ -61,7 +63,7 @@ public class VariantBindings : UniqueCompositeActionBinding<IHasBindingType, (Bi
 			return childData.Type switch {
 				BindingType.Buttons => ButtonBinding.Load( data, ctx ),
 				BindingType.Joystick => JoystickBindings.Load( data, ctx ),
-				BindingType.Clap => ClapBinding.Load( data, ctx ),
+				BindingType.Gestures => GestureBindings.Load( data, ctx ),
 				_ => null
 			};
 		} );
@@ -75,7 +77,7 @@ public class VariantBindings : UniqueCompositeActionBinding<IHasBindingType, (Bi
 		public static implicit operator ChildSaveData ( V1ChildSaveData from ) => new() {
 			Type = from.Type.EndsWith( "Buttons" ) ? BindingType.Buttons 
 				: from.Type.EndsWith( "Joystick" ) ? BindingType.Joystick
-				: from.Type == "Clap" ? BindingType.Clap
+				: from.Type == "Clap" ? BindingType.Gestures
 				: throw new InvalidDataException()
 		};
 	}
@@ -97,7 +99,8 @@ public class VariantBindings : UniqueCompositeActionBinding<IHasBindingType, (Bi
 public enum BindingType {
 	Buttons,
 	Joystick,
-	Clap
+	Clap,
+	Gestures
 }
 
 public interface IHasBindingType : IActionBinding {

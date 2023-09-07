@@ -51,15 +51,19 @@ public class ButtonBinding : ActionBinding, IHasBindingType, IIsHanded {
 		public static implicit operator SaveData ( V1SaveData from ) => new() {
 			Type = BindingType.Buttons,
 			Hand = from.Type == "Left Buttons" ? Hand.Left : Hand.Right,
-			Primary = from.Primary,
-			Secondary = from.Secondary
+			Primary = from.Data.Primary,
+			Secondary = from.Data.Secondary
 		};
 	}
 
 	[FormatVersion( "[Initial]" )]
 	public struct V1SaveData {
 		public string Type;
-		public ActionData? Primary;
-		public ActionData? Secondary;
+		public DataStruct Data;
+
+		public struct DataStruct {
+			public ActionData? Primary;
+			public ActionData? Secondary;
+		}
 	}
 }

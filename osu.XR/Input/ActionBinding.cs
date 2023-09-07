@@ -37,7 +37,7 @@ public abstract class ActionBinding : IActionBinding {
 	protected abstract object CreateSaveData ( BindingsSaveContext context );
 
 	protected static T? Load<T, Tdata> ( JsonElement data, BindingsSaveContext ctx, Func<Tdata, BindingsSaveContext, T> factory, JsonSerializerOptions? options = null ) {
-		if ( !ctx.DeserializeBindingData<Tdata>( data, out var save, options ) )
+		if ( !ctx.DeserializeBindingData<Tdata>( data, out var save, options ?? BindingsSaveContext.DefaultOptions ) )
 			return default;
 		return factory( save, ctx );
 	}
