@@ -8,12 +8,59 @@ namespace osu.XR.Input;
 
 [Cached]
 public partial class InjectedInput : CompositeDrawable {
-	PlayerInfo info;
+	public readonly PlayerInfo PlayerInfo;
 	public InjectedInput ( PlayerInfo info, VariantBindings bindings ) {
-		this.info = info;
+		RelativeSizeAxes = Axes.Both;
+		PlayerInfo = info;
 		AddInternal( bindings.CreateHandler() );
 
-		info.InputManager.GetType().GetMethod( "AddHandler", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic )!.Invoke( info.InputManager, new object[] { mouseHandler } );
+		var addHandler = info.InputManager.GetType().GetMethod( "AddHandler", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic )!;
+
+		addHandler.Invoke( info.InputManager, new object[] { mouseHandler } );
+		addHandler.Invoke( info.InputManager, new object[] { touchHandler } );
+	}
+
+	VirtualMouseHandler mouseHandler = new();
+	VirtualTouchHandler touchHandler = new();
+	Dictionary<object, InjectedInputCursor> customCursors = new();
+	public InjectedInputCursor GetCursor ( object source ) {
+		if ( !customCursors.TryGetValue( source, out var cursor ) ) {
+			customCursors.Add( source, cursor = new( this ) );
+			AddInternal( cursor );
+		}
+
+		PlayerInfo.InputManager.UseParentInput = false;
+		foreach ( var i in customCursors.Values ) {
+			i.Alpha = customCursors.Count == 1 ? 0 : 1;
+		}
+		return cursor;
+	}
+
+	public void DeleteCursor ( object source ) {
+		if ( !customCursors.Remove( source, out var cursor ) )
+			return;
+
+		foreach ( var i in customCursors.Values ) {
+			i.Alpha = customCursors.Count == 1 ? 0 : 1;
+		}
+
+		RemoveInternal( cursor, disposeImmediately: true );
+		touchHandler.EmulateTouchUp( cursor );
+		if ( customCursors.Count == 1 ) {
+			touchHandler.EmulateTouchUp( customCursors.Values.First() );
+		}
+		if ( customCursors.Count == 0 ) {
+			PlayerInfo.InputManager.UseParentInput = true;
+		}
+	}
+
+	public void MoveTo ( InjectedInputCursor cursor, Vector2 position ) {
+		if ( customCursors.Count == 1 ) {
+			mouseHandler.EmulateMouseMove( position );
+		}
+		else {
+			touchHandler.EmulateTouchMove( cursor, position );
+		}
 	}
 
 	/// <summary>
@@ -24,55 +71,13 @@ public partial class InjectedInput : CompositeDrawable {
 
 	MethodInfo? press;
 	public void TriggerPressed ( object action ) {
-		press ??= typeof( KeyBindingContainer<> ).MakeGenericType( info.RulesetActionType ).GetMethod( nameof( KeyBindingContainer<int>.TriggerPressed ) )!;
-		press.Invoke( info.KeyBindingContainer, new object[] { action } );
+		press ??= typeof( KeyBindingContainer<> ).MakeGenericType( PlayerInfo.RulesetActionType ).GetMethod( nameof( KeyBindingContainer<int>.TriggerPressed ) )!;
+		press.Invoke( PlayerInfo.KeyBindingContainer, new object[] { action } );
 	}
 
 	MethodInfo? release;
 	public void TriggerReleased ( object action ) {
-		release ??= typeof( KeyBindingContainer<> ).MakeGenericType( info.RulesetActionType ).GetMethod( nameof( KeyBindingContainer<int>.TriggerReleased ) )!;
-		release.Invoke( info.KeyBindingContainer, new object[] { action } );
-	}
-
-	VirtualMouseHandler mouseHandler = new();
-	public void MoveTo ( Vector2 position, bool isNormalized = false ) {
-		var quad = info.InputManager.ScreenSpaceDrawQuad;
-
-		if ( info.InputManager.UseParentInput ) {
-			info.InputManager.UseParentInput = false;
-
-			mousePos = quad.Size / 2;
-		}
-
-
-		if ( isNormalized ) {
-			var scale = Math.Min( quad.Width, quad.Height ) / 2;
-			position *= scale;
-		}
-
-		mouseHandler.EmulateMouseMove( mousePos = position + quad.Size / 2 );
-	}
-
-	Vector2 mousePos;
-	public void MoveBy ( Vector2 position, bool isNormalized = false ) { // TODO allow multiple cursors
-		var quad = info.InputManager.ScreenSpaceDrawQuad;
-
-		if ( info.InputManager.UseParentInput ) {
-			info.InputManager.UseParentInput = false;
-
-			mousePos = quad.Size / 2;
-		}
-
-		if ( isNormalized ) {
-			var scale = Math.Min( quad.Width, quad.Height ) / 2;
-			position *= scale;
-		}
-
-		mousePos += position;
-		mousePos = new Vector2(
-			Math.Clamp( mousePos.X, 0, quad.Width ),
-			Math.Clamp( mousePos.Y, 0, quad.Height )
-		);
-		mouseHandler.EmulateMouseMove( mousePos );
+		release ??= typeof( KeyBindingContainer<> ).MakeGenericType( PlayerInfo.RulesetActionType ).GetMethod( nameof( KeyBindingContainer<int>.TriggerReleased ) )!;
+		release.Invoke( PlayerInfo.KeyBindingContainer, new object[] { action } );
 	}
 }

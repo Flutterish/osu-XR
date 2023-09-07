@@ -22,14 +22,14 @@ public partial class ChangelogPanel : SettingsPanel {
 				#### Performance
 				* Lock execution mode to multithreaded with unlimited framerate (it's actually limited to the refresh rate of your HMD).
 				* Lock window to be always ""active"". This will make it so when you unfocus the window, it will not limit the update rate to 60Hz.
-				### Visual
+				#### Visual
 				* The VR headset is now rendered on screen.
 				* Added on-screen warning when rendering to screen is turned off.
 				* Added an option to show input display.
-				### Input
+				#### Input
 				* Made joystick zones easier to customize.
 				* Added a windmill gesture - it allows you to use your whole arm as a joystick.
-				### Other
+				#### Other
 				* Removed ""revert to default"" buttons in the {RulesetSection} section.
 				* Added notifications when ruleset binding load fails.
 			" );

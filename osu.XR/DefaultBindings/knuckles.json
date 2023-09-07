@@ -103,24 +103,24 @@
          "sources" : []
       },
       "/actions/poses" : {
-         "poses" : [
+        "poses": [
             {
-               "output" : "none",
-               "path" : "/user/hand/right/pose/base"
+                "output": "none",
+                "path": "/user/hand/right/pose/base"
             },
             {
-               "output" : "none",
-               "path" : "/user/hand/right/pose/tip"
+                "output": "/actions/poses/in/controllertip",
+                "path": "/user/hand/right/pose/tip"
             },
             {
-               "output" : "/actions/poses/in/controllertip",
-               "path" : "/user/hand/left/pose/tip"
+                "output": "/actions/poses/in/controllertip",
+                "path": "/user/hand/left/pose/tip"
             },
             {
-               "output" : "/actions/poses/in/controllertip",
-               "path" : "/user/hand/right/pose/gdc2015"
+                "output": "none",
+                "path": "/user/hand/right/pose/gdc2015"
             }
-         ],
+        ],
          "sources" : []
       },
       "/actions/skeleton" : {

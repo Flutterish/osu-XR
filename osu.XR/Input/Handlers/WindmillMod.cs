@@ -20,30 +20,47 @@ public partial class WindmillMod : HandlerMod {
 	PoseAction? leftTip;
 	PoseAction? rightTip;
 
+	Vector3? lastLeftTipPosition;
+	Vector3? lastRightTipPosition;
 	protected override void Update () {
 		base.Update();
 		var headset = VR.TrackedDevices.OfType<Headset>().SingleOrDefault();
-		var player = headset != null ? headset.Position : Vector3.Zero;
-		var playerRot = headset != null ? headset.Rotation : Quaternion.Identity;
-		player -= new Vector3( 0, 0.15f, 0 );
+		var player = VR.ActivePlayer;
+		var playerRot = headset != null ? headset.Rotation : Quaternion.Identity; // TODO maybe devices should be in player-space?
+
+		if ( player != null ) {
+			playerRot = player.InGlobalSpace( playerRot );
+		}
+
+		void move ( Bindable<Vector2> joystick, Vector3 delta ) {
+			const float range = 0.12f;
+			var change = delta.Xy / range;
+			var next = new Vector2() {
+				X = float.Clamp( joystick.Value.X + change.X, -1, 1 ),
+				Y = float.Clamp( joystick.Value.Y - change.Y, -1, 1 )
+			};
+			joystick.Value = next.Length > 1 ? next.Normalized() : next;
+		}
 
 		if ( leftTip?.FetchDataForNextFrame() is PoseInput leftPose ) {
-			var pos = playerRot.DecomposeAroundAxis( Vector3.UnitY ).Inverted().Apply( leftPose.Position - player );
-			pos.Y = -pos.Y;
-			pos.Z -= 0.1f;
-			pos.X += 0.1f;
-			LeftJoystickPosition.Value = pos.Normalized().Xy;
+			if ( lastLeftTipPosition is Vector3 last ) {
+				var delta = playerRot.DecomposeAroundAxis( Vector3.UnitY ).Inverted().Apply( leftPose.Position - last );
+				move( LeftJoystickPosition, delta );
+			}
+			
+			lastLeftTipPosition = leftPose.Position;
 		}
 		else {
 			LeftJoystickPosition.Value = Vector2.Zero;
 		}
 
 		if ( rightTip?.FetchDataForNextFrame() is PoseInput rightPose ) {
-			var pos = playerRot.DecomposeAroundAxis( Vector3.UnitY ).Inverted().Apply( rightPose.Position - player );
-			pos.Y = -pos.Y;
-			pos.Z -= 0.1f;
-			pos.X -= 0.1f;
-			RightJoystickPosition.Value = pos.Normalized().Xy;
+			if ( lastRightTipPosition is Vector3 last ) {
+				var delta = playerRot.DecomposeAroundAxis( Vector3.UnitY ).Inverted().Apply( rightPose.Position - last );
+				move( RightJoystickPosition, delta );
+			}
+
+			lastRightTipPosition = rightPose.Position;
 		}
 		else {
 			RightJoystickPosition.Value = Vector2.Zero;

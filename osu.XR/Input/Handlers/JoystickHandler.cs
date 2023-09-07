@@ -4,11 +4,11 @@ using osu.Framework.XR.VirtualReality;
 namespace osu.XR.Input.Handlers;
 
 public abstract partial class JoystickHandler : ActionBindingHandler {
-	public override LocalisableString Name => $@"{hand switch { Hand.Left => "Left ", Hand.Right => "Right ", _ => "" }}Joystick {Source.Name}";
-	Hand? hand;
+	public override LocalisableString Name => $@"{Hand switch { Framework.XR.VirtualReality.Hand.Left => "Left ", Framework.XR.VirtualReality.Hand.Right => "Right ", _ => "" }}Joystick {Source.Name}";
+	public readonly Hand? Hand;
 
 	public JoystickHandler ( Hand? hand, IActionBinding source ) : base( source ) {
-		this.hand = hand;
+		this.Hand = hand;
 		GetController( hand, c => {
 			actualJoystickPosition.BindTo( Input.GetAction<Vector2Action>( VrAction.Scroll, c ).ValueBindable );
 		} );
@@ -23,13 +23,13 @@ public abstract partial class JoystickHandler : ActionBindingHandler {
 			isWindmillEnabled.Value = false;
 
 			if ( v.NewValue != null ) {
-				isWindmillEnabled.BindTo( hand == Hand.Left ? v.NewValue.IsLeftEnabled : v.NewValue.IsRightEnabled );
+				isWindmillEnabled.BindTo( hand == Framework.XR.VirtualReality.Hand.Left ? v.NewValue.IsLeftEnabled : v.NewValue.IsRightEnabled );
 			}
 		} );
 
 		isWindmillEnabled.BindValueChanged( v => {
 			if ( v.NewValue ) {
-				JoystickPosition.Current = hand == Hand.Left ? windmill.Value!.LeftJoystickPosition : windmill.Value!.RightJoystickPosition;
+				JoystickPosition.Current = hand == Framework.XR.VirtualReality.Hand.Left ? windmill.Value!.LeftJoystickPosition : windmill.Value!.RightJoystickPosition;
 			}
 			else {
 				JoystickPosition.Current = correctedJoystickPosition;
