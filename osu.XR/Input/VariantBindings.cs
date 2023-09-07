@@ -55,7 +55,7 @@ public class VariantBindings : UniqueCompositeActionBinding<IHasBindingType, (Bi
 			ctx.Warning( @"Variant name mismatch", save );
 		}
 		bindings.LoadChildren( save.Bindings, ctx, static (data, ctx) => {
-			if ( !data.DeserializeBindingData<ChildSaveData>( ctx, out var childData ) )
+			if ( !ctx.DeserializeBindingData<ChildSaveData>( data, out var childData ) )
 				return null;
 
 			return childData.Type switch {
@@ -68,21 +68,25 @@ public class VariantBindings : UniqueCompositeActionBinding<IHasBindingType, (Bi
 		return bindings;
 	} );
 
-	[MigrateFrom(typeof(V1ChildSaveData), "[Initial]")]
+	[FormatVersion( "" )]
 	public struct ChildSaveData {
 		public BindingType Type;
 
 		public static implicit operator ChildSaveData ( V1ChildSaveData from ) => new() {
 			Type = from.Type.EndsWith( "Buttons" ) ? BindingType.Buttons 
 				: from.Type.EndsWith( "Joystick" ) ? BindingType.Joystick
-				: BindingType.Clap
+				: from.Type == "Clap" ? BindingType.Clap
+				: throw new InvalidDataException()
 		};
 	}
 
+	[FormatVersion( "[Initial]" )]
 	public struct V1ChildSaveData {
 		public string Type;
 	}
 
+	[FormatVersion( "" )]
+	[FormatVersion( "[Initial]" )]
 	public struct SaveData {
 		public string Name;
 		public Dictionary<int, string>? Actions;

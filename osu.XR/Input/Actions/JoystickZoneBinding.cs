@@ -53,8 +53,7 @@ public class JoystickZoneBinding : ActionBinding, IJoystickBinding {
 		OnSettingsChanged();
 	}
 
-	public override object CreateSaveData ( BindingsSaveContext context ) => new SaveData {
-		FormatVersion = "Range",
+	protected override object CreateSaveData ( BindingsSaveContext context ) => new SaveData {
 		Offset = Offset.Value,
 		Arc = Arc.Value,
 		Deadzone = Deadzone.Value,
@@ -78,7 +77,7 @@ public class JoystickZoneBinding : ActionBinding, IJoystickBinding {
 		return zone;
 	} );
 
-	[MigrateFrom(typeof(SaveDataSingle), null)]
+	[FormatVersion( "Range" )]
 	public struct SaveData {
 		public string FormatVersion;
 		public int Count;
@@ -97,6 +96,8 @@ public class JoystickZoneBinding : ActionBinding, IJoystickBinding {
 		};
 	}
 
+	[FormatVersion( "" )]
+	[FormatVersion( "[Initial]" )]
 	public struct SaveDataSingle {
 		public double StartAngle;
 		public double Arc;

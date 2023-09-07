@@ -2,6 +2,7 @@
 using osu.XR.Input.Handlers;
 using osu.XR.Input.Migration;
 using osu.XR.IO;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 
@@ -17,10 +18,26 @@ public abstract class ActionBinding : IActionBinding {
 	public abstract Drawable? CreateEditor ();
 	public virtual ActionBindingHandler? CreateHandler () => null;
 
-	public abstract object CreateSaveData ( BindingsSaveContext context );
+	public object GetSaveData ( BindingsSaveContext context ) {
+		var data = CreateSaveData( context );
+		var type = data.GetType();
+		var versioned = new Dictionary<string, object>();
+		foreach ( var i in type.GetFields() )
+			versioned.Add( i.Name, i.GetValue( data )! );
+
+		if ( versioned.ContainsKey( "FormatVersion" ) )
+			throw new InvalidDataException( "Save data can not include own `FormatVersion` field - it is reserved." );
+
+		var version = type.GetCustomAttributes<FormatVersionAttribute>().FirstOrDefault()?.Name;
+		if ( !string.IsNullOrEmpty( version ) )
+			versioned.Add( "FormatVersion", version );
+
+		return versioned;
+	}
+	protected abstract object CreateSaveData ( BindingsSaveContext context );
 
 	protected static T? Load<T, Tdata> ( JsonElement data, BindingsSaveContext ctx, Func<Tdata, BindingsSaveContext, T> factory, JsonSerializerOptions? options = null ) {
-		if ( !data.DeserializeBindingData<Tdata>( ctx, out var save, options ) )
+		if ( !ctx.DeserializeBindingData<Tdata>( data, out var save, options ) )
 			return default;
 		return factory( save, ctx );
 	}
@@ -45,7 +62,7 @@ public interface IActionBinding {
 	Drawable? CreateEditor ();
 	ActionBindingHandler? CreateHandler ();
 
-	object CreateSaveData ( BindingsSaveContext context );
+	object GetSaveData ( BindingsSaveContext context );
 
 	/// <summary>
 	/// Invoked when settings of this, or nested settings are changed, thus invalidating the save file

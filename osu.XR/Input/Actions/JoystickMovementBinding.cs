@@ -1,6 +1,7 @@
 ﻿using osu.Framework.Localisation;
 using osu.XR.Graphics.Bindings.Editors;
 using osu.XR.Input.Handlers;
+using osu.XR.Input.Migration;
 using osu.XR.IO;
 using osu.XR.Localisation.Bindings.Joystick.Movement;
 using osu.XR.Localisation.Bindings.Types;
@@ -24,7 +25,7 @@ public class JoystickMovementBinding : ActionBinding, IJoystickBinding {
 		TrackSetting( Distance );
 	}
 
-	public override object CreateSaveData ( BindingsSaveContext context ) => new SaveData {
+	protected override object CreateSaveData ( BindingsSaveContext context ) => new SaveData {
 		Type = MovementType.Value,
 		Distance = Distance.Value
 	};
@@ -36,6 +37,8 @@ public class JoystickMovementBinding : ActionBinding, IJoystickBinding {
 		return movement;
 	} );
 
+	[FormatVersion( "" )]
+	[FormatVersion( "[Initial]" )]
 	public struct SaveData {
 		public JoystickMovementType Type;
 		public double Distance;

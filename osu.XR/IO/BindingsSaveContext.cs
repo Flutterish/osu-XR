@@ -1,11 +1,22 @@
-﻿using osu.Framework.Localisation;
+﻿using osu.Framework.Extensions.TypeExtensions;
+using osu.Framework.Localisation;
 using osu.Framework.Logging;
 using osu.Game.Rulesets;
 using osu.XR.Input.Actions;
+using osu.XR.Input.Migration;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace osu.XR.IO;
 
 public class BindingsSaveContext {
+	static JsonSerializerOptions defaultOptions = new() { IncludeFields = true };
+	static BindingsSaveContext () {
+		defaultOptions.Converters.Add( new JsonStringEnumConverter() );
+	}
+
 	public Ruleset? Ruleset;
 	public int? Variant;
 
@@ -61,6 +72,53 @@ public class BindingsSaveContext {
 			action.Value = byId;
 			return true;
 		}
+	}
+
+	Migrant migrant = new();
+	public bool DeserializeBindingData<T> ( JsonElement json, [NotNullWhen( true )] out T? value, JsonSerializerOptions? options = null ) {
+		if ( typeof( T ) == typeof( JsonElement ) ) {
+			value = (T)(object)json;
+			return true;
+		}
+
+		options ??= defaultOptions;
+		var versionContainer = json.Deserialize<VersionContainer>( options );
+
+		var migrator = migrant.GetMigrator<T>( versionContainer.FormatVersion );
+		if ( migrator == null ) {
+			Error( $@"Invalid binding version for `{typeof(T).ReadableName()}` - `{versionContainer.FormatVersion}`", json );
+			value = default;
+			return false;
+		}
+
+		var loaded = json.Deserialize( migrator.Value.detectedType, options )!;
+		if ( !validateBindingData( migrator.Value.detectedType, loaded ) ) {
+			value = default;
+			return false;
+		}
+
+		value = (T)migrator.Value.migrator( loaded );
+		return true;
+	}
+
+	bool validateBindingData ( Type type, object value ) {
+		foreach ( var i in type.GetFields( BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance ) ) {
+			if ( !i.IsNullable() && i.GetValue( value ) == null ) {
+				Error( $@"Invalid binding data - '{i.Name}' must be present", value );
+				return false;
+			}
+		}
+		foreach ( var i in type.GetProperties( BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance ).Where( x => x.CanRead && x.GetIndexParameters().Length == 0 ) ) {
+			if ( !i.IsNullable() && i.GetValue( value ) == null ) {
+				Error( $@"Invalid binding data - '{i.Name}' must be present", value );
+				return false;
+			}
+		}
+		return true;
+	}
+
+	struct VersionContainer {
+		public string? FormatVersion;
 	}
 
 	public Dictionary<int, string> VariantsChecksum ( Ruleset ruleset ) {

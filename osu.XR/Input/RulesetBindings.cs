@@ -1,5 +1,6 @@
 ﻿using osu.Framework.Localisation;
 using osu.Game.Rulesets;
+using osu.XR.Input.Migration;
 using osu.XR.IO;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
@@ -65,6 +66,8 @@ public class RulesetBindings : UniqueCompositeActionBinding<VariantBindings, int
 		Variants = CreateSaveDataAsDictionary( children, context )
 	} : toBeLoaded ?? default;
 
+	[FormatVersion( "" )]
+	[FormatVersion( "[Initial]" )]
 	public struct SaveData {
 		public string Name;
 		public Dictionary<int, string>? VariantNames;

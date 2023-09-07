@@ -27,7 +27,7 @@ public class ButtonBinding : ActionBinding, IHasBindingType, IIsHanded {
 		TrackSetting( Secondary );
 	}
 
-	public override object CreateSaveData ( BindingsSaveContext context ) => new SaveData() {
+	protected override object CreateSaveData ( BindingsSaveContext context ) => new SaveData() {
 		Type = BindingType.Buttons,
 		Hand = Hand,
 		Primary = context.SaveAction( Primary ),
@@ -41,7 +41,7 @@ public class ButtonBinding : ActionBinding, IHasBindingType, IIsHanded {
 		return buttons;
 	} );
 
-	[MigrateFrom(typeof(V1SaveData), "[Initial]")]
+	[FormatVersion( "" )]
 	public struct SaveData {
 		public BindingType Type;
 		public Hand Hand;
@@ -56,6 +56,7 @@ public class ButtonBinding : ActionBinding, IHasBindingType, IIsHanded {
 		};
 	}
 
+	[FormatVersion( "[Initial]" )]
 	public struct V1SaveData {
 		public string Type;
 		public ActionData? Primary;

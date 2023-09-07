@@ -36,7 +36,7 @@ public class JoystickBindings : CompositeActionBinding<IJoystickBinding>, IHasBi
 	protected override object CreateSaveData ( IEnumerable<IJoystickBinding> children, BindingsSaveContext context ) => new SaveData {
 		Type = BindingType.Joystick,
 		Hand = Hand,
-		Data = children.Select( x => new ChildSaveData { Type = x.Type, Data = x.CreateSaveData( context ) } as object ).ToArray()
+		Data = children.Select( x => new ChildSaveData { Type = x.Type, Data = x.GetSaveData( context ) } as object ).ToArray()
 	};
 
 	public static JoystickBindings? Load ( JsonElement data, BindingsSaveContext ctx ) => Load<JoystickBindings, SaveData>( data, ctx, static (save, ctx) => {
@@ -49,7 +49,7 @@ public class JoystickBindings : CompositeActionBinding<IJoystickBinding>, IHasBi
 		return joystick;
 	} );
 
-	[MigrateFrom(typeof(V1SaveData), "[Initial]")]
+	[FormatVersion( "" )]
 	public struct SaveData {
 		public BindingType Type;
 		public Hand Hand;
@@ -62,11 +62,14 @@ public class JoystickBindings : CompositeActionBinding<IJoystickBinding>, IHasBi
 		};
 	}
 
+	[FormatVersion( "[Initial]" )]
 	public struct V1SaveData {
 		public string Type;
 		public object[] Data;
 	}
 
+	[FormatVersion( "" )]
+	[FormatVersion( "[Initial]" )]
 	public struct ChildSaveData {
 		public JoystickBindingType Type;
 		public object Data;

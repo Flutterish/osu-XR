@@ -1,6 +1,7 @@
 ﻿using osu.Framework.Localisation;
 using osu.Framework.Platform;
 using osu.XR.Input;
+using osu.XR.Input.Migration;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -51,13 +52,15 @@ public class BindingsFile : UniqueCompositeActionBinding<RulesetBindings, string
 			};
 			opts.Converters.Add( new JsonStringEnumConverter() );
 			using var stream = storage.CreateFileSafely( filename );
-			JsonSerializer.Serialize( stream, CreateSaveData( ctx ), opts );
+			JsonSerializer.Serialize( stream, GetSaveData( ctx ), opts );
 		}
 		catch ( Exception e ) {
 			ctx.Error( @"Failed to save bindings", filename, e );
 		}
 	}
 
+	[FormatVersion( "[Initial]" )]
+	[FormatVersion( "" )]
 	public struct SaveData {
 		public string Name;
 		public string Description;

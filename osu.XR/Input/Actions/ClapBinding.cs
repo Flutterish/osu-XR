@@ -1,6 +1,7 @@
 ﻿using osu.Framework.Localisation;
 using osu.XR.Graphics.Bindings.Editors;
 using osu.XR.Input.Handlers;
+using osu.XR.Input.Migration;
 using osu.XR.IO;
 using osu.XR.Localisation.Bindings;
 using System.Text.Json;
@@ -24,7 +25,7 @@ public class ClapBinding : ActionBinding, IHasBindingType {
 		TrackSetting( Action );
 	}
 
-	public override object CreateSaveData ( BindingsSaveContext context ) => new SaveData {
+	protected override object CreateSaveData ( BindingsSaveContext context ) => new SaveData {
 		Type = BindingType.Clap,
 		ThresholdA = ThresholdABindable.Value,
 		ThresholdB = ThresholdBBindable.Value,
@@ -39,6 +40,8 @@ public class ClapBinding : ActionBinding, IHasBindingType {
 		return clap;
 	} );
 
+	[FormatVersion( "" )]
+	[FormatVersion( "[Initial]" )]
 	public struct SaveData {
 		public BindingType Type;
 		public double ThresholdA;
