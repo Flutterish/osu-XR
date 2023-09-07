@@ -36,6 +36,8 @@ public partial class OsuXrGame : OsuXrGameBase {
 	public readonly OsuXrPlayer Player;
 
 	HandheldMenu menu;
+	UserTrackingDrawable3D menuContainer;
+
 	[Cached]
 	public readonly VrKeyboard Keyboard;
 	[Cached]
@@ -59,7 +61,7 @@ public partial class OsuXrGame : OsuXrGameBase {
 		Add( movementSystem = new( Scene ) { RelativeSizeAxes = Axes.Both } );
 		Add( new BasicPanelInteractionSource( Scene, physics, panelInteraction ) { RelativeSizeAxes = Axes.Both } );
 
-		Scene.Add( new UserTrackingDrawable3D { Child = menu = new HandheldMenu(), Y = 1 } );
+		Scene.Add( menuContainer = new UserTrackingDrawable3D { Child = menu = new HandheldMenu(), Y = 1 } );
 		menu.Notifications.Post( new SimpleNotification { Text = @"Welcome to OXR! This is the menu panel, which you can open and close with you VR controller (probably the A or B button). Check out other sections, configure your game, and close this menu when you are ready." } );
 		Scene.Add( Player = new OsuXrPlayer() );
 
@@ -114,6 +116,9 @@ public partial class OsuXrGame : OsuXrGameBase {
 				? $@"{message.Text} in {message.Ruleset.RulesetInfo.Name} ({message.Ruleset.GetVariantName(message.Variant!.Value)})"
 				: $@"{message.Text} in {message.Ruleset.RulesetInfo.Name}"
 			} );
+
+			menu.Panels.FocusPanel( menu.Notifications );
+			menuContainer.IsOpen = true;
 		}
 	}
 
