@@ -36,6 +36,11 @@ public partial class HandSkeletonPointer : CompositeDrawable3D, IPointerSource {
 					AddInternal( fingertips[i] );
 				}
 			}
+
+			for ( int i = 0; i < 5; i++ ) {
+				if ( fingertips[i].Parent == null )
+					fingertipPointers[i].Blur();
+			}
 		}, true );
 	}
 
