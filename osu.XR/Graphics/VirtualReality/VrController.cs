@@ -12,7 +12,7 @@ using Headset = osu.Framework.XR.VirtualReality.Devices.Headset;
 
 namespace osu.XR.Graphics.VirtualReality;
 
-public partial class VrController : BasicVrDevice {
+public partial class VrController : BasicVrDevice, IControllerRelay {
 	Controller source;
 	public bool IsEnabled => source.IsEnabled.Value;
 	public Hand Hand => source.Role == Valve.VR.ETrackedControllerRole.LeftHand ? Hand.Left : Hand.Right;
@@ -204,7 +204,7 @@ public partial class VrController : BasicVrDevice {
 
 	public bool IsFocusedOnAnything => pointers?.Any( x => x.HoveredCollider != null ) == true;
 	public bool UsesTouch => pointers?.Any( x => x.UsesTouch ) == true;
-	VrController relayController => inputMode.Value is InputMode.SinglePointer // in single pointer, the offhand should activate main hand buttons
+	IControllerRelay relayController => inputMode.Value is InputMode.SinglePointer // in single pointer, the offhand should activate main hand buttons
 		? activeControllers.OrderBy( x => x.Hand == dominantHand.Value ? 1 : 2 ).Append( this ).First()
 		: (UsesTouch || pointers == null) && !IsFocusedOnAnything // in touch modes, unfocused pointers should activate focused hand buttons
 		? activeControllers.Where( x => x.IsFocusedOnAnything ).Append( this ).First()
@@ -218,35 +218,38 @@ public partial class VrController : BasicVrDevice {
 			return;
 		}
 
-		var controller = relayController;
 		var actuators = action is VrAction.LeftButton ? leftActuators : rightActuators;
-		var pointerButtons = relayController.pointers?.DistinctBy( x => x.HoveredCollider ).Select( x => action is VrAction.LeftButton ? x.LeftButton : x.RightButton ).GetEnumerator();
-		if ( pointerButtons is not IEnumerator<PointerButton> enumerator ) {
-			foreach ( var i in actuators )
-				i.Actuate( null );
-			return;
-		}
+		var pointerButtons = relayController.GetButtonsFor( action );
 
 		int n = 0;
 		if ( isDown ) {
-			while ( pointerButtons.MoveNext() ) {
+			foreach ( var button in pointerButtons ) {
 				if ( n >= actuators.Count )
 					actuators.Add( new() );
 
-				actuators[n++].Actuate( pointerButtons.Current );
+				actuators[n++].Actuate( button );
 			}
 		}
 		for ( ; n < actuators.Count; n++ ) {
 			actuators[n].Actuate( null );
 		}
 	}
+	public IEnumerable<PointerButton> GetButtonsFor ( VrAction action ) {
+		if ( pointers is null )
+			return Array.Empty<PointerButton>();
+
+		return pointers.DistinctBy( x => x.HoveredCollider ).Select( x => action is VrAction.LeftButton ? x.LeftButton : x.RightButton );
+	}
 
 	Vector2Action scroll = null!;
 	void onScroll ( Vector2 value ) {
+		relayController.ScrollBy( value );
+	}
+	public void ScrollBy ( Vector2 amount ) {
 		if ( currentPlayer.Value != null )
 			return;
 
-		var pointers = relayController.pointers?.DistinctBy( x => x.HoveredCollider );
+		var pointers = this.pointers?.DistinctBy( x => x.HoveredCollider );
 		if ( pointers is null )
 			return;
 
@@ -255,7 +258,7 @@ public partial class VrController : BasicVrDevice {
 			if ( panel is null )
 				continue;
 
-			panel.Content.Scroll += value;
+			panel.Content.Scroll += amount;
 		}
 	}
 
