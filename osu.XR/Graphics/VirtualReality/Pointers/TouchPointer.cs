@@ -1,5 +1,6 @@
 ﻿using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Graphics.Meshes;
+using osu.Framework.XR.Graphics.Rendering;
 using osu.Framework.XR.Physics;
 
 namespace osu.XR.Graphics.VirtualReality.Pointers;
@@ -56,5 +57,12 @@ public partial class TouchPointer : Model, IPointer {
 
 	public void SetTint ( Colour4 tint ) {
 		Colour = tint.Opacity( 0.3f );
+	}
+
+	public void AddToScene ( Scene scene ) {
+		scene.Add( this );
+	}
+	public void RemoveFromScene ( Scene scene ) {
+		scene.Remove( this, disposeImmediately: false );
 	}
 }

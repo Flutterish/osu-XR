@@ -1,5 +1,6 @@
 ﻿using osu.Framework.XR.Allocation;
 using osu.Framework.XR.Graphics;
+using osu.Framework.XR.Graphics.Rendering;
 using osu.Framework.XR.VirtualReality;
 using osu.Framework.XR.VirtualReality.Devices;
 using osu.XR.Configuration;
@@ -44,7 +45,7 @@ public partial class HandSkeletonPointer : CompositeDrawable3D, IPointerSource {
 		}, true );
 	}
 
-	public IEnumerable<Pointer> Pointers => activePointers;
+	public IEnumerable<Pointer> Pointers => fingertipPointers;
 
 	public RentedArray<PointerHit?> UpdatePointers ( Vector3 playerPosition, Vector3 position, Quaternion rotation ) {
 		var arr = MemoryPool<PointerHit?>.Shared.Rent( activePointers.Count );
@@ -67,6 +68,13 @@ public partial class HandSkeletonPointer : CompositeDrawable3D, IPointerSource {
 	[BackgroundDependencyLoader]
 	private void load ( OsuXrConfigManager? config ) {
 		config?.BindWith( OsuXrSetting.HandSkeletonFingers, activeFingers );
+	}
+
+	public void AddToScene ( Scene scene ) {
+		scene.Add( this );
+	}
+	public void RemoveFromScene ( Scene scene ) {
+		scene.Remove( this, disposeImmediately: false );
 	}
 }
 

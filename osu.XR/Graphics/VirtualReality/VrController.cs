@@ -45,10 +45,10 @@ public partial class VrController : BasicVrDevice {
 	Bindable<bool> disableTeleport = new( false );
 	TeleportVisual teleportVisual = new();
 
-	Drawable3D? pointerSource;
+	IPointerBase? pointerSource;
 	Pointer[]? pointers;
 
-	Dictionary<Drawable3D, Pointer[]> pointersBySource = new();
+	Dictionary<IPointerBase, Pointer[]> pointersBySource = new();
 	RayPointer? rayPointer;
 	TouchPointer? touchPointer;
 	HandSkeletonPointer? handSkeletonPointer;
@@ -75,7 +75,7 @@ public partial class VrController : BasicVrDevice {
 		return pointer;
 	}
 
-	void setPointerSource ( Drawable3D? pointerSource ) {
+	void setPointerSource ( IPointerBase? pointerSource ) {
 		if ( pointerSource == this.pointerSource )
 			return;
 
@@ -86,10 +86,10 @@ public partial class VrController : BasicVrDevice {
 			pointers = null;
 		}
 
-		if ( this.pointerSource is Drawable3D old )
-			scene.Remove( old, disposeImmediately: false );
-		if ( pointerSource is Drawable3D @new ) {
-			scene.Add( @new );
+		if ( this.pointerSource is IPointerBase old )
+			old.RemoveFromScene( scene );
+		if ( pointerSource is IPointerBase @new ) {
+			@new.AddToScene( scene );
 			if ( !pointersBySource.TryGetValue( @new, out pointers ) ) {
 				var tint = Hand is Hand.Left ? Colour4.Cyan : Colour4.Orange;
 				if ( pointerSource is IPointerSource source ) {

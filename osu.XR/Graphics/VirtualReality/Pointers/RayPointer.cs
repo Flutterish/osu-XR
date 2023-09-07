@@ -1,4 +1,5 @@
 ﻿using osu.Framework.XR.Graphics;
+using osu.Framework.XR.Graphics.Rendering;
 using osu.Framework.XR.Physics;
 
 namespace osu.XR.Graphics.VirtualReality.Pointers;
@@ -44,5 +45,12 @@ public partial class RayPointer : CompositeDrawable3D, IPointer {
 
 	public void SetTint ( Colour4 tint ) {
 		ray.Colour = indicator.Colour = tint;
+	}
+
+	public void AddToScene ( Scene scene ) {
+		scene.Add( this );
+	}
+	public void RemoveFromScene ( Scene scene ) {
+		scene.Remove( this, disposeImmediately: false );
 	}
 }
