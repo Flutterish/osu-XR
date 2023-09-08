@@ -1,5 +1,6 @@
 ﻿using osu.Framework.Localisation;
 using osu.Framework.XR.VirtualReality;
+using osu.XR.Graphics.VirtualReality;
 
 namespace osu.XR.Input.Handlers;
 
@@ -11,6 +12,7 @@ public abstract partial class JoystickHandler : ActionBindingHandler {
 		this.Hand = hand;
 		GetController( hand, c => {
 			actualJoystickPosition.BindTo( Input.GetAction<Vector2Action>( VrAction.Scroll, c ).ValueBindable );
+			VrController = Game is OsuXrGame game ? game.ControllerFor( c ) : null;
 		} );
 
 		actualJoystickPosition.BindValueChanged( v => {
@@ -48,4 +50,5 @@ public abstract partial class JoystickHandler : ActionBindingHandler {
 	public readonly Bindable<bool> isWindmillEnabled = new();
 
 	public readonly BindableWithCurrent<Vector2> JoystickPosition = new();
+	protected VrController? VrController;
 }

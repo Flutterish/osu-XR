@@ -28,6 +28,9 @@ public partial class JoystickMovementHandler : JoystickHandler {
 			}
 		}
 
+		if ( VrController != null )
+			VrController.CustomRelay = cursor;
+
 		if ( cursor == null )
 			return;
 
@@ -37,5 +40,11 @@ public partial class JoystickMovementHandler : JoystickHandler {
 		else if ( MovementType.Value == JoystickMovementType.Relative ) {
 			cursor.MoveBy( JoystickPosition.Value * (float)(Distance.Value / 100 * Time.Elapsed / 100), isNormalized: true );
 		}
+	}
+
+	protected override void Dispose ( bool isDisposing ) {
+		base.Dispose( isDisposing );
+		if ( VrController != null )
+			VrController.CustomRelay = null;
 	}
 }

@@ -3,12 +3,12 @@
 /// <summary>
 /// An aggregate button whose input can be redirected to another button
 /// </summary>
-public class PointerButton {
-	PointerButton? actuated;
+public class RelayButton {
+	RelayButton? actuated;
 	int inputSourceCount;
 	public bool IsDown { get; private set; }
 
-	public void Actuate ( PointerButton? who ) {
+	public void Actuate ( RelayButton? who ) {
 		if ( actuated == who )
 			return;
 

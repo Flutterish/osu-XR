@@ -2,6 +2,7 @@
 using osu.Framework.XR.Graphics.Panels;
 using osu.XR.Input.Handlers;
 using osu.XR.Osu;
+using osuTK.Input;
 using System.Reflection;
 
 namespace osu.XR.Input;
@@ -22,16 +23,38 @@ public partial class InjectedInput : CompositeDrawable {
 
 	VirtualMouseHandler mouseHandler = new();
 	VirtualTouchHandler touchHandler = new();
+	bool usingTouch => customCursors.Count > 1;
 	Dictionary<object, InjectedInputCursor> customCursors = new();
 	public InjectedInputCursor GetCursor ( object source ) {
 		if ( !customCursors.TryGetValue( source, out var cursor ) ) {
 			customCursors.Add( source, cursor = new( this ) );
+			foreach ( var (button, mouseButton) in new[] { (cursor.LeftButton, MouseButton.Left), (cursor.RightButton, MouseButton.Right) } ) {
+				button.OnPressed += () => {
+					if ( usingTouch )
+						touchHandler.EmulateTouchDown( cursor, cursor.CursorPosition );
+					else
+						mouseHandler.EmulateMouseDown( mouseButton );
+				};
+				button.OnReleased += () => {
+					if ( usingTouch )
+						touchHandler.EmulateTouchUp( cursor );
+					else
+						mouseHandler.EmulateMouseUp( mouseButton );
+				};
+				button.OnRepeated += () => {
+					if ( usingTouch )
+						touchHandler.EmulateTouchDown( cursor, cursor.CursorPosition );
+					else
+						mouseHandler.EmulateMouseDown( mouseButton );
+				};
+			}
+			
 			AddInternal( cursor );
 		}
 
 		PlayerInfo.InputManager.UseParentInput = false;
 		foreach ( var i in customCursors.Values ) {
-			i.Alpha = customCursors.Count == 1 ? 0 : 1;
+			i.Alpha = usingTouch ? 1 : 0;
 		}
 		return cursor;
 	}
@@ -41,7 +64,7 @@ public partial class InjectedInput : CompositeDrawable {
 			return;
 
 		foreach ( var i in customCursors.Values ) {
-			i.Alpha = customCursors.Count == 1 ? 0 : 1;
+			i.Alpha = usingTouch ? 1 : 0;
 		}
 
 		RemoveInternal( cursor, disposeImmediately: true );
@@ -58,7 +81,7 @@ public partial class InjectedInput : CompositeDrawable {
 		if ( customCursors.Count == 1 ) {
 			mouseHandler.EmulateMouseMove( position );
 		}
-		else {
+		else if ( cursor.LeftButton.IsDown ) {
 			touchHandler.EmulateTouchMove( cursor, position );
 		}
 	}

@@ -121,6 +121,6 @@ public class Pointer {
 
 	public event Action<bool>? TouchDownStateChanged;
 
-	public readonly PointerButton LeftButton = new();
-	public readonly PointerButton RightButton = new();
+	public readonly RelayButton LeftButton = new();
+	public readonly RelayButton RightButton = new();
 }

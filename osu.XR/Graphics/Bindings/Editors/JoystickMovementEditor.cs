@@ -47,7 +47,7 @@ public partial class JoystickMovementEditor : FillFlowContainer {
 			if ( v.NewValue is JoystickMovementType.None )
 				type.ClearNoticeText();
 			else
-				type.SetNoticeText( MovementStrings.Warning, isWarning: true );
+				type.SetNoticeText( @"This will also forward the primary input from this controller to the left/right mouse button, or touch when there are multiple joystick cursors." );
 		}, true );
 	}
 }

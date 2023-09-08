@@ -1,5 +1,4 @@
-﻿using osu.Framework.XR.Graphics;
-using osu.Framework.XR.Graphics.Panels;
+﻿using osu.Framework.XR.Graphics.Panels;
 using osu.Framework.XR.Graphics.Rendering;
 using osu.Framework.XR.Input;
 using osu.Framework.XR.VirtualReality;
@@ -204,14 +203,29 @@ public partial class VrController : BasicVrDevice, IControllerRelay {
 
 	public bool IsFocusedOnAnything => pointers?.Any( x => x.HoveredCollider != null ) == true;
 	public bool UsesTouch => pointers?.Any( x => x.UsesTouch ) == true;
-	IControllerRelay relayController => inputMode.Value is InputMode.SinglePointer // in single pointer, the offhand should activate main hand buttons
-		? activeControllers.OrderBy( x => x.Hand == dominantHand.Value ? 1 : 2 ).Append( this ).First()
-		: (UsesTouch || pointers == null) && !IsFocusedOnAnything // in touch modes, unfocused pointers should activate focused hand buttons
-		? activeControllers.Where( x => x.IsFocusedOnAnything ).Append( this ).First()
-		: this;
 
-	List<PointerButton> leftActuators = new();
-	List<PointerButton> rightActuators = new();
+	public IControllerRelay? CustomRelay;
+	IControllerRelay relayController {
+		get {
+			if ( CustomRelay != null && !IsFocusedOnAnything ) {
+				return CustomRelay;
+			}
+
+			var choice = inputMode.Value is InputMode.SinglePointer // in single pointer, the offhand should activate main hand buttons
+				? activeControllers.OrderBy( x => x.Hand == dominantHand.Value ? 1 : 2 ).Append( this ).First()
+				: (UsesTouch || pointers == null) && !IsFocusedOnAnything // in touch modes, unfocused pointers should activate focused hand buttons
+				? activeControllers.Where( x => x.IsFocusedOnAnything || x.CustomRelay != null ).Append( this ).First()
+				: this;
+
+			if ( choice.CustomRelay != null && !choice.IsFocusedOnAnything ) {
+				return choice.CustomRelay;
+			}
+			return choice;
+		}
+	}
+
+	List<RelayButton> leftActuators = new();
+	List<RelayButton> rightActuators = new();
 	void onInputSourceValueChanged ( VrAction action, bool isDown ) {
 		if ( action is VrAction.ToggleMenu ) {
 			menuButton.Actuate( isDown ? menuButton : null );
@@ -219,7 +233,7 @@ public partial class VrController : BasicVrDevice, IControllerRelay {
 		}
 
 		var actuators = action is VrAction.LeftButton ? leftActuators : rightActuators;
-		var pointerButtons = relayController.GetButtonsFor( action );
+		var pointerButtons = relayController.GetButtonsFor( this, action );
 
 		int n = 0;
 		if ( isDown ) {
@@ -234,18 +248,18 @@ public partial class VrController : BasicVrDevice, IControllerRelay {
 			actuators[n].Actuate( null );
 		}
 	}
-	public IEnumerable<PointerButton> GetButtonsFor ( VrAction action ) {
+	public IEnumerable<RelayButton> GetButtonsFor ( VrController source, VrAction action ) {
 		if ( pointers is null )
-			return Array.Empty<PointerButton>();
+			return Array.Empty<RelayButton>();
 
 		return pointers.DistinctBy( x => x.HoveredCollider ).Select( x => action is VrAction.LeftButton ? x.LeftButton : x.RightButton );
 	}
 
 	Vector2Action scroll = null!;
 	void onScroll ( Vector2 value ) {
-		relayController.ScrollBy( value );
+		relayController.ScrollBy( this, value );
 	}
-	public void ScrollBy ( Vector2 amount ) {
+	public void ScrollBy ( VrController source, Vector2 amount ) {
 		if ( currentPlayer.Value != null )
 			return;
 
@@ -295,6 +309,6 @@ public partial class VrController : BasicVrDevice, IControllerRelay {
 		}
 	}
 
-	PointerButton menuButton = new();
+	RelayButton menuButton = new();
 	public event Action<VrController>? ToggleMenuPressed;
 }
