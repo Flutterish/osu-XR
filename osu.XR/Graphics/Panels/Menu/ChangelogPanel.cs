@@ -22,6 +22,9 @@ public partial class ChangelogPanel : SettingsPanel {
 				#### Performance
 				* Lock execution mode to multithreaded with unlimited framerate (it's actually limited to the refresh rate of your HMD).
 				* Lock window to be always ""active"". This will make it so when you unfocus the window, it will not limit the update rate to 60Hz.
+				#### QOL
+				* Teleporting is disabled while playing.
+				* Opening the handheld menu is disabled while playing.
 				#### Visual
 				* The VR headset is now rendered on screen.
 				* Added on-screen warning when rendering to screen is turned off.

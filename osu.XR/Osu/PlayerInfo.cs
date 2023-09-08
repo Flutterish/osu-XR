@@ -15,4 +15,6 @@ public record PlayerInfo {
 	public KeyBindingContainer KeyBindingContainer { get; init; }
 	public Bindable<IReadOnlyList<Mod>> Mods { get; init; }
 	public int Variant { get; init; }
+
+	public bool IsPaused => DrawableRuleset.IsPaused.Value;
 }

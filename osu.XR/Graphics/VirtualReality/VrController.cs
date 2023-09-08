@@ -194,14 +194,13 @@ public partial class VrController : BasicVrDevice, IControllerRelay {
 		dominantHand.BindValueChanged( _ => updatePointerType() );
 
 		menuButton.OnPressed += () => {
-			if ( currentPlayer.Value == null )
-				ToggleMenuPressed?.Invoke( this );
+			ToggleMenuPressed?.Invoke( this );
 		};
 		updatePointerType();
 	}
 
 	void updateTeleportCapability () {
-		disableTeleport.Value = settingsTeleportDisabled.Value || currentPlayer.Value != null;
+		disableTeleport.Value = settingsTeleportDisabled.Value || (currentPlayer.Value != null && !currentPlayer.Value.IsPaused);
 	}
 
 	public bool IsFocusedOnAnything => pointers?.Any( x => x.HoveredCollider != null ) == true;

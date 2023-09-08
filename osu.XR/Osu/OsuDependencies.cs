@@ -90,7 +90,7 @@ public class OsuDependencies : IReadOnlyDependencyContainer {
 
 	void onOsuScreenChanged ( IScreen screen ) {
 		try {
-			if ( screen is not Player player ) {
+			if ( screen is not Player player || player is ReplayPlayer ) {
 				Player.Value = null;
 				return;
 			}

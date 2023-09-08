@@ -1,6 +1,7 @@
 ﻿using osu.Framework.Utils;
 using osu.Framework.XR.Graphics.Containers;
 using osu.XR.Configuration;
+using osu.XR.Osu;
 
 namespace osu.XR.Graphics.VirtualReality;
 
@@ -34,6 +35,11 @@ public partial class UserTrackingDrawable3D : Container3D { // TODO this needs a
 	}
 
 	private void onToggleMenuPressed ( VrController controller ) {
+		if ( IsOpen && osu.Player.Value?.IsPaused == false ) {
+			IsOpen = false;
+			return;
+		}
+
 		if ( IsOpen && (HoldingController == controller || HoldingController == null || activeControllers.Count == 1 || inputMode.Value == InputMode.SinglePointer) ) {
 			IsOpen = false;
 		}
@@ -53,6 +59,8 @@ public partial class UserTrackingDrawable3D : Container3D { // TODO this needs a
 
 	[Resolved]
 	OsuXrGame game { get; set; } = null!;
+	[Resolved]
+	OsuDependencies osu { get; set; } = null!;
 	VrController? openingController;
 	bool isOpen;
 	public bool IsOpen {
