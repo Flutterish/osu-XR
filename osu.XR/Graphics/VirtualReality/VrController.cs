@@ -193,7 +193,10 @@ public partial class VrController : BasicVrDevice, IControllerRelay {
 		dominantHand.BindTo( game.DominantHand );
 		dominantHand.BindValueChanged( _ => updatePointerType() );
 
-		menuButton.OnPressed += () => ToggleMenuPressed?.Invoke( this );
+		menuButton.OnPressed += () => {
+			if ( currentPlayer.Value == null )
+				ToggleMenuPressed?.Invoke( this );
+		};
 		updatePointerType();
 	}
 
