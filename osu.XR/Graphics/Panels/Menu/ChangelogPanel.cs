@@ -1,7 +1,10 @@
 ﻿using osu.Framework.Graphics.Sprites;
 using osu.Framework.Localisation;
+using osu.Game.Graphics;
 using osu.Game.Graphics.Containers.Markdown;
+using osu.Game.Graphics.Sprites;
 using osu.Game.Overlays.Settings;
+using osuTK.Graphics;
 using System.Text.RegularExpressions;
 
 namespace osu.XR.Graphics.Panels.Menu;
@@ -58,7 +61,7 @@ public partial class ChangelogPanel : SettingsPanel {
 				* VR API for osu! rulesets. This will allow them to display elements in 3D space, create interactible props and much more.
 			" );
 
-			yield return new ChangelogEntry( @"2023.826.0", @"
+			yield return new ChangelogEntry( "2023.826.0", "osu!lazer 2023.815.0", @"
 				### Hello, World!
 
 				This is the release version for the overhaul of OXR!
@@ -77,7 +80,8 @@ public partial class ChangelogPanel : SettingsPanel {
 
 	partial class ChangelogEntry : SettingsSection {
 		static Regex deadspacePattern = new( @"^[\t ]+", RegexOptions.Compiled | RegexOptions.Multiline );
-		public ChangelogEntry ( LocalisableString header, string markdown ) {
+
+		public ChangelogEntry ( LocalisableString header, LocalisableString subHeader, string markdown ) {
 			Header = header;
 			RelativeSizeAxes = Axes.X;
 			AutoSizeAxes = Axes.Y;
@@ -86,12 +90,53 @@ public partial class ChangelogPanel : SettingsPanel {
 				RelativeSizeAxes = Axes.X,
 				AutoSizeAxes = Axes.Y
 			} );
+
+
+			this.subHeader = subHeader;
 		}
+
+		public ChangelogEntry ( LocalisableString header, string markdown ) : this( header, string.Empty, markdown ) { }
 
 		public override Drawable CreateIcon () {
 			return new SpriteIcon() { Icon = FontAwesome.Solid.Cat };
 		}
 
 		public override LocalisableString Header { get; }
+		LocalisableString subHeader;
+
+		public const float CONTENT_MARGINS = 20;
+		protected override void LoadComplete () {
+			base.LoadComplete();
+
+			var container = (Container)Content.Parent;
+
+			var header = container.Children[0];
+			header.Margin = new();
+			var flow = container.Children[1];
+			container.Clear( disposeChildren: false );
+			header.Origin = Anchor.BottomLeft;
+			header.Anchor = Anchor.BottomLeft;
+			
+			container.Add( new FillFlowContainer {
+				RelativeSizeAxes = Axes.X,
+				AutoSizeAxes = Axes.Y,
+				Direction = FillDirection.Horizontal,
+				Margin = new MarginPadding {
+					Horizontal = CONTENT_MARGINS
+				},
+				Children = new[] {
+					header,
+					new OsuSpriteText {
+						Font = OsuFont.TorusAlternate.With(size: 16),
+						Colour = Color4.Gray,
+						Origin = Anchor.BottomLeft,
+						Anchor = Anchor.BottomLeft,
+						Margin = new() { Left = 10 },
+						Text = subHeader
+					}
+				}
+			} );
+			container.Add( flow );
+		}
 	}
 }
