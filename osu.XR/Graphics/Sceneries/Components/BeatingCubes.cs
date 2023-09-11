@@ -1,10 +1,13 @@
-﻿using osu.Framework.XR;
+﻿using osu.Framework.Localisation;
+using osu.Framework.XR;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Graphics.Meshes;
 
 namespace osu.XR.Graphics.Sceneries.Components;
 
-public partial class BeatingCubes : CompositeDrawable3D {
+public partial class BeatingCubes : CompositeDrawable3D, ISceneryComponent {
+	LocalisableString ISceneryComponent.Name => @"Beat cubes";
+
 	public BeatingCubes ( int? seed = 0 ) {
 		Random random = seed.HasValue ? new( seed.Value ) : new();
 

@@ -12,6 +12,31 @@ public partial class Scenery : CompositeDrawable3D {
 			Mesh = BasicMesh.UnitCornerCube,
 			Scale = new( 100, 0.01f, 100 )
 		} );
-		AddInternal( new DustEmitter() );
+
+		Components.BindCollectionChanged( (_, e) => {
+			if ( e.OldItems != null ) {
+				foreach ( ISceneryComponent i in e.OldItems ) {
+					if ( i is Drawable3D drawable )
+						RemoveInternal( drawable, disposeImmediately: false );
+				}
+			}
+			if ( e.NewItems != null ) {
+				foreach ( ISceneryComponent i in e.NewItems ) {
+					if ( i is Drawable3D drawable )
+						AddInternal( drawable );
+				}
+			}
+		} );
+
+		AddComponent( new DustEmitter() );
+	}
+
+	public readonly BindableList<ISceneryComponent> Components = new();
+	public void AddComponent ( ISceneryComponent component ) {
+		Components.Add( component );
+	}
+
+	public void RemoveComponent ( ISceneryComponent component ) {
+		Components.Remove( component );
 	}
 }

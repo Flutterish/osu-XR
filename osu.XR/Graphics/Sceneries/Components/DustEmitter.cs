@@ -1,5 +1,6 @@
 ﻿using osu.Framework.Graphics.Rendering;
 using osu.Framework.Graphics.Textures;
+using osu.Framework.Localisation;
 using osu.Framework.Utils;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Graphics.Materials;
@@ -10,7 +11,9 @@ using osuTK.Graphics;
 
 namespace osu.XR.Graphics.Sceneries.Components;
 
-public partial class DustEmitter : SpriteParticleEmitter<DustParticle> {
+public partial class DustEmitter : SpriteParticleEmitter<DustParticle>, ISceneryComponent {
+	LocalisableString ISceneryComponent.Name => @"Dust";
+
 	[Resolved(canBeNull: true)]
 	VrPlayer? player { get; set; }
 	Vector3 playerPosition;

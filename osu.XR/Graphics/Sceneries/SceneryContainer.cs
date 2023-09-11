@@ -1,13 +1,12 @@
 ﻿using osu.Framework.XR.Graphics;
 using osu.XR.Configuration;
+using osu.XR.Graphics.Sceneries.Components;
 
 namespace osu.XR.Graphics.Sceneries;
 
 public partial class SceneryContainer : CompositeDrawable3D {
 	Bindable<SceneryType> type = new();
-
-	GridScenery? solid;
-	LightsOutScenery? lightsOut;
+	Scenery scenery = new();
 
 	[BackgroundDependencyLoader(permitNulls: true)]
 	private void load ( OsuXrConfigManager config ) {
@@ -19,11 +18,19 @@ public partial class SceneryContainer : CompositeDrawable3D {
 
 	protected override void LoadComplete () {
 		base.LoadComplete();
+		AddInternal( scenery );
+
 		type.BindValueChanged( v => {
-			ClearInternal( disposeChildren: false );
-			AddInternal( v.NewValue switch {
-				SceneryType.Solid => solid ??= new(),
-				SceneryType.LightsOut or _ => lightsOut ??= new()
+			while ( scenery.Components.Any() ) {
+				var last = scenery.Components[^1];
+				scenery.Components.RemoveAt( scenery.Components.Count - 1 );
+				last.Dispose(); // TODO option to not unload them
+			}
+
+			scenery.Components.AddRange( v.NewValue switch { 
+				SceneryType.Solid => GridScenery.CreateComponents(),
+				SceneryType.LightsOut => LightsOutScenery.CreateComponents(),
+				_ => Array.Empty<ISceneryComponent>()
 			} );
 		}, true );
 	}

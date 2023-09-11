@@ -1,5 +1,6 @@
 ﻿using osu.Framework.Caching;
 using osu.Framework.Graphics.Rendering;
+using osu.Framework.Localisation;
 using osu.Framework.XR;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Graphics.Materials;
@@ -8,7 +9,9 @@ using MaterialNames = osu.XR.Graphics.Materials.MaterialNames;
 
 namespace osu.XR.Graphics.Sceneries.Components;
 
-public partial class FloorGrid : BasicModel {
+public partial class FloorGrid : BasicModel, ISceneryComponent {
+	LocalisableString ISceneryComponent.Name => @"Floor Grid";
+
 	Cached meshCache = new();
 	public readonly BindableInt XSegmentsBindable = new( 7 ) { MinValue = 0, MaxValue = 20, Precision = 1 };
 	public readonly BindableInt ZSegmentsBindable = new( 7 ) { MinValue = 0, MaxValue = 20, Precision = 1 };

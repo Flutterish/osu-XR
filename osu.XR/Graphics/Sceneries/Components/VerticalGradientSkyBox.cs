@@ -1,4 +1,5 @@
 ﻿using osu.Framework.Graphics.Rendering;
+using osu.Framework.Localisation;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Graphics.Materials;
 using osu.Framework.XR.Graphics.Meshes;
@@ -7,7 +8,9 @@ using osuTK.Graphics;
 
 namespace osu.XR.Graphics.Sceneries.Components;
 
-public partial class VerticalGradientSkyBox : BasicModel {
+public partial class VerticalGradientSkyBox : BasicModel, ISceneryComponent {
+	LocalisableString ISceneryComponent.Name => @"Skybox";
+
 	public readonly Bindable<Color4> TintBindable = new( Color4.HotPink );
 	public readonly BindableFloat OpacityBindable = new( 1 ) { MinValue = 0, MaxValue = 1 };
 

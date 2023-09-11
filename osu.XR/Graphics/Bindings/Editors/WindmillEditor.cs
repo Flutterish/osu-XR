@@ -17,11 +17,13 @@ public partial class WindmillEditor : FillFlowContainer {
 
 		Add( new SettingsCheckbox {
 			LabelText = @"Enable Left",
-			Current = source.IsLeftEnabled
+			Current = source.IsLeftEnabled,
+			ShowsDefaultIndicator = false
 		} );
 		Add( new SettingsCheckbox {
 			LabelText = @"Enable Right",
-			Current = source.IsRightEnabled
+			Current = source.IsRightEnabled,
+			ShowsDefaultIndicator = false
 		} );
 
 		Add( source.CreateHandler()! );
