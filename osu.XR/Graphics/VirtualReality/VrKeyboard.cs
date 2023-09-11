@@ -287,7 +287,8 @@ public partial class VrKeyboard : CompositeDrawable3D {  // TODO add sticky keys
 					Origin = Anchor.Centre,
 					Anchor = Anchor.Centre,
 					Icon = icon,
-					Position = key == osuTK.Input.Key.Enter ? new( 14, -60 ) : new()
+					Position = key == osuTK.Input.Key.Enter ? new( 14, -60 ) : new(),
+					Rotation = key == osuTK.Input.Key.Enter ? 180 : 0
 				};
 			}
 
