@@ -28,6 +28,8 @@ public partial class OsuXrGame : OsuXrGameBase {
 	[Cached]
 	PanelInteractionSystem panelInteraction = new();
 
+	[Cached]
+	SceneryContainer scenery = new();
 	public readonly OsuXrScene Scene;
 	OsuGamePanel osuPanel;
 
@@ -203,7 +205,7 @@ public partial class OsuXrGame : OsuXrGameBase {
 		base.LoadComplete();
 		Add( BeatSync );
 		Add( Scene );
-		Scene.Add( new SceneryContainer() ); 
+		Scene.Add( scenery ); 
 		Add( new ScreenOverlay() );
 	}
 }

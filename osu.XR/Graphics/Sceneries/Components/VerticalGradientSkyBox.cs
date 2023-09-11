@@ -4,14 +4,17 @@ using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Graphics.Materials;
 using osu.Framework.XR.Graphics.Meshes;
 using osu.Framework.XR.Graphics.Vertices;
+using osu.Game.Overlays.Settings;
+using osu.XR.Graphics.Settings;
 using osuTK.Graphics;
 
 namespace osu.XR.Graphics.Sceneries.Components;
 
-public partial class VerticalGradientSkyBox : BasicModel, ISceneryComponent {
+public partial class VerticalGradientSkyBox : BasicModel, IConfigurableSceneryComponent {
 	LocalisableString ISceneryComponent.Name => @"Skybox";
+	public SceneryComponentSettingsSection CreateSettings () => new VerticalGradientSkyBoxSettings( this );
 
-	public readonly Bindable<Color4> TintBindable = new( Color4.HotPink );
+	public readonly Bindable<Colour4> TintBindable = new( Colour4.HotPink );
 	public readonly BindableFloat OpacityBindable = new( 1 ) { MinValue = 0, MaxValue = 1 };
 
 	public VerticalGradientSkyBox () {
@@ -61,5 +64,18 @@ public partial class VerticalGradientSkyBox : BasicModel, ISceneryComponent {
 			Matrix = Matrix4.CreateTranslation( renderer.ProjectionMatrix.ExtractCameraPosition() );
 			base.Draw( renderer, ctx );
 		}
+	}
+}
+
+public partial class VerticalGradientSkyBoxSettings : SceneryComponentSettingsSection {
+	public VerticalGradientSkyBoxSettings ( VerticalGradientSkyBox source ) : base( source ) {
+		Add( new SettingsColourPicker {
+			LabelText = @"Tint",
+			Current = source.TintBindable
+		} );
+		Add( new SettingsPercentageSlider<float> {
+			LabelText = @"Opacity",
+			Current = source.OpacityBindable
+		} );
 	}
 }

@@ -4,24 +4,26 @@ using osu.Framework.Localisation;
 using osu.Framework.XR;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Graphics.Materials;
+using osu.Game.Overlays.Settings;
+using osu.XR.Graphics.Settings;
 using osuTK.Graphics;
 using MaterialNames = osu.XR.Graphics.Materials.MaterialNames;
 
 namespace osu.XR.Graphics.Sceneries.Components;
 
-public partial class FloorGrid : BasicModel, ISceneryComponent {
+public partial class FloorGrid : BasicModel, IConfigurableSceneryComponent {
 	LocalisableString ISceneryComponent.Name => @"Floor Grid";
+	public SceneryComponentSettingsSection CreateSettings () => new FloorGridSettingsSection( this );
 
 	Cached meshCache = new();
-	public readonly BindableInt XSegmentsBindable = new( 7 ) { MinValue = 0, MaxValue = 20, Precision = 1 };
-	public readonly BindableInt ZSegmentsBindable = new( 7 ) { MinValue = 0, MaxValue = 20, Precision = 1 };
+	public readonly BindableInt SegmentsCountBindable = new( 7 ) { MinValue = 0, MaxValue = 20, Precision = 1 };
 	public readonly BindableFloat SegmentWidthBindable = new( 0.01f ) { MinValue = 0.001f, MaxValue = 0.05f };
 	public readonly BindableFloat SegmentSpreadBindable = new( 1 ) { MinValue = 0.1f, MaxValue = 2 };
 	public readonly BindableFloat SegmentLengthBindable = new( 16.7f ) { MinValue = 5, MaxValue = 50 };
 
 	public FloorGrid () {
 		RenderStage = RenderingStage.Transparent;
-		(XSegmentsBindable, ZSegmentsBindable, SegmentWidthBindable, SegmentSpreadBindable, SegmentLengthBindable).BindValuesChanged( () => meshCache.Invalidate(), true );
+		(SegmentsCountBindable, SegmentWidthBindable, SegmentSpreadBindable, SegmentLengthBindable).BindValuesChanged( () => meshCache.Invalidate(), true );
 	}
 
 	protected override void Update () {
@@ -43,8 +45,8 @@ public partial class FloorGrid : BasicModel, ISceneryComponent {
 
 	void RegenerateMesh () {
 		var (x_segments, z_segments, width, x_spread, z_spread, x_length, z_length) = (
-			XSegmentsBindable.Value,
-			ZSegmentsBindable.Value,
+			SegmentsCountBindable.Value,
+			SegmentsCountBindable.Value,
 			SegmentWidthBindable.Value,
 			SegmentSpreadBindable.Value,
 			SegmentSpreadBindable.Value,
@@ -73,5 +75,26 @@ public partial class FloorGrid : BasicModel, ISceneryComponent {
 				new Vector3( xTo, 0, zFrom ), new Vector3( xTo, 0, zTo )
 			), new Vector2( 0, 1 ), new Vector2( 1, 1 ), new Vector2( 0, 0 ), new Vector2( 1, 0 ) );
 		}
+	}
+}
+
+public partial class FloorGridSettingsSection : SceneryComponentSettingsSection {
+	public FloorGridSettingsSection ( FloorGrid source ) : base( source ) {
+		Add( new SettingsSlider<int> {
+			LabelText = @"Line count",
+			Current = source.SegmentsCountBindable
+		} );
+		Add( new SettingsSlider<float, MetersSliderBar> {
+			LabelText = "Line width",
+			Current = source.SegmentWidthBindable
+		} );
+		Add( new SettingsSlider<float, MetersSliderBar> {
+			LabelText = "Line spread",
+			Current = source.SegmentSpreadBindable
+		} );
+		Add( new SettingsSlider<float, MetersSliderBar> {
+			LabelText = "Line length",
+			Current = source.SegmentLengthBindable
+		} );
 	}
 }

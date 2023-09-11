@@ -9,7 +9,7 @@ using osuTK.Graphics;
 namespace osu.XR.Graphics.Sceneries.Components;
 
 public partial class RaveCylinder : CompositeDrawable3D, ISceneryComponent {
-	LocalisableString ISceneryComponent.Name => @"Neon lights";
+	LocalisableString ISceneryComponent.Name => @"Neon Lights";
 
 	Bindable<float> velocity = new( 0 );
 	Container3D clockwise;

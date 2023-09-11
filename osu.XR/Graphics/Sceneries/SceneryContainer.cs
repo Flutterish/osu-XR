@@ -6,7 +6,7 @@ namespace osu.XR.Graphics.Sceneries;
 
 public partial class SceneryContainer : CompositeDrawable3D {
 	Bindable<SceneryType> type = new();
-	Scenery scenery = new();
+	public readonly Scenery Scenery = new();
 
 	[BackgroundDependencyLoader(permitNulls: true)]
 	private void load ( OsuXrConfigManager config ) {
@@ -18,16 +18,16 @@ public partial class SceneryContainer : CompositeDrawable3D {
 
 	protected override void LoadComplete () {
 		base.LoadComplete();
-		AddInternal( scenery );
+		AddInternal( Scenery );
 
 		type.BindValueChanged( v => {
-			while ( scenery.Components.Any() ) {
-				var last = scenery.Components[^1];
-				scenery.Components.RemoveAt( scenery.Components.Count - 1 );
+			while ( Scenery.Components.Any() ) {
+				var last = Scenery.Components[^1];
+				Scenery.Components.RemoveAt( Scenery.Components.Count - 1 );
 				last.Dispose(); // TODO option to not unload them
 			}
 
-			scenery.Components.AddRange( v.NewValue switch { 
+			Scenery.Components.AddRange( v.NewValue switch { 
 				SceneryType.Solid => GridScenery.CreateComponents(),
 				SceneryType.LightsOut => LightsOutScenery.CreateComponents(),
 				_ => Array.Empty<ISceneryComponent>()
