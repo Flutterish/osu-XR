@@ -20,10 +20,12 @@ public partial class FloorGrid : BasicModel, IConfigurableSceneryComponent {
 	public readonly BindableFloat SegmentWidthBindable = new( 0.01f ) { MinValue = 0.001f, MaxValue = 0.05f };
 	public readonly BindableFloat SegmentSpreadBindable = new( 1 ) { MinValue = 0.1f, MaxValue = 2 };
 	public readonly BindableFloat SegmentLengthBindable = new( 16.7f ) { MinValue = 5, MaxValue = 50 };
+	public readonly Bindable<Colour4> TintBindable = new( Colour4.White );
 
 	public FloorGrid () {
 		RenderStage = RenderingStage.Transparent;
 		(SegmentsCountBindable, SegmentWidthBindable, SegmentSpreadBindable, SegmentLengthBindable).BindValuesChanged( () => meshCache.Invalidate(), true );
+		TintBindable.BindValueChanged( v => Colour = v.NewValue, true );
 	}
 
 	protected override void Update () {
@@ -80,6 +82,10 @@ public partial class FloorGrid : BasicModel, IConfigurableSceneryComponent {
 
 public partial class FloorGridSettingsSection : SceneryComponentSettingsSection {
 	public FloorGridSettingsSection ( FloorGrid source ) : base( source ) {
+		Add( new SettingsColourPicker {
+			LabelText = @"Tint",
+			Current = source.TintBindable
+		} );
 		Add( new SettingsSlider<int> {
 			LabelText = @"Line count",
 			Current = source.SegmentsCountBindable

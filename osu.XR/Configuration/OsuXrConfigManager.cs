@@ -31,7 +31,6 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 		SetDefault( OsuXrSetting.HandSkeletonFingers, Fingers.Index );
 		SetDefault( OsuXrSetting.ShadowType, FeetSymbols.None );
 
-		SetDefault( OsuXrSetting.ShowDust, true );
 		SetDefault( OsuXrSetting.SceneryType, SceneryType.Solid );
 
 		SetDefault( OsuXrSetting.CameraMode, CameraMode.Disabled );

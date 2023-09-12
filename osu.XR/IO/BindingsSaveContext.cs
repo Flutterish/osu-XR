@@ -12,8 +12,13 @@ using System.Text.Json.Serialization;
 namespace osu.XR.IO;
 
 public class BindingsSaveContext {
-	public static readonly JsonSerializerOptions DefaultOptions = new() { IncludeFields = true };
+	public static readonly JsonSerializerOptions DefaultOptions;
 	static BindingsSaveContext () {
+		DefaultOptions = new JsonSerializerOptions {
+			IncludeFields = true,
+			WriteIndented = true,
+			DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+		};
 		DefaultOptions.Converters.Add( new JsonStringEnumConverter() );
 	}
 

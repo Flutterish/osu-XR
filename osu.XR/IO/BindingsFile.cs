@@ -3,7 +3,6 @@ using osu.Framework.Platform;
 using osu.XR.Input;
 using osu.XR.Input.Migration;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace osu.XR.IO;
 
@@ -45,14 +44,8 @@ public class BindingsFile : UniqueCompositeActionBinding<RulesetBindings, string
 
 	public void SaveToStorage ( Storage storage, string filename, BindingsSaveContext ctx ) {
 		try {
-			var opts = new JsonSerializerOptions {
-				IncludeFields = true,
-				WriteIndented = true,
-				DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-			};
-			opts.Converters.Add( new JsonStringEnumConverter() );
 			using var stream = storage.CreateFileSafely( filename );
-			JsonSerializer.Serialize( stream, GetSaveData( ctx ), opts );
+			JsonSerializer.Serialize( stream, GetSaveData( ctx ), BindingsSaveContext.DefaultOptions );
 		}
 		catch ( Exception e ) {
 			ctx.Error( @"Failed to save bindings", filename, e );

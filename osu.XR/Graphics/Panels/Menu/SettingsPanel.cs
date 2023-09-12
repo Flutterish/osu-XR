@@ -1,13 +1,17 @@
-﻿using osu.Game.Graphics.Cursor;
+﻿using osu.Framework.Graphics.Cursor;
+using osu.Game.Graphics.Cursor;
 using osu.XR.Allocation;
 namespace osu.XR.Graphics.Panels.Menu;
 
 public abstract partial class SettingsPanel : MenuPanel {
 	public SettingsPanel () {
 		ContentSize = new Vector2( Game.Overlays.SettingsPanel.PANEL_WIDTH, Game.Overlays.SettingsPanel.PANEL_WIDTH / ASPECT_RATIO );
-		Content.Add( new OsuTooltipContainer(null) {
+		Content.Add( new OsuTooltipContainer(null!) {
 			RelativeSizeAxes = Axes.Both,
-			Child = CreateSectionsContainer()
+			Child = new PopoverContainer {
+				RelativeSizeAxes = Axes.Both,
+				Child = CreateSectionsContainer()
+			}
 		} );
 	}
 

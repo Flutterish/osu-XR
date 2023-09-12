@@ -16,5 +16,9 @@ public partial class MetersSliderBar : RoundedSliderBar<float> {
 }
 
 public partial class PercentSliderBar : RoundedSliderBar<float> {
-	public override LocalisableString TooltipText => Localisation.UnitsStrings.Percent(Current.Value);
+	public override LocalisableString TooltipText => Localisation.UnitsStrings.Percent( Current.Value );
+}
+
+public partial class MsSliderBar : RoundedSliderBar<float> {
+	public override LocalisableString TooltipText => $@"{Current.Value}ms";
 }

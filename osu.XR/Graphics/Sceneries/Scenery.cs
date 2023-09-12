@@ -27,8 +27,6 @@ public partial class Scenery : CompositeDrawable3D {
 				}
 			}
 		} );
-
-		AddComponent( new DustEmitter() );
 	}
 
 	public readonly BindableList<ISceneryComponent> Components = new();

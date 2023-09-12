@@ -3,13 +3,15 @@ using osu.Framework.Utils;
 using osu.Framework.XR;
 using osu.Framework.XR.Graphics;
 using osu.Framework.XR.Graphics.Containers;
+using osu.XR.Graphics.Settings;
 using osu.XR.Timing;
 using osuTK.Graphics;
 
 namespace osu.XR.Graphics.Sceneries.Components;
 
-public partial class RaveCylinder : CompositeDrawable3D, ISceneryComponent {
+public partial class RaveCylinder : CompositeDrawable3D, IConfigurableSceneryComponent {
 	LocalisableString ISceneryComponent.Name => @"Neon Lights";
+	public SceneryComponentSettingsSection CreateSettings () => new RaveCylinderSettingsSection( this );
 
 	Bindable<float> velocity = new( 0 );
 	Container3D clockwise;
@@ -19,6 +21,8 @@ public partial class RaveCylinder : CompositeDrawable3D, ISceneryComponent {
 		AddInternal( clockwise = new Container3D() );
 		AddInternal( counterClockwise = new Container3D() );
 	}
+
+	public readonly Bindable<string> Seed = new( "" );
 
 	protected override void LoadComplete () {
 		base.LoadComplete();
@@ -40,7 +44,7 @@ public partial class RaveCylinder : CompositeDrawable3D, ISceneryComponent {
 		tints.Clear();
 		bool clockwise = true;
 
-		Random random = new Random();
+		Random random = new( string.IsNullOrWhiteSpace( Seed.Value ) ? 0 : Seed.Value.GetHashCode() );
 		var radius = 10f;
 		for ( float y = 0; y < 4; y += random.NextSingle( 0.1f, 0.3f ) ) {
 			var height = random.NextSingle( 0.3f, 0.6f );
@@ -97,6 +101,15 @@ public partial class RaveCylinder : CompositeDrawable3D, ISceneryComponent {
 	[BackgroundDependencyLoader]
 	void load ( BeatSyncSource beat ) {
 		bindableBeat.BindTo( beat.BindableBeat );
-		recalculateChildren();
+		Seed.BindValueChanged( _ => recalculateChildren(), true );
+	}
+}
+
+public partial class RaveCylinderSettingsSection : SceneryComponentSettingsSection {
+	public RaveCylinderSettingsSection ( RaveCylinder source ) : base( source ) {
+		Add( new SettingsCommitTextBox {
+			LabelText = @"Seed",
+			Current = source.Seed
+		} );
 	}
 }

@@ -20,7 +20,6 @@ public enum OsuXrSetting {
 	DisableTeleport,
 	ShadowType,
 
-	ShowDust,
 	SceneryType,
 
 	CameraMode,

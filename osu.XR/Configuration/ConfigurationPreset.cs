@@ -65,12 +65,12 @@ public class ConfigurationPreset<Tlookup> : InMemoryConfigManager<Tlookup> where
 	
 	struct SaveData {
 		public string Name;
-		public Dictionary<Tlookup, object> Values;
+		public Dictionary<string, object> Values;
 	}
 	public string Stringify () {
 		return JsonSerializer.Serialize( new SaveData {
 			Name = Name,
-			Values = Keys.ToDictionary( k => k, k => getters[k]() )
+			Values = Keys.ToDictionary( k => k.ToString(), k => getters[k]() )
 		}, new JsonSerializerOptions { IncludeFields = true, WriteIndented = true } );
 	}
 
@@ -79,9 +79,12 @@ public class ConfigurationPreset<Tlookup> : InMemoryConfigManager<Tlookup> where
 		Name = save.Name;
 		Keys.Clear();
 		foreach ( var (k, v) in save.Values ) {
+			if ( !Enum.TryParse<Tlookup>( k, out var key ) )
+				continue;
+
 			var value = (JsonElement)v;
-			setters[k]( value.ToString() );
-			Keys.Add( k );
+			setters[key]( value.ToString() );
+			Keys.Add( key );
 		}
 	}
 

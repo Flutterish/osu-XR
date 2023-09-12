@@ -4,6 +4,7 @@ namespace osu.XR.Graphics.Sceneries;
 
 public static class LightsOutScenery {
 	public static IEnumerable<ISceneryComponent> CreateComponents () => new ISceneryComponent[] {
-		new RaveCylinder()
+		new RaveCylinder(),
+		new DustEmitter()
 	};
 }
