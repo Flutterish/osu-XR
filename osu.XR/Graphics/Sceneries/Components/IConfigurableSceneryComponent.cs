@@ -11,6 +11,10 @@ public interface IConfigurableSceneryComponent : ISceneryComponent {
 public partial class SceneryComponentSettingsSection : SettingsSection {
 	public SceneryComponentSettingsSection ( ISceneryComponent source ) {
 		Header = source.Name;
+		OnLoadComplete += _ => Add( new DangerousSettingsButton {
+			Text = @"Remove",
+			Action = () => RemoveRequested?.Invoke()
+		} );
 	}
 
 	public override Drawable CreateIcon () => new SpriteIcon {
@@ -18,4 +22,5 @@ public partial class SceneryComponentSettingsSection : SettingsSection {
 	};
 
 	public override LocalisableString Header { get; }
+	public event Action? RemoveRequested;
 }

@@ -1,4 +1,5 @@
-﻿using osu.Framework.Graphics.Sprites;
+﻿using osu.Framework.Extensions;
+using osu.Framework.Graphics.Sprites;
 using osu.Framework.Localisation;
 using osu.Game.Overlays.Settings;
 using osu.XR.Configuration;
@@ -37,11 +38,8 @@ public partial class SceneManagementPanel : SettingsPanel {
 						componentSettings.Add( i, section );
 						SectionsContainer.Add( section );
 
-						section.OnLoadComplete += s => {
-							section.Add( new DangerousSettingsButton {
-								Text = "Remove",
-								Action = () => { }
-							} );
+						section.RemoveRequested += () => {
+							sceneryContainer.Scenery.Components.Remove( i );
 						};
 					}
 				}
@@ -57,19 +55,31 @@ public partial class SceneManagementPanel : SettingsPanel {
 		}
 
 		partial class PresetsSection : SettingsSection {
+			public override LocalisableString Header => @"Presets";
 			public override Drawable CreateIcon () => new SpriteIcon {
-				Icon = FontAwesome.Solid.Image
+				Icon = FontAwesome.Solid.BoxOpen
 			};
 
 			[BackgroundDependencyLoader]
-			private void load ( OsuXrConfigManager config ) {
-				Add( new SettingsEnumDropdown<SceneryType> { 
-					Current = config.GetBindable<SceneryType>( OsuXrSetting.SceneryType ), 
-					LabelText = Localisation.SceneryStrings.Type 
-				} );
+			private void load () {
+				Add( new LoadSection() );
 			}
+		}
 
-			public override LocalisableString Header => string.Empty;
+		partial class LoadSection : SettingsSubsection {
+			protected override LocalisableString Header => @"Load";
+
+			[BackgroundDependencyLoader]
+			private void load ( SceneryContainer? scenery ) {
+				foreach ( var i in Enum.GetValues<SceneryType>() ) {
+					Add( new SettingsButton {
+						Text = i.GetLocalisableDescription(),
+						Action = () => {
+							scenery?.LoadPreset( i );
+						}
+					} );
+				}
+			}
 		}
 	}
 }
