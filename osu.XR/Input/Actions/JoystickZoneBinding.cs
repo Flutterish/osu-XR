@@ -79,7 +79,6 @@ public class JoystickZoneBinding : ActionBinding, IJoystickBinding {
 
 	[FormatVersion( "Range" )]
 	public struct SaveData {
-		public string FormatVersion;
 		public int Count;
 		public double Offset;
 		public double Arc;
@@ -87,7 +86,6 @@ public class JoystickZoneBinding : ActionBinding, IJoystickBinding {
 		public ActionData?[] Actions;
 
 		public static implicit operator SaveData ( SaveDataSingle single ) => new() {
-			FormatVersion = "Range",
 			Count = 1,
 			Offset = single.StartAngle,
 			Arc = single.Arc,
