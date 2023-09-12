@@ -118,11 +118,6 @@ public partial class OsuXrGameBase : Framework.Game {
 			return base.OnExiting();
 		
 		if ( !Bindings.IsDefault ) {
-			if ( storage.Exists( "Bindings.json~" ) )
-				storage.Delete( "Bindings.json~" );
-			if ( storage.Exists( "Bindings.json" ) )
-				storage.Move( "Bindings.json", "Bindings.json~" );
-
 			Bindings.Value.SaveToStorage( storage, "Bindings.json", new() );
 		}
 

@@ -10,6 +10,7 @@ public class ConfigurationPreset<Tlookup> : InMemoryConfigManager<Tlookup> where
 		set {
 			NameBindable.Default = value;
 			NameBindable.Value = value;
+			HasChanged = true;
 		}
 	}
 
@@ -18,6 +19,7 @@ public class ConfigurationPreset<Tlookup> : InMemoryConfigManager<Tlookup> where
 		set => SetDefault( lookup, value );
 	}
 
+	public bool HasChanged = true;
 	Dictionary<Tlookup, Action<string>> setters = new();
 	Dictionary<Tlookup, Func<object>> getters = new();
 	Dictionary<Tlookup, Action> saveDefaults = new();
@@ -32,7 +34,10 @@ public class ConfigurationPreset<Tlookup> : InMemoryConfigManager<Tlookup> where
 		copy[lookup] = clone => clone[lookup] = Get<TBindable>( lookup );
 		Keys.Add( lookup );
 
-		bindable.BindValueChanged( v => SettingChanged?.Invoke( lookup, v.NewValue ) );
+		bindable.BindValueChanged( v => {
+			HasChanged = true;
+			SettingChanged?.Invoke( lookup, v.NewValue );
+		}, true );
 	}
 
 	public void Remove ( Tlookup lookup ) {

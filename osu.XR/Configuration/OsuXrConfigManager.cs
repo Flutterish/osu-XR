@@ -2,6 +2,7 @@
 using osu.Framework.Platform;
 using osu.Game.Configuration;
 using osu.XR.Graphics.Settings;
+using osu.XR.IO;
 using System.Globalization;
 
 namespace osu.XR.Configuration;
@@ -62,28 +63,22 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 	ConfigurationPreset<OsuXrSetting> load ( Storage storage, string file ) {
 		var preset = CreateFullSavePreset();
 
-		using ( var stream = storage.GetStream( file, FileAccess.Read, FileMode.Open ) ) {
-			using var reader = new StreamReader( stream );
-			preset.Parse( reader.ReadToEnd() );
+		if ( storage.ReadWithBackup( file ) is Stream stream ) {
+			using ( stream ) {
+				using var reader = new StreamReader( stream );
+				preset.Parse( reader.ReadToEnd() );
+			}
 		}
 
 		return preset;
 	}
 
 	protected override bool PerformSave () {
-		if ( Storage.Exists( "XrSettings.json" + "~" ) )
-			Storage.Delete( "XrSettings.json" + "~" );
 		write( Storage, "XrSettings.json", CreateFullSavePreset().Stringify() );
 
 		var presetStorage = Storage.GetStorageForDirectory( "Presets" );
-		foreach ( var i in presetStorage.GetFiles( "." ) ) {
-			if ( i.EndsWith( "~" ) )
-				presetStorage.Delete( i );
-		}
 
-		foreach ( var i in presetStorage.GetFiles( "." ) ) {
-			presetStorage.Move( i, i + "~" );
-		}
+		HashSet<string> saved = new();
 
 		int j = 1;
 		foreach ( var i in Presets ) {
@@ -92,15 +87,24 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 				name = name.Replace( c, '~' );
 			}
 
+			saved.Add( name );
+			saved.Add( name + "~" );
 			write( presetStorage, name, i.Stringify() );
 			j++;
+		}
+
+		foreach ( var i in presetStorage.GetFiles( "." ) ) {
+			if ( saved.Contains( i ) )
+				continue;
+
+			presetStorage.Delete( i );
 		}
 
 		return true;
 	}
 
 	void write ( Storage storage, string path, string data ) {
-		using ( var stream = storage.GetStream( path, FileAccess.Write, FileMode.Create ) ) {
+		using ( var stream = storage.WriteWithBackup( path ) ) {
 			using var writer = new StreamWriter( stream );
 			writer.Write( data );
 		}

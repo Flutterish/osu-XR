@@ -28,13 +28,14 @@ public class BindingsFile : UniqueCompositeActionBinding<RulesetBindings, string
 	} );
 
 	public static BindingsFile LoadFromStorage ( Storage storage, string filename, BindingsSaveContext ctx ) {
-		if ( !storage.Exists( filename ) )
+		if ( storage.ReadWithBackup( filename ) is not Stream stream )
 			return new();
-
+		
 		try {
-			using var stream = storage.GetStream( filename, FileAccess.Read, FileMode.Open );
-			var data = JsonSerializer.Deserialize<JsonElement>( stream );
-			return Load( data, ctx ) ?? new();
+			using ( stream ) {
+				var data = JsonSerializer.Deserialize<JsonElement>( stream );
+				return Load( data, ctx ) ?? new();
+			}
 		}
 		catch ( Exception e ) {
 			ctx.Error( @"Failed to load bindings", filename, e );
@@ -44,7 +45,7 @@ public class BindingsFile : UniqueCompositeActionBinding<RulesetBindings, string
 
 	public void SaveToStorage ( Storage storage, string filename, BindingsSaveContext ctx ) {
 		try {
-			using var stream = storage.CreateFileSafely( filename );
+			using var stream = storage.WriteWithBackup( filename );
 			JsonSerializer.Serialize( stream, GetSaveData( ctx ), BindingsSaveContext.DefaultOptions );
 		}
 		catch ( Exception e ) {
