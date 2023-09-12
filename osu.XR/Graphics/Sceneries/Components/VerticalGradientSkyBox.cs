@@ -48,6 +48,10 @@ public partial class VerticalGradientSkyBox : BasicModel, IConfigurableSceneryCo
 		OpacityBindable.BindValueChanged( v => Alpha = v.NewValue, true );
 	}
 
+	protected override Material CreateDefaultMaterial ( MaterialStore materials ) {
+		return materials.GetNew( Materials.MaterialNames.Transparent );
+	}
+
 	[BackgroundDependencyLoader]
 	private void load ( IRenderer renderer ) {
 		Material.Set( "useGamma", false );

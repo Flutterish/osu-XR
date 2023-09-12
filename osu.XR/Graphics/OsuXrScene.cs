@@ -101,6 +101,7 @@ public partial class OsuXrScene : Scene {
 
 		protected override void Draw ( IRenderer renderer, int subtreeIndex, Matrix4 projectionMatrix, ulong mask ) {
 			if ( TryGetRenderStage( RenderingStage.Skybox, out var drawables ) ) {
+				MaterialStore.SetGlobalProperty( "solidPass", false );
 				renderer.PushDepthInfo( new( depthTest: false, writeDepth: false ) );
 				foreach ( var i in drawables ) {
 					if ( (i.RenderLayer & mask) != 0 )
