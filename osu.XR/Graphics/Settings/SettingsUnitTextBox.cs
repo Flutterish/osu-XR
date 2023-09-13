@@ -41,7 +41,11 @@ public abstract partial class SettingsUnitTextBox : SettingsItem<double> {
 	void onTextBoxCommit ( TextBox _sender, bool newText ) {
 		var sender = (OutlinedUnitTextBox)_sender;
 
-		if ( TryParse( sender.Text, out var value ) ) {
+		if ( string.IsNullOrWhiteSpace( sender.Text ) ) {
+			Current.Value = 0;
+			Current.TriggerChange();
+		}
+		else if ( TryParse( sender.Text, out var value ) ) {
 			Current.Value = value;
 			Current.TriggerChange();
 		}
