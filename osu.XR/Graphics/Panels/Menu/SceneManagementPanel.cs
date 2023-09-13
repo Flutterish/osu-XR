@@ -12,6 +12,7 @@ public partial class SceneManagementPanel : SettingsPanel {
 	protected override Sections CreateSectionsContainer ()
 		=> new( showSidebar: false );
 
+	[Cached]
 	public partial class Sections : SectionsContainer {
 		public Sections ( bool showSidebar ) : base( showSidebar ) { }
 
@@ -70,12 +71,13 @@ public partial class SceneManagementPanel : SettingsPanel {
 			protected override LocalisableString Header => @"Load";
 
 			[BackgroundDependencyLoader]
-			private void load ( SceneryContainer? scenery ) {
+			private void load ( SceneryContainer? scenery, Sections sections ) {
 				foreach ( var i in Enum.GetValues<SceneryType>() ) {
 					Add( new SettingsButton {
 						Text = i.GetLocalisableDescription(),
 						Action = () => {
 							scenery?.LoadPreset( i );
+							sections.SectionsContainer.ScrollTo( this );
 						}
 					} );
 				}
