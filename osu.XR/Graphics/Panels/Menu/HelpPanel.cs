@@ -44,10 +44,7 @@ public partial class HelpPanel : SettingsPanel {
 			" );
 
 			yield return new HelpEntry( @"Strumming", @"
-				There is an option to enable ""strumming"" in touch mode. This will make it so:
-				* Tapping works as usual.
-				* When you press a button, it will quickly release and tap again as usual.
-				* When you release that button, it will quickly release and tap. Without this option, releasing a button does nothing.
+				There is an option to enable ""strumming"" in touch mode. This will make it so releasing a button will trigger an extra tap.
 
 				This is intended to help with fast streams of circles, and should be an intuitive option for guitar hero players.
 			" );
