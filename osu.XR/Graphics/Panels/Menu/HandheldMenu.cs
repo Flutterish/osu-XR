@@ -19,11 +19,11 @@ public partial class HandheldMenu : CompositeDrawable3D {
 		AddInternal( Panels = new PopoutPanelStack<MenuPanel> {
 			Children = new MenuPanel[] {
 				Settings = new VrSettingsPanel(),
-				Notifications = new VrNotificationsPanel(),
-				Scenery = new SceneManagementPanel(),
 				Bindings = new BindingsPanel(),
-				Changelog = new ChangelogPanel(),
-				Help = new HelpPanel()
+				Scenery = new SceneManagementPanel(),
+				Notifications = new VrNotificationsPanel(),
+				Help = new HelpPanel(),
+				Changelog = new ChangelogPanel()
 			}
 		} );
 		AddInternal( Sidebar = new SidebarMenuPanel() { X = MenuPanel.PANEL_WIDTH / 2 + 0.01f, EulerY = 0.5f } );
@@ -34,11 +34,11 @@ public partial class HandheldMenu : CompositeDrawable3D {
 		presets.EulerY = -0.5f;
 
 		Sidebar.AddButton( FontAwesome.Solid.Cog, Localisation.MenuStrings.Settings, () => Panels.FocusPanel( Settings ) );
-		Sidebar.AddButton( FontAwesome.Solid.ExclamationCircle, Localisation.MenuStrings.Notifications, () => Panels.FocusPanel( Notifications ) );
-		Sidebar.AddButton( FontAwesome.Solid.Image, Localisation.MenuStrings.Scenery, () => Panels.FocusPanel( Scenery ) );
 		Sidebar.AddButton( FontAwesome.Solid.Gamepad, Localisation.MenuStrings.Ruleset, () => Panels.FocusPanel( Bindings ) );
-		Sidebar.AddButton( FontAwesome.Solid.Clipboard, @"Changelog", () => Panels.FocusPanel( Changelog ) );
+		Sidebar.AddButton( FontAwesome.Solid.Image, Localisation.MenuStrings.Scenery, () => Panels.FocusPanel( Scenery ) );
+		Sidebar.AddButton( FontAwesome.Solid.ExclamationCircle, Localisation.MenuStrings.Notifications, () => Panels.FocusPanel( Notifications ) );
 		Sidebar.AddButton( FontAwesome.Solid.QuestionCircle, @"Help", () => Panels.FocusPanel( Help ) );
+		Sidebar.AddButton( FontAwesome.Solid.Clipboard, @"Changelog", () => Panels.FocusPanel( Changelog ) );
 
 		VisibilityChanged += onVisibilityChanged;
 		Panels.FocusPanel( Notifications );
