@@ -68,9 +68,10 @@ public partial class HelpPanel : SettingsPanel {
 				* * You can map a button on your controller to a ruleset action.
 				* Joystick bindings:  
 				* * You can map a zone of the joystick range to a ruleset action.
-				* * You can map the joystick position to the cursor movement. This will however disable regular cursor movement and block the ability to click normally.
+				* * You can map the joystick position to the cursor movement.
 				* Gesture bindinbgs:
 				* * You can map a ""clap"" gesture to a ruleset action. The gesture is detected based on distance between controllers.
+				* * You can map your whole arm/controller to the joystick position.
 			" );
 
 			yield return new HelpEntry( @"Setting Presets", @$"
