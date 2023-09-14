@@ -2,6 +2,7 @@
 using osu.Framework.Localisation;
 using osu.Game.Overlays.Settings;
 using osu.XR.Configuration;
+using osu.XR.Configuration.Presets;
 using osu.XR.Graphics.Panels.Menu;
 
 namespace osu.XR.Graphics.Settings;
@@ -61,7 +62,7 @@ public partial class PresetPreview : SettingsPanel.SectionsContainer {
 
 				Add( new SettingsTextBox {
 					LabelText = Localisation.Config.Presets.PreviewStrings.PresetName,
-					Current = preset.NameBindable
+					Current = preset.Name
 				} );
 				Add( new SettingsButton {
 					Text = Localisation.Config.Presets.PreviewStrings.ToggleItems,
@@ -77,7 +78,7 @@ public partial class PresetPreview : SettingsPanel.SectionsContainer {
 					Text = Localisation.Config.Presets.PreviewStrings.Clone,
 					Action = () => {
 						var clone = preset.Clone();
-						clone.Name = $@"{preset.Name} (Copy)"; // TODO this from localisable string
+						clone.Name.Value = $@"{preset.Name.Value} (Copy)"; // TODO this from localisable string
 						presetContainer.Presets.Add( clone );
 						presetContainer.IsEditingBindable.Value = false;
 						presetContainer.SelectedPresetBindable.Value = clone;

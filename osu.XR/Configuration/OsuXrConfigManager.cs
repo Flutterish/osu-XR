@@ -1,13 +1,13 @@
 ﻿using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Platform;
 using osu.Game.Configuration;
+using osu.XR.Configuration.Presets;
 using osu.XR.Graphics.Settings;
 using osu.XR.IO;
-using System.Globalization;
 
 namespace osu.XR.Configuration;
 
-public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
+public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting>, ITypedSettingSource<OsuXrSetting> {
 	Storage Storage;
 	public OsuXrConfigManager ( Storage storage ) {
 		Storage = storage;
@@ -43,9 +43,9 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 		}
 
 		if ( !Storage.ExistsDirectory( "Presets" ) ) {
-			Presets.Add( DefaultPreset );
-			Presets.Add( PresetTouchscreenBig );
-			Presets.Add( PresetTouchscreenSmall );
+			Presets.Add( new( this, DefaultPreset ) );
+			Presets.Add( new( this, PresetTouchscreenBig ) );
+			Presets.Add( new( this, PresetTouchscreenSmall ) );
 			return;
 		}
 
@@ -59,20 +59,17 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 	}
 
 	ConfigurationPreset<OsuXrSetting> load ( Storage storage, string file ) {
-		var preset = CreateFullSavePreset();
-
 		if ( storage.ReadWithBackup( file ) is Stream stream ) {
 			using ( stream ) {
-				using var reader = new StreamReader( stream );
-				preset.Parse( reader.ReadToEnd() );
+				return ConfigurationPreset<OsuXrSetting>.Deserialize( stream, this );
 			}
 		}
 
-		return preset;
+		return new();
 	}
 
 	protected override bool PerformSave () {
-		write( Storage, "XrSettings.json", CreateFullSavePreset().Stringify() );
+		write( Storage, "XrSettings.json", CreateFullSavePreset() );
 
 		var presetStorage = Storage.GetStorageForDirectory( "Presets" );
 
@@ -87,7 +84,7 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 
 			saved.Add( name );
 			saved.Add( name + "~" );
-			write( presetStorage, name, i.Stringify() );
+			write( presetStorage, name, i );
 			j++;
 		}
 
@@ -101,20 +98,9 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 		return true;
 	}
 
-	void write ( Storage storage, string path, string data ) {
-		using ( var stream = storage.WriteWithBackup( path ) ) {
-			using var writer = new StreamWriter( stream );
-			writer.Write( data );
-		}
-	}
-
-	Dictionary<OsuXrSetting, Func<object>> getters = new();
-	Dictionary<OsuXrSetting, Action<string>> setters = new();
-
-	protected override void AddBindable<TBindable> ( OsuXrSetting lookup, Bindable<TBindable> bindable ) {
-		getters.Add( lookup, () => bindable.Value );
-		setters.Add( lookup, s => bindable.Parse(s) );
-		base.AddBindable( lookup, bindable );
+	void write ( Storage storage, string path, ConfigurationPreset<OsuXrSetting> preset ) {
+		using var stream = storage.WriteWithBackup( path );
+		preset.Serialize( stream );
 	}
 
 	public readonly BindableList<ConfigurationPreset<OsuXrSetting>> Presets = new();
@@ -136,37 +122,33 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 		}
 	}
 
-	private void onPreviewSettingChanged ( OsuXrSetting lookup, object value ) {
-		if ( setters.TryGetValue( lookup, out var set ) ) {
-			set( value.ToString()! );
-		}
+	private void onPreviewSettingChanged ( OsuXrSetting lookup, ITypedSetting setting ) {
+		setting.CopyTo( typedSettings[lookup] );
 	}
 
 	public ConfigurationPreset<OsuXrSetting> CreateFullSavePreset () {
 		var preset = new ConfigurationPreset<OsuXrSetting>();
-		foreach ( var (key, get) in getters ) {
-			preset[key] = get();
+		foreach ( var (key, setting) in TypedSettings ) {
+			setting.CopyTo( preset, key );
 		}
 		return preset;
 	}
 
 	public ConfigurationPreset<OsuXrSetting> CreateFullPreset () {
 		var preset = new ConfigurationPreset<OsuXrSetting>();
-		foreach ( var (key, get) in getters.Where( x => x.Key is not OsuXrSetting.CameraMode or OsuXrSetting.ShowInputDisplay ) ) { // TODO this should depend on which elements have a "preset component" in settings
-			preset[key] = get();
+		foreach ( var (key, setting) in TypedSettings.Where( x => x.Key is not OsuXrSetting.CameraMode or OsuXrSetting.ShowInputDisplay ) ) {
+			setting.CopyTo( preset, key );
 		}
 		return preset;
 	}
 
 	public void LoadPreset ( ConfigurationPreset<OsuXrSetting> preset ) {
-		foreach ( var (lookup, value) in preset.ConfigStore ) {
-			if ( preset.Keys.Contains(lookup) && setters.TryGetValue( lookup, out var set ) ) {
-				set( value.ToString(null, CultureInfo.InvariantCulture)! );
-			}
+		foreach ( var (key, setting) in preset.TypedSettings ) {
+			setting.CopyTo( this, key );
 		}
 	}
 
-	public readonly ConfigurationPreset<OsuXrSetting> DefaultPreset = new() {
+	public static readonly ConfigurationPresetLiteral<OsuXrSetting> DefaultPreset = new() {
 		Name = @"Default",
 		[OsuXrSetting.InputMode] = InputMode.SinglePointer,
 		[OsuXrSetting.TouchPointers] = false,
@@ -177,7 +159,7 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 		[OsuXrSetting.ScreenResolutionY] = 1080
 	};
 
-	public readonly ConfigurationPreset<OsuXrSetting> PresetTouchscreenBig = new() {
+	public static readonly ConfigurationPresetLiteral<OsuXrSetting> PresetTouchscreenBig = new() {
 		Name = @"Touchscreen Big",
 		[OsuXrSetting.InputMode] = InputMode.TouchScreen,
 		[OsuXrSetting.ScreenArc] = 1.2f,
@@ -187,7 +169,7 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 		[OsuXrSetting.ScreenResolutionY] = 2552 / 2
 	};
 
-	public readonly ConfigurationPreset<OsuXrSetting> PresetTouchscreenSmall = new() {
+	public static readonly ConfigurationPresetLiteral<OsuXrSetting> PresetTouchscreenSmall = new() {
 		Name = @"Touchscreen Small",
 		[OsuXrSetting.InputMode] = InputMode.TouchScreen,
 		[OsuXrSetting.ScreenArc] = 1.2f,
@@ -196,10 +178,23 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting> {
 		[OsuXrSetting.ScreenResolutionX] = 3840 / 2,
 		[OsuXrSetting.ScreenResolutionY] = 2552 / 2
 	};
+
+	public IReadOnlyDictionary<OsuXrSetting, ITypedSetting> TypedSettings => typedSettings;
+	Dictionary<OsuXrSetting, ITypedSetting> typedSettings = new();
+	protected override void AddBindable<TBindable> ( OsuXrSetting lookup, Bindable<TBindable> bindable ) {
+		typedSettings.Add( lookup, new TypedSetting<TBindable>( bindable ) );
+		base.AddBindable( lookup, bindable );
+	}
+	public void AddTypedSetting<TValue> ( OsuXrSetting key, TValue value ) {
+		throw new InvalidOperationException();
+	}
+	public void RemoveTypedSetting ( OsuXrSetting key ) {
+		throw new InvalidOperationException();
+	}
 }
 
 public static class PresetExtensions {
-	public static SettingPresetComponent<OsuXrSetting, Tvalue> PresetComponent<Tvalue> ( this IHasCurrentValue<Tvalue> self, OsuXrConfigManager config, OsuXrSetting lookup ) {
+	public static SettingPresetComponent<OsuXrSetting, TValue> PresetComponent<TValue> ( this IHasCurrentValue<TValue> self, OsuXrConfigManager config, OsuXrSetting lookup ) {
 		return new( lookup, self, config );
 	}
 }

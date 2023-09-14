@@ -30,6 +30,10 @@ public partial class SettingsFlagEnumCheckbox<T> : SettingsItem<T> where T : str
 					LabelText = flag.GetLocalisableDescription()
 				};
 
+				Current.BindDisabledChanged( v => {
+					control.Current.Disabled = v;
+				}, true );
+
 				control.Current.BindValueChanged( v => {
 					if ( v.NewValue ) {
 						Current.Value = (T)Enum.ToObject( typeof(T), current.Value.ToUInt64(null) | flag.ToUInt64(null));

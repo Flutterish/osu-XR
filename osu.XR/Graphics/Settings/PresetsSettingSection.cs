@@ -3,6 +3,7 @@ using osu.Framework.Localisation;
 using osu.Framework.XR;
 using osu.Game.Overlays.Settings;
 using osu.XR.Configuration;
+using osu.XR.Configuration.Presets;
 
 namespace osu.XR.Graphics.Settings;
 
@@ -67,7 +68,7 @@ public partial class PresetsSettingSection : SettingsSection {
 				AutoSizeAxes = Axes.Y,
 				Children = new[] {
 					main = new SettingsButton {
-						Text = preset.Name,
+						Text = preset.Name.Value,
 						RelativeSizeAxes = Axes.None,
 						Padding = default,
 						Action = () => {
@@ -94,7 +95,7 @@ public partial class PresetsSettingSection : SettingsSection {
 			buttonsContainer.PresetBindable.BindTo( presetContainer.SelectedPresetBindable );
 			(buttonsContainer.PresetBindable, buttonsContainer.IsEditingBindable).BindValuesChanged( (p, e) => main.Enabled.Value = (p is null && !e) || p == preset, true );
 			buttonsContainer.NameBindable.BindValueChanged( v => main.Text = v.NewValue );
-			buttonsContainer.NameBindable.BindTo( preset.NameBindable );
+			buttonsContainer.NameBindable.BindTo( preset.Name );
 
 			edit.Add( new SpriteIcon {
 				RelativeSizeAxes = Axes.Both,
@@ -135,7 +136,7 @@ public partial class PresetsSettingSection : SettingsSection {
 				TooltipText = Localisation.Config.Presets.ManageStrings.NewTooltip,
 				Action = () => {
 					var preset = config.CreateFullPreset();
-					preset.Name = @"New Preset"; // TODO this from localisation
+					preset.Name.Value = @"New Preset"; // TODO this from localisation
 					presetContainer.Presets.Add( preset );
 					presetContainer.IsEditingBindable.Value = false;
 					presetContainer.SelectedPresetBindable.Value = preset;

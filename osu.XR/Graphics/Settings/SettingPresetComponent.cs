@@ -6,7 +6,7 @@ using osu.Framework.Input.Events;
 using osu.Framework.XR;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays;
-using osu.XR.Configuration;
+using osu.XR.Configuration.Presets;
 
 namespace osu.XR.Graphics.Settings;
 

@@ -1,4 +1,5 @@
 ﻿using osu.XR.Configuration;
+using osu.XR.Configuration.Presets;
 
 namespace osu.XR.Graphics.Settings;
 
@@ -17,12 +18,12 @@ public class SettingPresetContainer<Tlookup> where Tlookup : struct, Enum {
 
 	public void Set<Tvalue> ( ISettingPresetComponent<Tlookup> component, Tvalue value ) {
 		if ( SelectedPresetBindable.Value is ConfigurationPreset<Tlookup> preset )
-			preset[component.Lookup] = value;
+			preset.SetValue( component.Lookup, value );
 	}
 
 	public void Remove ( ISettingPresetComponent<Tlookup> component ) {
 		if ( SelectedPresetBindable.Value is ConfigurationPreset<Tlookup> preset )
-			preset.Remove( component.Lookup );
+			preset.RemoveTypedSetting( component.Lookup );
 	}
 
 	public bool IsInPreset ( ISettingPresetComponent<Tlookup> component )
