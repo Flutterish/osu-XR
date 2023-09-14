@@ -14,12 +14,12 @@ public interface ISettingPresetComponent<Tlookup> {
 	Tlookup Lookup { get; }
 }
 
-public partial class SettingPresetComponent<Tlookup, Tvalue> : CompositeDrawable, ISettingPresetComponent<Tlookup> where Tlookup : struct, Enum {
+public partial class SettingPresetComponent_old<Tlookup, Tvalue> : CompositeDrawable, ISettingPresetComponent<Tlookup> where Tlookup : struct, Enum {
 	[Resolved]
 	OverlayColourProvider colours { get; set; } = null!;
 
 	[Resolved]
-	SettingPresetContainer<Tlookup> presetContainer { get; set; } = null!;
+	ConfigurationPresetSource<Tlookup> presetContainer { get; set; } = null!;
 	public readonly IHasCurrentValue<Tvalue> Source;
 	Drawable sourceDrawable;
 	public Tlookup Lookup { get; }
@@ -32,7 +32,7 @@ public partial class SettingPresetComponent<Tlookup, Tvalue> : CompositeDrawable
 	ConfigManager<Tlookup> config;
 	readonly BindableWithCurrent<Tvalue> current = new();
 
-	public SettingPresetComponent ( Tlookup lookup, IHasCurrentValue<Tvalue> source, ConfigManager<Tlookup> config ) {
+	public SettingPresetComponent_old ( Tlookup lookup, IHasCurrentValue<Tvalue> source, ConfigManager<Tlookup> config ) {
 		this.config = config;
 		Source = source;
 		Lookup = lookup;
@@ -149,9 +149,9 @@ public partial class SettingPresetComponent<Tlookup, Tvalue> : CompositeDrawable
 			}
 		}, true );
 
-		isEditingBindable.BindTo( presetContainer.IsEditingBindable );
-		isPreviewBindable.BindTo( presetContainer.IsPreviewBindable );
-		selectedPresetBindable.BindTo( presetContainer.SelectedPresetBindable );
+		isEditingBindable.BindTo( presetContainer.IsSlideoutEnabled );
+		isPreviewBindable.BindTo( presetContainer.ShowOnlyPresetItems );
+		selectedPresetBindable.BindTo( presetContainer.SelectedPreset );
 
 		presetKeys.BindCollectionChanged( (_, e) => {
 			if ( e.OldItems?.Contains( Lookup ) == true || e.NewItems?.Contains( Lookup ) == true ) {
@@ -176,7 +176,7 @@ public partial class SettingPresetComponent<Tlookup, Tvalue> : CompositeDrawable
 
 	BindableBool isVisibleBindable = new( true );
 	void updateVisibility () {
-		isVisibleBindable.Value = presetContainer.IsVisible( this );
+		isVisibleBindable.Value = presetContainer.IsVisible( Lookup );
 	}
 
 	protected override void Update () {
@@ -214,14 +214,14 @@ public partial class SettingPresetComponent<Tlookup, Tvalue> : CompositeDrawable
 
 	void slideOut () {
 		if ( isPreviewBindable.Value )
-			presetContainer.Remove( this );
+			presetContainer.Remove( Lookup );
 		else
-			presetContainer.Set( this, Source.Current.Value );
+			presetContainer.Set( Lookup, Source.Current.Value );
 	}
 
 	partial class InteractionArea : Drawable {
-		SettingPresetComponent<Tlookup, Tvalue> parent;
-		public InteractionArea ( SettingPresetComponent<Tlookup, Tvalue> parent ) {
+		SettingPresetComponent_old<Tlookup, Tvalue> parent;
+		public InteractionArea ( SettingPresetComponent_old<Tlookup, Tvalue> parent ) {
 			this.parent = parent;
 			RelativeSizeAxes = Axes.X;
 		}

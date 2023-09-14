@@ -24,7 +24,7 @@ public partial class PresetsSettingSection : SettingsSection {
 		protected override LocalisableString Header => Localisation.Config.PresetsStrings.LoadHeader;
 
 		[Resolved]
-		SettingPresetContainer<OsuXrSetting> presetContainer { get; set; } = null!;
+		ConfigurationPresetSource<OsuXrSetting> presetContainer { get; set; } = null!;
 
 		[Resolved]
 		OsuXrConfigManager config { get; set; } = null!;
@@ -72,7 +72,7 @@ public partial class PresetsSettingSection : SettingsSection {
 						RelativeSizeAxes = Axes.None,
 						Padding = default,
 						Action = () => {
-							if ( !presetContainer.IsEditingBindable.Value )
+							if ( !presetContainer.IsSlideoutEnabled.Value )
 								config.LoadPreset( preset );
 						}
 					},
@@ -80,19 +80,19 @@ public partial class PresetsSettingSection : SettingsSection {
 						RelativeSizeAxes = Axes.None,
 						Padding = default,
 						Action = () => {
-							if ( presetContainer.SelectedPresetBindable.Value == preset ) {
-								presetContainer.SelectedPresetBindable.Value = null;
-								presetContainer.IsEditingBindable.Value = false;
+							if ( presetContainer.SelectedPreset.Value == preset ) {
+								presetContainer.SelectedPreset.Value = null;
+								presetContainer.IsSlideoutEnabled.Value = false;
 							}
 							else
-								presetContainer.SelectedPresetBindable.Value = preset;
+								presetContainer.SelectedPreset.Value = preset;
 						}
 					}
 				}
 			} );
 
-			buttonsContainer.IsEditingBindable.BindTo( presetContainer.IsEditingBindable );
-			buttonsContainer.PresetBindable.BindTo( presetContainer.SelectedPresetBindable );
+			buttonsContainer.IsEditingBindable.BindTo( presetContainer.IsSlideoutEnabled );
+			buttonsContainer.PresetBindable.BindTo( presetContainer.SelectedPreset );
 			(buttonsContainer.PresetBindable, buttonsContainer.IsEditingBindable).BindValuesChanged( (p, e) => main.Enabled.Value = (p is null && !e) || p == preset, true );
 			buttonsContainer.NameBindable.BindValueChanged( v => main.Text = v.NewValue );
 			buttonsContainer.NameBindable.BindTo( preset.Name );
@@ -126,7 +126,7 @@ public partial class PresetsSettingSection : SettingsSection {
 		protected override LocalisableString Header => Localisation.Config.PresetsStrings.ManageHeader;
 
 		[Resolved]
-		SettingPresetContainer<OsuXrSetting> presetContainer { get; set; } = null!;
+		ConfigurationPresetSource<OsuXrSetting> presetContainer { get; set; } = null!;
 
 		[BackgroundDependencyLoader]
 		private void load ( OsuXrConfigManager config ) {
@@ -138,12 +138,12 @@ public partial class PresetsSettingSection : SettingsSection {
 					var preset = config.CreateFullPreset();
 					preset.Name.Value = @"New Preset"; // TODO this from localisation
 					presetContainer.Presets.Add( preset );
-					presetContainer.IsEditingBindable.Value = false;
-					presetContainer.SelectedPresetBindable.Value = preset;
+					presetContainer.IsSlideoutEnabled.Value = false;
+					presetContainer.SelectedPreset.Value = preset;
 				}
 			} );
 
-			presetContainer.IsEditingBindable.BindValueChanged( v => {
+			presetContainer.IsSlideoutEnabled.BindValueChanged( v => {
 				createButton.Enabled.Value = !v.NewValue;
 			}, true );
 		}

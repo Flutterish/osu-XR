@@ -30,7 +30,7 @@ public partial class TestSceneVrSettings : OsuTestScene {
 		sections.PresetContainer.Presets.BindTo( config.Presets );
 
 		presets.PresetContainer.Presets.BindTo( sections.PresetContainer.Presets );
-		presets.PresetContainer.IsEditingBindable.BindTo( sections.PresetContainer.IsEditingBindable );
-		presets.PresetContainer.SelectedPresetBindable.BindTo( sections.PresetContainer.SelectedPresetBindable );
+		presets.PresetContainer.IsSlideoutEnabled.BindTo( sections.PresetContainer.IsSlideoutEnabled );
+		presets.PresetContainer.SelectedPreset.BindTo( sections.PresetContainer.SelectedPreset );
 	}
 }

@@ -9,7 +9,7 @@ namespace osu.XR.Graphics.Settings;
 
 public partial class PresetPreview : SettingsPanel.SectionsContainer {
 	[Cached]
-	public readonly SettingPresetContainer<OsuXrSetting> PresetContainer = new();
+	public readonly ConfigurationPresetSource<OsuXrSetting> PresetContainer = new( LeftRight.Right );
 
 	public readonly Bindable<ConfigurationPreset<OsuXrSetting>?> PresetBindable = new();
 	public ConfigurationPreset<OsuXrSetting>? Preset {
@@ -18,8 +18,8 @@ public partial class PresetPreview : SettingsPanel.SectionsContainer {
 	}
 
 	public PresetPreview ( bool showSidebar ) : base( showSidebar ) {
-		PresetContainer.SelectedPresetBindable.BindTo( PresetBindable );
-		PresetContainer.IsPreviewBindable.Value = true;
+		PresetContainer.SelectedPreset.BindTo( PresetBindable );
+		PresetContainer.ShowOnlyPresetItems.Value = true;
 		settings = new();
 	}
 
@@ -36,7 +36,7 @@ public partial class PresetPreview : SettingsPanel.SectionsContainer {
 
 	partial class PresetSettingsSection : SettingsSection {
 		[Resolved]
-		SettingPresetContainer<OsuXrSetting> presetContainer { get; set; } = null!;
+		ConfigurationPresetSource<OsuXrSetting> presetContainer { get; set; } = null!;
 
 		public override Drawable CreateIcon ()
 			=> new SpriteIcon { Icon = FontAwesome.Solid.Cog };
@@ -48,8 +48,8 @@ public partial class PresetPreview : SettingsPanel.SectionsContainer {
 
 		[BackgroundDependencyLoader]
 		private void load () {
-			presetBindable.BindTo( presetContainer.SelectedPresetBindable );
-			isEditingBindable.BindTo( presetContainer.IsEditingBindable );
+			presetBindable.BindTo( presetContainer.SelectedPreset );
+			isEditingBindable.BindTo( presetContainer.IsSlideoutEnabled );
 
 			presetBindable.BindValueChanged( v => {
 				if ( v.OldValue is ConfigurationPreset<OsuXrSetting> old ) {
@@ -80,8 +80,8 @@ public partial class PresetPreview : SettingsPanel.SectionsContainer {
 						var clone = preset.Clone();
 						clone.Name.Value = $@"{preset.Name.Value} (Copy)"; // TODO this from localisable string
 						presetContainer.Presets.Add( clone );
-						presetContainer.IsEditingBindable.Value = false;
-						presetContainer.SelectedPresetBindable.Value = clone;
+						presetContainer.IsSlideoutEnabled.Value = false;
+						presetContainer.SelectedPreset.Value = clone;
 					}
 				} );
 				Add( new SettingsButton {

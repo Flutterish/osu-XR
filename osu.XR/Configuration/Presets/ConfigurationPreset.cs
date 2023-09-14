@@ -42,6 +42,7 @@ public class ConfigurationPreset<TLookup> : InMemoryConfigManager<TLookup>, ITyp
 	public void RemoveTypedSetting ( TLookup key ) {
 		if ( ConfigStore.Remove( key ) ) {
 			NeedsToBeSaved = true;
+			typedSettings.Remove( key );
 			Keys.Remove( key );
 		}
 	}

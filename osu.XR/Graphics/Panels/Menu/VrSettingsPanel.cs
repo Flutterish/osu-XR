@@ -1,5 +1,6 @@
 ﻿using osu.Game.Overlays.Settings;
 using osu.XR.Configuration;
+using osu.XR.Configuration.Presets;
 using osu.XR.Graphics.Settings;
 
 namespace osu.XR.Graphics.Panels.Menu;
@@ -14,10 +15,10 @@ public partial class VrSettingsPanel : SettingsPanel {
 		var presets = PresetSettings.Content;
 
 		presets.PresetContainer.Presets.BindTo( sections.PresetContainer.Presets );
-		presets.PresetContainer.IsEditingBindable.BindTo( sections.PresetContainer.IsEditingBindable );
-		presets.PresetContainer.SelectedPresetBindable.BindTo( sections.PresetContainer.SelectedPresetBindable );
+		presets.PresetContainer.IsSlideoutEnabled.BindTo( sections.PresetContainer.IsSlideoutEnabled );
+		presets.PresetContainer.SelectedPreset.BindTo( sections.PresetContainer.SelectedPreset );
 
-		presets.PresetContainer.SelectedPresetBindable.BindValueChanged( v => {
+		presets.PresetContainer.SelectedPreset.BindValueChanged( v => {
 			PresetSettings.FadeTo( v.NewValue != null ? 1 : 0, 200, Easing.Out );
 			onVisibilityChanged();
 		}, true );
@@ -29,7 +30,7 @@ public partial class VrSettingsPanel : SettingsPanel {
 	}
 
 	void onVisibilityChanged () {
-		PresetSettings.IsColliderEnabled = IsRendered && PresetSettings.Content.PresetContainer.SelectedPresetBindable.Value != null;
+		PresetSettings.IsColliderEnabled = IsRendered && PresetSettings.Content.PresetContainer.SelectedPreset.Value != null;
 	}
 
 	[BackgroundDependencyLoader(true)]
@@ -38,14 +39,14 @@ public partial class VrSettingsPanel : SettingsPanel {
 			return;
 
 		sections.PresetContainer.Presets.BindTo( config.Presets );
-		sections.PresetContainer.SelectedPresetBindable.BindValueChanged( v => {
+		sections.PresetContainer.SelectedPreset.BindValueChanged( v => {
 			config.ApplyPresetPreview( v.NewValue );
 		} );
 	}
 
 	public partial class Sections : SectionsContainer {
 		[Cached]
-		public readonly SettingPresetContainer<OsuXrSetting> PresetContainer = new();
+		public readonly ConfigurationPresetSource<OsuXrSetting> PresetContainer = new( slideoutDirection: LeftRight.Left );
 
 		public Sections ( bool showSidebar ) : base( showSidebar ) { }
 

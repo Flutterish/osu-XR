@@ -194,7 +194,7 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting>, ITypedSet
 }
 
 public static class PresetExtensions {
-	public static SettingPresetComponent<OsuXrSetting, TValue> PresetComponent<TValue> ( this IHasCurrentValue<TValue> self, OsuXrConfigManager config, OsuXrSetting lookup ) {
+	public static SettingPresetComponent_old<OsuXrSetting, TValue> PresetComponent<TValue> ( this IHasCurrentValue<TValue> self, OsuXrConfigManager config, OsuXrSetting lookup ) {
 		return new( lookup, self, config );
 	}
 }
