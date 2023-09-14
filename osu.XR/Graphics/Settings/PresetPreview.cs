@@ -9,7 +9,7 @@ namespace osu.XR.Graphics.Settings;
 
 public partial class PresetPreview : SettingsPanel.SectionsContainer {
 	[Cached]
-	public readonly ConfigurationPresetSource<OsuXrSetting> PresetContainer = new( LeftRight.Right );
+	public readonly ConfigurationPresetSource<OsuXrSetting> PresetContainer = new( PresetViewType.Preset, slideoutDirection: LeftRight.Right );
 
 	public readonly Bindable<ConfigurationPreset<OsuXrSetting>?> PresetBindable = new();
 	public ConfigurationPreset<OsuXrSetting>? Preset {
@@ -19,7 +19,6 @@ public partial class PresetPreview : SettingsPanel.SectionsContainer {
 
 	public PresetPreview ( bool showSidebar ) : base( showSidebar ) {
 		PresetContainer.SelectedPreset.BindTo( PresetBindable );
-		PresetContainer.ShowOnlyPresetItems.Value = true;
 		settings = new();
 	}
 

@@ -46,7 +46,7 @@ public partial class VrSettingsPanel : SettingsPanel {
 
 	public partial class Sections : SectionsContainer {
 		[Cached]
-		public readonly ConfigurationPresetSource<OsuXrSetting> PresetContainer = new( slideoutDirection: LeftRight.Left );
+		public readonly ConfigurationPresetSource<OsuXrSetting> PresetContainer = new( PresetViewType.ItemList, slideoutDirection: LeftRight.Left );
 
 		public Sections ( bool showSidebar ) : base( showSidebar ) { }
 

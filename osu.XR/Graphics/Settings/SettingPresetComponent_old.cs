@@ -3,7 +3,6 @@ using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Input.Events;
-using osu.Framework.XR;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays;
 using osu.XR.Configuration.Presets;
@@ -25,7 +24,6 @@ public partial class SettingPresetComponent_old<Tlookup, Tvalue> : CompositeDraw
 	public Tlookup Lookup { get; }
 
 	BindableBool isEditingBindable = new( false );
-	BindableBool isPreviewBindable = new( false );
 	Bindable<ConfigurationPreset<Tlookup>?> selectedPresetBindable = new();
 	BindableList<Tlookup> presetKeys = new();
 
@@ -150,7 +148,6 @@ public partial class SettingPresetComponent_old<Tlookup, Tvalue> : CompositeDraw
 		}, true );
 
 		isEditingBindable.BindTo( presetContainer.IsSlideoutEnabled );
-		isPreviewBindable.BindTo( presetContainer.ShowOnlyPresetItems );
 		selectedPresetBindable.BindTo( presetContainer.SelectedPreset );
 
 		presetKeys.BindCollectionChanged( (_, e) => {
@@ -168,7 +165,7 @@ public partial class SettingPresetComponent_old<Tlookup, Tvalue> : CompositeDraw
 			else
 				presetKeys.Clear();
 		}, true );
-		(isEditingBindable, isPreviewBindable).BindValuesChanged( updateVisibility, true );
+		isEditingBindable.BindValueChanged( _ => updateVisibility(), true );
 
 		updateSource();
 		FinishTransforms( true );
@@ -213,9 +210,9 @@ public partial class SettingPresetComponent_old<Tlookup, Tvalue> : CompositeDraw
 	}
 
 	void slideOut () {
-		if ( isPreviewBindable.Value )
+		if ( presetContainer.ViewType == PresetViewType.Preset )
 			presetContainer.Remove( Lookup );
-		else
+		else if ( presetContainer.ViewType == PresetViewType.ItemList )
 			presetContainer.Set( Lookup, Source.Current.Value );
 	}
 
