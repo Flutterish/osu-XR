@@ -21,6 +21,11 @@ public partial class InjectedInput : CompositeDrawable {
 		addHandler.Invoke( info.InputManager, new object[] { touchHandler } );
 	}
 
+	protected override void Update () {
+		base.Update();
+		PlayerInfo.Update();
+	}
+
 	VirtualMouseHandler mouseHandler = new();
 	VirtualTouchHandler touchHandler = new();
 	bool usingTouch => customCursors.Count > 1;

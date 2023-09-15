@@ -56,7 +56,7 @@ public partial class TouchPointer : Model, IPointer {
 	public bool IsTouchSource => true;
 
 	public void SetTint ( Colour4 tint ) {
-		Colour = tint.Opacity( 0.3f );
+		Colour = tint.MultiplyAlpha( 0.3f );
 	}
 
 	public void AddToScene ( Scene scene ) {

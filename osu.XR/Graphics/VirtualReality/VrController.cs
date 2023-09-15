@@ -15,6 +15,7 @@ public partial class VrController : BasicVrDevice, IControllerRelay {
 	Controller source;
 	public bool IsEnabled => source.IsEnabled.Value;
 	public Hand Hand => source.Role == Valve.VR.ETrackedControllerRole.LeftHand ? Hand.Left : Hand.Right;
+	public Colour4 AccentColour => Hand is Hand.Left ? Colour4.Cyan : Colour4.Orange;
 
 	Scene scene;
 	public VrController ( Controller source, Scene scene ) : base( source ) {
@@ -90,14 +91,13 @@ public partial class VrController : BasicVrDevice, IControllerRelay {
 		if ( pointerSource is IPointerBase @new ) {
 			@new.AddToScene( scene );
 			if ( !pointersBySource.TryGetValue( @new, out pointers ) ) {
-				var tint = Hand is Hand.Left ? Colour4.Cyan : Colour4.Orange;
 				if ( pointerSource is IPointerSource source ) {
 					pointersBySource.Add( @new, pointers = source.Pointers.Select( wrapPointer ).ToArray() );
-					source.SetTint( tint );
+					source.SetTint( AccentColour );
 				}
 				else if ( pointerSource is IPointer pointer ) {
 					pointersBySource.Add( @new, pointers = new[] { createPointer( pointer ) } );
-					pointer.SetTint( tint );
+					pointer.SetTint( AccentColour );
 				}
 			}
 		}
@@ -182,10 +182,8 @@ public partial class VrController : BasicVrDevice, IControllerRelay {
 			config.BindWith( OsuXrSetting.TouchPointers, pointerTouch );
 			config.BindWith( OsuXrSetting.TapStrum, tapStrum );
 			config.BindWith( OsuXrSetting.DisableTeleport, settingsTeleportDisabled );
-			settingsTeleportDisabled.BindValueChanged( _ => updateTeleportCapability() );
 		}
 		currentPlayer.BindTo( osu.Player );
-		currentPlayer.BindValueChanged( _ => updateTeleportCapability(), true );
 
 		inputMode.BindValueChanged( _ => updatePointerType() );
 		activeControllers.BindTo( game.ActiveVrControllers );
@@ -286,6 +284,8 @@ public partial class VrController : BasicVrDevice, IControllerRelay {
 	PoseAction? aim;
 	protected override void Update () {
 		base.Update();
+		pointerSource?.SetTint( AccentColour.MultiplyAlpha( currentPlayer.Value?.CursorOpacityFromMods ?? 1f ) );
+		updateTeleportCapability();
 		updateTouchSetting();
 		onScroll( scroll.Value * (float)Time.Elapsed / 1000 * 30 );
 

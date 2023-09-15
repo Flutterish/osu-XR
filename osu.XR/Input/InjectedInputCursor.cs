@@ -30,6 +30,13 @@ public partial class InjectedInputCursor : CompositeDrawable, IControllerRelay {
 			Anchor = Anchor.Centre
 		} );
 		outer.Current.Value = 1;
+
+		AlwaysPresent = true;
+	}
+
+	protected override void Update () {
+		base.Update();
+		Alpha = input.PlayerInfo.CursorOpacityFromMods;
 	}
 
 	public void MoveTo ( Vector2 position, bool isNormalized = false ) {

@@ -106,13 +106,12 @@ public class OsuDependencies : IReadOnlyDependencyContainer {
 			var actionType = managerType.GetGenericArguments()[0];
 			var bindings = GetReflected<KeyBindingContainer>( inputManager );
 
-			Player.Value = new PlayerInfo {
+			Player.Value = new PlayerInfo( GetReflected<IReadOnlyList<Mod>>( drawableRuleset ) ) {
 				Player = player,
 				DrawableRuleset = drawableRuleset,
 				InputManager = inputManager,
 				RulesetActionType = actionType,
 				KeyBindingContainer = bindings,
-				Mods = GetReflected<Bindable<IReadOnlyList<Mod>>>( player ),
 				Variant = GetReflected<int>( drawableRuleset, nameof( DrawableRuleset<HitObject>.Variant ) )
 			};
 		}
