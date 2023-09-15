@@ -55,24 +55,19 @@ public partial class VrController : BasicVrDevice, IControllerRelay {
 
 	Pointer createPointer ( IPointer source ) {
 		var pointer = new Pointer( source, InteractionSystem );
-		pointer.TapStrum.BindTo( tapStrum );
-		pointer.TouchDownStateChanged += v => {
-			if ( v )
-				SendHapticVibration( 0.05, 20, 0.5 ); 
-			else
-				SendHapticVibration( 0.05, 10, 0.3 );
-		};
+		bindPointer( pointer );
 		return pointer;
 	}
-	Pointer wrapPointer ( Pointer pointer ) {
+
+	void bindPointer ( Pointer pointer ) {
 		pointer.TapStrum.BindTo( tapStrum );
 		pointer.TouchDownStateChanged += v => {
+			var multiplier = currentPlayer.Value?.CursorOpacityFromMods ?? 1f;
 			if ( v )
-				SendHapticVibration( 0.05, 20, 0.5 );
+				SendHapticVibration( 0.05, 20, 0.5 * multiplier );
 			else
-				SendHapticVibration( 0.05, 10, 0.3 );
+				SendHapticVibration( 0.05, 10, 0.3 * multiplier );
 		};
-		return pointer;
 	}
 
 	void setPointerSource ( IPointerBase? pointerSource ) {
@@ -92,7 +87,10 @@ public partial class VrController : BasicVrDevice, IControllerRelay {
 			@new.AddToScene( scene );
 			if ( !pointersBySource.TryGetValue( @new, out pointers ) ) {
 				if ( pointerSource is IPointerSource source ) {
-					pointersBySource.Add( @new, pointers = source.Pointers.Select( wrapPointer ).ToArray() );
+					pointersBySource.Add( @new, pointers = source.Pointers.Select( x => {
+						bindPointer( x );
+						return x;
+					} ).ToArray() );
 					source.SetTint( AccentColour );
 				}
 				else if ( pointerSource is IPointer pointer ) {
@@ -205,7 +203,7 @@ public partial class VrController : BasicVrDevice, IControllerRelay {
 	public bool UsesTouch => pointers?.Any( x => x.UsesTouch ) == true;
 
 	public IControllerRelay? CustomRelay;
-	IControllerRelay relayController {
+	IControllerRelay relayController { // TODO this doenst work right with joy controllers and ray pointers. thinking this should only consider if its for click/scroll inputs
 		get {
 			if ( CustomRelay != null && !IsFocusedOnAnything ) {
 				return CustomRelay;
@@ -279,7 +277,7 @@ public partial class VrController : BasicVrDevice, IControllerRelay {
 	/// <summary>
 	/// Objects which prevent this pointer from working for various reasons such as getting too close, or holding something with this hand
 	/// </summary>
-	public readonly BindableList<object> SuppressionSources = new();
+	public readonly BindableList<object> SuppressionSources = new(); // joy cursors might want to add themselves here?
 
 	PoseAction? aim;
 	protected override void Update () {

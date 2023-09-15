@@ -23,7 +23,7 @@ public partial class InjectedInput : CompositeDrawable {
 
 	protected override void Update () {
 		base.Update();
-		PlayerInfo.Update();
+		PlayerInfo.Update( Clock.ElapsedFrameTime );
 	}
 
 	VirtualMouseHandler mouseHandler = new();

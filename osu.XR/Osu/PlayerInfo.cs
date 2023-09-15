@@ -1,5 +1,6 @@
 ﻿using osu.Framework.Input;
 using osu.Framework.Input.Bindings;
+using osu.Framework.Utils;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.UI;
 using osu.Game.Screens.Play;
@@ -17,6 +18,7 @@ public class PlayerInfo {
 	public required int Variant { get; init; }
 
 	public bool IsPaused => DrawableRuleset.IsPaused.Value;
+	public bool IsBreak => Player.IsBreakTime.Value;
 
 	Dictionary<Type, Mod> mods = new();
 	public PlayerInfo ( IReadOnlyList<Mod> mods ) {
@@ -30,8 +32,9 @@ public class PlayerInfo {
 		if ( getMod<ModNoScope>() is ModNoScope noScope ) {
 			var type = typeof( ModNoScope );
 			var opacityField = type.GetField( "ComboBasedAlpha", BindingFlags.Instance | BindingFlags.NonPublic )!;
-			updateActions.Add( () => {
-				noScopeOpacity = (float)opacityField.GetValue( noScope )!;
+			updateActions.Add( elapsed => {
+				var value = (float)opacityField.GetValue( noScope )!;
+				noScopeOpacity = (float)Interpolation.DampContinuously( noScopeOpacity, value, 100, elapsed );
 			} );
 		}
 	}
@@ -41,12 +44,12 @@ public class PlayerInfo {
 	}
 
 	float noScopeOpacity = 1f;
-	public float CursorOpacityFromMods => IsPaused ? 1f : noScopeOpacity;
+	public float CursorOpacityFromMods => IsPaused ? 1f : IsBreak ? (noScopeOpacity + (1f - noScopeOpacity) * 0.2f) : noScopeOpacity;
 
-	List<Action> updateActions = new();
-	public void Update () {
+	List<Action<double>> updateActions = new();
+	public void Update ( double elapsed ) {
 		foreach ( var i in updateActions ) {
-			i();
+			i( elapsed );
 		}
 	}
 }
