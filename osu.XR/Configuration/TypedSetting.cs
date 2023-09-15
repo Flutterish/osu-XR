@@ -35,8 +35,11 @@ public interface ITypedSetting {
 	void CopyTo<TLookup> ( ITypedSettingSource<TLookup> source, TLookup key ) where TLookup : struct, Enum;
 }
 
-public interface ITypedSettingSource<TLookup> where TLookup : struct, Enum {
+public interface IReadOnlyTypedSettingSource<TLookup> where TLookup : struct, Enum {
 	IReadOnlyDictionary<TLookup, ITypedSetting> TypedSettings { get; }
+}
+
+public interface ITypedSettingSource<TLookup> : IReadOnlyTypedSettingSource<TLookup> where TLookup : struct, Enum {
 	void AddTypedSetting<TValue> ( TLookup key, TValue value );
 	void RemoveTypedSetting ( TLookup key );
 	public void SetTypedSetting<TValue> ( TLookup key, TValue value ) {

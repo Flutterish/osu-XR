@@ -33,24 +33,24 @@ public partial class VrSettingsPanel : SettingsPanel {
 		PresetSettings.IsColliderEnabled = IsRendered && PresetSettings.Content.PresetContainer.SelectedPreset.Value != null;
 	}
 
-	[BackgroundDependencyLoader(true)]
-	private void load ( OsuXrConfigManager? config ) {
-		if ( config == null )
-			return;
-
-		sections.PresetContainer.Presets.BindTo( config.Presets );
-		sections.PresetContainer.SelectedPreset.BindValueChanged( v => {
-			config.ApplyPresetPreview( v.NewValue );
-		} );
-	}
-
 	public partial class Sections : SectionsContainer {
 		[Cached]
-		public readonly ConfigurationPresetSource<OsuXrSetting> PresetContainer = new( PresetViewType.ItemList, slideoutDirection: LeftRight.Left );
+		public readonly ConfigPresetSource<OsuXrSetting> PresetContainer = new( PresetViewType.ItemList, slideoutDirection: LeftRight.Left );
 
 		public Sections ( bool showSidebar ) : base( showSidebar ) { }
 
 		public readonly PresetsSettingSection Presets = new();
+
+		[BackgroundDependencyLoader]
+		private void load ( OsuXrConfigManager? config ) {
+			if ( config == null )
+				return;
+
+			PresetContainer.Presets.BindTo( config.Presets );
+			PresetContainer.SelectedPreset.BindValueChanged( v => {
+				config.SetCurrentPreset( v.NewValue );
+			} );
+		}
 
 		protected override IEnumerable<SettingsSection> CreateSections () {
 			yield return new InputSettingSection();

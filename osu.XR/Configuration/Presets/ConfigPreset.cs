@@ -3,20 +3,22 @@ using System.Text.Json;
 
 namespace osu.XR.Configuration.Presets;
 
-public class ConfigurationPreset<TLookup> : InMemoryConfigManager<TLookup>, ITypedSettingSource<TLookup>, IPreset<ConfigurationPreset<TLookup>> where TLookup : struct, Enum {
+public class ConfigPreset<TLookup> : InMemoryConfigManager<TLookup>, ITypedSettingSource<TLookup>, IPreset<ConfigPreset<TLookup>> where TLookup : struct, Enum {
 	public Bindable<string> Name { get; } = new( string.Empty );
 	public bool NeedsToBeSaved { get; set; } = true;
 
-	public ConfigurationPreset () {
+	public ConfigPreset () {
 		Name.BindValueChanged( _ => NeedsToBeSaved = true );
 	}
 
-	public ConfigurationPreset ( ITypedSettingSource<TLookup> source, ConfigurationPresetLiteral<TLookup> literal ) : this() {
+	public ConfigPreset ( IReadOnlyTypedSettingSource<TLookup> source, ConfigurationPresetLiteral<TLookup> literal ) : this() {
 		Name.Value = literal.Name;
 		foreach ( var (key, value) in literal.Values ) {
 			source.TypedSettings[key].CopyTo( this, key );
 			TypedSettings[key].Parse( value );
 		}
+
+		SaveDefaults();
 	}
 
 	public readonly BindableList<TLookup> Keys = new();
@@ -25,10 +27,7 @@ public class ConfigurationPreset<TLookup> : InMemoryConfigManager<TLookup>, ITyp
 	protected override void AddBindable<TBindable> ( TLookup lookup, Bindable<TBindable> bindable ) {
 		var typed = new TypedSetting<TBindable>( bindable );
 		typedSettings.Add( lookup, typed );
-		bindable.BindValueChanged( _ => {
-			NeedsToBeSaved = true;
-			SettingChanged?.Invoke( lookup, typed );
-		} );
+		bindable.BindValueChanged( _ => NeedsToBeSaved = true );
 		base.AddBindable( lookup, bindable );
 		Keys.Add( lookup );
 	}
@@ -60,8 +59,8 @@ public class ConfigurationPreset<TLookup> : InMemoryConfigManager<TLookup>, ITyp
 		}
 	}
 
-	public ConfigurationPreset<TLookup> Clone () {
-		var clone = new ConfigurationPreset<TLookup>();
+	public ConfigPreset<TLookup> Clone () {
+		var clone = new ConfigPreset<TLookup>();
 		clone.Name.Value = Name.Value;
 		foreach ( var (key, setting) in TypedSettings ) {
 			setting.CopyTo( clone, key );
@@ -82,8 +81,8 @@ public class ConfigurationPreset<TLookup> : InMemoryConfigManager<TLookup>, ITyp
 		}, new JsonSerializerOptions { IncludeFields = true, WriteIndented = true } );
 	}
 
-	public static ConfigurationPreset<TLookup> Deserialize ( Stream stream, ITypedSettingSource<TLookup> source ) {
-		var preset = new ConfigurationPreset<TLookup>();
+	public static ConfigPreset<TLookup> Deserialize ( Stream stream, IReadOnlyTypedSettingSource<TLookup> source ) {
+		var preset = new ConfigPreset<TLookup>();
 		var save = JsonSerializer.Deserialize<SaveData>( stream, new JsonSerializerOptions { IncludeFields = true } );
 
 		preset.Name.Value = save.Name;
@@ -96,10 +95,9 @@ public class ConfigurationPreset<TLookup> : InMemoryConfigManager<TLookup>, ITyp
 			preset.TypedSettings[key].Parse( value.ToString() );
 		}
 
+		preset.SaveDefaults();
 		return preset;
 	}
-
-	public event Action<TLookup, ITypedSetting>? SettingChanged;
 }
 
 public class ConfigurationPresetLiteral<TLookup> where TLookup : struct, Enum {

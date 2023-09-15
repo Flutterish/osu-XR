@@ -24,7 +24,7 @@ public partial class PresetsSettingSection : SettingsSection {
 		protected override LocalisableString Header => Localisation.Config.PresetsStrings.LoadHeader;
 
 		[Resolved]
-		ConfigurationPresetSource<OsuXrSetting> presetContainer { get; set; } = null!;
+		ConfigPresetSource<OsuXrSetting> presetContainer { get; set; } = null!;
 
 		[Resolved]
 		OsuXrConfigManager config { get; set; } = null!;
@@ -33,28 +33,28 @@ public partial class PresetsSettingSection : SettingsSection {
 			presets.BindTo( presetContainer.Presets );
 			presets.BindCollectionChanged( (_, e) => {
 				if ( e.OldItems != null ) {
-					foreach ( ConfigurationPreset<OsuXrSetting> i in e.OldItems ) {
+					foreach ( ConfigPreset<OsuXrSetting> i in e.OldItems ) {
 						removePreset( i );
 					}
 				}
 				if ( e.NewItems != null ) {
-					foreach ( ConfigurationPreset<OsuXrSetting> i in e.NewItems ) {
+					foreach ( ConfigPreset<OsuXrSetting> i in e.NewItems ) {
 						addPreset( i );
 					}
 				}
 			}, true );
 		}
 
-		BindableList<ConfigurationPreset<OsuXrSetting>> presets = new();
-		Dictionary<ConfigurationPreset<OsuXrSetting>, Drawable> buttonsByPreset = new();
-		void removePreset ( ConfigurationPreset<OsuXrSetting> preset ) {
+		BindableList<ConfigPreset<OsuXrSetting>> presets = new();
+		Dictionary<ConfigPreset<OsuXrSetting>, Drawable> buttonsByPreset = new();
+		void removePreset ( ConfigPreset<OsuXrSetting> preset ) {
 			if ( !buttonsByPreset.Remove( preset, out var button ) )
 				return;
 
 			Remove( button, true );
 		}
 
-		void addPreset ( ConfigurationPreset<OsuXrSetting> preset ) {
+		void addPreset ( ConfigPreset<OsuXrSetting> preset ) {
 			if ( buttonsByPreset.ContainsKey( preset ) )
 				return;
 
@@ -73,7 +73,7 @@ public partial class PresetsSettingSection : SettingsSection {
 						Padding = default,
 						Action = () => {
 							if ( !presetContainer.IsSlideoutEnabled.Value )
-								config.LoadPreset( preset );
+								config.ApplyPreset( preset );
 						}
 					},
 					edit = new SettingsButton {
@@ -117,7 +117,7 @@ public partial class PresetsSettingSection : SettingsSection {
 
 		partial class PresetButtonContainer : Container {
 			public Bindable<string> NameBindable = new();
-			public Bindable<ConfigurationPreset<OsuXrSetting>?> PresetBindable = new();
+			public Bindable<ConfigPreset<OsuXrSetting>?> PresetBindable = new();
 			public BindableBool IsEditingBindable = new();
 		}
 	}
@@ -126,7 +126,7 @@ public partial class PresetsSettingSection : SettingsSection {
 		protected override LocalisableString Header => Localisation.Config.PresetsStrings.ManageHeader;
 
 		[Resolved]
-		ConfigurationPresetSource<OsuXrSetting> presetContainer { get; set; } = null!;
+		ConfigPresetSource<OsuXrSetting> presetContainer { get; set; } = null!;
 
 		[BackgroundDependencyLoader]
 		private void load ( OsuXrConfigManager config ) {

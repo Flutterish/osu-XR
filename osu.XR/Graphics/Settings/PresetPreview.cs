@@ -9,10 +9,10 @@ namespace osu.XR.Graphics.Settings;
 
 public partial class PresetPreview : SettingsPanel.SectionsContainer {
 	[Cached]
-	public readonly ConfigurationPresetSource<OsuXrSetting> PresetContainer = new( PresetViewType.Preset, slideoutDirection: LeftRight.Right );
+	public readonly ConfigPresetSource<OsuXrSetting> PresetContainer = new( PresetViewType.Preset, slideoutDirection: LeftRight.Right );
 
-	public readonly Bindable<ConfigurationPreset<OsuXrSetting>?> PresetBindable = new();
-	public ConfigurationPreset<OsuXrSetting>? Preset {
+	public readonly Bindable<ConfigPreset<OsuXrSetting>?> PresetBindable = new();
+	public ConfigPreset<OsuXrSetting>? Preset {
 		get => PresetBindable.Value;
 		set => PresetBindable.Value = value;
 	}
@@ -35,14 +35,14 @@ public partial class PresetPreview : SettingsPanel.SectionsContainer {
 
 	partial class PresetSettingsSection : SettingsSection {
 		[Resolved]
-		ConfigurationPresetSource<OsuXrSetting> presetContainer { get; set; } = null!;
+		ConfigPresetSource<OsuXrSetting> presetContainer { get; set; } = null!;
 
 		public override Drawable CreateIcon ()
 			=> new SpriteIcon { Icon = FontAwesome.Solid.Cog };
 
 		public override LocalisableString Header => Localisation.Config.Presets.PreviewStrings.Settings;
 
-		Bindable<ConfigurationPreset<OsuXrSetting>?> presetBindable = new();
+		Bindable<ConfigPreset<OsuXrSetting>?> presetBindable = new();
 		readonly BindableWithCurrent<bool> isEditingBindable = new();
 
 		[BackgroundDependencyLoader]
@@ -51,12 +51,12 @@ public partial class PresetPreview : SettingsPanel.SectionsContainer {
 			isEditingBindable.BindTo( presetContainer.IsSlideoutEnabled );
 
 			presetBindable.BindValueChanged( v => {
-				if ( v.OldValue is ConfigurationPreset<OsuXrSetting> old ) {
+				if ( v.OldValue is ConfigPreset<OsuXrSetting> old ) {
 					old.SaveDefaults();
 				}
 
 				Clear();
-				if ( v.NewValue is not ConfigurationPreset<OsuXrSetting> preset )
+				if ( v.NewValue is not ConfigPreset<OsuXrSetting> preset )
 					return;
 
 				Add( new SettingsTextBox {

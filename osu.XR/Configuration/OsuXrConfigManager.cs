@@ -1,14 +1,13 @@
-﻿using osu.Framework.Graphics.UserInterface;
-using osu.Framework.Platform;
+﻿using osu.Framework.Platform;
 using osu.Game.Configuration;
 using osu.XR.Configuration.Presets;
-using osu.XR.Graphics.Settings;
 using osu.XR.IO;
 
 namespace osu.XR.Configuration;
 
-public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting>, ITypedSettingSource<OsuXrSetting> {
+public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting>, IConfigManagerWithCurrents<OsuXrSetting> {
 	Storage Storage;
+	public ConfigManagerCurrents<OsuXrSetting> Currents { get; } = new();
 	public OsuXrConfigManager ( Storage storage ) {
 		Storage = storage;
 	}
@@ -39,13 +38,13 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting>, ITypedSet
 
 	protected override void PerformLoad () {
 		if ( Storage.Exists( "XrSettings.json" ) ) {
-			LoadPreset( load( Storage, "XrSettings.json" ) );
+			this.ApplyPreset( load( Storage, "XrSettings.json" ) );
 		}
 
 		if ( !Storage.ExistsDirectory( "Presets" ) ) {
-			Presets.Add( new( this, DefaultPreset ) );
-			Presets.Add( new( this, PresetTouchscreenBig ) );
-			Presets.Add( new( this, PresetTouchscreenSmall ) );
+			Presets.Add( new( Currents, DefaultPreset ) );
+			Presets.Add( new( Currents, PresetTouchscreenBig ) );
+			Presets.Add( new( Currents, PresetTouchscreenSmall ) );
 			return;
 		}
 
@@ -58,10 +57,10 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting>, ITypedSet
 		}
 	}
 
-	ConfigurationPreset<OsuXrSetting> load ( Storage storage, string file ) {
+	ConfigPreset<OsuXrSetting> load ( Storage storage, string file ) {
 		if ( storage.ReadWithBackup( file ) is Stream stream ) {
 			using ( stream ) {
-				return ConfigurationPreset<OsuXrSetting>.Deserialize( stream, this );
+				return Currents.DeserializePreset( stream );
 			}
 		}
 
@@ -69,7 +68,7 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting>, ITypedSet
 	}
 
 	protected override bool PerformSave () {
-		write( Storage, "XrSettings.json", CreateFullSavePreset() );
+		write( Storage, "XrSettings.json", createFullSavePreset() );
 
 		var presetStorage = Storage.GetStorageForDirectory( "Presets" );
 
@@ -98,54 +97,19 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting>, ITypedSet
 		return true;
 	}
 
-	void write ( Storage storage, string path, ConfigurationPreset<OsuXrSetting> preset ) {
+	void write ( Storage storage, string path, ConfigPreset<OsuXrSetting> preset ) {
 		using var stream = storage.WriteWithBackup( path );
 		preset.Serialize( stream );
 	}
 
-	public readonly BindableList<ConfigurationPreset<OsuXrSetting>> Presets = new();
-	public ConfigurationPreset<OsuXrSetting>? AppliedPreset { get; private set; }
-	ConfigurationPreset<OsuXrSetting>? resetPreview;
-	public void ApplyPresetPreview ( ConfigurationPreset<OsuXrSetting>? preset ) {
-		if ( AppliedPreset != null ) {
-			AppliedPreset.SettingChanged -= onPreviewSettingChanged;
-		}
-		AppliedPreset = preset;
-		if ( AppliedPreset is null ) {
-			LoadPreset( resetPreview! );
-			resetPreview = null;
-		}
-		else {
-			resetPreview ??= CreateFullPreset();
-			LoadPreset( AppliedPreset );
-			AppliedPreset.SettingChanged += onPreviewSettingChanged;
-		}
+	public readonly BindableList<ConfigPreset<OsuXrSetting>> Presets = new();
+
+	ConfigPreset<OsuXrSetting> createFullSavePreset () {
+		return Currents.CreatePreset();
 	}
 
-	private void onPreviewSettingChanged ( OsuXrSetting lookup, ITypedSetting setting ) {
-		setting.CopyTo( typedSettings[lookup] );
-	}
-
-	public ConfigurationPreset<OsuXrSetting> CreateFullSavePreset () {
-		var preset = new ConfigurationPreset<OsuXrSetting>();
-		foreach ( var (key, setting) in TypedSettings ) {
-			setting.CopyTo( preset, key );
-		}
-		return preset;
-	}
-
-	public ConfigurationPreset<OsuXrSetting> CreateFullPreset () {
-		var preset = new ConfigurationPreset<OsuXrSetting>();
-		foreach ( var (key, setting) in TypedSettings.Where( x => x.Key is not OsuXrSetting.CameraMode or OsuXrSetting.ShowInputDisplay ) ) {
-			setting.CopyTo( preset, key );
-		}
-		return preset;
-	}
-
-	public void LoadPreset ( ConfigurationPreset<OsuXrSetting> preset ) {
-		foreach ( var (key, setting) in preset.TypedSettings ) {
-			setting.CopyTo( this, key );
-		}
+	public ConfigPreset<OsuXrSetting> CreateFullPreset () {
+		return Currents.CreatePreset( ConfigStore.Keys.Except( new[] { OsuXrSetting.CameraMode, OsuXrSetting.ShowInputDisplay } ) );
 	}
 
 	public static readonly ConfigurationPresetLiteral<OsuXrSetting> DefaultPreset = new() {
@@ -179,22 +143,8 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting>, ITypedSet
 		[OsuXrSetting.ScreenResolutionY] = 2552 / 2
 	};
 
-	public IReadOnlyDictionary<OsuXrSetting, ITypedSetting> TypedSettings => typedSettings;
-	Dictionary<OsuXrSetting, ITypedSetting> typedSettings = new();
-	protected override void AddBindable<TBindable> ( OsuXrSetting lookup, Bindable<TBindable> bindable ) {
-		typedSettings.Add( lookup, new TypedSetting<TBindable>( bindable ) );
-		base.AddBindable( lookup, bindable );
-	}
-	public void AddTypedSetting<TValue> ( OsuXrSetting key, TValue value ) {
-		throw new InvalidOperationException();
-	}
-	public void RemoveTypedSetting ( OsuXrSetting key ) {
-		throw new InvalidOperationException();
-	}
-}
-
-public static class PresetExtensions {
-	public static SettingPresetComponent_old<OsuXrSetting, TValue> PresetComponent<TValue> ( this IHasCurrentValue<TValue> self, OsuXrConfigManager config, OsuXrSetting lookup ) {
-		return new( lookup, self, config );
+	protected override void AddBindable<TBindable> ( OsuXrSetting lookup, Bindable<TBindable> backing ) {
+		Currents.AddBindable( lookup, backing );
+		ConfigStore[lookup] = backing;
 	}
 }

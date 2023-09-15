@@ -1,6 +1,5 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Graphics.Containers;
-using osu.XR.Configuration;
 using osu.XR.Graphics.Panels.Menu;
 using osu.XR.Graphics.Settings;
 
@@ -8,7 +7,7 @@ namespace osu.XR.Tests.Visual.Drawables;
 
 public partial class TestSceneVrSettings : OsuTestScene {
 	[BackgroundDependencyLoader]
-	private void load ( OsuXrConfigManager config ) {
+	private void load () {
 		PresetPreview presets;
 		VrSettingsPanel.Sections sections;
 
@@ -26,8 +25,6 @@ public partial class TestSceneVrSettings : OsuTestScene {
 			Masking = true,
 			Child = presets = new PresetPreview( false )
 		} );
-
-		sections.PresetContainer.Presets.BindTo( config.Presets );
 
 		presets.PresetContainer.Presets.BindTo( sections.PresetContainer.Presets );
 		presets.PresetContainer.IsSlideoutEnabled.BindTo( sections.PresetContainer.IsSlideoutEnabled );
