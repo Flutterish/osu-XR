@@ -1,4 +1,5 @@
-﻿using osu.Framework.XR.Graphics.Panels;
+﻿using osu.Framework.Testing;
+using osu.Framework.XR.Graphics.Panels;
 using osu.Framework.XR.Graphics.Rendering;
 using osu.Framework.XR.Input;
 using osu.Framework.XR.VirtualReality;
@@ -133,7 +134,7 @@ public partial class VrController : BasicVrDevice, IControllerRelay {
 		haptic?.TriggerVibration( duration, frequency, amplitude, delay );
 	}
 
-	Bindable<Hand> dominantHand = new( Hand.Right );
+	Bindable<Hand> dominantHand = new( Hand.Right ); // TODO active, not dominant
 	Bindable<InputMode> inputMode = new( InputMode.DoublePointer );
 	Bindable<bool> pointerTouch = new( false );
 	Bindable<bool> tapStrum = new( false );
@@ -199,27 +200,24 @@ public partial class VrController : BasicVrDevice, IControllerRelay {
 		disableTeleport.Value = settingsTeleportDisabled.Value || (currentPlayer.Value != null && !currentPlayer.Value.IsPaused);
 	}
 
-	public bool IsFocusedOnAnything => pointers?.Any( x => x.HoveredCollider != null ) == true;
+	public bool IsPointingToAnything => pointers?.Any( x => x.HoveredCollider != null ) == true;
+	public bool IsFocusedOnAnything => pointers?.Any( x => x.InputSource.FocusedPanel != null || (x.UsesTouch && x.HoveredCollider != null) ) == true;
 	public bool UsesTouch => pointers?.Any( x => x.UsesTouch ) == true;
 
 	public IControllerRelay? CustomRelay;
-	IControllerRelay relayController { // TODO this doenst work right with joy controllers and ray pointers. thinking this should only consider if its for click/scroll inputs
-		get {
-			if ( CustomRelay != null && !IsFocusedOnAnything ) {
-				return CustomRelay;
-			}
+	IControllerRelay getRelay ( bool permitIndirect ) { // TODO tab controls
+		foreach ( var controller in activeControllers.OrderBy( x => x == this ? 1 : 2 ) ) {
+			if ( controller.IsPointingToAnything )
+				return controller;
 
-			var choice = inputMode.Value is InputMode.SinglePointer // in single pointer, the offhand should activate main hand buttons
-				? activeControllers.OrderBy( x => x.Hand == dominantHand.Value ? 1 : 2 ).Append( this ).First()
-				: (UsesTouch || pointers == null) && !IsFocusedOnAnything // in touch modes, unfocused pointers should activate focused hand buttons
-				? activeControllers.Where( x => x.IsFocusedOnAnything || x.CustomRelay != null ).Append( this ).First()
-				: this;
+			if ( permitIndirect && controller.IsFocusedOnAnything )
+				return controller;
 
-			if ( choice.CustomRelay != null && !choice.IsFocusedOnAnything ) {
-				return choice.CustomRelay;
-			}
-			return choice;
+			if ( controller.CustomRelay != null )
+				return controller.CustomRelay;
 		}
+
+		return this;
 	}
 
 	List<RelayButton> leftActuators = new();
@@ -231,7 +229,7 @@ public partial class VrController : BasicVrDevice, IControllerRelay {
 		}
 
 		var actuators = action is VrAction.LeftButton ? leftActuators : rightActuators;
-		var pointerButtons = relayController.GetButtonsFor( this, action );
+		var pointerButtons = getRelay( permitIndirect: false ).GetButtonsFor( this, action );
 
 		int n = 0;
 		if ( isDown ) {
@@ -255,7 +253,7 @@ public partial class VrController : BasicVrDevice, IControllerRelay {
 
 	Vector2Action scroll = null!;
 	void onScroll ( Vector2 value ) {
-		relayController.ScrollBy( this, value );
+		getRelay( permitIndirect: true ).ScrollBy( this, value );
 	}
 	public void ScrollBy ( VrController source, Vector2 amount ) {
 		if ( currentPlayer.Value != null )
