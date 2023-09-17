@@ -15,7 +15,7 @@ public class BindingsFile : UniqueCompositeActionBinding<RulesetBindings, string
 	protected override object CreateSaveData ( IEnumerable<RulesetBindings> children, BindingsSaveContext context ) => new SaveData {
 		Name = FileName,
 		Description = Description,
-		Rulesets = CreateSaveDataAsArray( children, context )
+		Rulesets = children.Select( x => x.GetSaveData( context ) ).ToArray()
 	};
 
 	public static BindingsFile? Load ( JsonElement data, BindingsSaveContext ctx ) => Load<BindingsFile, SaveData>( data, ctx, static (save, ctx) => {

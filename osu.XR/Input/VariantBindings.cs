@@ -71,6 +71,7 @@ public class VariantBindings : UniqueCompositeActionBinding<IHasBindingType, (Bi
 	} );
 
 	[FormatVersion( "" )]
+	[FormatVersion( "Gestures" )]
 	public struct ChildSaveData {
 		public BindingType Type;
 
@@ -92,7 +93,7 @@ public class VariantBindings : UniqueCompositeActionBinding<IHasBindingType, (Bi
 	public struct SaveData {
 		public string Name;
 		public Dictionary<int, string>? Actions;
-		public object[] Bindings;
+		public object[] Bindings; // TODO we need the type to not be inlined
 	}
 }
 

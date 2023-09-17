@@ -45,7 +45,7 @@ public class GestureBindings : UniqueCompositeActionBinding<IHasGestureType, Ges
 		public BindingType Type;
 		public object[] Data;
 
-		public static implicit operator SaveData ( ClapBinding.NoSubmenuSaveData data ) => new() {
+		public static implicit operator SaveData ( ClapBinding.NoSubmenuSaveData data ) => new() { // TODO we need context for proper migration
 			Type = BindingType.Gestures,
 			Data = new object[] { JsonSerializer.SerializeToElement( new ChildSaveData { Type = GestureType.Clap, Data = data }, BindingsSaveContext.DefaultOptions ) }
 		};

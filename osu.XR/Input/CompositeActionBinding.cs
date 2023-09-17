@@ -49,11 +49,6 @@ public abstract class CompositeActionBinding<Tchild> : ActionBinding where Tchil
 
 	protected abstract object CreateSaveData ( IEnumerable<Tchild> children, BindingsSaveContext context );
 
-	protected object[] CreateSaveDataAsArray ( IEnumerable<Tchild> children, BindingsSaveContext context )
-		=> children.Select( x => x.GetSaveData( context ) ).ToArray();
-	protected List<object> CreateSaveDataAsList ( IEnumerable<Tchild> children, BindingsSaveContext context )
-		=> children.Select( x => x.GetSaveData( context ) ).ToList();
-
 	public override Drawable? CreateEditor () => new CompositeEditor<Tchild>( this );
 	public override ActionBindingHandler? CreateHandler () => new CompositeHandler<Tchild>( this );
 
