@@ -32,25 +32,14 @@ public partial class OsuXrGameBase : Framework.Game {
 	[Cached]
 	public readonly Bindable<BindingsFile> Bindings = new( new() );
 
-	public readonly Bindable<Hand> DominantHand = new( Hand.Right );
-	Bindable<HandSetting> dominantHandSetting = new( HandSetting.Right );
+	public readonly Bindable<Hand> ActiveHand = new( Hand.Right );
 
 	public OsuXrGameBase ( bool useSimulatedVR = true ) {
 		Compositor = useSimulatedVR ? new TestingVrCompositor() : new VrCompositor();
 		VrInput = Compositor.Input;
 
 		Compositor.Input.DominantHandBindable.BindValueChanged( v => {
-			if ( dominantHandSetting.Value is HandSetting.Auto )
-				DominantHand.Value = v.NewValue;
-		} );
-
-		dominantHandSetting.BindValueChanged( v => {
-			if ( v.NewValue is HandSetting.Auto ) {
-				DominantHand.Value = Compositor.Input.DominantHandBindable.Value;
-			}
-			else {
-				DominantHand.Value = v.NewValue == HandSetting.Right ? Hand.Right : Hand.Left;
-			}
+			ActiveHand.Value = v.NewValue;
 		} );
 
 		Add( Compositor );
@@ -124,12 +113,6 @@ public partial class OsuXrGameBase : Framework.Game {
 		config.Save();
 
 		return base.OnExiting();
-	}
-
-	protected override void LoadComplete () {
-		base.LoadComplete();
-
-		config.BindWith( OsuXrSetting.DominantHand, dominantHandSetting );
 	}
 
 	protected override void Dispose ( bool isDisposing ) {

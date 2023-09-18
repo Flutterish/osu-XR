@@ -36,6 +36,7 @@ public partial class ChangelogPanel : SettingsPanel {
 				* Made joystick zones easier to customize.
 				* Added a windmill gesture - it allows you to use your whole arm as a joystick.
 				* Double joystick cursors now work properly.
+				* Removed ""dominant hand"" setting - the active hand can be switched by clicking any button on the inactive controller (except while playing).
 				#### Other
 				* Removed ""revert to default"" buttons in the {RulesetSection} section.
 				* Added notifications when ruleset binding load fails.

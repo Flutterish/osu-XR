@@ -1,5 +1,4 @@
-﻿using osu.Framework.Testing;
-using osu.Framework.XR.Graphics.Panels;
+﻿using osu.Framework.XR.Graphics.Panels;
 using osu.Framework.XR.Graphics.Rendering;
 using osu.Framework.XR.Input;
 using osu.Framework.XR.VirtualReality;
@@ -125,7 +124,7 @@ public partial class VrController : BasicVrDevice, IControllerRelay {
 			InputMode.TouchScreen => touchPointer ??= new(),
 			InputMode.FingerTouchScreen => handSkeletonPointer ??= new( this ),
 			InputMode.DoublePointer => rayPointer ??= new(),
-			_ => ( activeControllers.Count == 1 || Hand == dominantHand.Value ) ? (rayPointer ??= new()) : null
+			_ => ( activeControllers.Count == 1 || Hand == activeHand.Value ) ? (rayPointer ??= new()) : null
 		} : null );
 	}
 
@@ -134,7 +133,7 @@ public partial class VrController : BasicVrDevice, IControllerRelay {
 		haptic?.TriggerVibration( duration, frequency, amplitude, delay );
 	}
 
-	Bindable<Hand> dominantHand = new( Hand.Right ); // TODO active, not dominant
+	Bindable<Hand> activeHand = new( Hand.Right ); // TODO active, not dominant
 	Bindable<InputMode> inputMode = new( InputMode.DoublePointer );
 	Bindable<bool> pointerTouch = new( false );
 	Bindable<bool> tapStrum = new( false );
@@ -187,8 +186,8 @@ public partial class VrController : BasicVrDevice, IControllerRelay {
 		inputMode.BindValueChanged( _ => updatePointerType() );
 		activeControllers.BindTo( game.ActiveVrControllers );
 		activeControllers.BindCollectionChanged( ( _, _ ) => updatePointerType() );
-		dominantHand.BindTo( game.DominantHand );
-		dominantHand.BindValueChanged( _ => updatePointerType() );
+		activeHand.BindTo( game.ActiveHand );
+		activeHand.BindValueChanged( _ => updatePointerType() );
 
 		menuButton.OnPressed += () => {
 			ToggleMenuPressed?.Invoke( this );
@@ -245,6 +244,9 @@ public partial class VrController : BasicVrDevice, IControllerRelay {
 		}
 	}
 	public IEnumerable<RelayButton> GetButtonsFor ( VrController source, VrAction action ) {
+		if ( inputMode.Value == InputMode.SinglePointer && currentPlayer.Value?.IsPaused != false )
+			activeHand.Value = Hand;
+
 		if ( pointers is null )
 			return Array.Empty<RelayButton>();
 

@@ -179,14 +179,14 @@ public partial class OsuXrGame : OsuXrGameBase {
 	}
 
 	public VrController? PrimaryController
-		=> VrControllers.FirstOrDefault( x => x.Hand == DominantHand.Value );
+		=> VrControllers.FirstOrDefault( x => x.Hand == ActiveHand.Value );
 	public VrController? SecondaryController
-		=> VrControllers.FirstOrDefault( x => x.Hand != DominantHand.Value );
+		=> VrControllers.FirstOrDefault( x => x.Hand != ActiveHand.Value );
 
 	public VrController? PrimaryActiveController
-		=> ActiveVrControllers.OrderBy( x => x.Hand == DominantHand.Value ? 1 : 2 ).FirstOrDefault();
+		=> ActiveVrControllers.OrderBy( x => x.Hand == ActiveHand.Value ? 1 : 2 ).FirstOrDefault();
 	public VrController? SecondaryActiveController
-		=> ActiveVrControllers.OrderBy( x => x.Hand == DominantHand.Value ? 1 : 2 ).Skip( 1 ).FirstOrDefault();
+		=> ActiveVrControllers.OrderBy( x => x.Hand == ActiveHand.Value ? 1 : 2 ).Skip( 1 ).FirstOrDefault();
 
 	public VrController ControllerFor ( Controller source )
 		=> VrControllers.Single( x => x.Source == source );

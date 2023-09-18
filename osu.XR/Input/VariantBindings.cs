@@ -23,7 +23,7 @@ public class VariantBindings : UniqueCompositeActionBinding<IHasBindingType, (Bi
 	protected override object CreateSaveData ( IEnumerable<IHasBindingType> children, BindingsSaveContext context ) => unloaded ?? new SaveData {
 		Name = context.VariantName( Variant ),
 		Actions = context.ActionsChecksum( Variant ),
-		Bindings = CreateSaveDataAsArray( children, context )
+		Bindings = children.Select( x => x.GetSaveData( context ) ).ToArray()
 	};
 
 	public static VariantBindings? Load ( JsonElement data, int variant, BindingsSaveContext context ) => Load<VariantBindings, SaveData>( data, context.SetVaraint( variant ), static (save, ctx) => {

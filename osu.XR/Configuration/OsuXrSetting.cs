@@ -13,7 +13,6 @@ public enum OsuXrSetting {
 	ScreenResolutionX,
 	ScreenResolutionY,
 
-	DominantHand,
 	HandSkeletonMotionRange,
 	HandSkeletonFingers,
 

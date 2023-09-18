@@ -36,9 +36,6 @@ public partial class InputSettingSection : SettingsSection {
 			new SettingsEnumDropdown<MotionRange> {
 				LabelText = @"Hand skeletion motion range"
 			}.PresetComponent( config, OsuXrSetting.HandSkeletonMotionRange ),
-			new SettingsEnumDropdown<HandSetting> {
-				LabelText = Localisation.Config.Input.MainHandStrings.Label
-			}.PresetComponent( config, OsuXrSetting.DominantHand ),
 			new SettingsCheckbox { 
 				LabelText = Localisation.Config.Input.DisableTeleportingStrings.Label,
 				TooltipText = Localisation.Config.Input.DisableTeleportingStrings.Tooltip

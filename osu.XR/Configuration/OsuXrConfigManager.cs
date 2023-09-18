@@ -26,7 +26,6 @@ public class OsuXrConfigManager : InMemoryConfigManager<OsuXrSetting>, IConfigMa
 		SetDefault( OsuXrSetting.ScreenResolutionY, 1080, 400, 4320 );
 
 		SetDefault( OsuXrSetting.DisableTeleport, false );
-		SetDefault( OsuXrSetting.DominantHand, HandSetting.Auto );
 		SetDefault( OsuXrSetting.HandSkeletonMotionRange, MotionRange.WithController );
 		SetDefault( OsuXrSetting.HandSkeletonFingers, Fingers.Index );
 		SetDefault( OsuXrSetting.ShadowType, FeetSymbols.None );
