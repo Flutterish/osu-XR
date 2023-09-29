@@ -36,6 +36,7 @@ public partial class OsuXrScene : Scene {
 					break;
 
 				case CameraMode.FirstPersonVR:
+					RenderToScreen = true;
 					ScreenRenderMask = RenderLayer.All & ~(RenderLayer.HMD);
 					break;
 
@@ -43,7 +44,6 @@ public partial class OsuXrScene : Scene {
 					RenderToScreen = true;
 					ScreenRenderMask = RenderLayer.All;
 					movementSystem.ControlType = ControlType.Fly;
-					// TODO panel interaction toggle - Im thinking some F-key shortcut would toggle an on screen panel with settings
 					break;
 
 				case CameraMode.ThirdPerson:
@@ -58,12 +58,8 @@ public partial class OsuXrScene : Scene {
 	protected override void Update () {
 		if ( cameraMode.Value == CameraMode.FirstPersonVR ) {
 			if ( compositor.VR is VR vr && vr.Headset is Headset headset ) {
-				RenderToScreen = true;
 				Camera.Position = compositor.ActivePlayer?.InGlobalSpace( headset.Position.ToOsuTk() ) ?? headset.Position.ToOsuTk(); // TODO use render position
 				Camera.Rotation = compositor.ActivePlayer?.InGlobalSpace( headset.Rotation.ToOsuTk() ) ?? headset.Rotation.ToOsuTk();
-			}
-			else {
-				RenderToScreen = false;
 			}
 		}
 

@@ -244,7 +244,7 @@ public partial class VrController : BasicVrDevice, IControllerRelay {
 		}
 	}
 	public IEnumerable<RelayButton> GetButtonsFor ( VrController source, VrAction action ) {
-		if ( inputMode.Value == InputMode.SinglePointer && currentPlayer.Value?.IsPaused != false )
+		if ( inputMode.Value == InputMode.SinglePointer && currentPlayer.Value?.IsPaused is null or true )
 			activeHand.Value = Hand;
 
 		if ( pointers is null )
