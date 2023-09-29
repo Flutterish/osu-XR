@@ -36,7 +36,8 @@ public partial class VrNotificationsPanel : MenuPanel {
 								new NotificationSection(Localisation.NotificationsStrings.Notifications, new[] { typeof(SimpleNotification) }), // TODO @"Clear All"
 								new NotificationSection(Localisation.NotificationsStrings.Tasks, new[] { typeof(ProgressNotification) }), // TODO @"Cancel All"
 							}
-						}
+						},
+						new ThankYouFooter()
 					}
 				}
 			}

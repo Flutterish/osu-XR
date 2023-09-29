@@ -27,6 +27,10 @@ public abstract partial class SettingsPanel : MenuPanel {
 			RelativeSizeAxes = Axes.Both;
 		}
 
+		protected override Drawable CreateFooter () {
+			return new ThankYouFooter();
+		}
+
 		protected override void LoadComplete () {
 			base.LoadComplete();
 			Show();

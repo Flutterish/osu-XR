@@ -16,8 +16,14 @@ public partial class BindingsPanel : MenuPanel {
 			Masking = true,
 			RelativeSizeAxes = Axes.Both,
 			ScrollbarVisible = false,
-			Child = Section = new() {
-				Margin = new() { Bottom = PREFFERED_CONTENT_HEIGHT - 100 }
+			Child = new FillFlowContainer {
+				Direction = FillDirection.Vertical,
+				AutoSizeAxes = Axes.Y,
+				RelativeSizeAxes = Axes.X,
+				Children = new Drawable[] {
+					Section = new(),
+					new ThankYouFooter()
+				}
 			}
 		} );
 	}

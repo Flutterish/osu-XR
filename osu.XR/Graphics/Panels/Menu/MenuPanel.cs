@@ -8,7 +8,7 @@ public partial class MenuPanel : OsuPanel {
 
 	protected const float ASPECT_RATIO = 4f / 5f;
 	protected const float PREFFERED_CONTENT_WIDTH = 400;
-	protected const float PREFFERED_CONTENT_HEIGHT = PREFFERED_CONTENT_WIDTH / ASPECT_RATIO;
+	public const float PREFFERED_CONTENT_HEIGHT = PREFFERED_CONTENT_WIDTH / ASPECT_RATIO;
 
 	public const float PANEL_WIDTH = 0.4f;
 	public const float PANEL_HEIGHT = PANEL_WIDTH / ASPECT_RATIO;

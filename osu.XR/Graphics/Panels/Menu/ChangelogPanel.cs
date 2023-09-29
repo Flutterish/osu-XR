@@ -40,6 +40,7 @@ public partial class ChangelogPanel : SettingsPanel {
 				#### Other
 				* Removed ""revert to default"" buttons in the {RulesetSection} section.
 				* Added notifications when ruleset binding load fails.
+				* Added a footer with a thank-you to supporters.
 			" );
 
 			yield return new ChangelogEntry( @"Upcoming", @"
@@ -54,7 +55,6 @@ public partial class ChangelogPanel : SettingsPanel {
 				#### Visual
 				* Movable render-to-window camera prop.
 				* Player avatar.
-				* A non-invasive thank you to contribuitors and ko-fi supporters somewhere.
 				* Anti-aliasing. I'm a bit limited on this one though, because osu!framework doesn't support it yet.
 				#### Audio
 				* Spatial sound for enviornment objects.
