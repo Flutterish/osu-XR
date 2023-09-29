@@ -26,7 +26,7 @@ public partial class WindmillMod : HandlerMod {
 		base.Update();
 		var headset = VR.TrackedDevices.OfType<Headset>().SingleOrDefault();
 		var player = VR.ActivePlayer;
-		var playerRot = headset != null ? headset.Rotation : Quaternion.Identity; // TODO maybe devices should be in player-space?
+		var playerRot = headset != null ? headset.Rotation : Quaternion.Identity;
 
 		if ( player != null ) {
 			playerRot = player.InGlobalSpace( playerRot );

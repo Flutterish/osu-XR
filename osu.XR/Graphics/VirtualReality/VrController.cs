@@ -133,7 +133,7 @@ public partial class VrController : BasicVrDevice, IControllerRelay {
 		haptic?.TriggerVibration( duration, frequency, amplitude, delay );
 	}
 
-	Bindable<Hand> activeHand = new( Hand.Right ); // TODO active, not dominant
+	Bindable<Hand> activeHand = new( Hand.Right );
 	Bindable<InputMode> inputMode = new( InputMode.DoublePointer );
 	Bindable<bool> pointerTouch = new( false );
 	Bindable<bool> tapStrum = new( false );

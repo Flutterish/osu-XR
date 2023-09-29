@@ -147,7 +147,7 @@ public class BindingsSaveContext {
 		return actions.ToDictionary( x => x.Key, x => x.Value.ToString()! );
 	}
 
-	public readonly BindableList<Message> Messages = new(); // TODO forward this to notifications
+	public readonly BindableList<Message> Messages = new();
 	public void Log ( LocalisableString text, object? context = null ) {
 		Messages.Add( new() { Severity = Severity.Log, Text = text, Context = context, Ruleset = Ruleset, Variant = Variant } );
 		Logger.Log( $"{text} - {Ruleset} (Variant {Variant}) - {context}", "osu!xr-runtime" );
