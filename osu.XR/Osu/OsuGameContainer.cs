@@ -54,6 +54,32 @@ public class VirtualOsuGameHost : VirtualGameHost {
 		return keyboardSource == null ? baseSource : new MergedTextInputSource( new[] { keyboardSource, baseSource } );
 	}
 
+	public override void OpenUrlExternally ( string url ) {
+		base.OpenUrlExternally( url );
+		UrlOpenedExternally?.Invoke( url );
+	}
+	public event Action<string>? UrlOpenedExternally;
+
+	public override bool OpenFileExternally ( string filename ) {
+		if ( base.OpenFileExternally( filename ) ) {
+			FileOpenedExternally?.Invoke( filename );
+			return true;
+		}
+
+		return false;
+	}
+	public event Action<string>? FileOpenedExternally;
+
+	public override bool PresentFileExternally ( string filename ) {
+		if ( base.PresentFileExternally( filename ) ) {
+			FilePresentedExternally?.Invoke( filename );
+			return true;
+		}
+
+		return false;
+	}
+	public event Action<string>? FilePresentedExternally;
+
 	class MergedTextInputSource : TextInputSource {
 		TextInputSource[] sources;
 		public MergedTextInputSource ( IEnumerable<TextInputSource> sources ) {

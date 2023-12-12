@@ -63,7 +63,8 @@ public partial class ThankYouFooter : FillFlowContainer {
 		} );
 		text.NewLine();
 		text.AddText( "And all " );
-		text.AddArbitraryDrawable( new LinkButton( "Ko-fi", "https://ko-fi.com/perigee" ) );
+		var link = new LinkButton( "Ko-fi", "https://ko-fi.com/perigee" );
+		text.AddArbitraryDrawable( link );
 		text.AddText( " supporters!" );
 
 		text.FadeIn( 1500, Easing.Out ).Delay( 40_000 ).Then().FadeOut( 1500, Easing.Out ).Then().Schedule( changeSupporter );
@@ -77,13 +78,17 @@ public partial class ThankYouFooter : FillFlowContainer {
 
 	partial class LinkButton : OsuAnimatedButton {
 		[Resolved]
-		private GameHost host { get; set; } = null!;
+		GameHost host { get; set; } = null!;
+
+		[Resolved]
+		ToastMessageStack? toasts { get; set; }
 
 		public LinkButton ( string name, string url ) {
 			TooltipText = url;
 			AutoSizeAxes = Axes.Both;
 			Action = () => {
 				host.OpenUrlExternally( url );
+				toasts?.PostMessage( $@"Opened {url}!" );
 			};
 
 			Add( new OsuSpriteText {

@@ -41,6 +41,7 @@ public partial class ChangelogPanel : SettingsPanel {
 				* Removed ""revert to default"" buttons in the {RulesetSection} section.
 				* Added notifications when ruleset binding load fails.
 				* Added a footer with a thank-you to supporters.
+				* Added a toast message when opening external files/websites.
 			" );
 
 			yield return new ChangelogEntry( @"Upcoming", @"

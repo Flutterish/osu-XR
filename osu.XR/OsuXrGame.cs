@@ -26,6 +26,9 @@ public partial class OsuXrGame : OsuXrGameBase {
 	BasicSceneMovementSystem movementSystem;
 
 	[Cached]
+	ToastMessageStack Toasts = new();
+
+	[Cached]
 	PanelInteractionSystem panelInteraction = new();
 
 	[Cached]
@@ -58,11 +61,18 @@ public partial class OsuXrGame : OsuXrGameBase {
 		Scene.Camera.Z = -5;
 		Scene.Camera.Y = 1;
 		Scene.Add( osuPanel = new() );
+		osuPanel.GameContainer.OnLoadComplete += _ => {
+			var host = osuPanel.GameContainer.VirtualGameHost;
+			host.UrlOpenedExternally += onUrlOpenedExternally;
+			host.FileOpenedExternally += onFileOpenedExternally;
+			host.FilePresentedExternally += onFilePresentedExternally;
+		};
 
 		physics.AddSubtree( Scene.Root );
 		Add( movementSystem = new( Scene ) { RelativeSizeAxes = Axes.Both } );
 		Add( new BasicPanelInteractionSource( Scene, physics, panelInteraction ) { RelativeSizeAxes = Axes.Both } );
 
+		Scene.Add( Toasts );
 		Scene.Add( menuContainer = new UserTrackingDrawable3D { Child = menu = new HandheldMenu(), Y = 1 } );
 		menu.Notifications.Post( new SimpleNotification { Text = @"Welcome to OXR! This is the menu panel, which you can open and close with you VR controller (probably the A or B button). Check out other sections, configure your game, and close this menu when you are ready." } );
 		Scene.Add( Player = new OsuXrPlayer() );
@@ -106,6 +116,18 @@ public partial class OsuXrGame : OsuXrGameBase {
 		};
 
 		Compositor.BindDeviceDetected( addVrDevice );
+	}
+
+	void onFilePresentedExternally ( string filename ) {
+		Toasts.PostMessage( $@"Opened {filename}!" );
+	}
+
+	void onFileOpenedExternally ( string filename ) {
+		Toasts.PostMessage( $@"Opened {filename}!" );
+	}
+
+	void onUrlOpenedExternally ( string url ) {
+		Toasts.PostMessage( $@"Opened {url}!" );
 	}
 
 	protected override void OnBindingsLoadMessage ( BindingsSaveContext.Message message ) {
