@@ -32,6 +32,7 @@ public partial class ToastMessageStack : MenuPanel {
 		Content.AlwaysPresent = true;
 		Content.Alpha = 0;
 
+		IsColliderEnabled = false;
 		RenderStage = RenderingStage.Transparent;
 	}
 
