@@ -21,7 +21,7 @@ public partial class ChangelogPanel : SettingsPanel {
 		const string SettingsSection = "`\uf013 Settings`";
 
 		protected override IEnumerable<SettingsSection> CreateSections () { // TODO this really shouldnt be hardcoded
-			yield return new ChangelogEntry( @"(Current)", $@"
+			yield return new ChangelogEntry( "2023.1212.0", "osu!lazer 2023.1130.0", $@"
 				#### Performance
 				* Lock execution mode to multithreaded with unlimited framerate (it's actually limited to the refresh rate of your HMD).
 				* Lock window to be always ""active"". This will make it so when you unfocus the window, it will not limit the update rate to 60Hz.
