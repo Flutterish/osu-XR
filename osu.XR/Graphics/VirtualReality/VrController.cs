@@ -298,7 +298,7 @@ public partial class VrController : BasicVrDevice, IControllerRelay {
 		teleportVisual.OriginBindable.Value = pos;
 		teleportVisual.DirectionBindable.Value = rot.Apply( Vector3.UnitZ ) * 5;
 
-		Vector3 player = compositor.TrackedDevices.OfType<Headset>().SingleOrDefault() is Headset headset ? headset.Position : Vector3.Zero;
+		Vector3 player = compositor.TrackedDevices.OfType<Headset>().SingleOrDefault() is Headset headset ? headset.GlobalPosition : Vector3.Zero;
 		if ( pointerSource is IPointerSource source ) {
 			source.UpdatePointers( player, pos, rot ).Dispose();
 		}

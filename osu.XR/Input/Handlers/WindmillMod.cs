@@ -26,10 +26,10 @@ public partial class WindmillMod : HandlerMod {
 		base.Update();
 		var headset = VR.TrackedDevices.OfType<Headset>().SingleOrDefault();
 		var player = VR.ActivePlayer;
-		var playerRot = headset != null ? headset.Rotation : Quaternion.Identity;
+		var playerRot = headset != null ? headset.GlobalRotation : Quaternion.Identity;
 
 		if ( player != null ) {
-			playerRot = player.InGlobalSpace( playerRot );
+			playerRot = player.ToGlobalSpace( playerRot );
 		}
 
 		void move ( Bindable<Vector2> joystick, Vector3 delta ) {

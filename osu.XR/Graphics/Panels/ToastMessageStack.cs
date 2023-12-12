@@ -90,7 +90,7 @@ public partial class ToastMessageStack : MenuPanel {
 		get {
 			if ( game.Headset is null )
 				return Vector3.Zero;
-			return game.Headset.Position - Vector3.UnitY * 0.1f + game.Headset.Rotation.Apply( Vector3.UnitZ ) * 0.5f;
+			return game.Headset.GlobalPosition - Vector3.UnitY * 0.1f + game.Headset.GlobalRotation.Apply( Vector3.UnitZ ) * 0.5f;
 		}
 	}
 
@@ -98,7 +98,7 @@ public partial class ToastMessageStack : MenuPanel {
 		get {
 			if ( game.Headset is null )
 				return Quaternion.Identity;
-			return game.Headset.Rotation;
+			return game.Headset.GlobalRotation;
 		}
 	}
 

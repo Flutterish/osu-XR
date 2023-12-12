@@ -26,7 +26,7 @@ public partial class ClapHandler : ActionBindingHandler {
 		base.Update();
 
 		if ( left != null && right != null )
-			Distance.Value = ( right.Position - left.Position ).Length;
+			Distance.Value = ( right.GlobalPosition - left.GlobalPosition).Length;
 		else
 			Distance.Value = 0;
 

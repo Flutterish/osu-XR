@@ -90,7 +90,7 @@ public partial class UserTrackingDrawable3D : Container3D { // TODO this needs a
 			if ( HoldingController is null ) {
 				if ( game.Headset is null )
 					return Vector3.Zero;
-				return retainedPosition = game.Headset.Position - Vector3.UnitY * 0.1f + game.Headset.Rotation.Apply( Vector3.UnitZ ) * 0.5f;
+				return retainedPosition = game.Headset.GlobalPosition - Vector3.UnitY * 0.1f + game.Headset.GlobalRotation.Apply( Vector3.UnitZ ) * 0.5f;
 			}
 			else {
 				return retainedPosition = HoldingController.Position + HoldingController.Forward * 0.2f + HoldingController.Up * 0.05f;
@@ -105,7 +105,7 @@ public partial class UserTrackingDrawable3D : Container3D { // TODO this needs a
 			if ( HoldingController is null ) {
 				if ( game.Headset is null )
 					return Quaternion.Identity;
-				return retainedRotation = game.Headset.Rotation;
+				return retainedRotation = game.Headset.GlobalRotation;
 			}
 			else {
 				return retainedRotation = HoldingController.Rotation * Quaternion.FromAxisAngle( Vector3.UnitX, MathF.PI * 0.25f );
