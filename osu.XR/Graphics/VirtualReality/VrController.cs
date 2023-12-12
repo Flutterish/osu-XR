@@ -199,8 +199,8 @@ public partial class VrController : BasicVrDevice, IControllerRelay {
 		disableTeleport.Value = settingsTeleportDisabled.Value || (currentPlayer.Value != null && !currentPlayer.Value.IsPaused);
 	}
 
-	public bool IsPointingToAnything => pointers?.Any( x => x.HoveredCollider != null ) == true;
-	public bool IsFocusedOnAnything => pointers?.Any( x => x.InputSource.FocusedPanel != null || (x.UsesTouch && x.HoveredCollider != null) ) == true;
+	public bool IsPointingToAnything => pointers?.Any( x => x.HoveredCollider is Panel ) == true;
+	public bool IsFocusedOnAnything => pointers?.Any( x => x.InputSource.FocusedPanel != null || (x.UsesTouch && x.HoveredCollider is Panel) ) == true;
 	public bool UsesTouch => pointers?.Any( x => x.UsesTouch ) == true;
 
 	public IControllerRelay? CustomRelay;
