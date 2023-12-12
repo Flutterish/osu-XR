@@ -42,6 +42,7 @@ public partial class ChangelogPanel : SettingsPanel {
 				* Added notifications when ruleset binding load fails.
 				* Added a footer with a thank-you to supporters.
 				* Added a toast message when opening external files/websites.
+				* Added ability to edit scenery to an extent.
 			" );
 
 			yield return new ChangelogEntry( @"Upcoming", @"
